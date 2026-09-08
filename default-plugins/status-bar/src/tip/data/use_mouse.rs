@@ -27,9 +27,9 @@ pub fn use_mouse_full(help: &ModeInfo) -> LinePart {
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_2);
 
     strings!(&[
-        Style::new().paint(" Tip: "),
-        Style::new().fg(green_color).bold().paint("Use the mouse"),
-        Style::new().paint(" to switch pane focus, scroll through the pane scrollbuffer, switch or scroll through the tabs."),
+        Style::new().paint(" 提示： "),
+        Style::new().fg(green_color).bold().paint("使用鼠标"),
+        Style::new().paint(" 来切换窗格焦点、滚动窗格回滚缓冲区、切换或滚动标签页。"),
     ])
 }
 
@@ -39,9 +39,9 @@ pub fn use_mouse_medium(help: &ModeInfo) -> LinePart {
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_2);
 
     strings!(&[
-        Style::new().paint(" Tip: "),
-        Style::new().fg(green_color).bold().paint("Use the mouse"),
-        Style::new().paint(" to switch pane/tabs or scroll through the pane scrollbuffer."),
+        Style::new().paint(" 提示： "),
+        Style::new().fg(green_color).bold().paint("使用鼠标"),
+        Style::new().paint(" 来切换窗格/标签页或滚动窗格回滚缓冲区。"),
     ])
 }
 
@@ -50,7 +50,7 @@ pub fn use_mouse_short(help: &ModeInfo) -> LinePart {
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_2);
 
     strings!(&[
-        Style::new().fg(green_color).bold().paint(" Use the mouse"),
-        Style::new().paint(" to switch pane/tabs or scroll."),
+        Style::new().fg(green_color).bold().paint(" 使用鼠标"),
+        Style::new().paint(" 来切换窗格/标签页或滚动。"),
     ])
 }

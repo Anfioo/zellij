@@ -19,33 +19,33 @@ macro_rules! strings {
 pub fn quicknav_full(help: &ModeInfo) -> LinePart {
     let groups = add_keybinds(help);
 
-    let mut bits = vec![Style::new().paint(" Tip: ")];
+    let mut bits = vec![Style::new().paint(" 提示： ")];
     bits.extend(groups.new_pane);
-    bits.push(Style::new().paint(" => open new pane. "));
+    bits.push(Style::new().paint(" => 打开新窗格。 "));
     bits.extend(groups.move_focus);
-    bits.push(Style::new().paint(" => navigate between panes. "));
+    bits.push(Style::new().paint(" => 在窗格之间导航。 "));
     bits.extend(groups.resize);
-    bits.push(Style::new().paint(" => increase/decrease pane size."));
+    bits.push(Style::new().paint(" => 增大/减小窗格大小。"));
     strings!(&bits)
 }
 
 pub fn quicknav_medium(help: &ModeInfo) -> LinePart {
     let groups = add_keybinds(help);
 
-    let mut bits = vec![Style::new().paint(" Tip: ")];
+    let mut bits = vec![Style::new().paint(" 提示： ")];
     bits.extend(groups.new_pane);
-    bits.push(Style::new().paint(" => new pane. "));
+    bits.push(Style::new().paint(" => 新窗格。 "));
     bits.extend(groups.move_focus);
-    bits.push(Style::new().paint(" => navigate. "));
+    bits.push(Style::new().paint(" => 导航。 "));
     bits.extend(groups.resize);
-    bits.push(Style::new().paint(" => resize pane."));
+    bits.push(Style::new().paint(" => 调整窗格大小。"));
     strings!(&bits)
 }
 
 pub fn quicknav_short(help: &ModeInfo) -> LinePart {
     let groups = add_keybinds(help);
 
-    let mut bits = vec![Style::new().paint(" QuickNav: ")];
+    let mut bits = vec![Style::new().paint(" 快速导航： ")];
     bits.extend(groups.new_pane);
     bits.push(Style::new().paint(" / "));
     bits.extend(groups.move_focus);
@@ -147,7 +147,7 @@ fn add_keybinds<'a>(help: &'a ModeInfo) -> Keygroups<'a> {
     } else {
         arrows
             .into_iter()
-            .chain(vec![Style::new().paint(" or ")].into_iter())
+            .chain(vec![Style::new().paint(" 或 ")].into_iter())
             .chain(letters.into_iter())
             .collect()
     };

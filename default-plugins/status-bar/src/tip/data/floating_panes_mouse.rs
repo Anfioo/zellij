@@ -19,19 +19,19 @@ macro_rules! strings {
 pub fn floating_panes_mouse_full(help: &ModeInfo) -> LinePart {
     // 提示：使用 Ctrl + <p> + <w> 切换浮动窗格，并用键盘或鼠标移动它们
     let mut bits = vec![
-        Style::new().paint(" Tip: "),
-        Style::new().paint("Toggle floating panes with "),
+        Style::new().paint(" 提示： "),
+        Style::new().paint("使用以下键位切换浮动窗格："),
     ];
     bits.extend(add_keybinds(help));
-    bits.push(Style::new().paint(" and move them with keyboard or mouse"));
+    bits.push(Style::new().paint("，并用键盘或鼠标移动它们"));
     strings!(&bits)
 }
 
 pub fn floating_panes_mouse_medium(help: &ModeInfo) -> LinePart {
     // 提示：使用 Ctrl + <p> + <w> 切换浮动窗格
     let mut bits = vec![
-        Style::new().paint(" Tip: "),
-        Style::new().paint("Toggle floating panes with "),
+        Style::new().paint(" 提示： "),
+        Style::new().paint("使用以下键位切换浮动窗格："),
     ];
     bits.extend(add_keybinds(help));
     strings!(&bits)
@@ -40,7 +40,7 @@ pub fn floating_panes_mouse_medium(help: &ModeInfo) -> LinePart {
 pub fn floating_panes_mouse_short(help: &ModeInfo) -> LinePart {
     //  Ctrl + <p> + <w> => 浮动窗格
     let mut bits = add_keybinds(help);
-    bits.push(Style::new().paint(" => floating panes"));
+    bits.push(Style::new().paint(" => 浮动窗格"));
     strings!(&bits)
 }
 

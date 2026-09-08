@@ -27,10 +27,10 @@ pub fn edit_scrollbuffer_full(help: &ModeInfo) -> LinePart {
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     let mut bits = vec![
-        Style::new().paint(" Tip: "),
-        Style::new().paint("Search through the scrollbuffer using your default "),
+        Style::new().paint(" 提示： "),
+        Style::new().paint("使用默认的 "),
         Style::new().fg(green_color).bold().paint("$EDITOR"),
-        Style::new().paint(" with "),
+        Style::new().paint(" 与以下键位："),
     ];
     bits.extend(add_keybinds(help));
     strings!(&bits)
@@ -42,10 +42,10 @@ pub fn edit_scrollbuffer_medium(help: &ModeInfo) -> LinePart {
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     let mut bits = vec![
-        Style::new().paint(" Tip: "),
-        Style::new().paint("Search the scrollbuffer using your "),
+        Style::new().paint(" 提示： "),
+        Style::new().paint("使用你的 "),
         Style::new().fg(green_color).bold().paint("$EDITOR"),
-        Style::new().paint(" with "),
+        Style::new().paint(" 与以下键位："),
     ];
     bits.extend(add_keybinds(help));
     strings!(&bits)
@@ -57,9 +57,9 @@ pub fn edit_scrollbuffer_short(help: &ModeInfo) -> LinePart {
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     let mut bits = vec![
-        Style::new().paint(" Search using "),
+        Style::new().paint(" 使用 "),
         Style::new().fg(green_color).bold().paint("$EDITOR"),
-        Style::new().paint(" with "),
+        Style::new().paint(" 与以下键位："),
     ];
     bits.extend(add_keybinds(help));
     strings!(&bits)

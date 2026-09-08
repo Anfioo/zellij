@@ -27,11 +27,11 @@ pub fn mouse_click_to_terminal_full(help: &ModeInfo) -> LinePart {
     let orange_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     strings!(&[
-        Style::new().paint(" Tip: "),
+        Style::new().paint(" 提示： "),
         Style::new().fg(orange_color).bold().paint("Shift"),
         Style::new().paint(" + <"),
         Style::new().fg(green_color).bold().paint("mouse-click"),
-        Style::new().paint("> bypasses Zellij and sends the mouse click directly to the terminal."),
+        Style::new().paint("> 绕过 Zellij 并将鼠标点击直接发送到终端。"),
     ])
 }
 
@@ -40,11 +40,11 @@ pub fn mouse_click_to_terminal_medium(help: &ModeInfo) -> LinePart {
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_2);
     let orange_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
     strings!(&[
-        Style::new().paint(" Tip: "),
+        Style::new().paint(" 提示： "),
         Style::new().fg(orange_color).bold().paint("Shift"),
         Style::new().paint(" + <"),
         Style::new().fg(green_color).bold().paint("mouse-click"),
-        Style::new().paint("> sends the click directly to the terminal."),
+        Style::new().paint("> 将点击直接发送到终端。"),
     ])
 }
 
@@ -54,10 +54,10 @@ pub fn mouse_click_to_terminal_short(help: &ModeInfo) -> LinePart {
     let orange_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     strings!(&[
-        Style::new().paint(" Tip: "),
+        Style::new().paint(" 提示： "),
         Style::new().fg(orange_color).bold().paint("Shift"),
         Style::new().paint(" + <"),
         Style::new().fg(green_color).bold().paint("mouse-click"),
-        Style::new().paint("> => sends click to terminal."),
+        Style::new().paint("> => 将点击发送到终端。"),
     ])
 }
