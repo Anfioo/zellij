@@ -5,30 +5,32 @@ use zellij_tile::prelude::*;
 
 pub fn render_instruction_line(y: usize, max_cols: usize) {
     if max_cols > 78 {
-        let text = "Help: go back with <Ctrl c>, go to root with /, <Ctrl e> - toggle hidden files";
+        let text = "帮助：用 <Ctrl c> 返回，用 / 回到根目录，<Ctrl e> 切换隐藏文件";
         let text = Text::new(text)
-            .color_range(3, 19..27)
-            .color_range(3, 45..46)
-            .color_range(3, 48..56);
+            .color_substring(3, "<Ctrl c>")
+            .color_substring(3, "/")
+            .color_substring(3, "<Ctrl e>");
         print_text_with_coordinates(text, 0, y, Some(max_cols), None);
     } else if max_cols > 56 {
-        let text = "Help: <Ctrl c> - back, / - root, <Ctrl e> - hidden files";
+        let text = "帮助：<Ctrl c> 返回，/ 根目录，<Ctrl e> 隐藏文件";
         let text = Text::new(text)
-            .color_range(3, 6..14)
-            .color_range(3, 23..24)
-            .color_range(3, 33..41);
+            .color_substring(3, "<Ctrl c>")
+            .color_substring(3, "/")
+            .color_substring(3, "<Ctrl e>");
         print_text_with_coordinates(text, 0, y, Some(max_cols), None);
     } else if max_cols > 25 {
-        let text = "<Ctrl c> - back, / - root";
-        let text = Text::new(text).color_range(3, ..8).color_range(3, 17..18);
+        let text = "<Ctrl c> 返回，/ 根目录";
+        let text = Text::new(text)
+            .color_substring(3, "<Ctrl c>")
+            .color_substring(3, "/");
         print_text_with_coordinates(text, 0, y, Some(max_cols), None);
     }
 }
 
 pub fn render_list_tip(y: usize, max_cols: usize) {
-    let tip = Text::new(format!("(<↓↑> - Navigate, <TAB> - Select)"))
-        .color_range(3, 1..5)
-        .color_range(3, 18..23);
+    let tip = Text::new("(<↓↑> - 导航，<TAB> - 选择)")
+        .color_substring(3, "<↓↑>")
+        .color_substring(3, "<TAB>");
     print_text_with_coordinates(tip, 0, y, Some(max_cols), None);
 }
 
@@ -71,7 +73,7 @@ pub fn calculate_list_bounds(
 }
 
 pub fn render_search_term(search_term: &str) {
-    let prompt = "FIND: ";
+    let prompt = "查找：";
     let text = Text::new(format!("{}{}_", prompt, search_term))
         .color_range(2, 0..prompt.len())
         .color_range(3, prompt.len()..);
@@ -80,8 +82,8 @@ pub fn render_search_term(search_term: &str) {
 }
 
 pub fn render_virtual_root_header(_cols: usize) {
-    let prompt = "PATH: ";
-    let title = "Computer";
+    let prompt = "路径：";
+    let title = "电脑";
     let prompt_len = prompt.width();
     let path_end = prompt_len + title.width();
     let text = Text::new(format!("{}{}", prompt, title))
@@ -99,17 +101,17 @@ pub fn render_current_path(
     max_cols: usize,
     platform: Platform,
 ) {
-    let prompt = "PATH: ";
+    let prompt = "路径：";
     let current_path = Platform::to_host_display(full_path, platform);
     let prompt_len = prompt.width();
     let current_path_len = current_path.width();
 
     let enter_tip = if handling_filepick {
-        "Select"
+        "选择"
     } else if path_is_dir {
-        "Open terminal here"
+        "在此处打开终端"
     } else {
-        "Open in editor"
+        "在编辑器中打开"
     };
     if max_cols > prompt_len + current_path_len + enter_tip.width() + 13 {
         let path_end = prompt_len + current_path_len;
