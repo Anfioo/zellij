@@ -392,7 +392,8 @@ impl Page {
             ApplyStatus::NotApplied => page
                 .with_paragraph(vec![ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(Text::new(
-                        "将这些键位绑定添加到你的配置文件中？(",)),
+                        "将这些键位绑定添加到你的配置文件中？(",
+                    ))),
                     ActiveComponent::new(TextOrCustomRender::Text(confirm_text()))
                         .with_hover(TextOrCustomRender::CustomRender(
                             Box::new(confirm_key_selected),
