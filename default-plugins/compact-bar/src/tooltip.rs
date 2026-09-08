@@ -114,9 +114,9 @@ impl<'a> TooltipRenderer<'a> {
 
         if actions_vec.is_empty() {
             let tooltip_text = match self.mode_info.mode {
-                InputMode::EnterSearch => "Entering search term...".to_owned(),
-                InputMode::RenameTab => "Renaming tab...".to_owned(),
-                InputMode::RenamePane => "Renaming pane...".to_owned(),
+                InputMode::EnterSearch => "正在输入搜索词...".to_owned(),
+                InputMode::RenameTab => "正在重命名标签页...".to_owned(),
+                InputMode::RenamePane => "正在重命名窗格...".to_owned(),
                 _ => {
                     format!("{:?}", self.mode_info.mode)
                 },

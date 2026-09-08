@@ -239,7 +239,7 @@ impl TabLinePopulator {
             return LinePart::default();
         }
 
-        let more_text = self.format_count_text(tab_count, "← +{}", " ← +many ");
+        let more_text = self.format_count_text(tab_count, "← +{}", " ← 多个 ");
         self.create_styled_indicator(more_text, tab_index)
     }
 
@@ -248,7 +248,7 @@ impl TabLinePopulator {
             return LinePart::default();
         }
 
-        let more_text = self.format_count_text(tab_count, "+{} →", " +many → ");
+        let more_text = self.format_count_text(tab_count, "+{} →", " 多个 → ");
         self.create_styled_indicator(more_text, tab_index)
     }
 
@@ -547,8 +547,8 @@ impl RightSideElementsBuilder {
 
     fn create_nested_hint(&self, hint: &NestedSessionHint, max_len: usize) -> Option<LinePart> {
         let (prefix, keys) = match hint {
-            NestedSessionHint::Ascend(keys) => ("Ascend: ", keys),
-            NestedSessionHint::Descend(keys) => ("Descend: ", keys),
+            NestedSessionHint::Ascend(keys) => ("上升： ", keys),
+            NestedSessionHint::Descend(keys) => ("下降： ", keys),
             NestedSessionHint::None => return None,
         };
 
@@ -586,8 +586,8 @@ impl RightSideElementsBuilder {
         }
 
         let message = match hint {
-            NestedSessionHint::Ascend(_) => " nested session",
-            NestedSessionHint::Descend(_) => " host session",
+            NestedSessionHint::Ascend(_) => " 嵌套会话",
+            NestedSessionHint::Descend(_) => " 宿主会话",
             NestedSessionHint::None => return None,
         };
         let message_len = message.width();
@@ -610,7 +610,7 @@ impl RightSideElementsBuilder {
         } else {
             Text::new(key_text).color_all(3).opaque()
         };
-        let ribbon_text = "Tooltip";
+        let ribbon_text = "工具提示";
         let mut ribbon = Text::new(ribbon_text);
 
         if self.dimmed {

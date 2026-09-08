@@ -587,7 +587,7 @@ impl State {
     fn get_tab_display_name(&self, tab: &TabInfo) -> String {
         let mut tab_name = tab.name.clone();
         if tab.active && self.mode_info.mode == InputMode::RenameTab && tab_name.is_empty() {
-            tab_name = "Enter name...".to_string();
+            tab_name = "输入名称...".to_string();
         }
         tab_name
     }

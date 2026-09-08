@@ -41,20 +41,20 @@ pub enum ActionType {
 impl ActionType {
     pub fn description(&self) -> String {
         match self {
-            ActionType::MoveFocus => "Move focus".to_string(),
-            ActionType::MovePaneWithDirection => "Move pane".to_string(),
-            ActionType::MovePaneWithoutDirection => "Move pane".to_string(),
-            ActionType::ResizeIncrease => "Increase size in direction".to_string(),
-            ActionType::ResizeDecrease => "Decrease size in direction".to_string(),
-            ActionType::ResizeAny => "Increase or decrease size".to_string(),
-            ActionType::Search => "Search".to_string(),
-            ActionType::NewPaneWithDirection => "Split right/down".to_string(),
-            ActionType::NewPaneWithoutDirection => "New pane".to_string(),
-            ActionType::BreakPaneLeftOrRight => "Break pane to adjacent tab".to_string(),
-            ActionType::GoToAdjacentTab => "Move tab focus".to_string(),
-            ActionType::Scroll => "Scroll".to_string(),
-            ActionType::PageScroll => "Scroll page".to_string(),
-            ActionType::HalfPageScroll => "Scroll half Page".to_string(),
+            ActionType::MoveFocus => "移动焦点".to_string(),
+            ActionType::MovePaneWithDirection => "移动窗格".to_string(),
+            ActionType::MovePaneWithoutDirection => "移动窗格".to_string(),
+            ActionType::ResizeIncrease => "按方向增大尺寸".to_string(),
+            ActionType::ResizeDecrease => "按方向减小尺寸".to_string(),
+            ActionType::ResizeAny => "增大或减小尺寸".to_string(),
+            ActionType::Search => "搜索".to_string(),
+            ActionType::NewPaneWithDirection => "向右/向下拆分".to_string(),
+            ActionType::NewPaneWithoutDirection => "新建窗格".to_string(),
+            ActionType::BreakPaneLeftOrRight => "将窗格移动到相邻标签页".to_string(),
+            ActionType::GoToAdjacentTab => "移动标签页焦点".to_string(),
+            ActionType::Scroll => "滚动".to_string(),
+            ActionType::PageScroll => "整页滚动".to_string(),
+            ActionType::HalfPageScroll => "半页滚动".to_string(),
             ActionType::SessionManager => "Session manager".to_string(),
             ActionType::PluginManager => "Plugin manager".to_string(),
             ActionType::Configuration => "Configuration".to_string(),
@@ -66,7 +66,7 @@ impl ActionType {
                 "Rename tab".to_string()
             },
             ActionType::SwitchToMode(input_mode) if input_mode == &InputMode::EnterSearch => {
-                "Search".to_string()
+                "搜索".to_string()
             },
             ActionType::SwitchToMode(input_mode) if input_mode == &InputMode::Locked => {
                 "Lock".to_string()
