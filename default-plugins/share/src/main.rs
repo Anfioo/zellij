@@ -12,7 +12,7 @@ use main_screen::MainScreen;
 use token_management_screen::TokenManagementScreen;
 use token_screen::TokenScreen;
 
-static WEB_SERVER_QUERY_DURATION: f64 = 0.4; // Doherty threshold
+static WEB_SERVER_QUERY_DURATION: f64 = 0.4; // Doherty 阈值
 
 #[derive(Debug, Default)]
 struct App {
@@ -457,7 +457,7 @@ impl App {
     }
 
     fn render_manage_tokens_screen(&self, rows: usize, cols: usize) {
-        // Pass whichever token input field is active (normal or read-only)
+        // 传递当前活动的令牌输入字段（普通或只读）
         let entering_new_token_name = if self.tokens.entering_new_name.is_some() {
             &self.tokens.entering_new_name
         } else {
@@ -540,7 +540,7 @@ impl TokenManager {
     fn adjust_selection_after_list_change(&mut self) -> bool {
         if self.list.is_empty() {
             self.selected_index = None;
-            true // indicates should change to main screen
+            true // 表示应切换到主界面
         } else if self.selected_index >= Some(self.list.len()) {
             self.selected_index = Some(self.list.len().saturating_sub(1));
             false

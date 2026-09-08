@@ -1,6 +1,6 @@
 use zellij_tile::prelude::*;
 
-// Constants for text content
+// 文本内容常量
 const TOKEN_LABEL_LONG: &str = "New log-in token: ";
 const TOKEN_LABEL_SHORT: &str = "Token: ";
 const EXPLANATION_1_LONG: &str = "Use this token to log-in from the browser.";
@@ -12,7 +12,7 @@ const EXPLANATION_3_LONG: &str = "If lost, it can always be revoked and a new on
 const EXPLANATION_3_SHORT: &str = "It can always be revoked and a regenerated.";
 const ESC_INSTRUCTION: &str = "<Esc> - go back";
 
-// Screen layout constants
+// 界面布局常量
 const SCREEN_HEIGHT: usize = 7;
 const TOKEN_Y_OFFSET: usize = 0;
 const EXPLANATION_1_Y_OFFSET: usize = 2;

@@ -47,7 +47,7 @@ pub struct ColorRange {
     pub color: usize,
 }
 
-// TODO: move this API to zellij-tile
+// TODO: 将此 API 移至 zellij-tile
 #[derive(Debug)]
 pub struct ColoredTextBuilder {
     text: String,
@@ -103,7 +103,7 @@ impl ColoredTextBuilder {
     }
 }
 
-// create titled text with different colors for title and value
+// 创建标题和值使用不同颜色的带标题文本
 fn create_titled_text(
     title: &str,
     value: &str,
@@ -117,7 +117,7 @@ fn create_titled_text(
         .build()
 }
 
-// to create text with a highlighted shortcut key
+// 创建带有高亮快捷键的文本
 fn create_highlighted_shortcut(text: &str, shortcut: &str, color: usize) -> (Text, usize) {
     ColoredTextBuilder::new(text.to_string())
         .highlight_substring(shortcut, color)
