@@ -23,7 +23,7 @@ pub fn format_kdl_error(error: LayoutParsingError) -> String {
             output
         },
         LayoutParsingError::SyntaxError => {
-            format!("Failed to deserialize KDL node. \nPossible reasons:\n{}\n{}\n{}\n{}",
+            format!("无法反序列化 KDL 节点。\n可能的原因：\n{}\n{}\n{}\n{}",
             "- 节点名称后缺少 `;`，例如 { node; another_node; }",
             "- 参数节点周围缺少引号 (\")，例如 { first_node \"argument_node\"; }",
             "- 标题行上的节点参数之间缺少等号 (=)。例如 argument=\"value\"",
