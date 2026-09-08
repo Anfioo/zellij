@@ -74,7 +74,7 @@ impl NewPluginScreen {
         }
     }
     fn render_title(&self, cols: usize) {
-        let title_text = format!("LOAD NEW PLUGIN");
+        let title_text = format!("加载新插件");
         let title_text_len = title_text.chars().count();
         let title = Text::new(title_text);
         print_text_with_coordinates(
@@ -88,41 +88,41 @@ impl NewPluginScreen {
     fn render_url_field(&self, cols: usize) {
         let url_field = if self.entering_plugin_url {
             let truncated_url =
-                truncate_string_start(&self.new_plugin_url, cols.saturating_sub(19)); // 17 the length of the prompt + 2 for padding and cursor
-            let text = format!("Enter Plugin URL: {}_", truncated_url);
-            Text::new(text).color_range(2, ..=16).color_range(3, 18..)
+                truncate_string_start(&self.new_plugin_url, cols.saturating_sub(9)); // 8 the length of the prompt + 1 for the cursor
+            let text = format!("输入插件地址: {}_", truncated_url);
+            Text::new(text).color_range(2, ..=6).color_range(3, 8..)
         } else {
             let truncated_url =
-                truncate_string_start(&self.new_plugin_url, cols.saturating_sub(18)); // 17 the length of the prompt + 1 for padding
-            let text = format!("Enter Plugin URL: {}", truncated_url);
-            Text::new(text).color_range(2, ..=16).color_range(0, 18..)
+                truncate_string_start(&self.new_plugin_url, cols.saturating_sub(8)); // 8 the length of the prompt
+            let text = format!("输入插件地址: {}", truncated_url);
+            Text::new(text).color_range(2, ..=6).color_range(0, 8..)
         };
         print_text_with_coordinates(url_field, 0, 2, None, None);
         let url_helper =
-            NestedListItem::new(format!("<Ctrl f> - Load from Disk")).color_range(3, ..=8);
+            NestedListItem::new(format!("<Ctrl f> - 从磁盘加载")).color_range(3, ..=8);
         print_nested_list_with_coordinates(vec![url_helper], 0, 3, None, None);
     }
     fn render_configuration_title(&self) {
         let configuration_title =
             if !self.editing_configuration() && self.new_plugin_config.is_empty() {
-                Text::new(format!("Plugin Configuration: <TAB> - Edit"))
-                    .color_range(2, ..=20)
-                    .color_range(3, 22..=26)
+                Text::new(format!("插件配置: <TAB> - 编辑"))
+                    .color_range(2, ..=4)
+                    .color_range(3, 6..=10)
             } else if !self.editing_configuration() {
                 Text::new(format!(
-                    "Plugin Configuration: <TAB> - Edit, <↓↑> - Navigate, <Del> - Delete"
+                    "插件配置: <TAB> - 编辑, <↓↑> - 导航, <Del> - 删除"
                 ))
-                .color_range(2, ..=20)
-                .color_range(3, 22..=26)
-                .color_range(3, 36..=39)
-                .color_range(3, 53..=57)
+                .color_range(2, ..=4)
+                .color_range(3, 6..=10)
+                .color_range(3, 18..=21)
+                .color_range(3, 29..=33)
             } else {
                 Text::new(format!(
-                    "Plugin Configuration: [Editing: <TAB> - Next, <ENTER> - Accept]"
+                    "插件配置: [编辑中: <TAB> - 下一项, <ENTER> - 确认]"
                 ))
-                .color_range(2, ..=20)
-                .color_range(3, 32..=36)
-                .color_range(3, 46..=52)
+                .color_range(2, ..=4)
+                .color_range(3, 12..=16)
+                .color_range(3, 25..=31)
             };
         print_text_with_coordinates(configuration_title, 0, 5, None, None);
     }
@@ -149,7 +149,7 @@ impl NewPluginScreen {
                 cols,
             ));
         } else if items.is_empty() {
-            items.push(NestedListItem::new("<NO CONFIGURATION>").color_range(0, ..));
+            items.push(NestedListItem::new("<无配置>").color_range(0, ..));
         }
         let config_list_len = items.len();
         print_nested_list_with_coordinates(items, 0, 6, Some(cols), None);
@@ -194,7 +194,7 @@ impl NewPluginScreen {
         };
         if self.entering_config_key {
             let val = if config_val.is_empty() {
-                "<EMPTY>".to_owned()
+                "<空>".to_owned()
             } else {
                 config_val
             };
@@ -203,7 +203,7 @@ impl NewPluginScreen {
                 .color_range(1, config_key.chars().count() + 3..)
         } else {
             let key = if config_key.is_empty() {
-                "<EMPTY>".to_owned()
+                "<空>".to_owned()
             } else {
                 config_key
             };
@@ -222,12 +222,12 @@ impl NewPluginScreen {
         let config_line_max_len = config_line_max_len.saturating_sub(5); // 3 - line padding,
                                                                          // 2 - ": "
         let config_key = if config_key.is_empty() {
-            "<EMPTY>"
+            "<空>"
         } else {
             config_key
         };
         let config_val = if config_val.is_empty() {
-            "<EMPTY>"
+            "<空>"
         } else {
             config_val
         };
@@ -272,8 +272,8 @@ impl NewPluginScreen {
             key_shortcuts_text.chars().count() + 1,
             bg_color
         );
-        let load_in_background_text = format!("Load in Background");
-        let load_in_foreground_text = format!("Load in Foreground");
+        let load_in_background_text = format!("后台加载");
+        let load_in_foreground_text = format!("前台加载");
         let (load_in_background_ribbon, load_in_foreground_ribbon) = if self.load_in_background {
             (
                 Text::new(&load_in_background_text).selected(),
@@ -302,10 +302,10 @@ impl NewPluginScreen {
     }
     fn render_help(&self, rows: usize) {
         let enter_line = Text::new(format!(
-            "Help: <ENTER> - Accept and Load Plugin, <ESC> - Cancel"
+            "帮助: <ENTER> - 确认并加载插件, <ESC> - 取消"
         ))
-        .color_range(3, 6..=12)
-        .color_range(3, 40..=44);
+        .color_range(3, 4..=10)
+        .color_range(3, 23..=27);
         print_text_with_coordinates(enter_line, 0, rows, None, None);
     }
     fn get_field_being_edited_mut(&mut self) -> Option<&mut String> {
@@ -466,7 +466,7 @@ impl NewPluginScreen {
                         .with_plugin_url("filepicker")
                         .with_plugin_config(config)
                         .new_plugin_instance_should_have_pane_title(
-                            "Select a .wasm file to load as a plugin...",
+                            "选择一个 .wasm 文件作为插件加载...",
                         )
                         .new_plugin_instance_should_be_focused()
                         .with_args(args),
@@ -510,7 +510,7 @@ impl ZellijPlugin for State {
             EventType::SessionUpdate,
         ]);
         let own_plugin_id = get_plugin_ids().plugin_id;
-        rename_plugin_pane(own_plugin_id, "Plugin Manager");
+        rename_plugin_pane(own_plugin_id, "插件管理器");
     }
     fn pipe(&mut self, pipe_message: PipeMessage) -> bool {
         if pipe_message.name == "filepicker_result" {
@@ -532,7 +532,7 @@ impl ZellijPlugin for State {
                             });
                         },
                         None => {
-                            eprintln!("request id not found");
+                            eprintln!("未找到请求 ID");
                         },
                     }
                 },
@@ -697,15 +697,15 @@ impl State {
         }
     }
     pub fn render_search(&self, cols: usize) {
-        let text = format!(" SEARCH: {}_", self.search_term);
+        let text = format!(" 搜索: {}_", self.search_term);
         if text.chars().count() <= cols {
-            let text = Text::new(text).color_range(3, 9..);
+            let text = Text::new(text).color_range(3, 5..);
             print_text_with_coordinates(text, 0, 0, None, None);
         } else {
             let truncated_search_term =
-                truncate_string_start(&self.search_term, cols.saturating_sub(10)); // 9 the length of the SEARCH prompt + 1 for the cursor
-            let text = format!(" SEARCH: {}_", truncated_search_term);
-            let text = Text::new(text).color_range(3, 9..);
+                truncate_string_start(&self.search_term, cols.saturating_sub(6)); // 5 the length of the SEARCH prompt + 1 for the cursor
+            let text = format!(" 搜索: {}_", truncated_search_term);
+            let text = Text::new(text).color_range(3, 5..);
             print_text_with_coordinates(text, 0, 0, None, None);
         }
     }
@@ -734,8 +734,8 @@ impl State {
             let tab_line = self.render_tab_line(plugin_id, cols);
             items.push(tab_line);
             if !plugin_info.configuration.is_empty() {
-                let config_line = NestedListItem::new(format!("Configuration:"))
-                    .color_range(2, ..=13)
+                let config_line = NestedListItem::new(format!("配置:"))
+                    .color_range(2, ..=2)
                     .indent(1);
                 items.push(config_line);
                 for (config_key, config_val) in &plugin_info.configuration {
@@ -809,8 +809,8 @@ impl State {
             let tab_line = self.render_tab_line(plugin_id, cols);
             items.push(tab_line);
             if !plugin_info.configuration.is_empty() {
-                let config_line = NestedListItem::new(format!("Configuration:"))
-                    .color_range(2, ..=13)
+                let config_line = NestedListItem::new(format!("配置:"))
+                    .color_range(2, ..=2)
                     .indent(1);
                 items.push(config_line);
                 for (config_key, config_value) in &plugin_info.configuration {
@@ -848,8 +848,8 @@ impl State {
     fn render_tab_line(&self, plugin_id: u32, max_width: usize) -> NestedListItem {
         let tab_of_plugin_id = self
             .get_tab_of_plugin_id(plugin_id)
-            .unwrap_or_else(|| "N/A".to_owned());
-        let tab_line_padding_count = 10; // 5 the length of the "Tab: " + 5 for the left padding
+            .unwrap_or_else(|| "无".to_owned());
+        let tab_line_padding_count = 10; // 5 the length of the "标签页: " + 5 for the left padding
 
         let tab_of_plugin_id =
             if tab_of_plugin_id.chars().count() + tab_line_padding_count > max_width {
@@ -861,39 +861,39 @@ impl State {
                 tab_of_plugin_id
             };
 
-        let tab_line = NestedListItem::new(format!("Tab: {}", tab_of_plugin_id))
+        let tab_line = NestedListItem::new(format!("标签页: {}", tab_of_plugin_id))
             .color_range(2, ..=3)
             .indent(1);
         tab_line
     }
     pub fn render_help(&self, y: usize, cols: usize) {
-        let full_text = "Help: <←↓↑→> - Navigate/Expand, <ENTER> - focus, <TAB> - Reload, <Del> - Close, <Ctrl a> - New, <ESC> - Exit";
+        let full_text = "帮助: <←↓↑→> - 导航/展开, <ENTER> - 聚焦, <TAB> - 重新加载, <Del> - 关闭, <Ctrl a> - 新建, <ESC> - 退出";
         let middle_text =
-            "Help: <←↓↑→/ENTER> - Navigate, <TAB> - Reload, <Del> - Close, <Ctrl a> - New, <ESC> - Exit";
+            "帮助: <←↓↑→/ENTER> - 导航, <TAB> - 重新加载, <Del> - 关闭, <Ctrl a> - 新建, <ESC> - 退出";
         let short_text =
-            "<←↓↑→/ENTER/TAB/Del> - Navigate/Expand/Reload/Close, <Ctrl a> - New, <ESC> - Exit";
+            "<←↓↑→/ENTER/TAB/Del> - 导航/展开/重新加载/关闭, <Ctrl a> - 新建, <ESC> - 退出";
         if cols >= full_text.chars().count() {
             let text = Text::new(full_text)
-                .color_range(3, 5..=11)
-                .color_range(3, 32..=38)
-                .color_range(3, 49..=53)
-                .color_range(3, 65..=69)
-                .color_range(3, 80..=87)
-                .color_range(3, 96..=100);
+                .color_range(3, 4..=9)
+                .color_range(3, 20..=26)
+                .color_range(3, 34..=38)
+                .color_range(3, 48..=52)
+                .color_range(3, 60..=67)
+                .color_range(3, 75..=79);
             print_text_with_coordinates(text, 0, y, Some(cols), None);
         } else if cols >= middle_text.chars().count() {
             let text = Text::new(middle_text)
-                .color_range(3, 6..=17)
-                .color_range(3, 31..=35)
-                .color_range(3, 47..=51)
-                .color_range(3, 62..=69)
-                .color_range(3, 78..=82);
+                .color_range(3, 4..=15)
+                .color_range(3, 23..=27)
+                .color_range(3, 37..=41)
+                .color_range(3, 49..=56)
+                .color_range(3, 64..=68);
             print_text_with_coordinates(text, 0, y, Some(cols), None);
         } else {
             let text = Text::new(short_text)
-                .color_range(3, ..=21)
-                .color_range(3, 53..=60)
-                .color_range(3, 69..=73);
+                .color_range(3, ..=19)
+                .color_range(3, 38..=45)
+                .color_range(3, 53..=57);
             print_text_with_coordinates(text, 0, y, Some(cols), None);
         }
     }
