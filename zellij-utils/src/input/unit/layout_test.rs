@@ -8,9 +8,9 @@ fn normalize_layout_debug(s: String) -> String {
 
 #[cfg(windows)]
 fn normalize_layout_debug(s: String) -> String {
-    // On Windows, PathBuf's Debug output uses `\\` (escaped backslash).
-    // Replace `\\\\` (two escaped backslashes in Debug repr) with `/`
-    // so that snapshots match Unix-recorded baselines.
+    // 在 Windows 上，PathBuf 的 Debug 输出使用 `\\`（转义的反斜杠）。
+    // 将 `\\\\`（Debug 表示中的两个转义反斜杠）替换为 `/`，
+    // 以便快照与 Unix 记录的基线匹配。
     s.replace("\\\\", "/")
 }
 
@@ -363,7 +363,7 @@ fn layout_with_nested_differing_tabs() {
                     ],
                     ..Default::default()
                 },
-                vec![], // floating panes
+                vec![], // 浮动窗格
             ),
             (
                 None,
@@ -372,7 +372,7 @@ fn layout_with_nested_differing_tabs() {
                     children: vec![TiledPaneLayout::default(), TiledPaneLayout::default()],
                     ..Default::default()
                 },
-                vec![], // floating panes
+                vec![], // 浮动窗格
             ),
         ],
         template: Some((TiledPaneLayout::default(), vec![])),
@@ -691,7 +691,7 @@ fn layout_with_tab_names() {
                     children: vec![],
                     ..Default::default()
                 },
-                vec![], // floating panes
+                vec![], // 浮动窗格
             ),
             (
                 Some("my cool tab name 2".into()),
@@ -699,7 +699,7 @@ fn layout_with_tab_names() {
                     children: vec![],
                     ..Default::default()
                 },
-                vec![], // floating panes
+                vec![], // 浮动窗格
             ),
         ],
         template: Some((TiledPaneLayout::default(), vec![])),
@@ -769,7 +769,7 @@ fn layout_with_tab_templates() {
                     ],
                     ..Default::default()
                 },
-                vec![], // floating panes
+                vec![], // 浮动窗格
             ),
             (
                 Some("my second tab".into()),
@@ -786,7 +786,7 @@ fn layout_with_tab_templates() {
                     ],
                     ..Default::default()
                 },
-                vec![], // floating panes
+                vec![], // 浮动窗格
             ),
             (
                 None,
@@ -799,7 +799,7 @@ fn layout_with_tab_templates() {
                     ],
                     ..Default::default()
                 },
-                vec![], // floating panes
+                vec![], // 浮动窗格
             ),
         ],
         template: Some((TiledPaneLayout::default(), vec![])),
@@ -1760,7 +1760,7 @@ fn global_cwd_prepended_to_panes_with_cwd() {
 
 #[test]
 fn global_cwd_passed_from_layout_constructor() {
-    // this is used by the new-tab cli action with --cwd
+    // 由带 --cwd 的 new-tab cli 操作使用
     let kdl_layout = r#"
         layout {
             pane
@@ -1780,7 +1780,7 @@ fn global_cwd_passed_from_layout_constructor() {
 
 #[test]
 fn global_cwd_passed_from_layout_constructor_overrides_global_cwd_in_layout_file() {
-    // this is used by the new-tab cli action with --cwd
+    // 由带 --cwd 的 new-tab cli 操作使用
     let kdl_layout = r#"
         layout {
             cwd "/home"
@@ -2227,13 +2227,13 @@ fn env_var_expansion() {
         ("HOME", "/home/aram"),
     ];
     let mut old_vars = Vec::new();
-    // set environment variables for test, keeping track of existing values.
+    // 为测试设置环境变量，并跟踪已有值。
     for (key, value) in env_vars {
         old_vars.push((key, std::env::var(key).ok()));
         std::env::set_var(key, value);
     }
     let layout = Layout::from_kdl(raw_layout, Some("layout_file_name".into()), None, None);
-    // restore environment.
+    // 恢复环境。
     for (key, opt) in old_vars {
         match opt {
             Some(value) => std::env::set_var(key, &value),
@@ -2311,9 +2311,9 @@ fn layout_node_with_cwd() {
 
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
 
-    // Verify cwd was applied - check the first pane's run property
+    // 验证 cwd 已应用 - 检查第一个窗格的 run 属性
     assert!(layout.tabs.len() > 0);
-    // The cwd should be propagated to children
+    // cwd 应传递给子进程
     if let Some(Run::Cwd(path)) = &layout.tabs[0].1.children[0].run {
         assert_eq!(path.to_str(), Some("/tmp"));
     } else {
@@ -2409,7 +2409,7 @@ fn layout_node_with_name_and_only_floating_panes() {
 
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
 
-    // Verify the tab name was applied
+    // 验证标签页名称已应用
     assert_eq!(layout.tabs.len(), 1);
     assert_eq!(layout.tabs[0].0, Some("floating-only".to_string()));
 }
@@ -2450,7 +2450,7 @@ fn floating_pane_coordinates_rejects_zero_percent_for_width() {
         Some(false),
     );
 
-    // Should have coords but width will be None due to rejection
+    // 应有坐标，但由于被拒绝，宽度将为 None
     assert!(coords.is_some());
     let coords = coords.unwrap();
     assert!(coords.width.is_none());
@@ -2471,7 +2471,7 @@ fn floating_pane_coordinates_rejects_zero_percent_for_height() {
         Some(false),
     );
 
-    // Should have coords but height will be None due to rejection
+    // 应有坐标，但由于被拒绝，高度将为 None
     assert!(coords.is_some());
     let coords = coords.unwrap();
     assert_eq!(coords.width, Some(PercentOrFixed::Percent(50)));
@@ -2527,11 +2527,11 @@ fn tiled_pane_still_rejects_zero_percent() {
     use crate::input::layout::SplitSize;
     use std::str::FromStr;
 
-    // Verify SplitSize::from_str still rejects 0%
+    // 验证 SplitSize::from_str 仍然拒绝 0%
     let result = SplitSize::from_str("0%");
     assert!(result.is_err());
 
-    // But 1% should work
+    // 但 1% 应该可以
     let result = SplitSize::from_str("1%");
     assert!(result.is_ok());
 }

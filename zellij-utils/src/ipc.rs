@@ -1,4 +1,4 @@
-//! IPC stuff for starting to split things into a client and server model.
+//! IPC 相关代码，用于开始把各部分拆分为客户端和服务端模型。
 use crate::{
     data::{ClientId, ConnectToSession, HostTerminalThemeMode, KeyWithModifier, PaneId, Style},
     errors::{prelude::*, ErrorContext},
@@ -14,7 +14,7 @@ use std::{
     marker::PhantomData,
 };
 
-// Protobuf imports
+// Protobuf 导入
 use crate::client_server_contract::client_server_contract::{
     ClientToServerMsg as ProtoClientToServerMsg, ServerToClientMsg as ProtoServerToClientMsg,
 };
@@ -28,7 +28,7 @@ mod tests;
 
 type SessionId = u64;
 
-/// A bidirectional byte stream that supports cloning for simultaneous read/write.
+/// 支持克隆以便同时读写的双向字节流
 pub trait IpcStream: Read + Write + Send + 'static {
     fn try_clone_stream(&self) -> io::Result<Box<dyn IpcStream>>;
 }
@@ -42,15 +42,15 @@ impl IpcStream for LocalSocketStream {
 
 #[derive(PartialEq, Eq, Serialize, Deserialize, Hash)]
 pub struct Session {
-    // Unique ID for this session
+    // 此会话的唯一 ID
     id: SessionId,
-    // Identifier for the underlying IPC primitive (socket, pipe)
+    // 底层 IPC 原语（socket、pipe）的标识符
     conn_name: String,
-    // User configured alias for the session
+    // 用户为会话配置的别名
     alias: String,
 }
 
-// How do we want to connect to a session?
+// 我们希望如何连接到会话？
 #[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ClientType {
     Reader,
@@ -153,7 +153,7 @@ pub struct MobileStatePayload {
     pub render_prefs: MobileRenderPrefsPayload,
 }
 
-// Types of messages sent from the client to the server
+// 从客户端发送到服务端的消息类型
 #[allow(clippy::large_enum_variant)]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum ClientToServerMsg {
@@ -246,7 +246,7 @@ pub enum ClientToServerMsg {
     },
 }
 
-// Types of messages sent from the server to the client
+// 从服务端发送到客户端的消息类型
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum ServerToClientMsg {
     Render {
@@ -365,14 +365,14 @@ There are a few things you can try now:
     }
 }
 
-/// Sends messages on a stream socket, along with an [`ErrorContext`].
+/// 在流式 socket 上发送消息，并携带一个 [`ErrorContext`]。
 pub struct IpcSenderWithContext<T: Serialize> {
     sender: io::BufWriter<Box<dyn IpcStream>>,
     _phantom: PhantomData<T>,
 }
 
 impl<T: Serialize> IpcSenderWithContext<T> {
-    /// Returns a sender to the given [LocalSocketStream](interprocess::local_socket::LocalSocketStream).
+    /// 返回指向给定 [LocalSocketStream](interprocess::local_socket::LocalSocketStream) 的发送端。
     pub fn new(sender: LocalSocketStream) -> Self {
         Self {
             sender: io::BufWriter::new(Box::new(sender)),
@@ -401,7 +401,7 @@ impl<T: Serialize> IpcSenderWithContext<T> {
         Ok(())
     }
 
-    /// Returns an [`IpcReceiverWithContext`] with the same socket as this sender.
+    /// 返回一个与此发送端共用同一 socket 的 [`IpcReceiverWithContext`]。
     pub fn get_receiver<F>(&self) -> IpcReceiverWithContext<F>
     where
         F: for<'de> Deserialize<'de> + Serialize,
@@ -411,7 +411,7 @@ impl<T: Serialize> IpcSenderWithContext<T> {
     }
 }
 
-/// Receives messages on a stream socket, along with an [`ErrorContext`].
+/// 在流式 socket 上接收消息，并携带一个 [`ErrorContext`]。
 pub struct IpcReceiverWithContext<T> {
     receiver: io::BufReader<Box<dyn IpcStream>>,
     _phantom: PhantomData<T>,
@@ -436,7 +436,7 @@ impl<T> IpcReceiverWithContext<T>
 where
     T: for<'de> Deserialize<'de> + Serialize,
 {
-    /// Returns a receiver to the given [LocalSocketStream](interprocess::local_socket::LocalSocketStream).
+    /// 返回指向给定 [LocalSocketStream](interprocess::local_socket::LocalSocketStream) 的接收端。
     pub fn new(receiver: LocalSocketStream) -> Self {
         Self {
             receiver: io::BufReader::new(Box::new(receiver)),
@@ -485,18 +485,18 @@ where
         }
     }
 
-    /// Returns an [`IpcSenderWithContext`] with the same socket as this receiver.
+    /// 返回一个与此接收端共用同一 socket 的 [`IpcSenderWithContext`]。
     pub fn get_sender<F: Serialize>(&self) -> IpcSenderWithContext<F> {
         let socket = self.receiver.get_ref().try_clone_stream().unwrap();
         IpcSenderWithContext::from_boxed(socket)
     }
 }
 
-// Protobuf wire format utilities
+// Protobuf 线格式工具
 fn read_protobuf_message<T: Message + Default>(
     reader: &mut impl Read,
 ) -> std::result::Result<T, IpcReceiveError> {
-    // Read length-prefixed protobuf message
+    // 读取带长度前缀的 protobuf 消息
     let mut len_bytes = [0u8; 4];
     reader
         .read_exact(&mut len_bytes)
@@ -515,16 +515,16 @@ fn write_protobuf_message<T: Message>(writer: &mut impl Write, msg: &T) -> Resul
     let encoded = msg.encode_to_vec();
     let len = encoded.len() as u32;
 
-    // we measure the length of the message and transmit it first so that the reader will be able
-    // to first read exactly 4 bytes (representing this length) and then read that amount of bytes
-    // as the actual message - this is so that we are able to distinct whole messages over the wire
-    // stream
+    // 我们测量消息的长度并先传输它，这样读取方就能
+    // 先精确读取 4 个字节（表示该长度），然后再读取那么多字节
+    // 作为实际消息——这样我们就能在流上区分出完整的消息，
+    // 而不会混淆整个消息的边界
     writer.write_all(&len.to_le_bytes())?;
     writer.write_all(&encoded)?;
     Ok(())
 }
 
-// Protobuf helper functions
+// Protobuf 辅助函数
 pub fn send_protobuf_client_to_server(
     sender: &mut IpcSenderWithContext<ClientToServerMsg>,
     msg: ClientToServerMsg,
@@ -557,16 +557,16 @@ pub fn recv_protobuf_server_to_client(
     receiver.try_recv_server_msg().ok()
 }
 
-/// Asynchronously send `ClientToServerMsg::KillSession` to the peer at `path`
-/// and wait until the peer's existing shutdown path replies (or its socket
-/// closes). Either of those outcomes confirms the kill landed; the caller
-/// wraps this in `tokio::time::timeout` to bound the wait against a wedged
-/// peer.
+/// 异步地向位于 `path` 的对端发送 `ClientToServerMsg::KillSession`，
+/// 并等待对端现有的关闭路径回复（或其 socket
+/// 关闭）。这两种结果都确认 kill 已生效；调用方
+/// 将其包裹在 `tokio::time::timeout` 中，以限制对卡死
+/// 对端的等待。
 ///
-/// On Unix the local socket is bidirectional, so the same async stream is
-/// used for both send and receive. On Windows the named pipe is half-duplex
-/// and the existing sync `ipc_connect` / `ipc_connect_reply` flow is
-/// dispatched onto a blocking task.
+/// 在 Unix 上，本地 socket 是双向的，因此同一个 async 流
+/// 同时用于发送和接收。在 Windows 上，命名管道是半双工的，
+/// 现有的同步 `ipc_connect` / `ipc_connect_reply` 流程会被
+/// 派发到一个阻塞任务上。
 #[cfg(unix)]
 pub async fn async_send_kill_and_await(path: &std::path::Path) -> io::Result<()> {
     use interprocess::local_socket::traits::tokio::Stream as _;
@@ -583,14 +583,14 @@ pub async fn async_send_kill_and_await(path: &std::path::Path) -> io::Result<()>
 
     stream.write_all(&len_bytes).await?;
     stream.write_all(&encoded).await?;
-    // Best-effort flush; failing here doesn't mean the kill failed.
+    // 尽力刷新；这里失败并不代表终止失败。
     let _ = stream.flush().await;
 
-    // The peer's shutdown path sends `ServerToClientMsg::Exit { Normal }`
-    // (zellij-server/src/lib.rs ServerInstruction::KillSession) over this
-    // same socket before exiting; if it dies without ACKing, the stream
-    // closes. Either outcome -- a successful 4-byte length-prefix read or a
-    // read error/EOF -- confirms the kill is no longer in flight.
+    // 对端的关闭路径在退出前通过这个
+    // 同一 socket 发送 `ServerToClientMsg::Exit { Normal }`
+    // （zellij-server/src/lib.rs 中的 ServerInstruction::KillSession）；如果它在未确认的情况下死亡，流
+    // 会关闭。无论哪种结果——成功读取 4 字节长度前缀或
+    // 读取错误/EOF——都确认 kill 不再进行中。
     let mut len_buf = [0u8; 4];
     let _ = stream.read_exact(&mut len_buf).await;
     Ok(())

@@ -36,7 +36,7 @@ fn validate_session(name: &str) -> Result<String, String> {
         socket_path.push(name);
 
         if socket_path.as_os_str().len() >= ZELLIJ_SOCK_MAX_LENGTH {
-            // socket path must be less than 108 bytes
+            // socket 路径必须小于 108 字节
             let available_length = ZELLIJ_SOCK_MAX_LENGTH
                 .saturating_sub(socket_path.as_os_str().len())
                 .saturating_sub(1);
@@ -60,51 +60,51 @@ fn validate_session(name: &str) -> Result<String, String> {
     args_override_self = true
 )]
 pub struct CliArgs {
-    /// Maximum panes on screen, caution: opening more panes will close old ones
+    /// 屏幕上最多显示的窗格数，注意：打开更多窗格会关闭旧窗格
     #[clap(long, value_parser)]
     pub max_panes: Option<usize>,
 
-    /// Change where zellij looks for plugins
+    /// 更改 zellij 查找插件的位置
     #[clap(long, value_parser, overrides_with = "data_dir")]
     pub data_dir: Option<PathBuf>,
 
-    /// Run server listening at the specified socket path
+    /// 运行服务端并监听指定的 socket 路径
     #[clap(long, value_parser, hide = true, overrides_with = "server")]
     pub server: Option<PathBuf>,
 
-    /// Specify name of a new session
+    /// 指定新会话的名称
     #[clap(long, short, overrides_with = "session", value_parser = validate_session)]
     pub session: Option<String>,
 
-    /// Name of a predefined layout inside the layout directory or the path to a layout file
-    /// if inside a session (or using the --session flag) will be added to the session as a new tab
-    /// or tabs, otherwise will start a new session
+    /// 布局目录中预定义布局的名称，或布局文件的路径
+    /// 如果处于会话中（或使用 --session 标志），将作为新标签页添加到该会话，
+    /// 否则将启动一个新会话
     #[clap(short, long, value_parser, overrides_with = "layout")]
     pub layout: Option<PathBuf>,
 
-    /// Raw KDL layout string to use directly (instead of a file path)
-    /// if inside a session (or using the --session flag) will be added to the session as a new tab
-    /// or tabs, otherwise will start a new session
+    /// 直接使用的原始 KDL 布局字符串（而不是文件路径）
+    /// 如果处于会话中（或使用 --session 标志），将作为新标签页添加到该会话，
+    /// 否则将启动一个新会话
     #[clap(long, value_parser, conflicts_with_all = &["layout", "new_session_with_layout"])]
     pub layout_string: Option<String>,
 
-    /// Name of a predefined layout inside the layout directory or the path to a layout file
-    /// Will always start a new session, even if inside an existing session
+    /// 布局目录中预定义布局的名称，或布局文件的路径
+    /// 即使处于已有会话中，也始终启动一个新会话
     #[clap(short, long, value_parser, overrides_with = "new_session_with_layout")]
     pub new_session_with_layout: Option<PathBuf>,
 
-    /// Change where zellij looks for the configuration file
+    /// 更改 zellij 查找配置文件的位置
     #[clap(short, long, overrides_with = "config", env = ZELLIJ_CONFIG_FILE_ENV, value_parser)]
     pub config: Option<PathBuf>,
 
-    /// Change where zellij looks for the configuration directory
+    /// 更改 zellij 查找配置目录的位置
     #[clap(long, overrides_with = "config_dir", env = ZELLIJ_CONFIG_DIR_ENV, value_parser)]
     pub config_dir: Option<PathBuf>,
 
     #[clap(subcommand)]
     pub command: Option<Command>,
 
-    /// Specify emitting additional debug information
+    /// 指定输出额外的调试信息
     #[clap(short, long, value_parser)]
     pub debug: bool,
 }
@@ -128,28 +128,28 @@ impl CliArgs {
 
 #[derive(Debug, Subcommand, Clone, Serialize, Deserialize)]
 pub enum Command {
-    /// Change the behaviour of zellij
+    /// 更改 zellij 的行为
     #[clap(name = "options", value_parser)]
     Options(Options),
 
-    /// Setup zellij and check its configuration
+    /// 设置 zellij 并检查其配置
     #[clap(name = "setup", value_parser)]
     Setup(Setup),
 
-    /// Run a web server to serve terminal sessions
+    /// 运行 Web 服务器以提供终端会话服务
     #[clap(name = "web", value_parser)]
     Web(WebCli),
 
-    /// Send actions to a specific session
+    /// 向特定会话发送操作
     #[clap(visible_alias = "ac")]
     #[clap(subcommand)]
     Action(Box<CliAction>),
 
-    /// Explore existing zellij sessions
+    /// 查看现有 zellij 会话
     #[clap(flatten)]
     Sessions(Sessions),
 
-    /// Subscribe to pane render updates (viewport and scrollback)
+    /// 订阅窗格渲染更新（视口和滚动缓冲）
     #[clap(override_usage(
         "zellij [--session <OTHER SESSION NAME>] subscribe [OPTIONS] --pane-id..."
     ))]
@@ -158,7 +158,7 @@ pub enum Command {
 
 #[derive(Debug, Parser, Clone, Serialize, Deserialize)]
 pub struct SubscribeCli {
-    /// Pane ID(s) to subscribe to (e.g. terminal_1, plugin_2, or bare number like 1)
+    /// 要订阅的窗格 ID（例如 terminal_1、plugin_2，或如 1 这样的裸数字）
     #[clap(
         short,
         long,
@@ -167,8 +167,8 @@ pub struct SubscribeCli {
     )]
     pub pane_id: Vec<String>,
 
-    /// Include scrollback lines in initial delivery.
-    /// Bare --scrollback = all scrollback, --scrollback N = last N lines.
+    /// 在初始交付中包含回滚缓冲行。
+    /// 裸 --scrollback = 全部回滚，--scrollback N = 最后 N 行。
     #[clap(
         short,
         long,
@@ -177,11 +177,11 @@ pub struct SubscribeCli {
     )]
     pub scrollback: Option<usize>,
 
-    /// Output format
+    /// 输出格式
     #[clap(short, long, default_value = "raw", value_enum)]
     pub format: SubscribeFormat,
 
-    /// Preserve ANSI styling in the output
+    /// 在输出中保留 ANSI 样式
     #[clap(long)]
     pub ansi: bool,
 }
@@ -194,23 +194,23 @@ pub enum SubscribeFormat {
 
 #[derive(Debug, Clone, Args, Serialize, Deserialize)]
 pub struct WebCli {
-    /// Start the server (default unless other arguments are specified)
+    /// 启动服务端（除非指定了其他参数，否则为默认操作）
     #[clap(long, value_parser, display_order = 1)]
     pub start: bool,
 
-    /// Stop the server
+    /// 停止服务端
     #[clap(long, value_parser, exclusive(true), display_order = 2)]
     pub stop: bool,
 
-    /// Get the server status
+    /// 获取服务端状态
     #[clap(long, value_parser, conflicts_with("start"), display_order = 3)]
     pub status: bool,
 
-    /// Timeout in seconds for the status check (default: 30)
+    /// 状态检查的超时秒数（默认：30）
     #[clap(long, value_parser, requires = "status", display_order = 4)]
     pub timeout: Option<u64>,
 
-    /// Run the server in the background
+    /// 在后台运行服务端
     #[clap(
         short,
         long,
@@ -219,22 +219,22 @@ pub struct WebCli {
         display_order = 5
     )]
     pub daemonize: bool,
-    /// Timeout in seconds waiting for the server to start (default: 10).
-    /// Only used on Windows where the daemonized server is polled via TCP.
-    /// On Unix, startup signaling uses pipes and this option is ignored.
+    /// 等待服务器启动的超时秒数（默认：10）。
+    /// 仅在 Windows 上使用，此时守护化的服务器通过 TCP 轮询。
+    /// 在 Unix 上，启动信令使用管道，此选项会被忽略。
     #[clap(long, value_parser, display_order = 6)]
     pub server_startup_timeout: Option<u64>,
-    /// Create a login token for the web interface, will only be displayed once and cannot later be
-    /// retrieved. Returns the token name and the token.
+    /// 为 Web 界面创建一个登录令牌，只会显示一次，之后无法
+    /// 再获取。返回令牌名称和令牌本身。
     #[clap(long, value_parser, exclusive(true), display_order = 7)]
     pub create_token: bool,
-    /// Optional name for the token
+    /// 令牌的可选名称
     #[clap(long, value_parser, value_name = "TOKEN_NAME", display_order = 8)]
     pub token_name: Option<String>,
-    /// Create a read-only login token (can only attach to existing sessions as watcher)
+    /// 创建只读登录令牌（只能以观察者身份附加到现有会话）
     #[clap(long, value_parser, exclusive(true), display_order = 9)]
     pub create_read_only_token: bool,
-    /// Revoke a login token by its name
+    /// 按名称撤销登录令牌
     #[clap(
         long,
         value_parser,
@@ -243,13 +243,13 @@ pub struct WebCli {
         display_order = 10
     )]
     pub revoke_token: Option<String>,
-    /// Revoke all login tokens
+    /// 撤销所有登录令牌
     #[clap(long, value_parser, exclusive(true), display_order = 11)]
     pub revoke_all_tokens: bool,
-    /// List token names and their creation dates (cannot show actual tokens)
+    /// 列出令牌名称及其创建日期（无法显示实际令牌）
     #[clap(long, value_parser, exclusive(true), display_order = 12)]
     pub list_tokens: bool,
-    /// The ip address to listen on locally for connections (defaults to 127.0.0.1)
+    /// 本地监听的 IP 地址（默认为 127.0.0.1）
     #[clap(
         long,
         value_parser,
@@ -257,7 +257,7 @@ pub struct WebCli {
         display_order = 13
     )]
     pub ip: Option<IpAddr>,
-    /// The port to listen on locally for connections (defaults to 8082)
+    /// 本地监听的端口（默认为 8082）
     #[clap(
         long,
         value_parser,
@@ -265,7 +265,7 @@ pub struct WebCli {
         display_order = 14
     )]
     pub port: Option<u16>,
-    /// The path to the SSL certificate (required if not listening on 127.0.0.1)
+    /// SSL 证书的路径（若未监听 127.0.0.1 则为必填）
     #[clap(
         long,
         value_parser,
@@ -273,7 +273,7 @@ pub struct WebCli {
         display_order = 15
     )]
     pub cert: Option<PathBuf>,
-    /// The path to the SSL key (required if not listening on 127.0.0.1)
+    /// SSL 密钥的路径（若未监听 127.0.0.1 则为必填）
     #[clap(
         long,
         value_parser,
@@ -298,199 +298,199 @@ impl WebCli {
 
 #[derive(Debug, Subcommand, Clone, Serialize, Deserialize)]
 pub enum SessionCommand {
-    /// Change the behaviour of zellij
+    /// 更改 zellij 的行为
     #[clap(name = "options")]
     Options(Options),
 }
 
 #[derive(Debug, Subcommand, Clone, Serialize, Deserialize)]
 pub enum Sessions {
-    /// List active sessions
+    /// 列出活动会话
     #[clap(visible_alias = "ls")]
     ListSessions {
-        /// Do not add colors and formatting to the list (useful for parsing)
+        /// 不给列表添加颜色和格式（便于解析）
         #[clap(short, long)]
         no_formatting: bool,
 
-        /// Print just the session name
+        /// 仅打印会话名称
         #[clap(short, long)]
         short: bool,
 
-        /// List the sessions in reverse order (default is ascending order)
+        /// 按相反顺序列出会话（默认为升序）
         #[clap(short, long)]
         reverse: bool,
     },
-    /// List existing plugin aliases
+    /// 列出现有插件别名
     #[clap(visible_alias = "la")]
     ListAliases,
-    /// Attach to a session
+    /// 附加到会话
     #[clap(visible_alias = "a")]
     Attach {
-        /// Name of the session to attach to.
+        /// 要附加到的会话名称。
         #[clap(value_parser)]
         session_name: Option<String>,
 
-        /// Create a session if one does not exist.
+        /// 若会话不存在则创建它。
         #[clap(short, long, value_parser)]
         create: bool,
 
-        /// Create a detached session in the background if one does not exist
+        /// 若会话不存在，则在后台创建一个分离的会话
         #[clap(short('b'), long, value_parser)]
         create_background: bool,
 
-        /// Number of the session index in the active sessions ordered creation date.
+        /// 活动会话按创建日期排序后的索引编号。
         #[clap(long, value_parser)]
         index: Option<usize>,
 
-        /// Change the behaviour of zellij
+        /// 更改 zellij 的行为
         #[clap(subcommand, name = "options")]
         options: Option<Box<SessionCommand>>,
 
-        /// If resurrecting a dead session, immediately run all its commands on startup
+        /// 若恢复已死亡的会话，在启动时立即运行其所有命令
         #[clap(short, long)]
         force_run_commands: bool,
 
-        /// Authentication token for remote sessions
+        /// 远程会话的认证令牌
         #[clap(short('t'), long, value_parser)]
         token: Option<String>,
 
-        /// Save session for automatic re-authentication (4 weeks)
+        /// 保存会话以便自动重新认证（4 周）
         #[clap(short('r'), long, value_parser)]
         remember: bool,
 
-        /// Delete saved session before connecting
+        /// 在连接前删除已保存的会话
         #[clap(long, value_parser)]
         forget: bool,
 
-        /// Path to a custom CA certificate (PEM format) for verifying the remote server
+        /// 用于验证远程服务器的自定义 CA 证书（PEM 格式）路径
         #[clap(long, value_name = "FILE", value_parser)]
         ca_cert: Option<PathBuf>,
 
-        /// Skip TLS certificate validation (DANGEROUS — development only)
+        /// 跳过 TLS 证书校验（危险——仅用于开发）
         #[clap(long, value_parser)]
         insecure: bool,
 
-        /// Command to run in the first pane of the session, if it is created
+        /// 会话创建时在第一个窗格中运行的命令
         #[clap(value_parser, last(true))]
         initial_command: Vec<String>,
 
-        /// Close the initial command's pane immediately when it exits
+        /// 初始命令退出时立即关闭其窗格
         #[clap(long, requires("initial_command"))]
         close_on_exit: bool,
 
-        /// Start the initial command suspended, only running it after you first press ENTER
+        /// 以挂起状态启动初始命令，仅在你首次按回车后才运行
         #[clap(long, requires("initial_command"))]
         start_suspended: bool,
     },
 
-    /// Watch a session (read-only)
+    /// 观察会话（只读）
     #[clap(visible_alias = "w")]
     Watch {
-        /// Name of the session to watch
+        /// 要观察的会话名称
         #[clap(value_parser)]
         session_name: Option<String>,
     },
 
-    /// Kill a specific session
+    /// 终止指定会话
     #[clap(visible_alias = "k")]
     KillSession {
-        /// Name of target session
+        /// 目标会话名称
         #[clap(value_parser)]
         target_session: Option<String>,
     },
 
-    /// Delete a specific session
+    /// 删除指定会话
     #[clap(visible_alias = "d")]
     DeleteSession {
-        /// Name of target session
+        /// 目标会话名称
         #[clap(value_parser)]
         target_session: Option<String>,
-        /// Kill the session if it's running before deleting it
+        /// 删除前若会话正在运行则先终止它
         #[clap(short, long)]
         force: bool,
     },
 
-    /// Kill all sessions
+    /// 终止所有会话
     #[clap(visible_alias = "ka")]
     KillAllSessions {
-        /// Automatic yes to prompts
+        /// 对提示自动回答是
         #[clap(short, long, value_parser)]
         yes: bool,
     },
 
-    /// Delete all sessions
+    /// 删除所有会话
     #[clap(visible_alias = "da")]
     DeleteAllSessions {
-        /// Automatic yes to prompts
+        /// 对提示自动回答是
         #[clap(short, long, value_parser)]
         yes: bool,
-        /// Kill the sessions if they're running before deleting them
+        /// 删除前若会话正在运行则先终止它们
         #[clap(short, long)]
         force: bool,
     },
 
-    /// Run a command in a new pane
-    /// Returns: Created pane ID (format: terminal_<id>)
+    /// 在新窗格中运行命令
+    /// 返回：创建的窗格 ID（格式：terminal_<id>）
     #[clap(visible_alias = "r")]
     Run {
-        /// Command to run
+        /// 要运行的命令
         #[clap(last(true), required(true))]
         command: Vec<String>,
 
-        /// Direction to open the new pane in
+        /// 打开新窗格的方向
         #[clap(short, long, value_parser, conflicts_with("floating"))]
         direction: Option<Direction>,
 
-        /// Change the working directory of the new pane
+        /// 更改新窗格的工作目录
         #[clap(long, value_parser)]
         cwd: Option<PathBuf>,
 
-        /// Open the new pane in floating mode
+        /// 以浮动模式打开新窗格
         #[clap(short, long)]
         floating: bool,
 
-        /// Open the new pane in place of the current pane, temporarily suspending it
+        /// 在当前窗格位置打开新窗格，并暂时挂起当前窗格
         #[clap(short, long, conflicts_with("floating"), conflicts_with("direction"))]
         in_place: bool,
 
-        /// Close the replaced pane instead of suspending it (only effective with --in-place)
+        /// 关闭被替换的窗格而不是挂起它（仅与 --in-place 一起使用有效）
         #[clap(long, requires("in_place"))]
         close_replaced_pane: bool,
 
-        /// Name of the new pane
+        /// 新窗格名称
         #[clap(short, long, value_parser)]
         name: Option<String>,
 
-        /// Close the pane immediately when its command exits
+        /// 命令退出时立即关闭窗格
         #[clap(short, long)]
         close_on_exit: bool,
 
-        /// Start the command suspended, only running after you first presses ENTER
+        /// 以挂起状态启动命令，仅在你首次按回车后才运行
         #[clap(short, long)]
         start_suspended: bool,
 
-        /// The x coordinates if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的 x 坐标，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(short, long, requires("floating"))]
         x: Option<String>,
-        /// The y coordinates if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的 y 坐标，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(short, long, requires("floating"))]
         y: Option<String>,
-        /// The width if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的宽度，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(long, requires("floating"))]
         width: Option<String>,
-        /// The height if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的高度，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(long, requires("floating"))]
         height: Option<String>,
-        /// Whether to pin a floating pane so that it is always on top
+        /// 是否固定浮动窗格使其始终置顶
         #[clap(long, requires("floating"))]
         pinned: Option<bool>,
         #[clap(long, conflicts_with("floating"), conflicts_with("direction"))]
         stacked: bool,
-        /// Block until the command has finished and its pane has been closed
+        /// 阻塞直到命令结束且其窗格已关闭
         #[clap(long)]
         blocking: bool,
 
-        /// Block until the command exits successfully (exit status 0) OR its pane has been closed
+        /// 阻塞直到命令成功退出（退出状态 0）或其窗格已关闭
         #[clap(
             long,
             conflicts_with("blocking"),
@@ -499,8 +499,8 @@ pub enum Sessions {
         )]
         block_until_exit_success: bool,
 
-        /// Block until the command exits with failure (non-zero exit status) OR its pane has been
-        /// closed
+        /// 阻塞直到命令以失败退出（非零退出状态）或其窗格已被
+        /// 关闭
         #[clap(
             long,
             conflicts_with("blocking"),
@@ -509,7 +509,7 @@ pub enum Sessions {
         )]
         block_until_exit_failure: bool,
 
-        /// Block until the command exits (regardless of exit status) OR its pane has been closed
+        /// 阻塞直到命令退出（无论退出状态如何）或其窗格已关闭
         #[clap(
             long,
             conflicts_with("blocking"),
@@ -517,7 +517,7 @@ pub enum Sessions {
             conflicts_with("block_until_exit_failure")
         )]
         block_until_exit: bool,
-        /// if set, will open the pane near the current one rather than following the user's focus
+        /// 若设置，将在当前窗格附近打开新窗格，而不是跟随用户的焦点
         #[clap(long)]
         near_current_pane: bool,
         #[clap(
@@ -525,11 +525,11 @@ pub enum Sessions {
             help = "if set, will open the pane without changing the focus of any client, placing it relative to the pane the command was issued from"
         )]
         no_focus: bool,
-        /// start this pane without a border (warning: will make it impossible to move with the
-        /// mouse)
+        /// 以无边框方式启动此窗格（警告：将无法用
+        /// 鼠标移动）
         #[clap(short, long, value_parser)]
         borderless: Option<bool>,
-        /// Target a specific tab by ID
+        /// 按 ID 定位指定标签页
         #[clap(
             long,
             value_parser,
@@ -538,46 +538,46 @@ pub enum Sessions {
         )]
         tab_id: Option<usize>,
     },
-    /// Load a plugin
-    /// Returns: Created pane ID (format: plugin_<id>)
+    /// 加载插件
+    /// 返回：创建的窗格 ID（格式：plugin_<id>）
     #[clap(visible_alias = "p")]
     Plugin {
-        /// Plugin URL, can either start with http(s), file: or zellij:
+        /// 插件 URL，可以以 http(s)、file: 或 zellij: 开头
         #[clap(last(true), required(true))]
         url: String,
 
-        /// Plugin configuration
+        /// 插件配置
         #[clap(short, long, value_parser)]
         configuration: Option<PluginUserConfiguration>,
 
-        /// Open the new pane in floating mode
+        /// 以浮动模式打开新窗格
         #[clap(short, long)]
         floating: bool,
 
-        /// Open the new pane in place of the current pane, temporarily suspending it
+        /// 在当前窗格位置打开新窗格，并暂时挂起当前窗格
         #[clap(short, long, conflicts_with("floating"))]
         in_place: bool,
 
-        /// Close the replaced pane instead of suspending it (only effective with --in-place)
+        /// 关闭被替换的窗格而不是挂起它（仅与 --in-place 一起使用有效）
         #[clap(long, requires("in_place"))]
         close_replaced_pane: bool,
 
-        /// Skip the memory and HD cache and force recompile of the plugin (good for development)
+        /// 跳过内存和硬盘缓存并强制重新编译插件（适合开发）
         #[clap(short, long)]
         skip_plugin_cache: bool,
-        /// The x coordinates if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的 x 坐标，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(short, long, requires("floating"))]
         x: Option<String>,
-        /// The y coordinates if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的 y 坐标，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(short, long, requires("floating"))]
         y: Option<String>,
-        /// The width if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的宽度，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(long, requires("floating"))]
         width: Option<String>,
-        /// The height if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的高度，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(long, requires("floating"))]
         height: Option<String>,
-        /// Whether to pin a floating pane so that it is always on top
+        /// 是否固定浮动窗格使其始终置顶
         #[clap(long, requires("floating"))]
         pinned: Option<bool>,
         #[clap(
@@ -585,59 +585,59 @@ pub enum Sessions {
             help = "if set, will open the plugin pane without changing the focus of any client, placing it relative to the pane the command was issued from"
         )]
         no_focus: bool,
-        /// start this pane without a border (warning: will make it impossible to move with the
-        /// mouse)
+        /// 以无边框方式启动此窗格（警告：将无法用
+        /// 鼠标移动）
         #[clap(short, long, value_parser)]
         borderless: Option<bool>,
-        /// Target a specific tab by ID
+        /// 按 ID 定位指定标签页
         #[clap(long, value_parser, conflicts_with("in_place"))]
         tab_id: Option<usize>,
     },
-    /// Edit file with default $EDITOR / $VISUAL
-    /// Returns: Created pane ID (format: terminal_<id>)
+    /// 使用默认 $EDITOR / $VISUAL 编辑文件
+    /// 返回：创建的窗格 ID（格式：terminal_<id>）
     #[clap(visible_alias = "e")]
     Edit {
         file: PathBuf,
 
-        /// Open the file in the specified line number
+        /// 在指定的行号处打开文件
         #[clap(short, long, value_parser)]
         line_number: Option<usize>,
 
-        /// Direction to open the new pane in
+        /// 打开新窗格的方向
         #[clap(short, long, value_parser, conflicts_with("floating"))]
         direction: Option<Direction>,
 
-        /// Open the new pane in place of the current pane, temporarily suspending it
+        /// 在当前窗格位置打开新窗格，并暂时挂起当前窗格
         #[clap(short, long, conflicts_with("floating"), conflicts_with("direction"))]
         in_place: bool,
 
-        /// Close the replaced pane instead of suspending it (only effective with --in-place)
+        /// 关闭被替换的窗格而不是挂起它（仅与 --in-place 一起使用有效）
         #[clap(long, requires("in_place"))]
         close_replaced_pane: bool,
 
-        /// Open the new pane in floating mode
+        /// 以浮动模式打开新窗格
         #[clap(short, long)]
         floating: bool,
 
-        /// Change the working directory of the editor
+        /// 更改编辑器的工作目录
         #[clap(long, value_parser)]
         cwd: Option<PathBuf>,
-        /// The x coordinates if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的 x 坐标，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(short, long, requires("floating"))]
         x: Option<String>,
-        /// The y coordinates if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的 y 坐标，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(short, long, requires("floating"))]
         y: Option<String>,
-        /// The width if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的宽度，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(long, requires("floating"))]
         width: Option<String>,
-        /// The height if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的高度，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(long, requires("floating"))]
         height: Option<String>,
-        /// Whether to pin a floating pane so that it is always on top
+        /// 是否固定浮动窗格使其始终置顶
         #[clap(long, requires("floating"))]
         pinned: Option<bool>,
-        /// if set, will open the pane near the current one rather than following the user's focus
+        /// 若设置，将在当前窗格附近打开新窗格，而不是跟随用户的焦点
         #[clap(long)]
         near_current_pane: bool,
         #[clap(
@@ -645,11 +645,11 @@ pub enum Sessions {
             help = "if set, will open the pane without changing the focus of any client, placing it relative to the pane the command was issued from"
         )]
         no_focus: bool,
-        /// start this pane without a border (warning: will make it impossible to move with the
-        /// mouse)
+        /// 以无边框方式启动此窗格（警告：将无法用
+        /// 鼠标移动）
         #[clap(short, long, value_parser)]
         borderless: Option<bool>,
-        /// Target a specific tab by ID
+        /// 按 ID 定位指定标签页
         #[clap(
             long,
             value_parser,
@@ -658,7 +658,7 @@ pub enum Sessions {
         )]
         tab_id: Option<usize>,
     },
-    /// Send data to one or more plugins, launch them if they are not running.
+    /// 向一个或多个插件发送数据，若未运行则启动它们。
     #[clap(override_usage(
 r#"
 zellij pipe [OPTIONS] [--] <PAYLOAD>
@@ -676,22 +676,22 @@ zellij pipe --name my_pipe_name -- my_arbitrary_data
 tail -f /tmp/my-live-logfile | zellij pipe --name logs --plugin https://example.com/my-plugin.wasm | wc -l
 "#))]
     Pipe {
-        /// The name of the pipe
+        /// 管道名称
         #[clap(short, long, value_parser, display_order(1))]
         name: Option<String>,
-        /// The data to send down this pipe (if blank, will listen to STDIN)
+        /// 通过此管道发送的数据（若为空，将监听 STDIN）
         payload: Option<String>,
 
         #[clap(short, long, value_parser, display_order(2))]
-        /// The args of the pipe
-        args: Option<PluginUserConfiguration>, // TODO: we might want to not re-use
+        /// 管道的参数
+        args: Option<PluginUserConfiguration>, // TODO：我们可能不想重复使用
         // PluginUserConfiguration
-        /// The plugin url (eg. file:/tmp/my-plugin.wasm) to direct this pipe to, if not specified,
-        /// will be sent to all plugins, if specified and is not running, the plugin will be launched
+        /// 该管道指向的插件 url（例如 file:/tmp/my-plugin.wasm）；若未指定，
+        /// 将发送给所有插件；若已指定但未运行，插件将被启动
         #[clap(short, long, value_parser, display_order(3))]
         plugin: Option<String>,
-        /// The plugin configuration (note: the same plugin with different configuration is
-        /// considered a different plugin for the purposes of determining the pipe destination)
+        /// 插件配置（注意：在确定管道目的地时，配置不同的同一插件会被视为
+        /// 不同的插件）
         #[clap(short('c'), long, value_parser, display_order(4))]
         plugin_configuration: Option<PluginUserConfiguration>,
     },
@@ -699,168 +699,168 @@ tail -f /tmp/my-live-logfile | zellij pipe --name logs --plugin https://example.
 
 #[derive(Debug, Subcommand, Clone, Serialize, Deserialize)]
 pub enum CliAction {
-    /// Write bytes to the terminal.
+    /// 向终端写入字节。
     Write {
         bytes: Vec<u8>,
-        /// The pane_id of the pane, eg. terminal_1, plugin_2 or 3 (equivalent to terminal_3)
+        /// 窗格的 pane_id，例如 terminal_1、plugin_2 或 3（等价于 terminal_3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Write characters to the terminal.
+    /// 向终端写入字符。
     WriteChars {
         chars: String,
-        /// The pane_id of the pane, eg. terminal_1, plugin_2 or 3 (equivalent to terminal_3)
+        /// 窗格的 pane_id，例如 terminal_1、plugin_2 或 3（等价于 terminal_3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Paste text to the terminal (using bracketed paste mode).
+    /// 向终端粘贴文本（使用括号粘贴模式）。
     Paste {
         chars: String,
-        /// The pane_id of the pane, eg. terminal_1, plugin_2 or 3 (equivalent to terminal_3)
+        /// 窗格的 pane_id，例如 terminal_1、plugin_2 或 3（等价于 terminal_3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Send one or more keys to the terminal (e.g., "Ctrl a", "F1", "Alt Shift b")
+    /// 向终端发送一个或多个按键（例如 "Ctrl a"、"F1"、"Alt Shift b"）
     SendKeys {
-        /// Keys to send as space-separated strings
+        /// 以空格分隔的字符串形式发送按键
         #[clap(value_parser, required = true)]
         keys: Vec<String>,
 
-        /// The pane_id of the pane, eg. terminal_1, plugin_2 or 3 (equivalent to terminal_3)
+        /// 窗格的 pane_id，例如 terminal_1、plugin_2 或 3（等价于 terminal_3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// [increase|decrease] the focused panes area at the [left|down|up|right] border.
+    /// 在 [左|下|上|右] 边界 [增加|减少] 聚焦窗格区域。
     Resize {
         resize: Resize,
         direction: Option<Direction>,
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Change focus to the next pane
+    /// 将焦点切换到下一个窗格
     FocusNextPane,
-    /// Change focus to the previous pane
+    /// 将焦点切换到上一个窗格
     FocusPreviousPane,
-    /// Focus a specific pane by its ID
+    /// 按 ID 聚焦指定窗格
     FocusPaneId {
-        /// The pane_id of the pane, eg. terminal_1, plugin_2 or 3
+        /// 窗格的 pane_id，例如 terminal_1、plugin_2 或 3
         pane_id: String,
     },
-    /// Change focus to the last focused frame
+    /// 将焦点切换到上一个聚焦的框架
     FocusLastPane,
-    /// Move the focused pane in the specified direction. [right|left|up|down]
+    /// 沿指定方向移动聚焦窗格。[right|left|up|down]
     MoveFocus {
         direction: Direction,
     },
-    /// Move focus to the pane or tab (if on screen edge) in the specified direction
+    /// 按指定方向将焦点移动到窗格或标签页（如果在屏幕边缘）
     /// [right|left|up|down]
     MoveFocusOrTab {
         direction: Direction,
     },
-    /// Change the location of the focused pane in the specified direction or rotate forwrads
+    /// 按指定方向改变聚焦窗格的位置，或向前旋转
     /// [right|left|up|down]
     MovePane {
         direction: Option<Direction>,
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Rotate the location of the previous pane backwards
+    /// 向后旋转上一个窗格的位置
     MovePaneBackwards {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Clear all buffers for a focused pane
+    /// 清除聚焦窗格的所有缓冲区
     Clear {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Dumps the viewport and optionally scrollback of a pane to a file or STDOUT
+    /// 将窗格的视口及可选的滚动缓冲转储到文件或 STDOUT
     DumpScreen {
-        /// File path to dump the pane content to. If omitted, prints to STDOUT.
+        /// 转储窗格内容的文件路径。若省略，则打印到 STDOUT。
         #[clap(long, value_parser)]
         path: Option<PathBuf>,
 
-        /// Dump the pane with full scrollback
+        /// 转储窗格的全部滚动缓冲
         #[clap(short, long)]
         full: bool,
 
-        /// The pane_id of the pane, eg. terminal_1, plugin_2 or 3 (equivalent to terminal_3). If not specified, dumps the focused pane.
+        /// 窗格的 pane_id，例如 terminal_1、plugin_2 或 3（等价于 terminal_3）。若未指定，则转储聚焦窗格。
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
 
-        /// Preserve ANSI styling in the dump output
+        /// 在转储输出中保留 ANSI 样式
         #[clap(short, long)]
         ansi: bool,
     },
-    /// Dump current layout to stdout
+    /// 将当前布局转储到 stdout
     DumpLayout,
-    /// Save the current session state to disk immediately
+    /// 立即将当前会话状态保存到磁盘
     SaveSession,
-    /// Open the pane scrollback in your default editor
+    /// 在默认编辑器中打开窗格的滚动缓冲
     EditScrollback {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
 
-        /// Preserve ANSI styling in the scrollback dump
+        /// 在滚动缓冲转储中保留 ANSI 样式
         #[clap(short, long)]
         ansi: bool,
     },
-    /// Scroll up in the focused pane
+    /// 在聚焦窗格中向上滚动
     ScrollUp {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Scroll down in focus pane.
+    /// 在聚焦窗格中向下滚动。
     ScrollDown {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Scroll down to bottom in focus pane.
+    /// 在聚焦窗格中向下滚动到底部。
     ScrollToBottom {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Scroll up to top in focus pane.
+    /// 在聚焦窗格中向上滚动到顶部。
     ScrollToTop {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Scroll up one page in focus pane.
+    /// 在聚焦窗格中向上滚动一页。
     PageScrollUp {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Scroll down one page in focus pane.
+    /// 在聚焦窗格中向下滚动一页。
     PageScrollDown {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Scroll up half page in focus pane.
+    /// 在聚焦窗格中向上滚动半页。
     HalfPageScrollUp {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Scroll down half page in focus pane.
+    /// 在聚焦窗格中向下滚动半页。
     HalfPageScrollDown {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Toggle between fullscreen focus pane and normal layout.
+    /// 在全屏聚焦窗格和正常布局之间切换。
     ToggleFullscreen {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
@@ -876,23 +876,23 @@ pub enum CliAction {
         )]
         pane_id: Option<String>,
     },
-    /// Toggle frames around panes in the UI
+    /// 切换 UI 中窗格周围的框架
     TogglePaneFrames,
     SetPaneFrameStyle {
         #[clap(value_enum, value_parser)]
         style: PaneFrameStyle,
     },
-    /// Toggle between sending text commands to all panes on the current tab and normal mode.
+    /// 在向当前标签页所有窗格发送文本命令与正常模式之间切换。
     ToggleActiveSyncTab {
-        /// Target a specific tab by ID
+        /// 按 ID 定位指定标签页
         #[clap(short, long, value_parser)]
         tab_id: Option<usize>,
     },
-    /// Open a new pane in the specified direction [right|down]
-    /// If no direction is specified, will try to use the biggest available space.
-    /// Returns: Created pane ID (format: terminal_<id> or plugin_<id>)
+    /// 在指定方向 [right|down] 打开新窗格
+    /// 若未指定方向，将尝试使用最大的可用空间。
+    /// 返回：创建的窗格 ID（格式：terminal_<id> 或 plugin_<id>）
     NewPane {
-        /// Direction to open the new pane in
+        /// 打开新窗格的方向
         #[clap(short, long, value_parser, conflicts_with("floating"))]
         direction: Option<Direction>,
 
@@ -902,24 +902,24 @@ pub enum CliAction {
         #[clap(short, long, conflicts_with("command"), conflicts_with("direction"))]
         plugin: Option<String>,
 
-        /// Change the working directory of the new pane
+        /// 更改新窗格的工作目录
         #[clap(long, value_parser)]
         cwd: Option<PathBuf>,
 
-        /// Open the new pane in floating mode
+        /// 以浮动模式打开新窗格
         #[clap(short, long)]
         floating: bool,
 
-        /// Open the new pane in place of the current pane, temporarily suspending it
+        /// 在当前窗格位置打开新窗格，并暂时挂起当前窗格
         #[clap(short, long, conflicts_with("floating"), conflicts_with("direction"))]
         in_place: bool,
 
-        /// Close the replaced pane instead of suspending it (only effective with --in-place)
+        /// 关闭被替换的窗格而不是挂起它（仅与 --in-place 一起使用有效）
         #[clap(long, requires("in_place"))]
         close_replaced_pane: bool,
 
-        /// The pane to replace when opening in place, eg. terminal_1, plugin_2 or 3 (only
-        /// effective with --in-place; defaults to the focused pane)
+        /// 原地打开时要替换的窗格，例如 terminal_1、plugin_2 或 3（仅
+        /// 与 --in-place 搭配生效；默认为聚焦窗格）
         #[clap(
             long,
             value_parser,
@@ -928,42 +928,42 @@ pub enum CliAction {
         )]
         pane_id: Option<String>,
 
-        /// Name of the new pane
+        /// 新窗格名称
         #[clap(short, long, value_parser)]
         name: Option<String>,
 
-        /// Close the pane immediately when its command exits
+        /// 命令退出时立即关闭窗格
         #[clap(short, long, requires("command"))]
         close_on_exit: bool,
-        /// Start the command suspended, only running it after the you first press ENTER
+        /// 以挂起状态启动命令，仅在你首次按回车后才运行
         #[clap(short, long, requires("command"))]
         start_suspended: bool,
         #[clap(long, value_parser)]
         configuration: Option<PluginUserConfiguration>,
         #[clap(long, value_parser)]
         skip_plugin_cache: bool,
-        /// The x coordinates if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的 x 坐标，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(short, long, requires("floating"))]
         x: Option<String>,
-        /// The y coordinates if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的 y 坐标，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(short, long, requires("floating"))]
         y: Option<String>,
-        /// The width if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的宽度，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(long, requires("floating"))]
         width: Option<String>,
-        /// The height if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的高度，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(long, requires("floating"))]
         height: Option<String>,
-        /// Whether to pin a floating pane so that it is always on top
+        /// 是否固定浮动窗格使其始终置顶
         #[clap(long, requires("floating"))]
         pinned: Option<bool>,
         #[clap(long, conflicts_with("floating"), conflicts_with("direction"))]
         stacked: bool,
-        /// Block until the command has finished and its pane has been closed
+        /// 阻塞直到命令结束且其窗格已关闭
         #[clap(short, long)]
         blocking: bool,
 
-        /// Block until the command exits successfully (exit status 0) OR its pane has been closed
+        /// 阻塞直到命令成功退出（退出状态 0）或其窗格已关闭
         #[clap(
             long,
             conflicts_with("blocking"),
@@ -972,8 +972,8 @@ pub enum CliAction {
         )]
         block_until_exit_success: bool,
 
-        /// Block until the command exits with failure (non-zero exit status) OR its pane has been
-        /// closed
+        /// 阻塞直到命令以失败退出（非零退出状态）或其窗格已被
+        /// 关闭
         #[clap(
             long,
             conflicts_with("blocking"),
@@ -982,7 +982,7 @@ pub enum CliAction {
         )]
         block_until_exit_failure: bool,
 
-        /// Block until the command exits (regardless of exit status) OR its pane has been closed
+        /// 阻塞直到命令退出（无论退出状态如何）或其窗格已关闭
         #[clap(
             long,
             conflicts_with("blocking"),
@@ -994,7 +994,7 @@ pub enum CliAction {
         #[clap(skip)]
         unblock_condition: Option<UnblockCondition>,
 
-        /// if set, will open the pane near the current one rather than following the user's focus
+        /// 若设置，将在当前窗格附近打开新窗格，而不是跟随用户的焦点
         #[clap(long)]
         near_current_pane: bool,
         #[clap(
@@ -1002,11 +1002,11 @@ pub enum CliAction {
             help = "if set, will open the pane without changing the focus of any client, placing it relative to the pane the command was issued from"
         )]
         no_focus: bool,
-        /// start this pane without a border (warning: will make it impossible to move with the
-        /// mouse)
+        /// 以无边框方式启动此窗格（警告：将无法用
+        /// 鼠标移动）
         #[clap(long, value_parser)]
         borderless: Option<bool>,
-        /// Target a specific tab by ID
+        /// 按 ID 定位指定标签页
         #[clap(
             long,
             value_parser,
@@ -1015,50 +1015,50 @@ pub enum CliAction {
         )]
         tab_id: Option<usize>,
     },
-    /// Open the specified file in a new zellij pane with your default EDITOR
-    /// Returns: Created pane ID (format: terminal_<id>)
+    /// 使用默认 EDITOR 在 zellij 新窗格中打开指定文件
+    /// 返回：创建的窗格 ID（格式：terminal_<id>）
     Edit {
         file: PathBuf,
 
-        /// Direction to open the new pane in
+        /// 打开新窗格的方向
         #[clap(short, long, value_parser, conflicts_with("floating"))]
         direction: Option<Direction>,
 
-        /// Open the file in the specified line number
+        /// 在指定的行号处打开文件
         #[clap(short, long, value_parser)]
         line_number: Option<usize>,
 
-        /// Open the new pane in floating mode
+        /// 以浮动模式打开新窗格
         #[clap(short, long)]
         floating: bool,
 
-        /// Open the new pane in place of the current pane, temporarily suspending it
+        /// 在当前窗格位置打开新窗格，并暂时挂起当前窗格
         #[clap(short, long, conflicts_with("floating"), conflicts_with("direction"))]
         in_place: bool,
 
-        /// Close the replaced pane instead of suspending it (only effective with --in-place)
+        /// 关闭被替换的窗格而不是挂起它（仅与 --in-place 一起使用有效）
         #[clap(long, requires("in_place"))]
         close_replaced_pane: bool,
 
-        /// Change the working directory of the editor
+        /// 更改编辑器的工作目录
         #[clap(long, value_parser)]
         cwd: Option<PathBuf>,
-        /// The x coordinates if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的 x 坐标，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(short, long, requires("floating"))]
         x: Option<String>,
-        /// The y coordinates if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的 y 坐标，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(short, long, requires("floating"))]
         y: Option<String>,
-        /// The width if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的宽度，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(long, requires("floating"))]
         width: Option<String>,
-        /// The height if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的高度，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(long, requires("floating"))]
         height: Option<String>,
-        /// Whether to pin a floating pane so that it is always on top
+        /// 是否固定浮动窗格使其始终置顶
         #[clap(long, requires("floating"))]
         pinned: Option<bool>,
-        /// if set, will open the pane near the current one rather than following the user's focus
+        /// 若设置，将在当前窗格附近打开新窗格，而不是跟随用户的焦点
         #[clap(long)]
         near_current_pane: bool,
         #[clap(
@@ -1066,11 +1066,11 @@ pub enum CliAction {
             help = "if set, will open the pane without changing the focus of any client, placing it relative to the pane the command was issued from"
         )]
         no_focus: bool,
-        /// start this pane without a border (warning: will make it impossible to move with the
-        /// mouse)
+        /// 以无边框方式启动此窗格（警告：将无法用
+        /// 鼠标移动）
         #[clap(short, long, value_parser)]
         borderless: Option<bool>,
-        /// Target a specific tab by ID
+        /// 按 ID 定位指定标签页
         #[clap(
             long,
             value_parser,
@@ -1079,153 +1079,153 @@ pub enum CliAction {
         )]
         tab_id: Option<usize>,
     },
-    /// Switch input mode of all connected clients [locked|pane|tab|resize|move|search|session]
+    /// 切换所有已连接客户端的输入模式 [locked|pane|tab|resize|move|search|session]
     SwitchMode {
         input_mode: InputMode,
     },
-    /// Embed focused pane if floating or float focused pane if embedded
+    /// 若聚焦窗格是浮动窗格则嵌入，若是嵌入窗格则浮动
     TogglePaneEmbedOrFloating {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Toggle the visibility of all floating panes in the current Tab, open one if none exist
+    /// 切换当前标签页中所有浮动窗格的可见性，若不存在则打开一个
     ToggleFloatingPanes {
-        /// Target a specific tab by ID
+        /// 按 ID 定位指定标签页
         #[clap(short, long, value_parser)]
         tab_id: Option<usize>,
     },
-    /// Show all floating panes in the specified tab (or active tab if tab_id is not provided).
+    /// 显示指定标签页（若未提供 tab_id 则为活动标签页）中的所有浮动窗格。
     ///
-    /// Returns exit code 0 if state was changed, 2 if already visible, 1 if tab not found.
+    /// 状态被改变时返回退出码 0，已可见时返回 2，标签页未找到时返回 1。
     ShowFloatingPanes {
         #[clap(short, long, value_parser)]
         tab_id: Option<usize>,
     },
-    /// Hide all floating panes in the specified tab (or active tab if tab_id is not provided).
+    /// 隐藏指定标签页（若未提供 tab_id 则为活动标签页）中的所有浮动窗格。
     ///
-    /// Returns exit code 0 if state was changed, 2 if already hidden, 1 if tab not found.
+    /// 状态被改变时返回退出码 0，已隐藏时返回 2，标签页未找到时返回 1。
     HideFloatingPanes {
         #[clap(short, long, value_parser)]
         tab_id: Option<usize>,
     },
-    /// Check if floating panes are visible in the specified tab (or active tab).
+    /// 检查指定标签页（或活动标签页）中的浮动窗格是否可见。
     ///
-    /// Prints "true" to stdout and exits 0 if visible.
-    /// Prints "false" to stdout and exits 1 if not visible.
+    /// 若可见，向 stdout 输出 "true" 并以 0 退出。
+    /// 若不可见，向 stdout 输出 "false" 并以 1 退出。
     AreFloatingPanesVisible {
         #[clap(short, long, value_parser)]
         tab_id: Option<usize>,
     },
-    /// Close the focused pane.
+    /// 关闭聚焦窗格。
     ClosePane {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Renames the focused pane
+    /// 重命名聚焦窗格
     RenamePane {
         name: String,
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Remove a previously set pane name
+    /// 移除先前设置的窗格名称
     UndoRenamePane {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Go to the next tab.
+    /// 转到下一个标签页。
     GoToNextTab,
-    /// Go to the previous tab.
+    /// 转到上一个标签页。
     GoToPreviousTab,
-    /// Close the current tab.
+    /// 关闭当前标签页。
     CloseTab {
-        /// Target a specific tab by ID
+        /// 按 ID 定位指定标签页
         #[clap(short, long, value_parser)]
         tab_id: Option<usize>,
     },
-    /// Go to tab with index [index]
+    /// 转到索引为 [index] 的标签页
     GoToTab {
         index: u32,
     },
-    /// Go to tab with name [name]
+    /// 转到名为 [name] 的标签页
     ///
-    /// Returns: When --create is used and tab is created, outputs the tab ID as a single number
+    /// 返回：当使用 --create 且标签页被创建时，以单个数字输出标签页 ID
     GoToTabName {
         name: String,
-        /// Create a tab if one does not exist.
+        /// 若标签页不存在则创建它。
         #[clap(short, long, value_parser)]
         create: bool,
     },
-    /// Renames the focused pane
+    /// 重命名聚焦窗格
     RenameTab {
         name: String,
-        /// Target a specific tab by ID
+        /// 按 ID 定位指定标签页
         #[clap(short, long, value_parser)]
         tab_id: Option<usize>,
     },
-    /// Remove a previously set tab name
+    /// 移除先前设置的标签页名称
     UndoRenameTab {
-        /// Target a specific tab by ID
+        /// 按 ID 定位指定标签页
         #[clap(short, long, value_parser)]
         tab_id: Option<usize>,
     },
-    /// Go to tab with stable ID
+    /// 转到具有稳定 ID 的标签页
     GoToTabById {
         id: u64,
     },
-    /// Close tab with stable ID
+    /// 关闭具有稳定 ID 的标签页
     CloseTabById {
         id: u64,
     },
-    /// Rename tab by stable ID
+    /// 按稳定 ID 重命名标签页
     RenameTabById {
         id: u64,
         name: String,
     },
-    /// Create a new tab, optionally with a specified tab layout and name
+    /// 创建一个新标签页，可选指定标签页布局和名称
     ///
-    /// Returns: The created tab's ID as a single number on stdout
+    /// 返回：在 stdout 上以单个数字输出所创建标签页的 ID
     NewTab {
-        /// Layout to use for the new tab
+        /// 新标签页使用的布局
         #[clap(short, long, value_parser, conflicts_with = "layout_string")]
         layout: Option<PathBuf>,
 
-        /// Raw KDL layout string to use directly (instead of a layout file path)
+        /// 直接使用的原始 KDL 布局字符串（而不是布局文件路径）
         #[clap(long, value_parser, conflicts_with = "layout")]
         layout_string: Option<String>,
 
-        /// Default folder to look for layouts
+        /// 查找布局的默认文件夹
         #[clap(long, value_parser, requires("layout"))]
         layout_dir: Option<PathBuf>,
 
-        /// Name of the new tab
+        /// 新标签页名称
         #[clap(short, long, value_parser)]
         name: Option<String>,
 
-        /// Change the working directory of the new tab
+        /// 更改新标签页的工作目录
         #[clap(short, long, value_parser)]
         cwd: Option<PathBuf>,
 
-        /// Optional initial command to run in the new tab
+        /// 新标签页中可选的初始运行命令
         #[clap(value_parser, conflicts_with("initial_plugin"), last(true))]
         initial_command: Vec<String>,
 
-        /// Initial plugin to load in the new tab
+        /// 新标签页中加载的初始插件
         #[clap(long, value_parser, conflicts_with("initial_command"))]
         initial_plugin: Option<String>,
 
-        /// Close the pane immediately when its command exits
+        /// 命令退出时立即关闭窗格
         #[clap(long, requires("initial_command"))]
         close_on_exit: bool,
 
-        /// Start the command suspended, only running it after you first press ENTER
+        /// 以挂起状态启动命令，仅在你首次按回车后才运行
         #[clap(long, requires("initial_command"))]
         start_suspended: bool,
 
-        /// Block until the command exits successfully (exit status 0) OR its pane has been closed
+        /// 阻塞直到命令成功退出（退出状态 0）或其窗格已关闭
         #[clap(
             long,
             requires("initial_command"),
@@ -1234,7 +1234,7 @@ pub enum CliAction {
         )]
         block_until_exit_success: bool,
 
-        /// Block until the command exits with failure (non-zero exit status) OR its pane has been closed
+        /// 阻塞直到命令以失败退出（非零退出状态）或其窗格已被关闭
         #[clap(
             long,
             requires("initial_command"),
@@ -1243,7 +1243,7 @@ pub enum CliAction {
         )]
         block_until_exit_failure: bool,
 
-        /// Block until the command exits (regardless of exit status) OR its pane has been closed
+        /// 阻塞直到命令退出（无论退出状态如何）或其窗格已关闭
         #[clap(
             long,
             requires("initial_command"),
@@ -1258,26 +1258,26 @@ pub enum CliAction {
         )]
         no_focus: bool,
     },
-    /// Move the focused tab in the specified direction. [right|left]
+    /// 沿指定方向移动聚焦标签页。[right|left]
     MoveTab {
         direction: Direction,
-        /// Target a specific tab by ID
+        /// 按 ID 定位指定标签页
         #[clap(short, long, value_parser)]
         tab_id: Option<usize>,
     },
     PreviousSwapLayout {
-        /// Target a specific tab by ID
+        /// 按 ID 定位指定标签页
         #[clap(short, long, value_parser)]
         tab_id: Option<usize>,
     },
     NextSwapLayout {
-        /// Target a specific tab by ID
+        /// 按 ID 定位指定标签页
         #[clap(short, long, value_parser)]
         tab_id: Option<usize>,
     },
-    /// Override the layout of the active tab
+    /// 覆盖活动标签页的布局
     OverrideLayout {
-        /// Path to the layout file
+        /// 布局文件的路径
         #[clap(
             value_parser,
             required_unless_present = "layout_string",
@@ -1285,41 +1285,41 @@ pub enum CliAction {
         )]
         layout: Option<PathBuf>,
 
-        /// Raw KDL layout string to use directly (instead of a layout file path)
+        /// 直接使用的原始 KDL 布局字符串（而不是布局文件路径）
         #[clap(long, value_parser, conflicts_with = "layout")]
         layout_string: Option<String>,
 
-        /// Default folder to look for layouts
+        /// 查找布局的默认文件夹
         #[clap(long, value_parser)]
         layout_dir: Option<PathBuf>,
 
-        /// Retain existing terminal panes that do not fit in the layout (default: false)
+        /// 保留不符合布局的现有终端窗格（默认：false）
         #[clap(long)]
         retain_existing_terminal_panes: bool,
 
-        /// Retain existing plugin panes that do not fit with the layout default: false)
+        /// 保留不符合布局的现有插件窗格（默认：false）
         #[clap(long)]
         retain_existing_plugin_panes: bool,
 
-        /// Only apply the layout to the active tab (uses just the first layout tab if it has
-        /// multiple)
+        /// 仅将布局应用于活动标签页（若布局有多个标签页则
+        /// 只使用第一个）
         #[clap(long)]
         apply_only_to_active_tab: bool,
     },
-    /// Query all tab names
+    /// 查询所有标签页名称
     QueryTabNames,
     StartOrReloadPlugin {
         url: String,
         #[clap(short, long, value_parser)]
         configuration: Option<PluginUserConfiguration>,
     },
-    /// Returns: Plugin pane ID (format: plugin_<id>) when creating or focusing plugin
+    /// 返回：创建或聚焦插件时的插件窗格 ID（格式：plugin_<id>）
     LaunchOrFocusPlugin {
         #[clap(short, long, value_parser)]
         floating: bool,
         #[clap(short, long, value_parser)]
         in_place: bool,
-        /// Close the replaced pane instead of suspending it (only effective with --in-place)
+        /// 关闭被替换的窗格而不是挂起它（仅与 --in-place 一起使用有效）
         #[clap(long, requires("in_place"))]
         close_replaced_pane: bool,
         #[clap(short, long, value_parser)]
@@ -1329,17 +1329,17 @@ pub enum CliAction {
         configuration: Option<PluginUserConfiguration>,
         #[clap(short, long, value_parser)]
         skip_plugin_cache: bool,
-        /// Target a specific tab by ID
+        /// 按 ID 定位指定标签页
         #[clap(long, value_parser, conflicts_with("in_place"))]
         tab_id: Option<usize>,
     },
-    /// Returns: Plugin pane ID (format: plugin_<id>)
+    /// 返回：插件窗格 ID（格式：plugin_<id>）
     LaunchPlugin {
         #[clap(short, long, value_parser)]
         floating: bool,
         #[clap(short, long, value_parser)]
         in_place: bool,
-        /// Close the replaced pane instead of suspending it (only effective with --in-place)
+        /// 关闭被替换的窗格而不是挂起它（仅与 --in-place 一起使用有效）
         #[clap(long, requires("in_place"))]
         close_replaced_pane: bool,
         url: Url,
@@ -1352,14 +1352,14 @@ pub enum CliAction {
             help = "if set, will open the plugin pane without changing the focus of any client"
         )]
         no_focus: bool,
-        /// Target a specific tab by ID
+        /// 按 ID 定位指定标签页
         #[clap(long, value_parser, conflicts_with("in_place"))]
         tab_id: Option<usize>,
     },
     RenameSession {
         name: String,
     },
-    /// Send data to one or more plugins, launch them if they are not running.
+    /// 向一个或多个插件发送数据，若未运行则启动它们。
     #[clap(override_usage(
 r#"
 zellij action pipe [OPTIONS] [--] <PAYLOAD>
@@ -1377,34 +1377,34 @@ zellij action pipe --name my_pipe_name -- my_arbitrary_data
 tail -f /tmp/my-live-logfile | zellij action pipe --name logs --plugin https://example.com/my-plugin.wasm | wc -l
 "#))]
     Pipe {
-        /// The name of the pipe
+        /// 管道名称
         #[clap(short, long, value_parser, display_order(1))]
         name: Option<String>,
-        /// The data to send down this pipe (if blank, will listen to STDIN)
+        /// 通过此管道发送的数据（若为空，将监听 STDIN）
         payload: Option<String>,
 
         #[clap(short, long, value_parser, display_order(2))]
-        /// The args of the pipe
-        args: Option<PluginUserConfiguration>, // TODO: we might want to not re-use
+        /// 管道的参数
+        args: Option<PluginUserConfiguration>, // TODO：我们可能不想重复使用
         // PluginUserConfiguration
-        /// The plugin url (eg. file:/tmp/my-plugin.wasm) to direct this pipe to, if not specified,
-        /// will be sent to all plugins, if specified and is not running, the plugin will be launched
+        /// 该管道指向的插件 url（例如 file:/tmp/my-plugin.wasm）；若未指定，
+        /// 将发送给所有插件；若已指定但未运行，插件将被启动
         #[clap(short, long, value_parser, display_order(3))]
         plugin: Option<String>,
-        /// The plugin configuration (note: the same plugin with different configuration is
-        /// considered a different plugin for the purposes of determining the pipe destination)
+        /// 插件配置（注意：在确定管道目的地时，配置不同的同一插件会被视为
+        /// 不同的插件）
         #[clap(short('c'), long, value_parser, display_order(4))]
         plugin_configuration: Option<PluginUserConfiguration>,
-        /// Launch a new plugin even if one is already running
+        /// 即使已有插件在运行，也启动一个新的插件
         #[clap(short('l'), long, display_order(5))]
         force_launch_plugin: bool,
-        /// If launching a new plugin, skip cache and force-compile the plugin
+        /// 若启动新插件，跳过缓存并强制编译插件
         #[clap(short('s'), long, display_order(6))]
         skip_plugin_cache: bool,
-        /// If launching a plugin, should it be floating or not, defaults to floating
+        /// 若启动插件，是否浮动，默认为浮动
         #[clap(short('f'), long, value_parser, display_order(7))]
         floating_plugin: Option<bool>,
-        /// If launching a plugin, launch it in-place (on top of the current pane)
+        /// 若启动插件，原地启动它（在当前窗格之上）
         #[clap(
             short('i'),
             long,
@@ -1413,176 +1413,176 @@ tail -f /tmp/my-live-logfile | zellij action pipe --name logs --plugin https://e
             display_order(8)
         )]
         in_place_plugin: Option<bool>,
-        /// If launching a plugin, specify its working directory
+        /// 若启动插件，指定其工作目录
         #[clap(short('w'), long, value_parser, display_order(9))]
         plugin_cwd: Option<PathBuf>,
-        /// If launching a plugin, specify its pane title
+        /// 若启动插件，指定其窗格标题
         #[clap(short('t'), long, value_parser, display_order(10))]
         plugin_title: Option<String>,
     },
     ListClients,
-    /// List all panes in the current session
+    /// 列出当前会话中的所有窗格
     ///
-    /// Returns: Formatted list of panes (table or JSON) to stdout
+    /// 返回：以表格或 JSON 格式将格式化后的窗格列表输出到 stdout
     ListPanes {
-        /// Include tab information (name, position, ID)
+        /// 包含标签页信息（名称、位置、ID）
         #[clap(short, long, value_parser)]
         tab: bool,
 
-        /// Include running command information
+        /// 包含正在运行的命令信息
         #[clap(short, long, value_parser)]
         command: bool,
 
-        /// Include pane state (focused, floating, exited, etc.)
+        /// 包含窗格状态（聚焦、浮动、已退出等）
         #[clap(short, long, value_parser)]
         state: bool,
 
-        /// Include geometry (position, size)
+        /// 包含几何信息（位置、大小）
         #[clap(short, long, value_parser)]
         geometry: bool,
 
-        /// Include all available fields
+        /// 包含所有可用字段
         #[clap(short, long, value_parser)]
         all: bool,
 
-        /// Output as JSON
+        /// 以 JSON 格式输出
         #[clap(short, long, value_parser)]
         json: bool,
     },
-    /// List all tabs with their information
+    /// 列出所有标签页及其信息
     ///
-    /// Returns: Tab information in table or JSON format
+    /// 返回：以表格或 JSON 格式返回标签页信息
     ListTabs {
-        /// Include state information (active, fullscreen, sync, floating visibility)
+        /// 包含状态信息（活动、全屏、同步、浮动可见性）
         #[clap(short, long, value_parser)]
         state: bool,
 
-        /// Include dimension information (viewport, display area)
+        /// 包含尺寸信息（视口、显示区域）
         #[clap(short, long, value_parser)]
         dimensions: bool,
 
-        /// Include pane counts
+        /// 包含窗格数量
         #[clap(short, long, value_parser)]
         panes: bool,
 
-        /// Include layout information (swap layout name and dirty state)
+        /// 包含布局信息（交换布局名称和脏状态）
         #[clap(short, long, value_parser)]
         layout: bool,
 
-        /// Include all available fields
+        /// 包含所有可用字段
         #[clap(short, long, value_parser)]
         all: bool,
 
-        /// Output as JSON
+        /// 以 JSON 格式输出
         #[clap(short, long, value_parser)]
         json: bool,
     },
-    /// Get information about the currently active tab
+    /// 获取当前活动标签页的信息
     ///
-    /// Returns: Tab name and ID by default, or full info in JSON
+    /// 返回：默认返回标签页名称和 ID，或以 JSON 格式返回完整信息
     CurrentTabInfo {
-        /// Output as JSON with full TabInfo
+        /// 以 JSON 输出完整的 TabInfo
         #[clap(short, long, value_parser)]
         json: bool,
     },
     TogglePanePinned {
-        /// Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)
+        /// 按 ID 定位指定窗格（例如 terminal_1、plugin_2 或 3）
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
     },
-    /// Stack pane ids
-    /// Ids are a space separated list of pane ids.
-    /// They should either be in the form of `terminal_<int>` (eg. terminal_1), `plugin_<int>` (eg.
-    /// plugin_1) or bare integers in which case they'll be considered terminals (eg. 1 is
-    /// the equivalent of terminal_1)
+    /// 堆叠窗格 id
+    /// id 是以空格分隔的窗格 id 列表。
+    /// 它们既可以是 `terminal_<int>`（例如 terminal_1）、`plugin_<int>`（例如
+    /// plugin_1）形式，也可以是裸整数，此时会被视为终端窗格（例如 1
+    /// 等同于 terminal_1）
     ///
-    /// Example: zellij action stack-panes -- terminal_1 plugin_2 3
+    /// 示例：zellij action stack-panes -- terminal_1 plugin_2 3
     StackPanes {
         #[clap(last(true), required(true))]
         pane_ids: Vec<String>,
     },
     ChangeFloatingPaneCoordinates {
-        /// The pane_id of the floating pane, eg.  terminal_1, plugin_2 or 3 (equivalent to
-        /// terminal_3)
+        /// 浮动窗格的 pane_id，例如 terminal_1、plugin_2 或 3（等同于
+        /// terminal_3）
         #[clap(short, long, value_parser)]
         pane_id: String,
-        /// The x coordinates if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的 x 坐标，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(short, long)]
         x: Option<String>,
-        /// The y coordinates if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的 y 坐标，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(short, long)]
         y: Option<String>,
-        /// The width if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的宽度，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(long)]
         width: Option<String>,
-        /// The height if the pane is floating as a bare integer (eg. 1) or percent (eg. 10%)
+        /// 窗格浮动时的高度，可以是裸整数（如 1）或百分比（如 10%）
         #[clap(long)]
         height: Option<String>,
-        /// Whether to pin a floating pane so that it is always on top
+        /// 是否固定浮动窗格使其始终置顶
         #[clap(long)]
         pinned: Option<bool>,
-        /// change this pane to be with/without a border (warning: will make it impossible to move with the
-        /// mouse if without a border)
+        /// 将该窗格切换为带/不带边框（警告：不带边框时将无法用
+        /// 鼠标移动）
         #[clap(short, long, value_parser)]
         borderless: Option<bool>,
     },
     TogglePaneBorderless {
-        /// The pane_id of the pane, eg. terminal_1, plugin_2 or 3 (equivalent to terminal_3)
+        /// 窗格的 pane_id，例如 terminal_1、plugin_2 或 3（等价于 terminal_3）
         #[clap(short, long, value_parser)]
         pane_id: String,
     },
     SetPaneBorderless {
-        /// The pane_id of the pane, eg. terminal_1, plugin_2 or 3 (equivalent to terminal_3)
+        /// 窗格的 pane_id，例如 terminal_1、plugin_2 或 3（等价于 terminal_3）
         #[clap(short, long, value_parser)]
         pane_id: String,
-        /// Whether the pane should be borderless (flag present) or bordered (flag absent)
+        /// 窗格应为无边框（有标志）还是有边框（无标志）
         #[clap(short, long, value_parser)]
         borderless: bool,
     },
-    /// Detach from the current session
+    /// 从当前会话分离
     Detach,
-    /// Switch the theme to dark (uses configured `theme_dark`).
+    /// 切换到深色主题（使用配置的 `theme_dark`）。
     SetDarkTheme,
-    /// Switch the theme to light (uses configured `theme_light`).
+    /// 切换到浅色主题（使用配置的 `theme_light`）。
     SetLightTheme,
-    /// Toggle between dark and light themes (used configured `theme_dark` and `theme_light`)
+    /// 在深色和浅色主题之间切换（使用配置的 `theme_dark` 和 `theme_light`）
     ToggleTheme,
-    /// Switch to a different session
+    /// 切换到不同的会话
     SwitchSession {
-        /// Name of the session to switch to
+        /// 要切换到的会话名称
         name: String,
-        /// Optional tab position to focus
+        /// 可选的聚焦标签页位置
         #[clap(long)]
         tab_position: Option<usize>,
-        /// Optional pane ID to focus (eg. "terminal_1" for terminal pane with id 1, or "plugin_2" for plugin pane with id 2)
+        /// 可选的聚焦窗格 ID（例如 id 为 1 的终端窗格 "terminal_1"，或 id 为 2 的插件窗格 "plugin_2"）
         #[clap(long)]
         pane_id: Option<String>,
-        /// Layout to apply when switching to the session (relative paths start at layout-dir)
+        /// 切换到会话时应用的布局（相对路径从 layout-dir 开始）
         #[clap(short, long, value_parser, conflicts_with = "layout_string")]
         layout: Option<PathBuf>,
-        /// Raw KDL layout string to use directly
+        /// 直接使用的原始 KDL 布局字符串
         #[clap(long, value_parser, conflicts_with = "layout")]
         layout_string: Option<String>,
-        /// Default folder to look for layouts
+        /// 查找布局的默认文件夹
         #[clap(long, value_parser, requires("layout"))]
         layout_dir: Option<PathBuf>,
-        /// Change the working directory when switching
+        /// 切换时更改工作目录
         #[clap(short, long, value_parser)]
         cwd: Option<PathBuf>,
     },
-    /// Set the default foreground/background color of a pane
+    /// 设置窗格的默认前景/背景颜色
     SetPaneColor {
-        /// The pane_id of the pane, eg. terminal_1, plugin_2 or 3 (equivalent to terminal_3).
-        /// Defaults to $ZELLIJ_PANE_ID if not provided.
+        /// 窗格的 pane_id，例如 terminal_1、plugin_2 或 3（等同于 terminal_3）。
+        /// 未提供时默认为 $ZELLIJ_PANE_ID。
         #[clap(short, long, value_parser)]
         pane_id: Option<String>,
-        /// Foreground color (e.g. "#00e000", "rgb:00/e0/00")
+        /// 前景颜色（例如 "#00e000"、"rgb:00/e0/00"）
         #[clap(long, value_parser)]
         fg: Option<String>,
-        /// Background color (e.g. "#001a3a", "rgb:00/1a/3a")
+        /// 背景颜色（例如 "#001a3a"、"rgb:00/1a/3a"）
         #[clap(long, value_parser)]
         bg: Option<String>,
-        /// Reset pane colors to terminal defaults
+        /// 将窗格颜色重置为终端默认值
         #[clap(long, value_parser, conflicts_with_all(&["fg", "bg"]))]
         reset: bool,
     },

@@ -23,9 +23,9 @@ pub fn get_sessions() -> Result<Vec<(String, Duration)>, io::ErrorKind> {
             files.for_each(|file| {
                 if let Ok(file) = file {
                     let file_name = file.file_name().into_string().unwrap();
-                    // try to get creation time, fall back to modification time on platforms where it's not supported (e.g., musl)
-                    // for session creation time these are almost always identical (notable
-                    // exceptions are session name changes)
+                    // 尝试获取创建时间，在不支持的平台上回退到修改时间（例如 musl）
+                    // 对于会话创建时间来说两者几乎总是相同的（显著的
+                    // 例外是会话名称变更）
                     let ctime = std::fs::metadata(&file.path())
                         .ok()
                         .and_then(|f| f.created().ok().or_else(|| f.modified().ok()))
@@ -54,7 +54,7 @@ pub fn get_resurrectable_sessions() -> Vec<(String, Duration)> {
                 .filter_map(|folder_name| {
                     let layout_file_name =
                         session_layout_cache_file_name(&folder_name.display().to_string());
-                    // Try to get creation time, fall back to modification time on platforms where it's not supported (e.g., musl)
+                    // 尝试获取创建时间，在不支持的平台上回退到修改时间（例如 musl）
                     let ctime = std::fs::metadata(&layout_file_name)
                         .ok()
                         .and_then(|metadata| {
@@ -130,7 +130,7 @@ pub fn get_sessions_sorted_by_mtime() -> anyhow::Result<Vec<String>> {
                     sessions_with_mtime.push((file_name, file_modified_at));
                 }
             }
-            sessions_with_mtime.sort_by_key(|x| x.1); // the oldest one will be the first
+            sessions_with_mtime.sort_by_key(|x| x.1); // 最旧的一个将排在第一位
 
             let sessions = sessions_with_mtime.iter().map(|x| x.0.clone()).collect();
             Ok(sessions)
@@ -140,10 +140,10 @@ pub fn get_sessions_sorted_by_mtime() -> anyhow::Result<Vec<String>> {
     }
 }
 
-/// Probe a session socket to check if a server is alive.
+/// 探测会话 socket 以检查服务器是否存活。
 ///
-/// On Unix, connects and sends a `ConnStatus` message to verify the server responds.
-/// On Windows, reads the server PID from the marker file and checks process liveness.
+/// 在 Unix 上，连接并发送 `ConnStatus` 消息以验证服务器有响应。
+/// 在 Windows 上，从标记文件读取服务器 PID 并检查进程是否存活。
 #[cfg(unix)]
 fn assert_socket(name: &str) -> bool {
     use crate::consts::ipc_connect;
@@ -167,8 +167,8 @@ fn assert_socket(name: &str) -> bool {
     }
 }
 
-/// On Windows, reads the server PID from the marker file and checks whether
-/// the process is still alive via `OpenProcess`. Cleans up stale marker files.
+/// 在 Windows 上，从标记文件读取服务器 PID，并通过 `OpenProcess` 检查
+/// 进程是否仍然存活。清理过期的标记文件。
 #[cfg(windows)]
 fn assert_socket(name: &str) -> bool {
     use windows_sys::Win32::Foundation::CloseHandle;
@@ -185,8 +185,8 @@ fn assert_socket(name: &str) -> bool {
     let pid: u32 = match pid_str.trim().parse() {
         Ok(p) => p,
         Err(_) => {
-            // Marker file exists but has no valid PID (e.g. empty from old version).
-            // Treat as stale.
+            // 标记文件存在但没有有效的 PID（例如旧版本留下的空文件）。
+            // 视为过期。
             drop(fs::remove_file(path));
             return false;
         },
@@ -221,7 +221,7 @@ pub fn print_sessions(
     let curr_session = envs::get_session_name().unwrap_or_else(|_| "".into());
     sessions.sort_by(|a, b| {
         if reverse {
-            // sort by `Duration` ascending (newest would be first)
+            // 按 `Duration` 升序排序（最新的排第一）
             a.1.cmp(&b.1)
         } else {
             b.1.cmp(&a.1)
@@ -297,13 +297,13 @@ pub fn kill_session(name: &str) {
     let path = &*ZELLIJ_SOCK_DIR.join(name);
     match ipc_connect(path) {
         Ok(stream) => {
-            // On Windows, the server uses a dual-pipe architecture: the main pipe
-            // for client→server and a reply pipe for server→client. We must:
-            // 1. Connect to the reply pipe (so the server unblocks from
-            //    reply_listener.accept() and spawns the route thread)
-            // 2. Send KillSession on the main pipe
-            // 3. Wait for the Exit response on the reply pipe (so we don't
-            //    disconnect before the server processes the message)
+            // 在 Windows 上，服务器使用双管道架构：主管道
+            // 用于 client→server，回复管道用于 server→client。我们必须：
+            // 1. 连接到回复管道（这样服务器才能从
+            //    reply_listener.accept() 解除阻塞并启动路由线程）
+            // 2. 在主管道上发送 KillSession
+            // 3. 等待回复管道上的 Exit 响应（这样我们就不会
+            //    在服务器处理消息之前断开连接）
             #[cfg(windows)]
             {
                 let reply = crate::consts::ipc_connect_reply(path);
@@ -440,7 +440,7 @@ pub fn session_exists(name: &str) -> Result<bool, io::ErrorKind> {
     }
 }
 
-// if the session is resurrecable, the returned layout is the one to be used to resurrect it
+// 如果会话可恢复，返回的布局就是用于恢复它的布局
 pub fn resurrection_layout(session_name_to_resurrect: &str) -> Result<Option<Layout>, String> {
     let layout_file_name = session_layout_cache_file_name(&session_name_to_resurrect);
     let raw_layout = match std::fs::read_to_string(&layout_file_name) {
@@ -649,20 +649,20 @@ pub fn generate_unique_session_name() -> Option<String> {
     }
 }
 
-/// Create a new random name generator
+/// 创建一个新的随机名称生成器
 ///
-/// Used to provide a memorable handle for a session when users don't specify a session name when the session is
-/// created.
+/// 用于在用户创建会话时未指定会话名称的情况下，为会话提供一个易记的
+/// 名称。
 ///
-/// Uses the list of adjectives and nouns defined below, with the intention of avoiding unfortunate
-/// and offensive combinations. Care should be taken when adding or removing to either list due to the birthday paradox/
-/// hash collisions, e.g. with 4096 unique names, the likelihood of a collision in 10 session names is 1%.
+/// 使用下面定义的形容词和名词列表，目的是避免不恰当
+/// 且冒犯的组合。由于生日悖论/
+/// 哈希碰撞，在添加或移除任一列表中的词时应格外小心，例如 4096 个唯一名称下，10 个会话名称中发生碰撞的概率为 1%。
 pub fn get_name_generator() -> impl Iterator<Item = String> {
     names::Generator::new(&ADJECTIVES, &NOUNS, names::Name::Plain)
 }
 
-/// Generates a random human-readable name using curated adjectives and nouns.
-/// Returns a single name in the format: AdjectiveNoun (e.g., "BraveRustacean")
+/// 使用精心挑选的形容词和名词生成随机的可读名称。
+/// 返回一个格式为 AdjectiveNoun 的名称（例如 "BraveRustacean"）
 pub fn generate_random_name() -> String {
     get_name_generator().next().unwrap()
 }

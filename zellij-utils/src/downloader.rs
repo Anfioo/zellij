@@ -32,9 +32,9 @@ pub enum DownloaderError {
 pub struct Downloader {
     client: Option<HttpClient>,
     location: PathBuf,
-    // the whole thing is an Arc/Mutex so that Downloader is thread safe, and the individual values of
-    // the HashMap are Arc/Mutexes (Mutexi?) to represent that individual downloads should not
-    // happen concurrently
+    // 整体是 Arc/Mutex，因此 Downloader 是线程安全的，而
+    // HashMap 的各个值也是 Arc/Mutex（Mutexi?），表示各个下载不应
+    // 并发发生
     download_locks: Arc<Mutex<HashMap<String, Arc<Mutex<()>>>>>,
 }
 
@@ -42,7 +42,7 @@ impl Default for Downloader {
     fn default() -> Self {
         Self {
             client: HttpClient::builder()
-                // TODO: timeout?
+                // TODO: 超时？
                 .redirect_policy(RedirectPolicy::Follow)
                 .build()
                 .ok(),
@@ -56,7 +56,7 @@ impl Downloader {
     pub fn new(location: PathBuf) -> Self {
         Self {
             client: HttpClient::builder()
-                // TODO: timeout?
+                // TODO: 超时？
                 .redirect_policy(RedirectPolicy::Follow)
                 .build()
                 .ok(),
@@ -79,11 +79,11 @@ impl Downloader {
             None => self.parse_name(url)?,
         };
 
-        // we do this to make sure only one download of a specific url is happening at a time
-        // otherwise the downloads corrupt each other (and we waste lots of system resources)
+        // 我们这样做是为了确保同一时刻只有一个特定 url 的下载在进行，
+        // 否则下载会互相破坏（并且我们浪费大量系统资源）
         let download_lock = self.acquire_download_lock(&file_name).await;
-        // it's important that _lock remains in scope, otherwise it gets dropped and the lock is
-        // released before the download is complete
+        // 重要的是 _lock 保持在作用域内，否则它会被丢弃、锁会在
+        // 下载完成之前被释放
         let _lock = download_lock.lock().await;
 
         let file_path = self.location.join(file_name.as_str());
@@ -146,7 +146,7 @@ impl Downloader {
             .header("Content-Type", "application/octet-stream")
             .body(())?;
         let client = HttpClient::builder()
-            // TODO: timeout?
+            // TODO: 超时？
             .redirect_policy(RedirectPolicy::Follow)
             .build()?;
 
@@ -167,24 +167,24 @@ impl Downloader {
         Ok(stringified)
     }
 
-    /// Download the content of a URL and block for the result.
+    /// 下载 URL 的内容并阻塞等待结果。
     ///
-    /// Wraps the `async` call to [`download_without_cache`] such that it can be used from sync
-    /// code. This is achieved by either:
+    /// 包装对 [`download_without_cache`] 的 `async` 调用，使其可以用于同步
+    /// 代码。这通过以下两种方式之一实现：
     ///
-    /// 1. Reusing an existing async runtime in case one is present in the current thread, or
-    /// 2. Spawning a new async runtime on the current thread
+    /// 1. 若当前线程中已存在 async 运行时则复用之，或
+    /// 2. 在当前线程上启动一个新的 async 运行时
     ///
-    /// If neither of these works, an error is returned instead.
+    /// 如果两者都不可行，则返回错误。
     ///
-    /// # Note
+    /// # 注意
     ///
-    /// At the moment, this function is only here to bridge the gap between the async
-    /// [`Downloader`] impl and the sync [`Layout`] code that ultimately calls this function. This
-    /// is needed since the Layout code can't trivially be turned `async` without a lot of
-    /// refactoring, while the Downloader is used in many other places with async code and can't
-    /// sensibly be sync. Maybe in the future, when more code around here is async, we can drop
-    /// this function.
+    /// 目前，此函数仅用于弥合 async 的
+    /// [`Downloader`] 实现与最终调用此函数的同步 [`Layout`] 代码之间的鸿沟。之所以
+    /// 需要它，是因为 Layout 代码无法在不进行大量
+    /// 重构的情况下轻易改为 `async`，而 Downloader 在许多其他使用 async 代码的地方被使用，且无法
+    /// 合理地改为同步。也许将来这里更多的代码变成 async 后，我们可以去掉
+    /// 这个函数。
     pub fn download_without_cache_blocking(url: &str) -> Result<String, DownloaderError> {
         let runtime_handle = match tokio::runtime::Handle::try_current() {
             Ok(handle) => handle.clone(),
