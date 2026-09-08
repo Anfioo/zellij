@@ -34,7 +34,7 @@ use crate::{
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-// Convert Rust ClientToServerMsg to protobuf
+// 将 Rust ClientToServerMsg 转换为 protobuf
 impl From<ClientToServerMsg> for ProtoClientToServerMsg {
     fn from(msg: ClientToServerMsg) -> Self {
         let message = match msg {
@@ -193,7 +193,7 @@ impl From<ClientToServerMsg> for ProtoClientToServerMsg {
     }
 }
 
-// Convert protobuf ClientToServerMsg to Rust
+// 将 protobuf ClientToServerMsg 转换为 Rust
 impl TryFrom<ProtoClientToServerMsg> for ClientToServerMsg {
     type Error = anyhow::Error;
 
@@ -366,7 +366,7 @@ impl TryFrom<ProtoClientToServerMsg> for ClientToServerMsg {
     }
 }
 
-// Convert Rust ServerToClientMsg to protobuf
+// 将 Rust ServerToClientMsg 转换为 protobuf
 impl From<ServerToClientMsg> for ProtoServerToClientMsg {
     fn from(msg: ServerToClientMsg) -> Self {
         let message = match msg {
@@ -587,7 +587,7 @@ fn mobile_state_payload_from_proto(msg: MobileStateMsg) -> MobileStatePayload {
     }
 }
 
-// Convert protobuf ServerToClientMsg to Rust
+// 将 protobuf ServerToClientMsg 转换为 Rust
 impl TryFrom<ProtoServerToClientMsg> for ServerToClientMsg {
     type Error = anyhow::Error;
 
@@ -711,7 +711,7 @@ impl TryFrom<ProtoServerToClientMsg> for ServerToClientMsg {
     }
 }
 
-// Basic type conversions
+// 基本类型转换
 impl From<crate::pane_size::Size> for crate::client_server_contract::client_server_contract::Size {
     fn from(size: crate::pane_size::Size) -> Self {
         Self {
@@ -1157,7 +1157,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::Options>
     }
 }
 
-// Complete Action conversion implementation - all 91 variants
+// 完整的 Action 转换实现 - 全部 91 个变体
 impl From<crate::input::actions::Action>
     for crate::client_server_contract::client_server_contract::Action
 {
@@ -1268,7 +1268,7 @@ impl From<crate::input::actions::Action>
             ScrollToTopByPaneIdAction,
             ScrollUpAction,
             ScrollUpAtAction,
-            // Pane-targeting
+            // 以窗格为目标
             ScrollUpByPaneIdAction,
             SearchAction,
             SearchInputAction,
@@ -1311,7 +1311,7 @@ impl From<crate::input::actions::Action>
             UndoRenamePaneAction,
             UndoRenamePaneByPaneIdAction,
             UndoRenameTabAction,
-            // Tab-targeting
+            // 以标签页为目标
             UndoRenameTabByTabIdAction,
             WriteAction,
             WriteCharsAction,
@@ -2084,7 +2084,7 @@ impl From<crate::input::actions::Action>
                     bg,
                 })
             },
-            // Pane-targeting CLI-only variants
+            // 以窗格为目标的仅 CLI 变体
             crate::input::actions::Action::ScrollUpByPaneId { pane_id } => {
                 ActionType::ScrollUpByPaneId(ScrollUpByPaneIdAction {
                     pane_id: Some(pane_id.into()),
@@ -2201,7 +2201,7 @@ impl From<crate::input::actions::Action>
                     pane_id: Some(pane_id.into()),
                 })
             },
-            // Tab-targeting CLI-only variants
+            // 以标签页为目标的仅 CLI 变体
             crate::input::actions::Action::UndoRenameTabByTabId { id } => {
                 ActionType::UndoRenameTabByTabId(UndoRenameTabByTabIdAction { id })
             },
@@ -2996,7 +2996,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::Action>
                     bg: set_pane_color_action.bg,
                 })
             },
-            // Pane-targeting CLI-only variants
+            // 以窗格为目标的仅 CLI 变体
             ActionType::ScrollUpByPaneId(a) => {
                 Ok(crate::input::actions::Action::ScrollUpByPaneId {
                     pane_id: a
@@ -3178,7 +3178,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::Action>
                         .try_into()?,
                 })
             },
-            // Tab-targeting CLI-only variants
+            // 以标签页为目标的仅 CLI 变体
             ActionType::UndoRenameTabByTabId(a) => {
                 Ok(crate::input::actions::Action::UndoRenameTabByTabId { id: a.id })
             },
@@ -3211,7 +3211,7 @@ impl From<crate::data::KeyWithModifier>
     fn from(key: crate::data::KeyWithModifier) -> Self {
         use crate::ipc::enum_conversions::{bare_key_to_proto_i32, key_modifier_to_proto_i32};
 
-        // Handle character keys specially - store the character for Char variant
+        // 特殊处理字符键 - 为 Char 变体存储字符
         let (bare_key_enum, char_data) = match &key.bare_key {
             crate::data::BareKey::Char(c) => (
                 crate::client_server_contract::client_server_contract::BareKey::Char as i32,
@@ -3242,7 +3242,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::KeyWithModif
         use crate::ipc::enum_conversions::{bare_key_from_proto_i32, key_modifier_from_proto_i32};
         use std::collections::BTreeSet;
 
-        // Handle character keys specially
+        // 特殊处理字符键
         let bare_key = if key.bare_key
             == crate::client_server_contract::client_server_contract::BareKey::Char as i32
         {
@@ -3479,7 +3479,7 @@ impl From<ProtoHostTerminalThemeIndication> for HostTerminalThemeMode {
     }
 }
 
-// InputMode conversion helper functions
+// InputMode 转换辅助函数
 fn input_mode_to_proto_i32(mode: InputMode) -> i32 {
     match mode {
         InputMode::Normal => ProtoInputMode::Normal as i32,
@@ -3519,7 +3519,7 @@ fn proto_i32_to_input_mode(i: i32) -> Result<InputMode> {
     }
 }
 
-// Additional helper functions for Action conversion
+// Action 转换的额外辅助函数
 fn resize_to_proto_i32(resize: crate::data::Resize) -> i32 {
     use crate::client_server_contract::client_server_contract::ResizeType;
     match resize {
@@ -3566,7 +3566,7 @@ fn unblock_condition_to_proto_i32(condition: crate::data::UnblockCondition) -> i
     }
 }
 
-// Reverse helper functions for Action conversion
+// Action 转换的反向辅助函数
 
 fn proto_i32_to_resize(resize: i32) -> Result<crate::data::Resize> {
     use crate::client_server_contract::client_server_contract::ResizeType as ProtoResize;
@@ -3652,7 +3652,7 @@ fn proto_i32_to_unblock_condition(condition: i32) -> Result<crate::data::Unblock
     }
 }
 
-// Position conversion
+// Position 转换
 impl From<crate::position::Position>
     for crate::client_server_contract::client_server_contract::Position
 {
@@ -3664,7 +3664,7 @@ impl From<crate::position::Position>
     }
 }
 
-// Reverse Position conversion
+// 反向 Position 转换
 impl TryFrom<crate::client_server_contract::client_server_contract::Position>
     for crate::position::Position
 {
@@ -3679,7 +3679,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::Position>
     }
 }
 
-// OpenFilePayload conversion
+// OpenFilePayload 转换
 impl From<crate::input::command::OpenFilePayload>
     for crate::client_server_contract::client_server_contract::OpenFilePayload
 {
@@ -3693,7 +3693,7 @@ impl From<crate::input::command::OpenFilePayload>
     }
 }
 
-// Reverse OpenFilePayload conversion
+// 反向 OpenFilePayload 转换
 impl TryFrom<crate::client_server_contract::client_server_contract::OpenFilePayload>
     for crate::input::command::OpenFilePayload
 {
@@ -3713,7 +3713,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::OpenFilePayl
     }
 }
 
-// PaneId conversion
+// PaneId 转换
 impl From<crate::data::PaneId> for crate::client_server_contract::client_server_contract::PaneId {
     fn from(pane_id: crate::data::PaneId) -> Self {
         use crate::client_server_contract::client_server_contract::pane_id::PaneType;
@@ -3728,7 +3728,7 @@ impl From<crate::data::PaneId> for crate::client_server_contract::client_server_
     }
 }
 
-// Reverse PaneId conversion
+// 反向 PaneId 转换
 impl TryFrom<crate::client_server_contract::client_server_contract::PaneId>
     for crate::data::PaneId
 {
@@ -3747,7 +3747,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::PaneId>
     }
 }
 
-// FloatingCoordinate conversion - SplitSize to FloatingCoordinate
+// FloatingCoordinate 转换 - SplitSize 到 FloatingCoordinate
 impl From<crate::input::layout::SplitSize>
     for crate::client_server_contract::client_server_contract::FloatingCoordinate
 {
@@ -3763,7 +3763,7 @@ impl From<crate::input::layout::SplitSize>
     }
 }
 
-// Reverse FloatingCoordinate conversion
+// 反向 FloatingCoordinate 转换
 impl TryFrom<crate::client_server_contract::client_server_contract::FloatingCoordinate>
     for crate::input::layout::SplitSize
 {
@@ -3782,7 +3782,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::FloatingCoor
     }
 }
 
-// FloatingCoordinate conversion - PercentOrFixed to FloatingCoordinate
+// FloatingCoordinate 转换 - PercentOrFixed 到 FloatingCoordinate
 impl From<crate::input::layout::PercentOrFixed>
     for crate::client_server_contract::client_server_contract::FloatingCoordinate
 {
@@ -3798,7 +3798,7 @@ impl From<crate::input::layout::PercentOrFixed>
     }
 }
 
-// Reverse FloatingCoordinate conversion for PercentOrFixed
+// PercentOrFixed 的反向 FloatingCoordinate 转换
 impl TryFrom<crate::client_server_contract::client_server_contract::FloatingCoordinate>
     for crate::input::layout::PercentOrFixed
 {
@@ -3819,7 +3819,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::FloatingCoor
     }
 }
 
-// FloatingPaneCoordinates conversion
+// FloatingPaneCoordinates 转换
 impl From<crate::data::FloatingPaneCoordinates>
     for crate::client_server_contract::client_server_contract::FloatingPaneCoordinates
 {
@@ -3835,7 +3835,7 @@ impl From<crate::data::FloatingPaneCoordinates>
     }
 }
 
-// Reverse FloatingPaneCoordinates conversion
+// 反向 FloatingPaneCoordinates 转换
 impl TryFrom<crate::client_server_contract::client_server_contract::FloatingPaneCoordinates>
     for crate::data::FloatingPaneCoordinates
 {
@@ -3854,7 +3854,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::FloatingPane
     }
 }
 
-// NewPanePlacement conversion
+// NewPanePlacement 转换
 impl From<crate::data::NewPanePlacement>
     for crate::client_server_contract::client_server_contract::NewPanePlacement
 {
@@ -3919,7 +3919,7 @@ impl From<crate::data::NewPanePlacement>
     }
 }
 
-// Reverse NewPanePlacement conversion
+// 反向 NewPanePlacement 转换
 impl TryFrom<crate::client_server_contract::client_server_contract::NewPanePlacement>
     for crate::data::NewPanePlacement
 {
@@ -3932,7 +3932,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::NewPanePlace
             .placement_type
             .ok_or_else(|| anyhow!("NewPanePlacement missing placement_type"))?
         {
-            // New fields (with borderless support) take priority
+            // 新字段（支持 borderless）优先
             PlacementType::NoPreferenceWithOptions(opts) => {
                 Ok(crate::data::NewPanePlacement::NoPreference {
                     borderless: opts.borderless,
@@ -3955,7 +3955,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::NewPanePlace
                     borderless: opts.borderless,
                 })
             },
-            // Legacy fields (without borderless support)
+            // 旧字段（不支持 borderless）
             PlacementType::NoPreference(_) => {
                 Ok(crate::data::NewPanePlacement::NoPreference { borderless: None })
             },
@@ -4001,7 +4001,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::NewPanePlace
     }
 }
 
-// MouseEvent conversion
+// MouseEvent 转换
 impl From<crate::input::mouse::MouseEvent>
     for crate::client_server_contract::client_server_contract::MouseEvent
 {
@@ -4038,7 +4038,7 @@ impl From<crate::input::mouse::MouseEvent>
     }
 }
 
-// RunCommandAction conversion
+// RunCommandAction 转换
 impl From<crate::input::command::RunCommandAction>
     for crate::client_server_contract::client_server_contract::RunCommandAction
 {
@@ -4056,7 +4056,7 @@ impl From<crate::input::command::RunCommandAction>
     }
 }
 
-// OriginatingPlugin conversion
+// OriginatingPlugin 转换
 impl From<crate::data::OriginatingPlugin>
     for crate::client_server_contract::client_server_contract::OriginatingPlugin
 {
@@ -4073,7 +4073,7 @@ impl From<crate::data::OriginatingPlugin>
     }
 }
 
-// OriginatingPlugin reverse conversion
+// OriginatingPlugin 反向转换
 impl TryFrom<crate::client_server_contract::client_server_contract::OriginatingPlugin>
     for crate::data::OriginatingPlugin
 {
@@ -4093,7 +4093,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::OriginatingP
     }
 }
 
-// SplitDirection conversion helper
+// SplitDirection 转换辅助函数
 fn split_direction_to_proto_i32(direction: crate::input::layout::SplitDirection) -> i32 {
     use crate::client_server_contract::client_server_contract::SplitDirection as ProtoSplitDirection;
     match direction {
@@ -4102,7 +4102,7 @@ fn split_direction_to_proto_i32(direction: crate::input::layout::SplitDirection)
     }
 }
 
-// SplitSize conversion
+// SplitSize 转换
 impl From<crate::input::layout::SplitSize>
     for crate::client_server_contract::client_server_contract::SplitSize
 {
@@ -4119,7 +4119,7 @@ impl From<crate::input::layout::SplitSize>
     }
 }
 
-// PercentOrFixed conversion
+// PercentOrFixed 转换
 impl From<crate::input::layout::PercentOrFixed>
     for crate::client_server_contract::client_server_contract::PercentOrFixed
 {
@@ -4136,7 +4136,7 @@ impl From<crate::input::layout::PercentOrFixed>
     }
 }
 
-// Run conversion
+// Run 转换
 impl From<crate::input::layout::Run>
     for crate::client_server_contract::client_server_contract::Run
 {
@@ -4149,7 +4149,7 @@ impl From<crate::input::layout::Run>
                         command: cmd.command.to_string_lossy().to_string(),
                         args: cmd.args,
                         cwd: cmd.cwd.map(|p| p.to_string_lossy().to_string()),
-                        direction: None, // RunCommand doesn't have direction field
+                        direction: None, // RunCommand 没有 direction 字段
                         hold_on_close: cmd.hold_on_close,
                         hold_on_start: cmd.hold_on_start,
                         originating_plugin: cmd.originating_plugin.map(|op| op.into()),
@@ -4176,7 +4176,7 @@ impl From<crate::input::layout::Run>
     }
 }
 
-// TabLayoutInfo conversion
+// TabLayoutInfo 转换
 impl From<crate::input::layout::TabLayoutInfo>
     for crate::client_server_contract::client_server_contract::TabLayoutInfo
 {
@@ -4252,7 +4252,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::TabLayoutInf
     }
 }
 
-// TiledPaneLayout conversion
+// TiledPaneLayout 转换
 impl From<crate::input::layout::TiledPaneLayout>
     for crate::client_server_contract::client_server_contract::TiledPaneLayout
 {
@@ -4346,18 +4346,18 @@ impl From<crate::input::layout::SwapFloatingLayout>
     }
 }
 
-// PluginUserConfiguration conversion
+// PluginUserConfiguration 转换
 impl From<crate::input::layout::PluginUserConfiguration>
     for crate::client_server_contract::client_server_contract::PluginUserConfiguration
 {
     fn from(config: crate::input::layout::PluginUserConfiguration) -> Self {
         Self {
-            configuration: config.inner().clone().into_iter().collect(), // Convert BTreeMap to HashMap
+            configuration: config.inner().clone().into_iter().collect(), // 将 BTreeMap 转换为 HashMap
         }
     }
 }
 
-// LayoutConstraint conversion
+// LayoutConstraint 转换
 impl From<crate::input::layout::LayoutConstraint>
     for crate::client_server_contract::client_server_contract::LayoutConstraintWithValue
 {
@@ -4384,7 +4384,7 @@ impl From<crate::input::layout::LayoutConstraint>
     }
 }
 
-// RunPlugin conversion
+// RunPlugin 转换
 impl From<crate::input::layout::RunPlugin>
     for crate::client_server_contract::client_server_contract::RunPlugin
 {
@@ -4398,7 +4398,7 @@ impl From<crate::input::layout::RunPlugin>
     }
 }
 
-// PluginAlias conversion
+// PluginAlias 转换
 impl From<crate::input::layout::PluginAlias>
     for crate::client_server_contract::client_server_contract::PluginAlias
 {
@@ -4412,7 +4412,7 @@ impl From<crate::input::layout::PluginAlias>
     }
 }
 
-// RunPluginLocation conversion
+// RunPluginLocation 转换
 impl From<crate::input::layout::RunPluginLocation>
     for crate::client_server_contract::client_server_contract::RunPluginLocationData
 {
@@ -4441,7 +4441,7 @@ impl From<crate::input::layout::RunPluginLocation>
     }
 }
 
-// RunPluginOrAlias conversion
+// RunPluginOrAlias 转换
 impl From<crate::input::layout::RunPluginOrAlias>
     for crate::client_server_contract::client_server_contract::RunPluginOrAlias
 {
@@ -4458,7 +4458,7 @@ impl From<crate::input::layout::RunPluginOrAlias>
     }
 }
 
-// CommandOrPlugin conversion
+// CommandOrPlugin 转换
 impl From<crate::data::CommandOrPlugin>
     for crate::client_server_contract::client_server_contract::CommandOrPlugin
 {
@@ -4514,7 +4514,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::CommandOrPlu
     }
 }
 
-// Run reverse conversion
+// Run 反向转换
 impl TryFrom<crate::client_server_contract::client_server_contract::Run>
     for crate::input::layout::Run
 {
@@ -4554,7 +4554,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::Run>
     }
 }
 
-// PercentOrFixed reverse conversion
+// PercentOrFixed 反向转换
 impl TryFrom<crate::client_server_contract::client_server_contract::PercentOrFixed>
     for crate::input::layout::PercentOrFixed
 {
@@ -4579,9 +4579,9 @@ impl TryFrom<crate::client_server_contract::client_server_contract::PercentOrFix
     }
 }
 
-// ===== REVERSE CONVERSIONS =====
+// ===== 反向转换 =====
 
-// MouseEvent reverse conversion
+// MouseEvent 反向转换
 impl TryFrom<crate::client_server_contract::client_server_contract::MouseEvent>
     for crate::input::mouse::MouseEvent
 {
@@ -4627,7 +4627,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::MouseEvent>
     }
 }
 
-// RunCommandAction reverse conversion
+// RunCommandAction 反向转换
 impl TryFrom<crate::client_server_contract::client_server_contract::RunCommandAction>
     for crate::input::command::RunCommandAction
 {
@@ -4652,7 +4652,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::RunCommandAc
     }
 }
 
-// TiledPaneLayout reverse conversion
+// TiledPaneLayout 反向转换
 impl TryFrom<crate::client_server_contract::client_server_contract::TiledPaneLayout>
     for crate::input::layout::TiledPaneLayout
 {
@@ -4676,7 +4676,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::TiledPaneLay
             {
                 SplitDirection::Vertical
             },
-            _ => SplitDirection::Horizontal, // default
+            _ => SplitDirection::Horizontal, // 默认
         };
 
         let children: Result<Vec<_>> = layout.children.into_iter().map(|c| c.try_into()).collect();
@@ -4698,12 +4698,12 @@ impl TryFrom<crate::client_server_contract::client_server_contract::TiledPaneLay
             split_size,
             run,
             borderless: layout.borderless,
-            focus: layout.focus.map(|f| f == "true"), // Convert string to bool
+            focus: layout.focus.map(|f| f == "true"), // 将字符串转换为 bool
             external_children_index: layout.external_children_index.map(|l| l as usize),
             children_are_stacked: layout.children_are_stacked,
             is_expanded_in_stack: layout.is_expanded_in_stack,
             exclude_from_sync: layout.exclude_from_sync,
-            run_instructions_to_ignore: vec![], // not represented in protobuf
+            run_instructions_to_ignore: vec![], // 在 protobuf 中未表示
             hide_floating_panes: layout.hide_floating_panes,
             pane_initial_contents: layout.pane_initial_contents,
             default_fg: layout.default_fg,
@@ -4712,7 +4712,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::TiledPaneLay
     }
 }
 
-// FloatingPaneLayout reverse conversion
+// FloatingPaneLayout 反向转换
 impl TryFrom<crate::client_server_contract::client_server_contract::FloatingPaneLayout>
     for crate::input::layout::FloatingPaneLayout
 {
@@ -4746,7 +4746,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::FloatingPane
     }
 }
 
-// SwapTiledLayout reverse conversion
+// SwapTiledLayout 反向转换
 impl TryFrom<crate::client_server_contract::client_server_contract::SwapTiledLayout>
     for crate::input::layout::SwapTiledLayout
 {
@@ -4773,7 +4773,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::SwapTiledLay
     }
 }
 
-// SwapFloatingLayout reverse conversion
+// SwapFloatingLayout 反向转换
 impl TryFrom<crate::client_server_contract::client_server_contract::SwapFloatingLayout>
     for crate::input::layout::SwapFloatingLayout
 {
@@ -4801,7 +4801,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::SwapFloating
     }
 }
 
-// PluginUserConfiguration reverse conversion
+// PluginUserConfiguration 反向转换
 impl TryFrom<crate::client_server_contract::client_server_contract::PluginUserConfiguration>
     for crate::input::layout::PluginUserConfiguration
 {
@@ -4817,7 +4817,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::PluginUserCo
     }
 }
 
-// LayoutConstraint reverse conversion
+// LayoutConstraint 反向转换
 impl TryFrom<crate::client_server_contract::client_server_contract::LayoutConstraintWithValue>
     for crate::input::layout::LayoutConstraint
 {
@@ -4860,7 +4860,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::LayoutConstr
     }
 }
 
-// RunPlugin reverse conversion
+// RunPlugin 反向转换
 impl TryFrom<crate::client_server_contract::client_server_contract::RunPlugin>
     for crate::input::layout::RunPlugin
 {
@@ -4888,7 +4888,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::RunPlugin>
     }
 }
 
-// PluginAlias reverse conversion
+// PluginAlias 反向转换
 impl TryFrom<crate::client_server_contract::client_server_contract::PluginAlias>
     for crate::input::layout::PluginAlias
 {
@@ -4909,7 +4909,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::PluginAlias>
     }
 }
 
-// RunPluginLocation reverse conversion
+// RunPluginLocation 反向转换
 impl TryFrom<crate::client_server_contract::client_server_contract::RunPluginLocationData>
     for crate::input::layout::RunPluginLocation
 {
@@ -4959,7 +4959,7 @@ impl TryFrom<crate::client_server_contract::client_server_contract::RunPluginLoc
     }
 }
 
-// RunPluginOrAlias reverse conversion
+// RunPluginOrAlias 反向转换
 impl TryFrom<crate::client_server_contract::client_server_contract::RunPluginOrAlias>
     for crate::input::layout::RunPluginOrAlias
 {

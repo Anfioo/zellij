@@ -3763,9 +3763,9 @@ fn test_client_messages() {
         token: u32::MAX,
         reply_bytes: (0u8..=255u8).collect(),
     });
-    // Guard against protobuf string-vs-bytes encoding regressions: a
-    // payload mixing NULs, ESC, and CSI framing must round-trip
-    // byte-for-byte or the pane will receive corrupt terminal data.
+    // 防范 protobuf 字符串与字节编码回归：
+    // 混合 NUL、ESC 和 CSI 帧的载荷必须往返
+    // 逐字节，否则窗格将收到损坏的终端数据。
     test_client_roundtrip!(ClientToServerMsg::ForwardedReplyFromHost {
         token: 17,
         reply_bytes: vec![
@@ -4062,14 +4062,14 @@ fn set_pane_color_wire_roundtrip() {
     assert_eq!(original, roundtrip);
 }
 
-/// Tests that RenamePaneByPaneId with `pane_id: None` (the active-pane CLI
-/// rename case) survives a full wire-level round-trip
-/// (Rust → proto struct → bytes → proto struct → Rust).
+/// 测试带有 `pane_id: None` 的 RenamePaneByPaneId（活动窗格 CLI
+/// 重命名情况）在完整的线路级往返中存活
+///（Rust → proto 结构体 → 字节 → proto 结构体 → Rust）。
 ///
-/// The struct-level round-trip in `test_client_roundtrip!` doesn't catch
-/// issues with prost's `tags` attribute on oneof fields, because prost
-/// only uses the tags list during byte decoding, not struct-to-struct
-/// conversion.
+/// `test_client_roundtrip!` 中的结构体级往返不能捕获
+/// prost 在 oneof 字段上的 `tags` 属性的问题，因为 prost
+/// 仅在字节解码期间使用 tags 列表，而不是结构体到结构体
+/// 转换。
 #[test]
 fn rename_active_pane_wire_roundtrip() {
     use prost::Message;
@@ -4084,7 +4084,7 @@ fn rename_active_pane_wire_roundtrip() {
         is_cli_client: true,
     };
 
-    // Rust → proto struct
+    // Rust → proto 结构体
     let proto: crate::client_server_contract::client_server_contract::ClientToServerMsg =
         original.clone().into();
 

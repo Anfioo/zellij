@@ -1,4 +1,4 @@
-/// Macro for testing round-trip conversion for ClientToServerMsg variants
+/// 用于测试 ClientToServerMsg 变体往返转换的宏
 macro_rules! test_client_roundtrip {
     ($msg:expr) => {{
         let original: crate::ipc::ClientToServerMsg = $msg;
@@ -11,7 +11,7 @@ macro_rules! test_client_roundtrip {
     }};
 }
 
-/// Macro for testing round-trip conversion for ServerToClientMsg variants
+/// 用于测试 ServerToClientMsg 变体往返转换的宏
 macro_rules! test_server_roundtrip {
     ($msg:expr) => {{
         let original: crate::ipc::ServerToClientMsg = $msg;

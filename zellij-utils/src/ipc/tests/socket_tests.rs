@@ -10,9 +10,9 @@ use std::sync::atomic::{AtomicU32, Ordering};
 
 static IPC_COUNTER: AtomicU32 = AtomicU32::new(0);
 
-// --- Cross-platform IPC helpers ---
-// On Unix: use filesystem-based sockets (TempDir + PathBuf + GenericFilePath)
-// On Windows: use named pipes (no guard needed, String name + GenericNamespaced)
+// --- 跨平台 IPC 辅助函数 ---
+// 在 Unix 上：使用基于文件系统的套接字（TempDir + PathBuf + GenericFilePath）
+// 在 Windows 上：使用命名管道（不需要守护，String 名称 + GenericNamespaced）
 
 #[cfg(unix)]
 type IpcGuard = tempfile::TempDir;

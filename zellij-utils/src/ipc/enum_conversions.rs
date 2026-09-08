@@ -6,7 +6,7 @@ use crate::{
     errors::prelude::*,
 };
 
-// BareKey conversions
+// BareKey 转换
 impl From<BareKey> for ProtoBareKey {
     fn from(key: BareKey) -> Self {
         match key {
@@ -33,8 +33,8 @@ impl From<BareKey> for ProtoBareKey {
             BareKey::F(10) => ProtoBareKey::F10,
             BareKey::F(11) => ProtoBareKey::F11,
             BareKey::F(12) => ProtoBareKey::F12,
-            BareKey::F(_) => ProtoBareKey::Unspecified, // Unsupported F-key
-            BareKey::Char(_) => ProtoBareKey::Char,     // Character stored separately
+            BareKey::F(_) => ProtoBareKey::Unspecified, // 不支持的 F 键
+            BareKey::Char(_) => ProtoBareKey::Char,     // 字符单独存储
             BareKey::Tab => ProtoBareKey::Tab,
             BareKey::Esc => ProtoBareKey::Esc,
             BareKey::Enter => ProtoBareKey::Enter,
@@ -91,7 +91,7 @@ impl TryFrom<ProtoBareKey> for BareKey {
     }
 }
 
-// KeyModifier conversions
+// KeyModifier 转换
 impl From<KeyModifier> for ProtoKeyModifier {
     fn from(modifier: KeyModifier) -> Self {
         match modifier {
@@ -117,7 +117,7 @@ impl TryFrom<ProtoKeyModifier> for KeyModifier {
     }
 }
 
-// Helper functions for converting between protobuf i32 and enum types
+// 在 protobuf i32 和枚举类型之间转换的辅助函数
 pub fn bare_key_to_proto_i32(key: BareKey) -> i32 {
     ProtoBareKey::from(key) as i32
 }
