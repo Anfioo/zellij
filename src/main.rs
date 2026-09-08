@@ -56,9 +56,9 @@ fn main() {
         })) = opts.command
         {
             let cwd = cwd.or_else(|| std::env::current_dir().ok());
-            let skip_plugin_cache = false; // N/A for this action
+            let skip_plugin_cache = false; // 此操作不适用
 
-            // Compute the unblock condition
+            // 计算解除阻塞条件
             let unblock_condition = if block_until_exit_success {
                 Some(UnblockCondition::OnExitSuccess)
             } else if block_until_exit_failure {

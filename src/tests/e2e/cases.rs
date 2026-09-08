@@ -1,8 +1,8 @@
 /*
  *
- * NOTE: These tests are very heavy and are used as smoke tests just to verify the app is working
- * end-to-end. Avoid adding new ones, preferring instead to use the zellij-integration-tests module
- * it tests the app as a whole, only mocking the OS interaction parts
+ * 注意：这些测试非常重，仅作为冒烟测试用于验证应用程序端到端正常工作。
+ * 避免添加新的测试，优先使用 zellij-integration-tests 模块——
+ * 它将应用程序作为一个整体进行测试，仅模拟操作系统交互部分
  *
 */
 #![allow(unused)]
@@ -79,18 +79,16 @@ pub const SLEEP: [u8; 0] = [];
 pub const SECOND_TAB_CONTENT: [u8; 14] =
     [84, 97, 98, 32, 35, 50, 32, 99, 111, 110, 116, 101, 110, 116]; // Tab #2 content
 
-// what we do here is adjust snapshots for various race conditions that should hopefully be
-// temporary until we can fix them - when adding stuff here, please add a detailed comment
-// explaining the race condition and what needs to be done to solve it
+// 我们在这里做的是针对各种竞态条件调整快照，希望这些调整是暂时的，
+// 直到我们能够修复它们——在这里添加内容时，请添加详细注释
+// 解释竞态条件以及解决它需要做什么
 fn account_for_races_in_snapshot(snapshot: String) -> String {
-    // these replacements need to be done because plugins set themselves as "unselectable" at runtime
-    // when they are loaded - since they are loaded asynchronously, sometimes the "BASE" indication
-    // (which should only happen if there's more than one selectable pane) is rendered and
-    // sometimes it isn't - this removes it entirely
+    // 这些替换是必要的，因为插件在加载时会将自己设置为"不可选择"——
+    // 由于它们是异步加载的，有时"BASE"指示（仅当有多个可选择窗格时才应出现）
+    // 会被渲染，有时不会——这里将其完全移除
     //
-    // to fix this, we should set plugins as unselectable in the layout (before they are loaded),
-    // once that happens, we should be able to remove this hack (and adjust the snapshots for the
-    // trailing spaces that we had to get rid of here)
+    // 要修复此问题，我们应该在布局中（加载之前）将插件设置为不可选择，
+    // 一旦完成，我们应该能够移除这个 hack（并调整此处不得不去掉的尾随空格的快照）
     let base_replace = Regex::new(r"Alt <\[\]>  BASE \s*\n").unwrap();
     let base_replace_tmux_mode_1 = Regex::new(r"Alt \[\|SPACE\|Alt \]  BASE \s*\n").unwrap();
     let base_replace_tmux_mode_2 = Regex::new(r"Alt \[\|Alt \]\|SPACE  BASE \s*\n").unwrap();
@@ -107,8 +105,7 @@ fn account_for_races_in_snapshot(snapshot: String) -> String {
     snapshot
 }
 
-// All the E2E tests are marked as "ignored" so that they can be run separately from the normal
-// tests
+// 所有 E2E 测试都标记为 "ignored"，以便可以与常规测试分开运行
 
 #[test]
 #[ignore]
@@ -198,7 +195,7 @@ pub fn typing_exit_closes_pane() {
                 let mut step_is_complete = false;
                 if remote_terminal.cursor_position_is(2, 1) && remote_terminal.status_bar_appears()
                 {
-                    // cursor is in the original pane
+                    // 光标在原始窗格中
                     step_is_complete = true;
                 }
                 step_is_complete
@@ -218,7 +215,7 @@ pub fn typing_exit_closes_pane() {
 #[test]
 #[ignore]
 pub fn resize_terminal_window() {
-    // this checks the resizing of the whole terminal window (reaction to SIGWINCH) and not just one pane
+    // 这检查整个终端窗口的大小调整（对 SIGWINCH 的反应），而不仅仅是单个窗格
     let fake_win_size = Size {
         cols: 120,
         rows: 24,
@@ -249,7 +246,7 @@ pub fn resize_terminal_window() {
                     if remote_terminal.cursor_position_is(62, 2)
                         && remote_terminal.status_bar_appears()
                     {
-                        // new pane has been opened and focused
+                        // 新窗格已打开并获得焦点
                         remote_terminal.change_size(100, 24);
                         step_is_complete = true;
                     }
@@ -263,7 +260,7 @@ pub fn resize_terminal_window() {
                 let mut step_is_complete = false;
                 if remote_terminal.cursor_position_is(52, 2) && remote_terminal.ctrl_plus_appears()
                 {
-                    // size has been changed
+                    // 大小已更改
                     step_is_complete = true;
                 }
                 step_is_complete
@@ -297,8 +294,8 @@ pub fn quit_and_resurrect_session() {
                 instruction: |mut remote_terminal: RemoteTerminal| -> bool {
                     let mut step_is_complete = false;
                     if remote_terminal.snapshot_contains("Waiting to run: top") {
-                        std::thread::sleep(std::time::Duration::from_millis(5000)); // wait for
-                                                                                    // serialization
+                        std::thread::sleep(std::time::Duration::from_millis(5000)); // 等待
+                                                                                    // 序列化
                         remote_terminal.send_key(&QUIT);
                         step_is_complete = true;
                     }
@@ -339,12 +336,12 @@ pub fn quit_and_resurrect_session() {
 #[test]
 #[ignore]
 pub fn send_blocking_command_through_the_cli() {
-    // here we test the following flow:
-    // - send a blocking command through the cli with --blocking --floating --close-on-exit
-    // - the command sleeps for 2 seconds (longer than the default 1s timeout) then exits with status 42
-    // - verify that the CLI blocks for the full duration (we check after 2+ seconds)
-    // - verify that the floating pane appears while running and disappears after completion
-    // - verify that the exit status is properly propagated
+    // 在这里我们测试以下流程：
+    // - 通过 cli 发送阻塞命令，使用 --blocking --floating --close-on-exit
+    // - 命令休眠 2 秒（长于默认的 1 秒超时），然后以状态码 42 退出
+    // - 验证 CLI 阻塞了完整持续时间（我们在 2 秒以上后检查）
+    // - 验证浮动窗格在运行时出现，完成后消失
+    // - 验证退出状态正确传播
     let fake_win_size = Size {
         cols: 150,
         rows: 24,
@@ -375,11 +372,11 @@ pub fn send_blocking_command_through_the_cli() {
                 name: "Wait for floating pane to appear",
                 instruction: |remote_terminal: RemoteTerminal| -> bool {
                     let mut step_is_complete = false;
-                    // The floating pane should appear with the running command
+                    // 浮动窗格应随正在运行的命令一起出现
                     if remote_terminal.snapshot_contains("PIN [ ]") {
-                        std::thread::sleep(std::time::Duration::from_millis(2000)); // wait for
-                                                                                    // command to
-                                                                                    // end
+                        std::thread::sleep(std::time::Duration::from_millis(2000)); // 等待
+                                                                                    // 命令
+                                                                                    // 结束
                         step_is_complete = true
                     }
                     step_is_complete
@@ -389,10 +386,10 @@ pub fn send_blocking_command_through_the_cli() {
                 name: "Wait for command to complete and verify exit status",
                 instruction: |mut remote_terminal: RemoteTerminal| -> bool {
                     let mut step_is_complete = false;
-                    // After 2+ seconds, the command should complete and the floating pane should close
-                    // Wait until the floating pane is gone AND the shell prompt is back before
-                    // asking for $?, otherwise we can race the blocking CLI process itself
-                    // returning to the shell.
+                    // 2 秒以上后，命令应完成，浮动窗格应关闭
+                    // 等待浮动窗格消失且 shell 提示符返回后再
+                    // 请求 $?，否则我们可能与阻塞 CLI 进程本身
+                    // 返回 shell 发生竞态。
                     if !remote_terminal.snapshot_contains("PIN [ ]")
                         && remote_terminal.snapshot_contains("$ \u{2588}")
                         && remote_terminal.status_bar_appears()
@@ -412,8 +409,8 @@ pub fn send_blocking_command_through_the_cli() {
             name: "Verify CLI returned with proper exit status after command completed",
             instruction: |remote_terminal: RemoteTerminal| -> bool {
                 let mut step_is_complete = false;
-                // wait until echo $? is visible, the exit status rendered, and the cursor is back
-                // at a blank prompt, which means the shell command actually executed
+                // 等待 echo $? 可见、退出状态已渲染、光标回到
+                // 空白提示符，这意味着 shell 命令确实已执行
                 if remote_terminal.snapshot_contains("echo $?")
                     && remote_terminal.snapshot_contains("42")
                     && remote_terminal.snapshot_contains("$ \u{2588}")

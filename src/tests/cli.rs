@@ -42,7 +42,7 @@ fn web_cli_status_with_timeout_works() {
 
 #[test]
 fn web_cli_timeout_with_status_works() {
-    // Test with --timeout before --status (order shouldn't matter)
+    // 测试 --timeout 在 --status 之前（顺序不应有影响）
     let args = CliArgs::try_parse_from(["zellij", "web", "--timeout", "10", "--status"]);
     assert!(args.is_ok());
     if let Ok(CliArgs {

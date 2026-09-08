@@ -166,7 +166,7 @@ fn get_os_input<OsInputOutput>(
 }
 
 pub(crate) fn start_server(path: PathBuf, debug: bool) {
-    // Set instance-wide debug mode
+    // 设置实例级别的调试模式
     zellij_utils::consts::DEBUG_MODE.set(debug).unwrap();
     let os_input = get_os_input(get_server_os_input);
     start_server_impl(Box::new(os_input), path);
@@ -182,7 +182,7 @@ pub(crate) fn start_web_server(
     key: Option<PathBuf>,
     startup_timeout: Option<u64>,
 ) {
-    // TODO: move this outside of this function
+    // TODO: 将此逻辑移到函数外部
     let (config, _layout, config_options, _config_without_layout, _config_options_without_layout) =
         match Setup::from_cli_args(&opts) {
             Ok(results) => results,
@@ -251,7 +251,7 @@ pub(crate) fn stop_web_server() -> Result<(), String> {
 
 #[cfg(feature = "web_server_capability")]
 pub(crate) fn create_auth_token(name: Option<String>, read_only: bool) -> Result<String, String> {
-    // returns the token and it's name
+    // 返回 token 及其名称
     create_token(name, read_only)
         .map(|(token, token_name)| {
             let access_type = if read_only { " (read-only)" } else { "" };
@@ -289,7 +289,7 @@ pub(crate) fn revoke_auth_token(_token_name: &str) -> Result<bool, String> {
 
 #[cfg(feature = "web_server_capability")]
 pub(crate) fn revoke_all_auth_tokens() -> Result<usize, String> {
-    // returns the revoked count
+    // 返回已撤销的数量
     revoke_all_tokens().map_err(|e| e.to_string())
 }
 
@@ -306,7 +306,7 @@ pub(crate) fn revoke_all_auth_tokens() -> Result<usize, String> {
 
 #[cfg(feature = "web_server_capability")]
 pub(crate) fn list_auth_tokens() -> Result<Vec<String>, String> {
-    // returns the token list line by line
+    // 逐行返回 token 列表
     list_tokens()
         .map(|tokens| {
             let mut res = vec![];
@@ -333,7 +333,7 @@ pub(crate) fn list_auth_tokens() -> Result<Vec<String>, String> {
     std::process::exit(2);
 }
 
-/// Default timeout for web server status check (in seconds)
+/// Web 服务端状态检查的默认超时时间（秒）
 #[cfg(feature = "web_server_capability")]
 pub const DEFAULT_WEB_SERVER_STATUS_TIMEOUT_SECS: u64 = 30;
 
@@ -398,9 +398,9 @@ fn find_indexed_session(
     }
 }
 
-/// Client entrypoint for all [`zellij_utils::cli::CliAction`]
+/// 所有 [`zellij_utils::cli::CliAction`] 的客户端入口点
 ///
-/// Checks session to send the action to and attaches with client
+/// 检查要发送操作的会话并通过客户端进行连接
 pub(crate) fn send_action_to_session(
     cli_action: zellij_utils::cli::CliAction,
     requested_session_name: Option<String>,
@@ -533,7 +533,7 @@ fn attach_with_cli_client(
 }
 
 fn attach_with_session_index(config_options: Options, index: usize, create: bool) -> ClientInfo {
-    // Ignore the session_name when `--index` is provided
+    // 当提供 `--index` 时忽略 session_name
     match get_sessions_sorted_by_mtime() {
         Ok(sessions) if sessions.is_empty() => {
             if create {
@@ -643,10 +643,10 @@ pub(crate) fn start_client(opts: CliArgs) {
         let mut new_session_cwd = None;
 
         if let Some(reconnect_to_session) = &reconnect_to_session {
-            // this is integration code to make session reconnects work with this existing,
-            // untested and pretty involved function
+            // 这是使会话重连与此现有、未经测试且相当复杂的函数
+            // 协同工作的集成代码
             //
-            // ideally, we should write tests for this whole function and refctor it
+            // 理想情况下，我们应该为整个函数编写测试并重构它
             reload_config_from_disk(
                 &mut config_without_layout,
                 &mut config_options_without_layout,
@@ -861,13 +861,12 @@ pub(crate) fn start_client(opts: CliArgs) {
             } else {
                 if let Some(session_name) = config_options.session_name.as_ref() {
                     if let Ok(val) = envs::get_session_name() {
-                        // This prevents the same type of recursion as above, only that here we
-                        // don't get the command to "attach", but to start a new session instead.
-                        // This occurs for example when declaring the session name inside a layout
-                        // file and then, from within this session, trying to open a new zellij
-                        // session with the same layout. This causes an infinite recursion in the
-                        // `zellij_server::terminal_bytes::listen` task, flooding the server and
-                        // clients with infinite `Render` requests.
+                        // 这防止了与上述相同类型的递归，只是在这里
+                        // 我们没有收到"attach"命令，而是启动一个新会话。
+                        // 例如，当在布局文件中声明会话名称，然后从该会话内部
+                        // 尝试使用相同布局打开新的 zellij 会话时，就会发生这种情况。
+                        // 这会导致 `zellij_server::terminal_bytes::listen` 任务中
+                        // 的无限递归，用无限的 `Render` 请求淹没服务端和客户端。
                         if *session_name == val {
                             eprintln!("You are trying to attach to the current session (\"{}\"). Zellij does not support nesting a session in itself.", session_name);
                             process::exit(1);
@@ -915,8 +914,8 @@ pub(crate) fn start_client(opts: CliArgs) {
                     if reconnect_to_session.is_some() {
                         continue;
                     }
-                    // after we detach, this happens and so we need to exit before the rest of the
-                    // function happens
+                    // 分离后会发生这种情况，因此我们需要在函数其余部分
+                    // 执行之前退出
                     process::exit(0);
                 }
 
@@ -983,7 +982,7 @@ pub(crate) fn watch_session(session_name: Option<String>, opts: CliArgs) {
         },
     };
 
-    // Resolve the session name to watch
+    // 解析要监视的会话名称
     let client_info = match &session_name {
         Some(prefix) => match match_session_name(prefix).unwrap() {
             SessionNameMatch::UniquePrefix(s) | SessionNameMatch::Exact(s) => {
@@ -1028,7 +1027,7 @@ pub(crate) fn watch_session(session_name: Option<String>, opts: CliArgs) {
 
     let os_input = get_os_input(get_client_os_input);
 
-    // Start the watcher client
+    // 启动监视客户端
     start_client_impl(
         Box::new(os_input),
         opts,

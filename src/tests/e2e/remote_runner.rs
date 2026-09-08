@@ -48,23 +48,22 @@ fn setup_remote_environment(channel: &mut ssh2::Channel, win_size: Size) {
 }
 
 fn stop_zellij(channel: &mut ssh2::Channel) {
-    // here we remove the status-bar-tips cache to make sure only the quicknav tip is loaded
+    // 在这里我们移除 status-bar-tips 缓存，以确保只加载 quicknav 提示
     channel
         .write_all(b"find /tmp | grep status-bar-tips | xargs rm\n")
         .unwrap();
     channel.write_all(b"killall -KILL zellij\n").unwrap();
-    channel.write_all(b"rm -rf /tmp/*\n").unwrap(); // remove temporary artifacts from previous
-                                                    // tests
-    channel.write_all(b"rm -rf /tmp/*\n").unwrap(); // remove temporary artifacts from previous
-    channel.write_all(b"rm -rf /tmp/*\n").unwrap(); // remove temporary artifacts from previous
+    channel.write_all(b"rm -rf /tmp/*\n").unwrap(); // 移除之前测试的临时产物
+    channel.write_all(b"rm -rf /tmp/*\n").unwrap(); // 移除之前测试的临时产物
+    channel.write_all(b"rm -rf /tmp/*\n").unwrap(); // 移除之前测试的临时产物
     channel
         .write_all(b"rm -rf ~/.cache/zellij/*/session_info\n")
         .unwrap();
     channel
         .write_all(b"rm -rf ~/.cache/zellij/permissions.kdl\n")
         .unwrap();
-    // create an arch-independent symlink so the binary path in snapshots is stable across
-    // x86_64 (CI) and aarch64 (Apple Silicon local dev)
+    // 创建与架构无关的符号链接，使快照中的二进制路径在
+    // x86_64 (CI) 和 aarch64 (Apple Silicon 本地开发) 之间保持稳定
     channel
         .write_all(
             b"ln -sf /usr/src/zellij/$(uname -m)-unknown-linux-musl/release/zellij /usr/src/zellij/zellij\n",
@@ -112,7 +111,7 @@ fn wait_for_startup(last_snapshot: &Arc<Mutex<String>>) {
             break;
         }
         if start.elapsed() > timeout {
-            break; // timed out — let the test proceed and fail naturally
+            break; // 超时——让测试继续并自然失败
         }
         std::thread::sleep(std::time::Duration::from_millis(50));
     }
@@ -186,7 +185,7 @@ fn read_from_channel(
                     true, // osc8_hyperlinks
                     explicitly_disable_kitty_keyboard_protocol,
                     None,
-                ); // 0 is the pane index
+                ); // 0 是窗格索引
                 loop {
                     if !should_keep_running.load(Ordering::SeqCst) {
                         break;
@@ -304,16 +303,16 @@ impl RemoteTerminal {
     }
     #[allow(unused)]
     pub fn current_snapshot(&self) -> String {
-        // convenience method for writing tests,
-        // this should only be used when developing,
-        // please prefer "snapsht_contains" instead
+        // 编写测试的便捷方法，
+        // 仅应在开发时使用，
+        // 请优先使用 "snapshot_contains"
         self.last_snapshot.lock().unwrap().clone()
     }
     #[allow(unused)]
     pub fn current_cursor_position(&self) -> String {
-        // convenience method for writing tests,
-        // this should only be used when developing,
-        // please prefer "cursor_position_is" instead
+        // 编写测试的便捷方法，
+        // 仅应在开发时使用，
+        // 请优先使用 "cursor_position_is"
         format!("x: {}, y: {}", self.cursor_x, self.cursor_y)
     }
     pub fn send_key(&mut self, key: &[u8]) {
@@ -337,8 +336,8 @@ impl RemoteTerminal {
                 )
                 .unwrap();
             channel.flush().unwrap();
-        } // release mutex before sleeping so the reader thread can process Zellij's startup output
-        std::thread::sleep(std::time::Duration::from_secs(1)); // wait until Zellij stops parsing startup ANSI codes from the terminal STDIN
+        } // 在休眠前释放互斥锁，以便读取线程可以处理 Zellij 的启动输出
+        std::thread::sleep(std::time::Duration::from_secs(1)); // 等待 Zellij 停止解析来自终端 STDIN 的启动 ANSI 码
     }
     pub fn send_blocking_command_through_the_cli(&mut self, command: &str) {
         let mut channel = self.channel.lock().unwrap();
