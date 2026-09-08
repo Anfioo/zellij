@@ -19,19 +19,19 @@ macro_rules! strings {
 pub fn floating_panes_mouse_full(help: &ModeInfo) -> LinePart {
     // Tip: Toggle floating panes with Ctrl + <p> + <w> and move them with keyboard or mouse
     let mut bits = vec![
-        Style::new().paint(" Tip: "),
-        Style::new().paint("Toggle floating panes with "),
+        Style::new().paint(" 提示："),
+        Style::new().paint("用 切换浮动窗格"),
     ];
     bits.extend(add_keybinds(help));
-    bits.push(Style::new().paint(" and move them with keyboard or mouse"));
+    bits.push(Style::new().paint("，并用键盘或鼠标移动它们"));
     strings!(&bits)
 }
 
 pub fn floating_panes_mouse_medium(help: &ModeInfo) -> LinePart {
     // Tip: Toggle floating panes with Ctrl + <p> + <w>
     let mut bits = vec![
-        Style::new().paint(" Tip: "),
-        Style::new().paint("Toggle floating panes with "),
+        Style::new().paint(" 提示："),
+        Style::new().paint("用 切换浮动窗格"),
     ];
     bits.extend(add_keybinds(help));
     strings!(&bits)
@@ -40,7 +40,7 @@ pub fn floating_panes_mouse_medium(help: &ModeInfo) -> LinePart {
 pub fn floating_panes_mouse_short(help: &ModeInfo) -> LinePart {
     // Ctrl + <p> + <w> => floating panes
     let mut bits = add_keybinds(help);
-    bits.push(Style::new().paint(" => floating panes"));
+    bits.push(Style::new().paint(" => 浮动窗格"));
     strings!(&bits)
 }
 
@@ -62,7 +62,7 @@ fn add_keybinds<'a>(help: &'a ModeInfo) -> Vec<ANSIString<'a>> {
     );
 
     if floating_toggle.is_empty() {
-        return vec![Style::new().bold().paint("UNBOUND")];
+        return vec![Style::new().bold().paint("未绑定")];
     }
 
     let mut bits = vec![];

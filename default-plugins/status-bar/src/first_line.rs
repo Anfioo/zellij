@@ -44,15 +44,15 @@ impl KeyShortcut {
 
     pub fn full_text(&self) -> String {
         match self.action {
-            KeyAction::Lock => String::from("LOCK"),
-            KeyAction::Unlock => String::from("UNLOCK"),
-            KeyAction::Pane => String::from("PANE"),
-            KeyAction::Tab => String::from("TAB"),
-            KeyAction::Resize => String::from("RESIZE"),
-            KeyAction::Search => String::from("SEARCH"),
-            KeyAction::Quit => String::from("QUIT"),
-            KeyAction::Session => String::from("SESSION"),
-            KeyAction::Move => String::from("MOVE"),
+            KeyAction::Lock => String::from("锁定"),
+            KeyAction::Unlock => String::from("解锁"),
+            KeyAction::Pane => String::from("窗格"),
+            KeyAction::Tab => String::from("标签"),
+            KeyAction::Resize => String::from("缩放"),
+            KeyAction::Search => String::from("搜索"),
+            KeyAction::Quit => String::from("退出"),
+            KeyAction::Session => String::from("会话"),
+            KeyAction::Move => String::from("移动"),
             KeyAction::Tmux => String::from("TMUX"),
         }
     }

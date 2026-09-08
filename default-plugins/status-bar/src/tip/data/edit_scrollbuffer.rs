@@ -27,10 +27,10 @@ pub fn edit_scrollbuffer_full(help: &ModeInfo) -> LinePart {
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     let mut bits = vec![
-        Style::new().paint(" Tip: "),
-        Style::new().paint("Search through the scrollbuffer using your default "),
+        Style::new().paint(" 提示："),
+        Style::new().paint("用默认 "),
         Style::new().fg(green_color).bold().paint("$EDITOR"),
-        Style::new().paint(" with "),
+        Style::new().paint(" 搜索滚动缓冲，按键"),
     ];
     bits.extend(add_keybinds(help));
     strings!(&bits)
@@ -42,10 +42,10 @@ pub fn edit_scrollbuffer_medium(help: &ModeInfo) -> LinePart {
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     let mut bits = vec![
-        Style::new().paint(" Tip: "),
-        Style::new().paint("Search the scrollbuffer using your "),
+        Style::new().paint(" 提示："),
+        Style::new().paint("用 "),
         Style::new().fg(green_color).bold().paint("$EDITOR"),
-        Style::new().paint(" with "),
+        Style::new().paint(" 搜索滚动缓冲，按键"),
     ];
     bits.extend(add_keybinds(help));
     strings!(&bits)
@@ -57,9 +57,9 @@ pub fn edit_scrollbuffer_short(help: &ModeInfo) -> LinePart {
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     let mut bits = vec![
-        Style::new().paint(" Search using "),
+        Style::new().paint(" 用 "),
         Style::new().fg(green_color).bold().paint("$EDITOR"),
-        Style::new().paint(" with "),
+        Style::new().paint(" 搜索，按键"),
     ];
     bits.extend(add_keybinds(help));
     strings!(&bits)
@@ -83,7 +83,7 @@ fn add_keybinds<'a>(help: &'a ModeInfo) -> Vec<ANSIString<'a>> {
     );
 
     if edit_buffer.is_empty() {
-        return vec![Style::new().bold().paint("UNBOUND")];
+        return vec![Style::new().bold().paint("未绑定")];
     }
 
     let mut bits = vec![];

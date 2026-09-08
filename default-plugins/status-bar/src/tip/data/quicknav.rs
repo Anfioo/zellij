@@ -19,33 +19,33 @@ macro_rules! strings {
 pub fn quicknav_full(help: &ModeInfo) -> LinePart {
     let groups = add_keybinds(help);
 
-    let mut bits = vec![Style::new().paint(" Tip: ")];
+    let mut bits = vec![Style::new().paint(" 提示：")];
     bits.extend(groups.new_pane);
-    bits.push(Style::new().paint(" => open new pane. "));
+    bits.push(Style::new().paint(" => 打开新窗格。 "));
     bits.extend(groups.move_focus);
-    bits.push(Style::new().paint(" => navigate between panes. "));
+    bits.push(Style::new().paint(" => 在窗格间导航。 "));
     bits.extend(groups.resize);
-    bits.push(Style::new().paint(" => increase/decrease pane size."));
+    bits.push(Style::new().paint(" => 增大/减小窗格尺寸。"));
     strings!(&bits)
 }
 
 pub fn quicknav_medium(help: &ModeInfo) -> LinePart {
     let groups = add_keybinds(help);
 
-    let mut bits = vec![Style::new().paint(" Tip: ")];
+    let mut bits = vec![Style::new().paint(" 提示：")];
     bits.extend(groups.new_pane);
-    bits.push(Style::new().paint(" => new pane. "));
+    bits.push(Style::new().paint(" => 新窗格。 "));
     bits.extend(groups.move_focus);
-    bits.push(Style::new().paint(" => navigate. "));
+    bits.push(Style::new().paint(" => 导航。 "));
     bits.extend(groups.resize);
-    bits.push(Style::new().paint(" => resize pane."));
+    bits.push(Style::new().paint(" => 缩放窗格。"));
     strings!(&bits)
 }
 
 pub fn quicknav_short(help: &ModeInfo) -> LinePart {
     let groups = add_keybinds(help);
 
-    let mut bits = vec![Style::new().paint(" QuickNav: ")];
+    let mut bits = vec![Style::new().paint(" 快速导航：")];
     bits.extend(groups.new_pane);
     bits.push(Style::new().paint(" / "));
     bits.extend(groups.move_focus);
@@ -71,7 +71,7 @@ fn add_keybinds<'a>(help: &'a ModeInfo) -> Keygroups<'a> {
         }],
     );
     let new_pane = if new_pane_keys.is_empty() {
-        vec![Style::new().bold().paint("UNBOUND")]
+        vec![Style::new().bold().paint("未绑定")]
     } else {
         style_key_with_modifier(&new_pane_keys, &help.style.colors, None)
     };
@@ -95,7 +95,7 @@ fn add_keybinds<'a>(help: &'a ModeInfo) -> Keygroups<'a> {
         resize_keys.retain(|k| k != &KeyWithModifier::new(BareKey::Char('=')).with_alt_modifier())
     }
     let resize = if resize_keys.is_empty() {
-        vec![Style::new().bold().paint("UNBOUND")]
+        vec![Style::new().bold().paint("未绑定")]
     } else {
         style_key_with_modifier(&resize_keys, &help.style.colors, None)
     };
@@ -141,13 +141,13 @@ fn add_keybinds<'a>(help: &'a ModeInfo) -> Keygroups<'a> {
     let arrows = style_key_with_modifier(&arrows, &help.style.colors, None);
     let letters = style_key_with_modifier(&letters, &help.style.colors, None);
     let move_focus = if arrows.is_empty() && letters.is_empty() {
-        vec![Style::new().bold().paint("UNBOUND")]
+        vec![Style::new().bold().paint("未绑定")]
     } else if arrows.is_empty() || letters.is_empty() {
         arrows.into_iter().chain(letters.into_iter()).collect()
     } else {
         arrows
             .into_iter()
-            .chain(vec![Style::new().paint(" or ")].into_iter())
+            .chain(vec![Style::new().paint(" 或 ")].into_iter())
             .chain(letters.into_iter())
             .collect()
     };

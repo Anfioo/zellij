@@ -28,13 +28,13 @@ pub fn compact_layout_full(help: &ModeInfo) -> LinePart {
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     let mut bits = vec![
-        Style::new().paint(" Tip: "),
-        Style::new().paint("UI taking up too much space? Start Zellij with "),
+        Style::new().paint(" 提示："),
+        Style::new().paint("界面占用太多空间？用 "),
         Style::new()
             .fg(green_color)
             .bold()
             .paint("zellij -l compact"),
-        Style::new().paint(" or remove pane frames with "),
+        Style::new().paint(" 启动 Zellij，或用 移除窗格边框"),
     ];
     bits.extend(add_keybinds(help));
     strings!(&bits)
@@ -46,13 +46,13 @@ pub fn compact_layout_medium(help: &ModeInfo) -> LinePart {
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     let mut bits = vec![
-        Style::new().paint(" Tip: "),
-        Style::new().paint("To save screen space, start Zellij with "),
+        Style::new().paint(" 提示："),
+        Style::new().paint("为节省屏幕空间，用 "),
         Style::new()
             .fg(green_color)
             .bold()
             .paint("zellij -l compact"),
-        Style::new().paint(" or remove frames with "),
+        Style::new().paint(" 启动，或用 移除边框"),
     ];
     bits.extend(add_keybinds(help));
     strings!(&bits)
@@ -64,12 +64,12 @@ pub fn compact_layout_short(help: &ModeInfo) -> LinePart {
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     let mut bits = vec![
-        Style::new().paint(" Save screen space, start with: "),
+        Style::new().paint(" 节省屏幕空间，启动方式："),
         Style::new()
             .fg(green_color)
             .bold()
             .paint("zellij -l compact"),
-        Style::new().paint(" or remove frames with "),
+        Style::new().paint("，或用 移除边框"),
     ];
     bits.extend(add_keybinds(help));
     strings!(&bits)
@@ -93,7 +93,7 @@ fn add_keybinds<'a>(help: &'a ModeInfo) -> Vec<ANSIString<'a>> {
     );
 
     if pane_frames.is_empty() {
-        return vec![Style::new().bold().paint("UNBOUND")];
+        return vec![Style::new().bold().paint("未绑定")];
     }
 
     let mut bits = vec![];

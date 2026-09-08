@@ -26,8 +26,8 @@ pub fn zellij_setup_check_full(help: &ModeInfo) -> LinePart {
     let orange_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     strings!(&[
-        Style::new().paint(" Tip: "),
-        Style::new().paint("Having issues with Zellij? Try running "),
+        Style::new().paint(" 提示："),
+        Style::new().paint("Zellij 有问题？尝试运行 "),
         Style::new()
             .fg(orange_color)
             .bold()
@@ -40,13 +40,13 @@ pub fn zellij_setup_check_medium(help: &ModeInfo) -> LinePart {
     let orange_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     strings!(&[
-        Style::new().paint(" Tip: "),
-        Style::new().paint("Run "),
+        Style::new().paint(" 提示："),
+        Style::new().paint("运行 "),
         Style::new()
             .fg(orange_color)
             .bold()
             .paint("zellij setup --check"),
-        Style::new().paint(" to find issues"),
+        Style::new().paint(" 排查问题"),
     ])
 }
 
@@ -55,11 +55,11 @@ pub fn zellij_setup_check_short(help: &ModeInfo) -> LinePart {
     let orange_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     strings!(&[
-        Style::new().paint(" Run "),
+        Style::new().paint(" 运行 "),
         Style::new()
             .fg(orange_color)
             .bold()
             .paint("zellij setup --check"),
-        Style::new().paint(" to find issues"),
+        Style::new().paint(" 排查问题"),
     ])
 }

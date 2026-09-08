@@ -369,11 +369,11 @@ pub fn keybinds(help: &ModeInfo, tip_name: &str, max_width: usize) -> LinePart {
 }
 
 pub fn descended_into_nested_session_hint(help: &ModeInfo, max_len: usize) -> LinePart {
-    nested_session_status_hint(help, "Ascend: ", &help.nested_ascend_keys, max_len)
+    nested_session_status_hint(help, "上升：", &help.nested_ascend_keys, max_len)
 }
 
 pub fn ascended_to_host_session_hint(help: &ModeInfo, max_len: usize) -> LinePart {
-    nested_session_status_hint(help, "Descend: ", &help.nested_descend_keys, max_len)
+    nested_session_status_hint(help, "下降：", &help.nested_descend_keys, max_len)
 }
 
 fn nested_session_status_hint(
@@ -387,7 +387,7 @@ fn nested_session_status_hint(
     let styled_label = Style::new().dimmed().italic().paint(format!(" {}", label));
     let mut key_bits: Vec<ANSIString> = vec![];
     if keys.is_empty() {
-        key_bits.push(Style::new().dimmed().italic().paint("<unbound>"));
+        key_bits.push(Style::new().dimmed().italic().paint("<未绑定>"));
     } else {
         for (i, key) in keys.iter().enumerate() {
             if i > 0 {
@@ -424,12 +424,12 @@ fn nested_session_status_hint(
 
 pub fn text_copied_hint(copy_destination: CopyDestination) -> LinePart {
     let hint = match copy_destination {
-        CopyDestination::Command => "Text piped to external command",
+        CopyDestination::Command => "文本已通过管道发送到外部命令",
         #[cfg(not(target_os = "macos"))]
-        CopyDestination::Primary => "Text copied to system primary selection",
+        CopyDestination::Primary => "文本已复制到系统主选区",
         #[cfg(target_os = "macos")] // primary selection does not exist on macos
-        CopyDestination::Primary => "Text copied to system clipboard",
-        CopyDestination::System => "Text copied to system clipboard",
+        CopyDestination::Primary => "文本已复制到系统剪贴板",
+        CopyDestination::System => "文本已复制到系统剪贴板",
     };
     LinePart {
         part: serialize_text(&Text::new(&hint).color_range(2, ..).opaque()),
@@ -438,7 +438,7 @@ pub fn text_copied_hint(copy_destination: CopyDestination) -> LinePart {
 }
 
 pub fn system_clipboard_error(palette: &Styling) -> LinePart {
-    let hint = " Error using the system clipboard.";
+    let hint = " 使用系统剪贴板时出错。";
     let red_color = palette_match!(palette.text_unselected.emphasis_3);
     LinePart {
         part: Style::new().fg(red_color).bold().paint(hint).to_string(),
@@ -452,10 +452,10 @@ pub fn fullscreen_panes_to_hide(palette: &Styling, panes_to_hide: usize) -> Line
     let orange_color = palette_match!(palette.text_unselected.emphasis_0);
     let shortcut_left_separator = Style::new().fg(text_color).bold().paint(" (");
     let shortcut_right_separator = Style::new().fg(text_color).bold().paint("): ");
-    let fullscreen = "FULLSCREEN";
+    let fullscreen = "全屏";
     let puls = "+ ";
     let panes = panes_to_hide.to_string();
-    let hide = " hidden panes";
+    let hide = " 个隐藏窗格";
     let len = fullscreen.chars().count()
         + puls.chars().count()
         + panes.chars().count()
@@ -483,8 +483,8 @@ pub fn floating_panes_are_visible(mode_info: &ModeInfo) -> LinePart {
     let orange_color = palette_match!(palette.text_unselected.emphasis_0);
     let shortcut_left_separator = Style::new().fg(white_color).bold().paint(" (");
     let shortcut_right_separator = Style::new().fg(white_color).bold().paint("): ");
-    let floating_panes = "FLOATING PANES VISIBLE";
-    let press = "Press ";
+    let floating_panes = "浮动窗格可见";
+    let press = "按 ";
     let pane_mode = format!(
         "{}",
         action_key(
@@ -508,7 +508,7 @@ pub fn floating_panes_are_visible(mode_info: &ModeInfo) -> LinePart {
         .unwrap_or(&KeyWithModifier::new(BareKey::Char('?')))
     );
     let p_right_separator = "> ";
-    let to_hide = "to hide.";
+    let to_hide = " 隐藏。";
 
     let len = floating_panes.chars().count()
         + press.chars().count()
@@ -541,13 +541,13 @@ pub fn locked_fullscreen_panes_to_hide(palette: &Styling, panes_to_hide: usize) 
     let text_color = palette_match!(palette.text_unselected.base);
     let green_color = palette_match!(palette.text_unselected.emphasis_2);
     let orange_color = palette_match!(palette.text_unselected.emphasis_0);
-    let locked_text = " -- INTERFACE LOCKED -- ";
+    let locked_text = " -- 界面已锁定 -- ";
     let shortcut_left_separator = Style::new().fg(text_color).bold().paint(" (");
     let shortcut_right_separator = Style::new().fg(text_color).bold().paint("): ");
-    let fullscreen = "FULLSCREEN";
+    let fullscreen = "全屏";
     let puls = "+ ";
     let panes = panes_to_hide.to_string();
-    let hide = " hidden panes";
+    let hide = " 个隐藏窗格";
     let len = locked_text.chars().count()
         + fullscreen.chars().count()
         + puls.chars().count()
@@ -574,8 +574,8 @@ pub fn locked_floating_panes_are_visible(palette: &Styling) -> LinePart {
     let orange_color = palette_match!(palette.text_unselected.emphasis_0);
     let shortcut_left_separator = Style::new().fg(white_color).bold().paint(" (");
     let shortcut_right_separator = Style::new().fg(white_color).bold().paint(")");
-    let locked_text = " -- INTERFACE LOCKED -- ";
-    let floating_panes = "FLOATING PANES VISIBLE";
+    let locked_text = " -- 界面已锁定 -- ";
+    let floating_panes = "浮动窗格可见";
 
     let len = locked_text.chars().count() + floating_panes.chars().count();
     LinePart {
