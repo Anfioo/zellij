@@ -118,7 +118,7 @@ impl ZellijPlugin for State {
             Event::ModeUpdate(mode_info) => {
                 self.colors = mode_info.style.colors;
                 if self.latest_mode_info.as_ref().and_then(|l| l.base_mode) != mode_info.base_mode {
-                    // reset ui state
+                    // 重置界面状态
                     self.current_screen.reset_state(self.is_setup_wizard);
                 }
                 self.latest_mode_info = Some(mode_info.clone());

@@ -48,12 +48,12 @@ impl PresetsScreen {
         if let Some(rebind_leaders_screen) = self.rebind_leaders_screen.as_mut() {
             match key.bare_key {
                 BareKey::Esc if key.has_no_modifiers() => {
-                    // consume screen without applying its modifiers
+                    // 关闭界面但不应用其修饰键
                     drop(self.rebind_leaders_screen.take());
                     return true;
                 },
                 BareKey::Enter if key.has_no_modifiers() => {
-                    // consume screen and apply its modifiers
+                    // 关闭界面并应用其修饰键
                     let (primary_modifier, secondary_modifier) =
                         rebind_leaders_screen.primary_and_secondary_modifiers();
                     self.primary_modifier = primary_modifier;
@@ -93,13 +93,11 @@ impl PresetsScreen {
                 should_render = true;
             }
         } else if key.bare_key == BareKey::Char('l') && key.has_no_modifiers() {
-            // for the time being this screen has been disabled because it was deemed too confusing
-            // and its use-cases are very limited (it's possible to achieve the same results by
-            // applying a preset and then rebinding the leader keys)
+            // 目前此界面已被禁用，因为它被认为过于令人困惑，
+            // 且其用例非常有限（可以通过先应用预设再重新绑定引导键来达到相同效果）
             //
-            // the code is left here in case someone feels strongly about implementing this on
-            // their own, and because at the time of writing I'm a little ambiguous about this
-            // decision. At some point it should be refactored away
+            // 代码留在这里，以防有人强烈希望自己实现此功能，
+            // 也因为在编写此代码时我对这个决定还有些犹豫。将来某个时候应该将其重构掉
             //             self.rebind_leaders_screen = Some(
             //                 RebindLeadersScreen::default()
             //                     .with_rebinding_for_presets()
@@ -212,8 +210,7 @@ impl PresetsScreen {
     }
     fn reconfigure(&self, selected: usize, write_to_disk: bool) {
         if selected == 0 {
-            // TODO: these should be part of a "transaction" when they are
-            // implemented
+            // TODO: 这些在实现后应该成为 "事务" 的一部分
             reconfigure(
                 default_keybinds(
                     self.primary_modifier

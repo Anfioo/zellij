@@ -47,8 +47,8 @@ impl Default for RebindLeadersScreen {
 }
 
 impl RebindLeadersScreen {
-    // temporarily commented out for the time being because the extra leaders screen was deemed a bit
-    // confusing, see comment in <l> key
+    // 暂时注释掉，因为额外的引导键界面被认为有点令人困惑，
+    // 请参见 <l> 按键中的注释
     //     pub fn with_rebinding_for_presets(mut self) -> Self {
     //         self.is_rebinding_for_presets = true;
     //         self
