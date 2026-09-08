@@ -105,13 +105,13 @@ impl App {
     }
 
     fn render_no_panes_message(&self, rows: usize, cols: usize) {
-        let message = "PANES SELECTED FOR OTHER CLIENT";
+        let message = "已为其他客户端选择的窗格";
         let message_component = Text::new(message).color_all(2);
         let base_x = cols.saturating_sub(message.len()) / 2;
         let base_y = rows / 2;
         print_text_with_coordinates(message_component, base_x, base_y, None, None);
 
-        let esc_message = "<ESC> - close";
+        let esc_message = "<ESC> - 关闭";
         let esc_message_component = Text::new(esc_message).color_substring(3, "<ESC>");
         let esc_base_x = cols.saturating_sub(esc_message.len()) / 2;
         let esc_base_y = base_y + 2;
@@ -119,7 +119,7 @@ impl App {
     }
 
     fn header_text() -> (&'static str, Text) {
-        let header_text = "<ESC> - cancel, <TAB> - move";
+        let header_text = "<ESC> - 取消, <TAB> - 移动";
         let header_text_component = Text::new(header_text)
             .color_substring(3, "<ESC>")
             .color_substring(3, "<TAB>");
@@ -140,21 +140,17 @@ impl App {
     }
 
     fn group_actions_text(&self) -> (&'static str, Text) {
-        let count_text = if self.grouped_panes_count == 1 {
-            format!("GROUP ACTIONS ({} SELECTED PANE)", self.grouped_panes_count)
-        } else {
-            format!(
-                "GROUP ACTIONS ({} SELECTED PANES)",
-                self.grouped_panes_count
-            )
-        };
+        let count_text = format!(
+            "组操作 ({} 个已选窗格)",
+            self.grouped_panes_count
+        );
 
         let component = Text::new(&count_text).color_all(2);
         (Box::leak(count_text.into_boxed_str()), component)
     }
 
     fn shortcuts_line1_text() -> (&'static str, Text) {
-        let text = "<b> - break out, <s> - stack, <c> - close";
+        let text = "<b> - 拆分到新标签页, <s> - 堆叠, <c> - 关闭";
         let component = Text::new(text)
             .color_substring(3, "<b>")
             .color_substring(3, "<s>")
@@ -163,7 +159,7 @@ impl App {
     }
 
     fn shortcuts_line2_text() -> (&'static str, Text) {
-        let text = "<l> - break left, <r> - break right";
+        let text = "<l> - 拆分到左侧, <r> - 拆分到右侧";
         let component = Text::new(text)
             .color_substring(3, "<l>")
             .color_substring(3, "<r>");
@@ -171,7 +167,7 @@ impl App {
     }
 
     fn shortcuts_line3_text() -> (&'static str, Text) {
-        let text = "<e> - embed, <f> - float";
+        let text = "<e> - 嵌入, <f> - 浮动";
         let component = Text::new(text)
             .color_substring(3, "<e>")
             .color_substring(3, "<f>");
@@ -269,7 +265,7 @@ impl App {
         self.grouped_panes_count = count;
         if let Some(own_plugin_id) = self.own_plugin_id {
             if previous_count != count {
-                rename_plugin_pane(own_plugin_id, "Multiple Pane Select".to_string());
+                rename_plugin_pane(own_plugin_id, "多窗格选择".to_string());
             }
             if previous_count != 0 && count != 0 && previous_count != count {
                 if self.doherty_threshold_elapsed_since_highlight() {
@@ -561,12 +557,12 @@ fn group_controls_length(mode_info: &ModeInfo) -> usize {
     }
 
     if pane_group_bound {
-        let toggle_text = format!("<{}> Toggle", pane_group_key);
+        let toggle_text = format!("<{}> 切换", pane_group_key);
         length += toggle_text.chars().count() + 4;
     }
 
     if group_mark_bound {
-        let follow_text = format!("<{}> Follow Focus", group_mark_key);
+        let follow_text = format!("<{}> 跟随焦点", group_mark_key);
         length += follow_text.chars().count() + 4;
     }
 
@@ -667,7 +663,7 @@ fn render_follow_focus_ribbon(
     base_y: usize,
     mode_info: &ModeInfo,
 ) {
-    let follow_text = format!("<{}> Follow Focus", group_mark_key);
+    let follow_text = format!("<{}> 跟随焦点", group_mark_key);
     let key_highlight = format!("{}", group_mark_key);
 
     let mut ribbon = Text::new(&follow_text).color_substring(0, &key_highlight);
@@ -680,7 +676,7 @@ fn render_follow_focus_ribbon(
 }
 
 fn render_toggle_group_ribbon(pane_group_key: &str, base_x: usize, base_y: usize) -> usize {
-    let toggle_text = format!("<{}> Toggle", pane_group_key);
+    let toggle_text = format!("<{}> 切换", pane_group_key);
     let key_highlight = format!("{}", pane_group_key);
 
     print_ribbon_with_coordinates(
