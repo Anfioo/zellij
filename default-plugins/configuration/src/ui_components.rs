@@ -7,10 +7,10 @@ pub fn top_tab_menu(cols: usize, current_screen: &Screen, colors: &Styling) {
         PaletteColor::Rgb((r, g, b)) => format!("\u{1b}[48;2;{};{};{}m\u{1b}[0K", r, g, b),
         PaletteColor::EightBit(color) => format!("\u{1b}[48;5;{}m\u{1b}[0K", color),
     };
-    let first_ribbon_text_long = "Rebind leader keys";
-    let second_ribbon_text_long = "Change mode behavior";
-    let first_ribbon_text_short = "Rebind keys";
-    let second_ribbon_text_short = "Mode behavior";
+    let first_ribbon_text_long = "重新绑定前导键";
+    let second_ribbon_text_long = "更改模式行为";
+    let first_ribbon_text_short = "重新绑定按键";
+    let second_ribbon_text_short = "模式行为";
     let (first_ribbon_is_selected, second_ribbon_is_selected) = match current_screen {
         Screen::RebindLeaders(_) => (true, false),
         Screen::Presets(_) => (false, true),
@@ -18,9 +18,9 @@ pub fn top_tab_menu(cols: usize, current_screen: &Screen, colors: &Styling) {
     let (first_ribbon_text, second_ribbon_text, starting_positions) = if cols
         >= first_ribbon_text_long.chars().count() + second_ribbon_text_long.chars().count() + 14
     {
-        (first_ribbon_text_long, second_ribbon_text_long, (6, 28))
+        (first_ribbon_text_long, second_ribbon_text_long, (6, 17))
     } else {
-        (first_ribbon_text_short, second_ribbon_text_short, (6, 21))
+        (first_ribbon_text_short, second_ribbon_text_short, (6, 16))
     };
     let mut first_ribbon = Text::new(first_ribbon_text);
     let mut second_ribbon = Text::new(second_ribbon_text);
@@ -39,7 +39,7 @@ pub fn top_tab_menu(cols: usize, current_screen: &Screen, colors: &Styling) {
 
 pub fn back_to_presets() {
     let esc = Text::new("<ESC>").color_range(3, ..);
-    let first_ribbon = Text::new("Back to Presets");
+    let first_ribbon = Text::new("返回预设");
     print_text_with_coordinates(esc, 0, 0, None, None);
     print_ribbon_with_coordinates(first_ribbon, 6, 0, None, None);
 }

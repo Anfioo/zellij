@@ -104,12 +104,12 @@ impl ZellijPlugin for State {
         if self.is_setup_wizard {
             self.ui_size = 18;
             self.current_screen = Screen::new_reset_keybindings_screen(Some(0));
-            rename_plugin_pane(own_plugin_id, "First Run Setup Wizard (Step 1/1)");
+            rename_plugin_pane(own_plugin_id, "首次运行设置向导 (第 1/1 步)");
             resize_focused_pane(Resize::Increase);
             resize_focused_pane(Resize::Increase);
             resize_focused_pane(Resize::Increase);
         } else {
-            rename_plugin_pane(own_plugin_id, "Configuration");
+            rename_plugin_pane(own_plugin_id, "配置");
         }
     }
     fn update(&mut self, event: Event) -> bool {
@@ -154,12 +154,12 @@ impl ZellijPlugin for State {
                 match config_file_path {
                     Some(failed_path) => {
                         self.notification = Some(format!(
-                            "Failed to write configuration file: {}",
+                            "写入配置文件失败: {}",
                             failed_path
                         ));
                     },
                     None => {
-                        self.notification = Some(format!("Failed to write configuration file."));
+                        self.notification = Some(format!("写入配置文件失败。"));
                     },
                 }
                 should_render = true;

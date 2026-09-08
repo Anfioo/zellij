@@ -308,7 +308,7 @@ impl RebindLeadersScreen {
         let primary_modifier_key_text = self.primary_modifier_text();
         let (primary_modifier_text, primary_modifier_start_position) =
             if cols >= WIDTH_BREAKPOINTS.0 {
-                (format!("Primary: {}", primary_modifier_key_text), 9)
+                (format!("主前导键: {}", primary_modifier_key_text), 5)
             } else {
                 (format!("{}", primary_modifier_key_text), 0)
             };
@@ -350,25 +350,25 @@ impl RebindLeadersScreen {
             WIDTH_BREAKPOINTS.1
         };
         let leader_keys_text = if cols >= WIDTH_BREAKPOINTS.0 {
-            "Rebind leader keys (Non-Colliding preset)"
+            "重新绑定前导键（无冲突预设）"
         } else if cols >= WIDTH_BREAKPOINTS.1 {
-            "Rebind leader keys (Non-Colliding)"
+            "重新绑定前导键（无冲突）"
         } else {
-            "Rebind leader keys"
+            "重新绑定前导键"
         };
         let base_x = cols.saturating_sub(screen_width) / 2;
         let base_y = rows.saturating_sub(10) / 2;
         let explanation_text_1 = if cols >= WIDTH_BREAKPOINTS.0 {
-            "Unlock toggle - used to expose the other modes (eg. PANE, TAB)"
+            "解锁切换 - 用于显示其他模式（如 PANE、TAB）"
         } else if cols >= WIDTH_BREAKPOINTS.1 {
-            "Unlock toggle - expose other modes"
+            "解锁切换 - 显示其他模式"
         } else {
             ""
         };
         let explanation_text_2 = if cols >= WIDTH_BREAKPOINTS.0 {
-            "Secondary modifier - prefixes common actions (eg. New Pane)"
+            "辅助修饰键 - 为常用操作添加前缀（如新窗格）"
         } else if cols >= WIDTH_BREAKPOINTS.1 {
-            "Secondary modifier - common actions"
+            "辅助修饰键 - 常用操作"
         } else {
             ""
         };
@@ -380,14 +380,14 @@ impl RebindLeadersScreen {
             None,
         );
         print_text_with_coordinates(
-            Text::new(explanation_text_1).color_range(1, ..=12),
+            Text::new(explanation_text_1).color_range(1, ..=3),
             base_x,
             base_y + 2,
             None,
             None,
         );
         print_text_with_coordinates(
-            Text::new(explanation_text_2).color_range(1, ..=17),
+            Text::new(explanation_text_2).color_range(1, ..=4),
             base_x,
             base_y + 3,
             None,
@@ -401,23 +401,23 @@ impl RebindLeadersScreen {
             WIDTH_BREAKPOINTS.1
         };
         let leader_keys_text = if cols >= WIDTH_BREAKPOINTS.0 {
-            "Rebind leader keys (Default preset)"
+            "重新绑定前导键（默认预设）"
         } else {
-            "Rebind leader keys"
+            "重新绑定前导键"
         };
         let base_x = cols.saturating_sub(screen_width) / 2;
         let base_y = rows.saturating_sub(10) / 2;
         let explanation_text_1 = if cols >= WIDTH_BREAKPOINTS.0 {
-            "Primary - the modifier used to switch modes (eg. PANE, TAB)"
+            "主修饰键 - 用于切换模式的修饰键（如 PANE、TAB）"
         } else if cols >= WIDTH_BREAKPOINTS.1 {
-            "Primary - used to switch modes"
+            "主修饰键 - 用于切换模式"
         } else {
             ""
         };
         let explanation_text_2 = if cols >= WIDTH_BREAKPOINTS.0 {
-            "Secondary - the modifier used for common actions (eg. New Pane)"
+            "辅助修饰键 - 用于常用操作的修饰键（如新窗格）"
         } else if cols >= WIDTH_BREAKPOINTS.1 {
-            "Secondary - common actions"
+            "辅助修饰键 - 常用操作"
         } else {
             ""
         };
@@ -429,14 +429,14 @@ impl RebindLeadersScreen {
             None,
         );
         print_text_with_coordinates(
-            Text::new(explanation_text_1).color_range(1, ..=6),
+            Text::new(explanation_text_1).color_range(1, ..=3),
             base_x,
             base_y + 2,
             None,
             None,
         );
         print_text_with_coordinates(
-            Text::new(explanation_text_2).color_range(1, ..=8),
+            Text::new(explanation_text_2).color_range(1, ..=4),
             base_x,
             base_y + 3,
             None,
@@ -459,7 +459,7 @@ impl RebindLeadersScreen {
             };
             let (primary_modifier_text, primary_modifier_start_position) =
                 if cols >= WIDTH_BREAKPOINTS.0 {
-                    (format!("Unlock Toggle: {}", main_leader_key_text), 15)
+                    (format!("解锁切换: {}", main_leader_key_text), 5)
                 } else {
                     (format!("{}", main_leader_key_text), 0)
                 };
@@ -470,12 +470,12 @@ impl RebindLeadersScreen {
             }
             print_text_with_coordinates(primary_modifier, base_x, base_y + 5, None, None);
             if self.rebinding_main_leader {
-                let first_bulletin = "[Enter new key] eg.";
+                let first_bulletin = "[输入新键] 例如";
                 let second_bulletin = "\"Ctrl g\", \"Alt g\",";
                 let third_bulletin = "\"Alt ESC\", \"Ctrl SPACE\"";
                 print_nested_list_with_coordinates(
                     vec![
-                        NestedListItem::new(first_bulletin).color_range(3, ..=14),
+                        NestedListItem::new(first_bulletin).color_range(3, ..=5),
                         NestedListItem::new(second_bulletin),
                         NestedListItem::new(third_bulletin),
                     ],
@@ -503,11 +503,11 @@ impl RebindLeadersScreen {
             if cols >= WIDTH_BREAKPOINTS.0 {
                 if self.currently_in_unlock_first() {
                     (
-                        format!("Secondary Modifier: {}", secondary_modifier_key_text),
-                        20,
+                        format!("辅助修饰键: {}", secondary_modifier_key_text),
+                        6,
                     )
                 } else {
-                    (format!("Secondary: {}", secondary_modifier_key_text), 11)
+                    (format!("辅助键: {}", secondary_modifier_key_text), 4)
                 }
             } else {
                 (format!("{}", secondary_modifier_key_text), 0)
@@ -570,20 +570,20 @@ impl RebindLeadersScreen {
         if self.is_rebinding_for_presets {
             return self.render_help_text_for_presets_rebinding(rows, cols);
         }
-        let help_text_long = "Help: <←↓↑→> - navigate, <SPACE> - select, <ENTER> - apply, <Ctrl a> - save, <Ctrl c> - reset, <ESC> - close";
-        let help_text_medium = "Help: <←↓↑→/SPACE> - navigate/select, <ENTER/Ctrl a> - apply/save, <Ctrl c> - reset, <ESC> - close";
+        let help_text_long = "帮助: <←↓↑→> - 导航, <SPACE> - 选择, <ENTER> - 应用, <Ctrl a> - 保存, <Ctrl c> - 重置, <ESC> - 关闭";
+        let help_text_medium = "帮助: <←↓↑→/SPACE> - 导航/选择, <ENTER/Ctrl a> - 应用/保存, <Ctrl c> - 重置, <ESC> - 关闭";
         let help_text_short =
-            "Help: <←↓↑→>/<SPACE>/<ENTER> select/<Ctrl a> save/<Ctrl c> reset/<ESC>";
+            "帮助: <←↓↑→>/<SPACE>/<ENTER> 选择/<Ctrl a> 保存/<Ctrl c> 重置/<ESC>";
         let help_text_minimum = "<←↓↑→>/<SPACE>/<ENTER>/<Ctrl a>/<Ctrl c>/<ESC>";
         if cols >= help_text_long.chars().count() {
             print_text_with_coordinates(
                 Text::new(help_text_long)
-                    .color_range(2, 6..=12)
-                    .color_range(2, 25..=31)
-                    .color_range(2, 43..=49)
+                    .color_range(2, 4..=10)
+                    .color_range(2, 17..=23)
+                    .color_range(2, 31..=37)
+                    .color_range(2, 45..=52)
                     .color_range(2, 60..=67)
-                    .color_range(2, 77..=84)
-                    .color_range(2, 95..=99),
+                    .color_range(2, 75..=79),
                 0,
                 rows,
                 None,
@@ -592,10 +592,10 @@ impl RebindLeadersScreen {
         } else if cols >= help_text_medium.chars().count() {
             print_text_with_coordinates(
                 Text::new(help_text_medium)
-                    .color_range(2, 6..=17)
-                    .color_range(2, 38..=51)
-                    .color_range(2, 67..=75)
-                    .color_range(2, 85..=89),
+                    .color_range(2, 4..=15)
+                    .color_range(2, 26..=39)
+                    .color_range(2, 50..=58)
+                    .color_range(2, 65..=69),
                 0,
                 rows,
                 None,
@@ -604,12 +604,12 @@ impl RebindLeadersScreen {
         } else if cols >= help_text_short.chars().count() {
             print_text_with_coordinates(
                 Text::new(help_text_short)
-                    .color_range(2, 6..=11)
-                    .color_range(2, 13..=19)
-                    .color_range(2, 21..=27)
-                    .color_range(2, 36..=43)
-                    .color_range(2, 50..=57)
-                    .color_range(2, 65..=69),
+                    .color_range(2, 4..=9)
+                    .color_range(2, 11..=17)
+                    .color_range(2, 19..=25)
+                    .color_range(2, 30..=37)
+                    .color_range(2, 42..=49)
+                    .color_range(2, 54..=58),
                 0,
                 rows,
                 None,
@@ -632,16 +632,16 @@ impl RebindLeadersScreen {
         }
     }
     fn render_help_text_for_presets_rebinding(&self, rows: usize, cols: usize) {
-        let help_text_long = "Help: <←↓↑→> - navigate, <SPACE> - select, <ENTER> - apply to presets in previous screen";
-        let help_text_medium = "Help: <←↓↑→> - navigate, <SPACE> - select, <ENTER> - apply";
-        let help_text_short = "<←↓↑→/SPACE> - navigate/select, <ENTER> - apply";
+        let help_text_long = "帮助: <←↓↑→> - 导航, <SPACE> - 选择, <ENTER> - 应用到上一屏幕的预设";
+        let help_text_medium = "帮助: <←↓↑→> - 导航, <SPACE> - 选择, <ENTER> - 应用";
+        let help_text_short = "<←↓↑→/SPACE> - 导航/选择, <ENTER> - 应用";
         let help_text_minimum = "<←↓↑→>/<SPACE>/<ENTER>";
         if cols >= help_text_long.chars().count() {
             print_text_with_coordinates(
                 Text::new(help_text_long)
-                    .color_range(2, 6..=12)
-                    .color_range(2, 25..=31)
-                    .color_range(2, 43..=49),
+                    .color_range(2, 4..=10)
+                    .color_range(2, 17..=23)
+                    .color_range(2, 31..=37),
                 0,
                 rows,
                 None,
@@ -650,9 +650,9 @@ impl RebindLeadersScreen {
         } else if cols >= help_text_medium.chars().count() {
             print_text_with_coordinates(
                 Text::new(help_text_medium)
-                    .color_range(2, 6..=12)
-                    .color_range(2, 25..=31)
-                    .color_range(2, 43..=49),
+                    .color_range(2, 4..=10)
+                    .color_range(2, 17..=23)
+                    .color_range(2, 31..=37),
                 0,
                 rows,
                 None,
@@ -663,7 +663,7 @@ impl RebindLeadersScreen {
                 Text::new(help_text_short)
                     .color_range(2, 1..=4)
                     .color_range(2, 6..=10)
-                    .color_range(2, 32..=38),
+                    .color_range(2, 22..=28),
                 0,
                 rows,
                 None,
@@ -780,9 +780,9 @@ impl RebindLeadersScreen {
             self.bind_all_primary_actions(&mut keys_to_unbind, &mut keys_to_bind);
         }
         if write_to_disk {
-            self.notification = Some("Configuration applied and saved to disk.".to_owned());
+            self.notification = Some("配置已应用并保存到磁盘。".to_owned());
         } else {
-            self.notification = Some("Configuration applied to current session.".to_owned());
+            self.notification = Some("配置已应用到当前会话。".to_owned());
         }
         rebind_keys(keys_to_unbind, keys_to_bind, write_to_disk);
     }
@@ -1318,17 +1318,17 @@ impl RebindLeadersScreen {
     fn warning_text(&self, max_width: usize) -> Option<String> {
         if self.needs_kitty_support() {
             if max_width >= 38 {
-                Some(String::from("Warning: requires supporting terminal."))
+                Some(String::from("警告: 需要支持的终端。"))
             } else {
-                Some(String::from("Requires supporting terminal"))
+                Some(String::from("需要支持的终端"))
             }
         } else if self.primary_modifier.is_empty() && self.secondary_modifier.is_empty() {
             if max_width >= 49 {
                 Some(String::from(
-                    "Warning: no leaders defined. UI will be disabled.",
+                    "警告: 未定义前导键。UI 将被禁用。",
                 ))
             } else {
-                Some(String::from("No leaders. UI will be unusable."))
+                Some(String::from("无前导键。UI 将无法使用。"))
             }
         } else {
             None
