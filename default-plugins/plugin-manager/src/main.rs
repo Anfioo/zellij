@@ -25,7 +25,7 @@ impl SearchResult {
 
 pub struct NewPluginScreen {
     new_plugin_url: String,
-    new_plugin_config: Vec<(String, String)>, // key/val for easy in-place manipulation
+    new_plugin_config: Vec<(String, String)>, // 键/值对，便于原地操作
     new_config_key: String,
     new_config_val: String,
     entering_plugin_url: bool,
@@ -67,7 +67,7 @@ impl NewPluginScreen {
         self.render_title(cols);
         self.render_url_field(cols);
         self.render_configuration_title();
-        let config_list_len = self.render_config_list(cols, rows.saturating_sub(10)); // 10 - the rest
+        let config_list_len = self.render_config_list(cols, rows.saturating_sub(10)); // 10 - 其余部分
         self.render_background_toggle(6 + config_list_len + 1);
         if !self.editing_configuration() {
             self.render_help(rows);
@@ -88,12 +88,12 @@ impl NewPluginScreen {
     fn render_url_field(&self, cols: usize) {
         let url_field = if self.entering_plugin_url {
             let truncated_url =
-                truncate_string_start(&self.new_plugin_url, cols.saturating_sub(19)); // 17 the length of the prompt + 2 for padding and cursor
+                truncate_string_start(&self.new_plugin_url, cols.saturating_sub(19)); // 17 是提示的长度 + 2 用于内边距和光标
             let text = format!("Enter Plugin URL: {}_", truncated_url);
             Text::new(text).color_range(2, ..=16).color_range(3, 18..)
         } else {
             let truncated_url =
-                truncate_string_start(&self.new_plugin_url, cols.saturating_sub(18)); // 17 the length of the prompt + 1 for padding
+                truncate_string_start(&self.new_plugin_url, cols.saturating_sub(18)); // 17 是提示的长度 + 1 用于内边距
             let text = format!("Enter Plugin URL: {}", truncated_url);
             Text::new(text).color_range(2, ..=16).color_range(0, 18..)
         };
@@ -178,8 +178,8 @@ impl NewPluginScreen {
         config_val: &str,
         config_line_max_len: usize,
     ) -> NestedListItem {
-        let config_line_max_len = config_line_max_len.saturating_sub(6); // 3 - line padding, 1 -
-                                                                         // cursor, 2 ": "
+        let config_line_max_len = config_line_max_len.saturating_sub(6); // 3 - 行内边距, 1 -
+                                                                         // 光标, 2 ": "
         let config_key_max_len = config_line_max_len / 2;
         let config_val_max_len = config_line_max_len.saturating_sub(config_key_max_len);
         let config_key = if config_key.chars().count() > config_key_max_len {
@@ -219,7 +219,7 @@ impl NewPluginScreen {
         is_selected: bool,
         config_line_max_len: usize,
     ) -> NestedListItem {
-        let config_line_max_len = config_line_max_len.saturating_sub(5); // 3 - line padding,
+        let config_line_max_len = config_line_max_len.saturating_sub(5); // 3 - 行内边距,
                                                                          // 2 - ": "
         let config_key = if config_key.is_empty() {
             "<EMPTY>"
@@ -390,7 +390,7 @@ impl NewPluginScreen {
                 } else if self.entering_config_val {
                     self.entering_config_val = false;
                     if self.selected_config_index.is_none() {
-                        // new config, add it to the map
+                        // 新配置，将其添加到映射中
                         self.add_edit_buffer_to_config();
                         self.entering_config_key = true;
                     } else {
@@ -601,7 +601,7 @@ impl ZellijPlugin for State {
             None => {
                 self.render_search(cols);
                 let list_y = 2;
-                let max_list_items = rows.saturating_sub(4); // 2 top padding, 2 bottom padding
+                let max_list_items = rows.saturating_sub(4); // 2 顶部内边距, 2 底部内边距
                 let (selected_index_in_list, plugin_list) = if self.is_searching() {
                     self.render_search_results(cols)
                 } else {
@@ -703,7 +703,7 @@ impl State {
             print_text_with_coordinates(text, 0, 0, None, None);
         } else {
             let truncated_search_term =
-                truncate_string_start(&self.search_term, cols.saturating_sub(10)); // 9 the length of the SEARCH prompt + 1 for the cursor
+                truncate_string_start(&self.search_term, cols.saturating_sub(10)); // 9 是 SEARCH 提示的长度 + 1 用于光标
             let text = format!(" SEARCH: {}_", truncated_search_term);
             let text = Text::new(text).color_range(3, 9..);
             print_text_with_coordinates(text, 0, 0, None, None);
@@ -719,7 +719,7 @@ impl State {
     ) -> Vec<NestedListItem> {
         let mut items = vec![];
         let plugin_location_len = plugin_info.location.chars().count();
-        let max_location_len = cols.saturating_sub(3); // 3 for the bulletin
+        let max_location_len = cols.saturating_sub(3); // 3 用于编号
         let location_string = if plugin_location_len > max_location_len {
             truncate_string_start(&plugin_info.location, max_location_len)
         } else {
@@ -751,7 +751,7 @@ impl State {
         config_val: &str,
         cols: usize,
     ) -> NestedListItem {
-        let config_line_padding = 9; // 7, left padding + 2 for the ": " between key/val
+        let config_line_padding = 9; // 7, 左内边距 + 2 用于键/值之间的 ": "
         let config_line_max_len = cols.saturating_sub(config_line_padding);
         let config_key_max_len = config_line_max_len / 2;
         let config_val_max_len = config_line_max_len.saturating_sub(config_key_max_len);
@@ -785,8 +785,8 @@ impl State {
         let indices = &search_result.indices;
         let plus_indication_len = plus_indication
             .map(|p| p.to_string().chars().count() + 4)
-            .unwrap_or(0); // 4 for the plus indication decorators and space
-        let max_location_len = cols.saturating_sub(plus_indication_len + 3); // 3 for the bulletin
+            .unwrap_or(0); // 4 用于加号指示装饰符和空格
+        let max_location_len = cols.saturating_sub(plus_indication_len + 3); // 3 用于编号
         let (location_string, indices) = if plugin_info.location.chars().count() <= max_location_len
         {
             (plugin_info.location.clone(), indices.clone())
@@ -849,7 +849,7 @@ impl State {
         let tab_of_plugin_id = self
             .get_tab_of_plugin_id(plugin_id)
             .unwrap_or_else(|| "N/A".to_owned());
-        let tab_line_padding_count = 10; // 5 the length of the "Tab: " + 5 for the left padding
+        let tab_line_padding_count = 10; // 5 是 "Tab: " 的长度 + 5 用于左内边距
 
         let tab_of_plugin_id =
             if tab_of_plugin_id.chars().count() + tab_line_padding_count > max_width {
