@@ -125,14 +125,14 @@ impl ServerOsApi for FakeInputOutput {
     }
 }
 
-/// Parse KDL layout string and extract tiled and floating layouts
+/// 解析 KDL 布局 string and 提取 平铺 and 浮动 布局
 fn parse_kdl_layout(kdl_str: &str) -> (TiledPaneLayout, Vec<FloatingPaneLayout>) {
     let layout = Layout::from_kdl(kdl_str, Some("test_layout".into()), None, None)
         .expect("Failed to parse KDL layout");
     layout.new_tab()
 }
 
-/// Creates all the fixtures needed for LayoutApplier tests
+/// Creates all the fixtures needed for LayoutApplier 测试
 #[allow(clippy::type_complexity)]
 fn create_layout_applier_fixtures(
     size: Size,
@@ -184,7 +184,7 @@ fn create_layout_applier_fixtures(
 
     let os_api = Box::new(FakeInputOutput {});
 
-    // Create TiledPanes
+    // 创建 TiledPanes
     let connected_clients_set = Rc::new(RefCell::new(HashSet::from([client_id])));
     let mode_info = Rc::new(RefCell::new(HashMap::new()));
     let stacked_resize = Rc::new(RefCell::new(false));
@@ -212,7 +212,7 @@ fn create_layout_applier_fixtures(
         senders.clone(),
     );
 
-    // Create FloatingPanes
+    // 创建 FloatingPanes
     let floating_panes = FloatingPanes::new(
         display_area.clone(),
         viewport.clone(),
@@ -260,7 +260,7 @@ fn create_layout_applier_fixtures(
     )
 }
 
-/// Creates fixtures with receivers for verifying messages sent to pty and plugin threads
+/// Creates fixtures with 接收者 for 验证 消息 sent to pty and 插件 线程
 #[allow(clippy::type_complexity)]
 fn create_layout_applier_fixtures_with_receivers(
     size: Size,
@@ -320,7 +320,7 @@ fn create_layout_applier_fixtures_with_receivers(
 
     let os_api = Box::new(FakeInputOutput {});
 
-    // Create TiledPanes
+    // 创建 TiledPanes
     let connected_clients_set = Rc::new(RefCell::new(HashSet::from([client_id])));
     let mode_info = Rc::new(RefCell::new(HashMap::new()));
     let stacked_resize = Rc::new(RefCell::new(false));
@@ -348,7 +348,7 @@ fn create_layout_applier_fixtures_with_receivers(
         senders.clone(),
     );
 
-    // Create FloatingPanes
+    // 创建 FloatingPanes
     let floating_panes = FloatingPanes::new(
         display_area.clone(),
         viewport.clone(),
@@ -398,7 +398,7 @@ fn create_layout_applier_fixtures_with_receivers(
     )
 }
 
-/// Takes a snapshot of the current pane state for assertion
+/// Takes a 快照 of the 当前 窗格 状态 for 断言
 fn take_pane_state_snapshot(
     tiled_panes: &TiledPanes,
     floating_panes: &FloatingPanes,
@@ -408,7 +408,7 @@ fn take_pane_state_snapshot(
 ) -> String {
     let mut output = String::new();
 
-    // Viewport info
+    // 视口 info
     let viewport_state = viewport.borrow();
     writeln!(
         &mut output,
@@ -425,12 +425,12 @@ fn take_pane_state_snapshot(
     )
     .unwrap();
 
-    // Focus state
+    // 焦点 状态
     writeln!(&mut output, "FOCUS: {:?}", focus_pane_id).unwrap();
 
     writeln!(&mut output).unwrap();
 
-    // Tiled panes
+    // 平铺 窗格
     writeln!(&mut output, "TILED PANES ({})", tiled_panes.panes.len()).unwrap();
     let mut tiled_list: Vec<_> = tiled_panes.get_panes().collect();
     tiled_list.sort_by_key(|(id, _)| **id);
@@ -468,7 +468,7 @@ fn take_pane_state_snapshot(
         writeln!(&mut output).unwrap();
     }
 
-    // Floating panes
+    // 浮动 窗格
     if floating_panes.pane_ids().count() > 0 {
         writeln!(
             &mut output,
@@ -510,7 +510,7 @@ fn take_pane_state_snapshot(
     output
 }
 
-/// Format a Run instruction as a human-readable string
+/// 格式 a Run instruction as a human-readable string
 fn format_run_instruction(run: &Option<Run>) -> String {
     match run {
         None => "None".to_string(),
@@ -534,7 +534,7 @@ fn format_run_instruction(run: &Option<Run>) -> String {
     }
 }
 
-/// Collect all close pane messages from the pty receiver
+/// 收集 all 关闭 窗格 消息 from the pty 接收者
 fn collect_close_pane_messages(
     pty_receiver: &Receiver<(PtyInstruction, zellij_utils::errors::ErrorContext)>,
 ) -> Vec<PaneId> {
@@ -547,7 +547,7 @@ fn collect_close_pane_messages(
     closed_panes
 }
 
-/// Collect all unload plugin messages from the plugin receiver
+/// 收集 all 卸载 插件 消息 from the 插件 接收者
 fn collect_unload_plugin_messages(
     plugin_receiver: &Receiver<(PluginInstruction, zellij_utils::errors::ErrorContext)>,
 ) -> Vec<u32> {
@@ -1152,7 +1152,7 @@ fn test_apply_layout_with_focus() {
         )
         .unwrap();
 
-    // Snapshot should show FOCUS: Some(Terminal(2))
+    // 快照 should show 焦点: Some(终端(2))
     assert_snapshot!(take_pane_state_snapshot(
         &tiled_panes,
         &floating_panes,
@@ -1410,7 +1410,7 @@ fn test_apply_layout_with_borderless_panes() {
         )
         .unwrap();
 
-    // Snapshot should show viewport adjusted for borderless panes
+    // 快照 should show 视口 adjusted for borderless 窗格
     assert_snapshot!(take_pane_state_snapshot(
         &tiled_panes,
         &floating_panes,
@@ -1710,10 +1710,10 @@ fn test_apply_layout_with_mixed_tiled_and_floating_panes() {
 
     assert_eq!(should_show_floating, true);
 
-    // Snapshot should show:
-    // - 3 tiled panes with correct geometries, commands, and names
-    // - 2 floating panes with correct positions and properties
-    // - Focus on terminal pane (Terminal(2))
+    // 快照 should show:
+    // - 3 平铺 窗格 with correct geometries, 命令, and names
+    // - 2 浮动 窗格 with correct positions and properties
+    // - 焦点 on 终端 窗格 (终端(2))
     assert_snapshot!(take_pane_state_snapshot(
         &tiled_panes,
         &floating_panes,
@@ -1725,7 +1725,7 @@ fn test_apply_layout_with_mixed_tiled_and_floating_panes() {
 
 #[test]
 fn test_reapply_layout_exact_match() {
-    // First apply initial layout
+    // First apply 初始 布局
     let initial_kdl = r#"
         layout {
             pane command="htop"
@@ -1800,7 +1800,7 @@ fn test_reapply_layout_exact_match() {
         )
         .unwrap();
 
-    // Now reapply with commands in different positions
+    // Now reapply with 命令 in different positions
     let new_kdl = r#"
         layout {
             pane
@@ -1823,13 +1823,13 @@ fn test_reapply_layout_exact_match() {
         &display_area,
     );
 
-    // Snapshot will show panes matched by command and repositioned
+    // 快照 will show 窗格 matched by 命令 and repositioned
     assert_snapshot!(snapshot);
 }
 
 #[test]
 fn test_reapply_layout_logical_position_match() {
-    // Apply initial layout - 3 panes in horizontal split
+    // Apply 初始 布局 - 3 窗格 in horizontal 分割
     let initial_kdl = r#"
         layout {
             pane
@@ -1904,8 +1904,8 @@ fn test_reapply_layout_logical_position_match() {
         )
         .unwrap();
 
-    // Reapply DIFFERENT layout - still 3 panes but with different split
-    // This tests logical position matching (position 0, 1, 2) without exact command match
+    // Reapply DIFFERENT 布局 - still 3 窗格 but with different 分割
+    // This 测试 logical position matching (position 0, 1, 2) without exact 命令 匹配
     let new_kdl = r#"
         layout {
             pane split_direction="Vertical" {
@@ -1922,7 +1922,7 @@ fn test_reapply_layout_logical_position_match() {
         .apply_tiled_panes_layout_to_existing_panes(&new_layout)
         .unwrap();
 
-    // Panes should be repositioned according to new layout structure
+    // 窗格 should be repositioned according to new 布局 structure
     // while being matched by their logical positions (0, 1, 2)
     assert_snapshot!(take_pane_state_snapshot(
         &tiled_panes,
@@ -1935,7 +1935,7 @@ fn test_reapply_layout_logical_position_match() {
 
 #[test]
 fn test_reapply_layout_with_more_positions() {
-    // Apply initial layout with 2 panes
+    // Apply 初始 布局 with 2 窗格
     let initial_kdl = r#"
         layout {
             pane
@@ -2009,7 +2009,7 @@ fn test_reapply_layout_with_more_positions() {
         )
         .unwrap();
 
-    // Reapply with 4 positions (but we only have 2 panes)
+    // Reapply with 4 positions (but we only have 2 窗格)
     let new_kdl = r#"
         layout {
             pane
@@ -2025,7 +2025,7 @@ fn test_reapply_layout_with_more_positions() {
         .apply_tiled_panes_layout_to_existing_panes(&new_layout)
         .unwrap();
 
-    // Should show 2 panes filling first 2 positions, remaining positions empty
+    // Should show 2 窗格 filling first 2 positions, remaining positions empty
     assert_snapshot!(take_pane_state_snapshot(
         &tiled_panes,
         &floating_panes,
@@ -2037,7 +2037,7 @@ fn test_reapply_layout_with_more_positions() {
 
 #[test]
 fn test_reapply_floating_pane_layout() {
-    // Apply initial layout
+    // Apply 初始 布局
     let initial_kdl = r#"
         layout {
             pane
@@ -2323,9 +2323,9 @@ fn test_apply_layout_with_stacked_panes() {
         )
         .unwrap();
 
-    // Snapshot should show:
-    // - 4 panes total (3 in stack + 1 regular)
-    // - Stack panes should have stacked field set with same stack_id
+    // 快照 should show:
+    // - 4 窗格 total (3 in 栈 + 1 regular)
+    // - 栈 窗格 should have 堆叠 字段 set with same stack_id
     assert_snapshot!(take_pane_state_snapshot(
         &tiled_panes,
         &floating_panes,
@@ -2419,8 +2419,8 @@ fn test_apply_layout_with_multiple_stacks() {
         )
         .unwrap();
 
-    // Snapshot should show:
-    // - 5 panes in 2 different stacks (different stack_ids)
+    // 快照 should show:
+    // - 5 窗格 in 2 different stacks (different stack_ids)
     assert_snapshot!(take_pane_state_snapshot(
         &tiled_panes,
         &floating_panes,
@@ -2447,11 +2447,11 @@ fn test_apply_layout_with_plugin_panes() {
     let (tiled_layout, floating_layout) = parse_kdl_layout(kdl_layout);
     let terminal_ids = vec![(1, None)];
 
-    // Create plugin IDs - need to match the RunPluginOrAlias from the layout
+    // 创建 插件 IDs - need to 匹配 the RunPluginOrAlias from the 布局
 
     let mut new_plugin_ids = HashMap::new();
 
-    // Create plugin aliases that match the layout
+    // 创建 插件 aliases that 匹配 the 布局
     let tab_bar_plugin = RunPluginOrAlias::from_url("zellij:tab-bar", &None, None, None).unwrap();
     let status_bar_plugin =
         RunPluginOrAlias::from_url("zellij:status-bar", &None, None, None).unwrap();
@@ -2522,9 +2522,9 @@ fn test_apply_layout_with_plugin_panes() {
         )
         .unwrap();
 
-    // Snapshot should show:
-    // - 1 terminal pane
-    // - 2 plugin panes with correct plugin locations
+    // 快照 should show:
+    // - 1 终端 窗格
+    // - 2 插件 窗格 with correct 插件 locations
     assert_snapshot!(take_pane_state_snapshot(
         &tiled_panes,
         &floating_panes,
@@ -2631,9 +2631,9 @@ fn test_apply_layout_with_mixed_plugin_and_terminal_panes() {
         )
         .unwrap();
 
-    // Snapshot should show:
-    // - 2 terminal panes with commands
-    // - 2 plugin panes with different locations
+    // 快照 should show:
+    // - 2 终端 窗格 with 命令
+    // - 2 插件 窗格 with different locations
     // - Correct size distribution (20%, 60%, 20%)
     assert_snapshot!(take_pane_state_snapshot(
         &tiled_panes,
@@ -2657,7 +2657,7 @@ fn test_apply_layout_with_missing_plugin_ids() {
 
     let (tiled_layout, floating_layout) = parse_kdl_layout(kdl_layout);
     let terminal_ids = vec![(1, None)];
-    // Don't provide plugin IDs - empty HashMap
+    // Don't provide 插件 IDs - empty HashMap
     let new_plugin_ids = HashMap::new();
 
     let size = Size {
@@ -2721,7 +2721,7 @@ fn test_apply_layout_with_missing_plugin_ids() {
         1,
     );
 
-    // This should return an error - missing plugin ID
+    // This should 返回 an 错误 - missing 插件 ID
     assert!(result.is_err());
 }
 
@@ -2735,7 +2735,7 @@ fn test_apply_layout_with_excess_terminal_ids() {
     "#;
 
     let (tiled_layout, floating_layout) = parse_kdl_layout(kdl_layout);
-    // Provide more terminal IDs than needed
+    // Provide more 终端 IDs than needed
     let terminal_ids = vec![(1, None), (2, None), (3, None), (4, None)];
 
     let size = Size {
@@ -2801,8 +2801,8 @@ fn test_apply_layout_with_excess_terminal_ids() {
 
     assert!(result.is_ok());
 
-    // Snapshot should show only 2 panes created
-    // Excess IDs should be closed by the applier
+    // 快照 should show only 2 窗格 创建的
+    // Excess IDs should be 关闭的 by the applier
     assert_snapshot!(take_pane_state_snapshot(
         &tiled_panes,
         &floating_panes,
@@ -2814,7 +2814,7 @@ fn test_apply_layout_with_excess_terminal_ids() {
 
 #[test]
 fn test_override_layout_basic_with_both_tiled_and_floating() {
-    // Setup: Apply initial layout with 2 tiled panes + 1 floating pane
+    // 设置: Apply 初始 布局 with 2 平铺 窗格 + 1 浮动 窗格
     let initial_kdl = r#"
         layout {
             pane command="htop"
@@ -2901,7 +2901,7 @@ fn test_override_layout_basic_with_both_tiled_and_floating() {
         )
         .unwrap();
 
-    // Now override with different layout (2 tiled + 1 floating)
+    // Now override with different 布局 (2 平铺 + 1 浮动)
     let override_kdl = r#"
         layout {
             pane command="top"
@@ -2938,16 +2938,16 @@ fn test_override_layout_basic_with_both_tiled_and_floating() {
         )
         .unwrap();
 
-    // Should show floating panes
+    // Should show 浮动 窗格
     assert_eq!(should_show_floating, true);
 
-    // Verify close messages were sent for vim (Terminal(2)) and tail (Terminal(3))
+    // 验证 关闭 消息 were sent for vim (终端(2)) and tail (终端(3))
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(closed_panes.len(), 2);
     assert!(closed_panes.contains(&PaneId::Terminal(2))); // vim
     assert!(closed_panes.contains(&PaneId::Terminal(3))); // tail
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
@@ -2962,7 +2962,7 @@ fn test_override_layout_basic_with_both_tiled_and_floating() {
 
 #[test]
 fn test_override_layout_hide_floating_panes_true() {
-    // Setup: Initial layout with floating panes
+    // 设置: 初始 布局 with 浮动 窗格
     let initial_kdl = r#"
         layout {
             pane
@@ -3046,7 +3046,7 @@ fn test_override_layout_hide_floating_panes_true() {
         )
         .unwrap();
 
-    // Override with layout that has hide_floating_panes true
+    // Override with 布局 that has hide_floating_panes true
     let override_kdl = r#"
         layout {
             hide_floating_panes true
@@ -3082,13 +3082,13 @@ fn test_override_layout_hide_floating_panes_true() {
         )
         .unwrap();
 
-    // Should NOT show floating panes because of hide_floating_panes
+    // Should NOT show 浮动 窗格 because of hide_floating_panes
     assert_eq!(should_show_floating, false);
 
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(closed_panes.len(), 0);
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
@@ -3103,7 +3103,7 @@ fn test_override_layout_hide_floating_panes_true() {
 
 #[test]
 fn test_override_layout_show_floating_panes() {
-    // Setup: Initial layout
+    // 设置: 初始 布局
     let initial_kdl = r#"
         layout {
             pane
@@ -3179,7 +3179,7 @@ fn test_override_layout_show_floating_panes() {
         )
         .unwrap();
 
-    // Override with layout containing floating panes
+    // Override with 布局 containing 浮动 窗格
     let override_kdl = r#"
         layout {
             pane
@@ -3212,15 +3212,15 @@ fn test_override_layout_show_floating_panes() {
         )
         .unwrap();
 
-    // Should show floating panes
+    // Should show 浮动 窗格
     assert_eq!(should_show_floating, true);
 
-    // Verify close message was sent for one tiled pane (Terminal(2))
+    // 验证 关闭 消息 was sent for one 平铺 窗格 (终端(2))
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(closed_panes.len(), 1);
     assert!(closed_panes.contains(&PaneId::Terminal(2)));
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
@@ -3234,12 +3234,12 @@ fn test_override_layout_show_floating_panes() {
 }
 
 // ============================================================================
-// Suite 2: override_tiled_panes_layout_for_existing_panes Tests
+// Suite 2: override_tiled_panes_layout_for_existing_panes 测试
 // ============================================================================
 
 #[test]
 fn test_override_tiled_exact_match_preservation_commands() {
-    // Setup: Apply initial layout with 3 panes running different commands
+    // 设置: Apply 初始 布局 with 3 窗格 running different 命令
     let initial_kdl = r#"
         layout {
             pane command="htop"
@@ -3318,7 +3318,7 @@ fn test_override_tiled_exact_match_preservation_commands() {
         )
         .unwrap();
 
-    // Override: New layout with only htop and vim in different positions
+    // Override: New 布局 with only htop and vim in different positions
     let override_kdl = r#"
         layout {
             pane command="vim"
@@ -3339,16 +3339,16 @@ fn test_override_tiled_exact_match_preservation_commands() {
         )
         .unwrap();
 
-    // htop and vim panes should be preserved (same PaneIds: Terminal(1) and Terminal(2))
-    // tail pane should be closed
-    // Panes should be repositioned to new layout positions
+    // htop and vim 窗格 should be 保存的 (same PaneIds: 终端(1) and 终端(2))
+    // tail 窗格 should be 关闭的
+    // 窗格 should be repositioned to new 布局 positions
 
-    // Verify close message was sent for tail pane (Terminal(3))
+    // 验证 关闭 消息 was sent for tail 窗格 (终端(3))
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(closed_panes.len(), 1);
     assert!(closed_panes.contains(&PaneId::Terminal(3))); // tail
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
@@ -3363,7 +3363,7 @@ fn test_override_tiled_exact_match_preservation_commands() {
 
 #[test]
 fn test_override_tiled_exact_match_preservation_plugins() {
-    // Setup: Initial layout with 2 terminal panes + 1 plugin pane
+    // 设置: 初始 布局 with 2 终端 窗格 + 1 插件 窗格
     let initial_kdl = r#"
         layout {
             pane
@@ -3446,7 +3446,7 @@ fn test_override_tiled_exact_match_preservation_plugins() {
         )
         .unwrap();
 
-    // Override: New layout with only the plugin pane
+    // Override: New 布局 with only the 插件 窗格
     let override_kdl = r#"
         layout {
             pane {
@@ -3468,17 +3468,17 @@ fn test_override_tiled_exact_match_preservation_plugins() {
         )
         .unwrap();
 
-    // Plugin pane should be preserved
-    // Terminal panes should be closed
-    // Total pane count is 1
+    // 插件 窗格 should be 保存的
+    // 终端 窗格 should be 关闭的
+    // Total 窗格 count is 1
 
-    // Verify close messages were sent for both terminal panes (Terminal(1) and Terminal(2))
+    // 验证 关闭 消息 were sent for both 终端 窗格 (终端(1) and 终端(2))
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(closed_panes.len(), 2);
     assert!(closed_panes.contains(&PaneId::Terminal(1)));
     assert!(closed_panes.contains(&PaneId::Terminal(2)));
 
-    // No plugins should be unloaded (plugin is preserved)
+    // No 插件 should be 卸载的 (插件 is 保存的)
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
@@ -3493,7 +3493,7 @@ fn test_override_tiled_exact_match_preservation_plugins() {
 
 #[test]
 fn test_override_tiled_all_panes_closed_no_matches() {
-    // Setup: 3 panes running htop, vim, tail
+    // 设置: 3 窗格 running htop, vim, tail
     let initial_kdl = r#"
         layout {
             pane command="htop"
@@ -3572,7 +3572,7 @@ fn test_override_tiled_all_panes_closed_no_matches() {
         )
         .unwrap();
 
-    // Override: New layout with 3 completely different commands
+    // Override: New 布局 with 3 completely different 命令
     let override_kdl = r#"
         layout {
             pane command="cargo" {
@@ -3601,18 +3601,18 @@ fn test_override_tiled_all_panes_closed_no_matches() {
         )
         .unwrap();
 
-    // All original pane IDs gone (1, 2, 3 should not be present)
-    // 3 new panes with new IDs (4, 5, 6)
-    // Total pane count is 3
+    // All 原始 窗格 IDs gone (1, 2, 3 should not be present)
+    // 3 new 窗格 with new IDs (4, 5, 6)
+    // Total 窗格 count is 3
 
-    // Verify close messages were sent for all original panes (Terminal(1), Terminal(2), Terminal(3))
+    // 验证 关闭 消息 were sent for all 原始 窗格 (终端(1), 终端(2), 终端(3))
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(closed_panes.len(), 3);
     assert!(closed_panes.contains(&PaneId::Terminal(1))); // htop
     assert!(closed_panes.contains(&PaneId::Terminal(2))); // vim
     assert!(closed_panes.contains(&PaneId::Terminal(3))); // tail
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
@@ -3627,7 +3627,7 @@ fn test_override_tiled_all_panes_closed_no_matches() {
 
 #[test]
 fn test_override_tiled_mixed_some_matches_some_new() {
-    // Setup: 2 panes - one running htop, one generic shell (no command)
+    // 设置: 2 窗格 - one running htop, one 泛型 shell (no 命令)
     let initial_kdl = r#"
         layout {
             pane command="htop"
@@ -3703,7 +3703,7 @@ fn test_override_tiled_mixed_some_matches_some_new() {
         )
         .unwrap();
 
-    // Override: Layout with htop, vim, and generic shell
+    // Override: 布局 with htop, vim, and 泛型 shell
     let override_kdl = r#"
         layout {
             pane command="htop"
@@ -3726,16 +3726,16 @@ fn test_override_tiled_mixed_some_matches_some_new() {
         )
         .unwrap();
 
-    // htop preserved with same ID (Terminal(1))
-    // Original shell pane closed (generic shells are NOT exact matches)
-    // 2 new panes created (vim and new shell)
-    // Total pane count is 3
+    // htop 保存的 with same ID (终端(1))
+    // 原始 shell 窗格 关闭的 (泛型 shells are NOT exact matches)
+    // 2 new 窗格 创建的 (vim and new shell)
+    // Total 窗格 count is 3
 
-    // Verify close message was not sent for original shell pane (Terminal(2))
+    // 验证 关闭 消息 was not sent for 原始 shell 窗格 (终端(2))
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(closed_panes.len(), 0);
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
@@ -3750,7 +3750,7 @@ fn test_override_tiled_mixed_some_matches_some_new() {
 
 #[test]
 fn test_override_tiled_new_panes_for_unmatched_positions() {
-    // Setup: 1 pane running htop
+    // 设置: 1 窗格 running htop
     let initial_kdl = r#"
         layout {
             pane command="htop"
@@ -3823,7 +3823,7 @@ fn test_override_tiled_new_panes_for_unmatched_positions() {
         )
         .unwrap();
 
-    // Override: Layout with 4 positions
+    // Override: 布局 with 4 positions
     let override_kdl = r#"
         layout {
             pane command="htop"
@@ -3847,9 +3847,9 @@ fn test_override_tiled_new_panes_for_unmatched_positions() {
         )
         .unwrap();
 
-    // 1 original htop pane preserved (Terminal(1))
-    // 3 new panes created (Terminal(2), Terminal(3), Terminal(4))
-    // Total 4 panes
+    // 1 原始 htop 窗格 保存的 (终端(1))
+    // 3 new 窗格 创建的 (终端(2), 终端(3), 终端(4))
+    // Total 4 窗格
     assert_snapshot!(take_pane_state_snapshot(
         &tiled_panes,
         &floating_panes,
@@ -3861,7 +3861,7 @@ fn test_override_tiled_new_panes_for_unmatched_positions() {
 
 #[test]
 fn test_override_tiled_focus_on_new_pane() {
-    // Setup: 2 panes, first one focused
+    // 设置: 2 窗格, first one 聚焦的
     let initial_kdl = r#"
         layout {
             pane focus=true
@@ -3935,7 +3935,7 @@ fn test_override_tiled_focus_on_new_pane() {
         )
         .unwrap();
 
-    // Override: Layout with 3 panes where second pane has focus=true
+    // Override: 布局 with 3 窗格 where second 窗格 has 焦点=true
     let override_kdl = r#"
         layout {
             pane
@@ -3958,7 +3958,7 @@ fn test_override_tiled_focus_on_new_pane() {
         )
         .unwrap();
 
-    // focus_pane_id should point to the newly created middle pane (Terminal(3))
+    // focus_pane_id should point to the newly 创建的 middle 窗格 (终端(3))
     assert_snapshot!(take_pane_state_snapshot(
         &tiled_panes,
         &floating_panes,
@@ -3970,7 +3970,7 @@ fn test_override_tiled_focus_on_new_pane() {
 
 #[test]
 fn test_override_tiled_focus_when_focused_pane_closed() {
-    // Setup: 3 panes, middle one focused running vim
+    // 设置: 3 窗格, middle one 聚焦的 running vim
     let initial_kdl = r#"
         layout {
             pane command="htop"
@@ -4049,7 +4049,7 @@ fn test_override_tiled_focus_when_focused_pane_closed() {
         )
         .unwrap();
 
-    // Override: Layout with 2 panes running htop and cargo (not vim)
+    // Override: 布局 with 2 窗格 running htop and cargo (not vim)
     let override_kdl = r#"
         layout {
             pane command="htop"
@@ -4073,16 +4073,16 @@ fn test_override_tiled_focus_when_focused_pane_closed() {
         )
         .unwrap();
 
-    // Focused pane (vim) no longer exists
-    // Focus should be moved to one of the remaining panes
+    // 聚焦的 窗格 (vim) no longer exists
+    // 焦点 should be 移动 to one of the remaining 窗格
 
-    // Verify close messages were sent for vim (Terminal(2)) and tail (Terminal(3))
+    // 验证 关闭 消息 were sent for vim (终端(2)) and tail (终端(3))
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(closed_panes.len(), 2);
-    assert!(closed_panes.contains(&PaneId::Terminal(2))); // vim (focused)
+    assert!(closed_panes.contains(&PaneId::Terminal(2))); // vim (聚焦的)
     assert!(closed_panes.contains(&PaneId::Terminal(3))); // tail
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
@@ -4097,7 +4097,7 @@ fn test_override_tiled_focus_when_focused_pane_closed() {
 
 #[test]
 fn test_override_tiled_empty_layout_closes_all() {
-    // Setup: 3 panes running various commands
+    // 设置: 3 窗格 running various 命令
     let initial_kdl = r#"
         layout {
             pane command="htop"
@@ -4176,7 +4176,7 @@ fn test_override_tiled_empty_layout_closes_all() {
         )
         .unwrap();
 
-    // Override: Empty layout
+    // Override: Empty 布局
     let override_kdl = r#"
         layout {
         }
@@ -4195,17 +4195,17 @@ fn test_override_tiled_empty_layout_closes_all() {
         )
         .unwrap();
 
-    // No panes in snapshot
-    // Pane count is 0
+    // No 窗格 in 快照
+    // 窗格 count is 0
 
-    // Verify close messages were sent for all panes (Terminal(1), Terminal(2), Terminal(3))
+    // 验证 关闭 消息 were sent for all 窗格 (终端(1), 终端(2), 终端(3))
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(closed_panes.len(), 3);
     assert!(closed_panes.contains(&PaneId::Terminal(1))); // htop
     assert!(closed_panes.contains(&PaneId::Terminal(2))); // vim
     assert!(closed_panes.contains(&PaneId::Terminal(3))); // tail
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
@@ -4219,12 +4219,12 @@ fn test_override_tiled_empty_layout_closes_all() {
 }
 
 // ============================================================================
-// Suite 3: override_floating_panes_layout_for_existing_panes Tests
+// Suite 3: override_floating_panes_layout_for_existing_panes 测试
 // ============================================================================
 
 #[test]
 fn test_override_floating_exact_match_preservation() {
-    // Setup: 2 floating panes running htop and vim
+    // 设置: 2 浮动 窗格 running htop and vim
     let initial_kdl = r#"
         layout {
             pane
@@ -4316,7 +4316,7 @@ fn test_override_floating_exact_match_preservation() {
         )
         .unwrap();
 
-    // Override: Layout with htop at different x/y position
+    // Override: 布局 with htop at different x/y position
     let override_kdl = r#"
         layout {
             pane
@@ -4344,16 +4344,16 @@ fn test_override_floating_exact_match_preservation() {
         )
         .unwrap();
 
-    // htop pane preserved (Terminal(2)), repositioned
-    // vim pane closed (Terminal(3))
-    // Total floating pane count is 1
+    // htop 窗格 保存的 (终端(2)), repositioned
+    // vim 窗格 关闭的 (终端(3))
+    // Total 浮动 窗格 count is 1
 
-    // Verify close message was sent for vim pane (Terminal(3))
+    // 验证 关闭 消息 was sent for vim 窗格 (终端(3))
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(closed_panes.len(), 1);
     assert!(closed_panes.contains(&PaneId::Terminal(3))); // vim
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
@@ -4368,7 +4368,7 @@ fn test_override_floating_exact_match_preservation() {
 
 #[test]
 fn test_override_floating_all_closed_no_matches() {
-    // Setup: 2 floating panes with specific commands
+    // 设置: 2 浮动 窗格 with 特定 命令
     let initial_kdl = r#"
         layout {
             pane
@@ -4460,7 +4460,7 @@ fn test_override_floating_all_closed_no_matches() {
         )
         .unwrap();
 
-    // Override: Layout with different commands
+    // Override: 布局 with different 命令
     let override_kdl = r#"
         layout {
             pane
@@ -4496,17 +4496,17 @@ fn test_override_floating_all_closed_no_matches() {
         )
         .unwrap();
 
-    // Both original panes closed (IDs 2, 3 gone)
-    // New panes created with new IDs (4, 5)
-    // Pane count matches new layout (2 floating panes)
+    // Both 原始 窗格 关闭的 (IDs 2, 3 gone)
+    // New 窗格 创建的 with new IDs (4, 5)
+    // 窗格 count matches new 布局 (2 浮动 窗格)
 
-    // Verify close messages were sent for both floating panes (Terminal(2), Terminal(3))
+    // 验证 关闭 消息 were sent for both 浮动 窗格 (终端(2), 终端(3))
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(closed_panes.len(), 2);
     assert!(closed_panes.contains(&PaneId::Terminal(2))); // htop
     assert!(closed_panes.contains(&PaneId::Terminal(3))); // vim
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
@@ -4521,7 +4521,7 @@ fn test_override_floating_all_closed_no_matches() {
 
 #[test]
 fn test_override_floating_new_panes_created() {
-    // Setup: 1 floating pane running htop
+    // 设置: 1 浮动 窗格 running htop
     let initial_kdl = r#"
         layout {
             pane
@@ -4604,7 +4604,7 @@ fn test_override_floating_new_panes_created() {
         )
         .unwrap();
 
-    // Override: Layout with 3 floating panes: htop, vim, and generic shell
+    // Override: 布局 with 3 浮动 窗格: htop, vim, and 泛型 shell
     let override_kdl = r#"
         layout {
             pane
@@ -4646,9 +4646,9 @@ fn test_override_floating_new_panes_created() {
         )
         .unwrap();
 
-    // Original htop preserved (Terminal(2))
-    // 2 new floating panes created (Terminal(3), Terminal(4))
-    // Total 3 floating panes
+    // 原始 htop 保存的 (终端(2))
+    // 2 new 浮动 窗格 创建的 (终端(3), 终端(4))
+    // Total 3 浮动 窗格
     assert_snapshot!(take_pane_state_snapshot(
         &tiled_panes,
         &floating_panes,
@@ -4660,7 +4660,7 @@ fn test_override_floating_new_panes_created() {
 
 #[test]
 fn test_override_floating_focus_handling() {
-    // Setup: 2 floating panes, one focused
+    // 设置: 2 浮动 窗格, one 聚焦的
     let initial_kdl = r#"
         layout {
             pane
@@ -4751,7 +4751,7 @@ fn test_override_floating_focus_handling() {
         )
         .unwrap();
 
-    // Override: Layout with 1 new pane that has focus=true
+    // Override: 布局 with 1 new 窗格 that has 焦点=true
     let override_kdl = r#"
         layout {
             pane
@@ -4780,14 +4780,14 @@ fn test_override_floating_focus_handling() {
         )
         .unwrap();
 
-    // Focus should be set on newly created pane (Terminal(4))
+    // 焦点 should be set on newly 创建的 窗格 (终端(4))
 
-    // Verify close messages were sent for Terminal(3)
+    // 验证 关闭 消息 were sent for 终端(3)
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(closed_panes.len(), 1);
     assert!(closed_panes.contains(&PaneId::Terminal(3)));
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
@@ -4802,7 +4802,7 @@ fn test_override_floating_focus_handling() {
 
 #[test]
 fn test_override_floating_position_and_size_update() {
-    // Setup: 1 floating pane running htop at specific position
+    // 设置: 1 浮动 窗格 running htop at 特定 position
     let initial_kdl = r#"
         layout {
             pane
@@ -4885,7 +4885,7 @@ fn test_override_floating_position_and_size_update() {
         )
         .unwrap();
 
-    // Override: Layout with htop at different position and size
+    // Override: 布局 with htop at different position and size
     let override_kdl = r#"
         layout {
             pane
@@ -4913,8 +4913,8 @@ fn test_override_floating_position_and_size_update() {
         )
         .unwrap();
 
-    // Same pane ID preserved (Terminal(2))
-    // Geometry updated: x=50, y=30, cols=60, rows=30
+    // Same 窗格 ID 保存的 (终端(2))
+    // 几何 updated: x=50, y=30, cols=60, 行=30
     assert_snapshot!(take_pane_state_snapshot(
         &tiled_panes,
         &floating_panes,
@@ -4926,7 +4926,7 @@ fn test_override_floating_position_and_size_update() {
 
 #[test]
 fn test_override_floating_return_value_has_panes() {
-    // Setup: Empty floating panes
+    // 设置: Empty 浮动 窗格
     let initial_kdl = r#"
         layout {
             pane
@@ -4999,7 +4999,7 @@ fn test_override_floating_return_value_has_panes() {
         )
         .unwrap();
 
-    // Override: Layout with 1 floating pane
+    // Override: 布局 with 1 浮动 窗格
     let override_kdl = r#"
         layout {
             pane
@@ -5027,7 +5027,7 @@ fn test_override_floating_return_value_has_panes() {
         )
         .unwrap();
 
-    // Function should return true because layout has floating panes
+    // 函数 should 返回 true because 布局 has 浮动 窗格
     assert_eq!(has_floating_panes, true);
 
     assert_snapshot!(take_pane_state_snapshot(
@@ -5041,7 +5041,7 @@ fn test_override_floating_return_value_has_panes() {
 
 #[test]
 fn test_override_floating_return_value_no_panes() {
-    // Setup: 1 floating pane
+    // 设置: 1 浮动 窗格
     let initial_kdl = r#"
         layout {
             pane
@@ -5125,7 +5125,7 @@ fn test_override_floating_return_value_no_panes() {
         )
         .unwrap();
 
-    // Override: Empty floating layout (no floating_panes block)
+    // Override: Empty 浮动 布局 (no floating_panes block)
     let override_kdl = r#"
         layout {
             pane
@@ -5144,15 +5144,15 @@ fn test_override_floating_return_value_no_panes() {
         )
         .unwrap();
 
-    // Function should return false because layout has no floating panes
+    // 函数 should 返回 false because 布局 has no 浮动 窗格
     assert_eq!(has_floating_panes, false);
 
-    // Verify close message was sent for floating pane (Terminal(2))
+    // 验证 关闭 消息 was sent for 浮动 窗格 (终端(2))
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(closed_panes.len(), 1);
     assert!(closed_panes.contains(&PaneId::Terminal(2)));
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
@@ -5166,12 +5166,12 @@ fn test_override_floating_return_value_no_panes() {
 }
 
 // ============================================================================
-// Suite 4: Integration Tests
+// Suite 4: Integration 测试
 // ============================================================================
 
 #[test]
 fn test_override_full_tiled_and_floating_together() {
-    // Setup: Initial layout with 3 tiled panes + 2 floating panes
+    // 设置: 初始 布局 with 3 平铺 窗格 + 2 浮动 窗格
     let initial_kdl = r#"
         layout {
             pane command="htop"
@@ -5267,7 +5267,7 @@ fn test_override_full_tiled_and_floating_together() {
         )
         .unwrap();
 
-    // Override: Layout with 2 tiled (htop, npm start) + 1 floating (cargo watch)
+    // Override: 布局 with 2 平铺 (htop, npm 启动) + 1 浮动 (cargo 监视)
     let override_kdl = r#"
         layout {
             pane command="htop"
@@ -5311,18 +5311,18 @@ fn test_override_full_tiled_and_floating_together() {
         )
         .unwrap();
 
-    // Tiled: htop preserved (Terminal(1)), vim and shell closed, npm start created (Terminal(6))
-    // Floating: cargo watch preserved (Terminal(4)), tail closed
-    // Total: 2 tiled + 1 floating
+    // 平铺: htop 保存的 (终端(1)), vim and shell 关闭的, npm 启动 创建的 (终端(6))
+    // 浮动: cargo 监视 保存的 (终端(4)), tail 关闭的
+    // Total: 2 平铺 + 1 浮动
 
-    // Verify close messages were sent for vim (Terminal(2)), shell (Terminal(3)), and tail (Terminal(5))
+    // 验证 关闭 消息 were sent for vim (终端(2)), shell (终端(3)), and tail (终端(5))
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(closed_panes.len(), 3);
     assert!(closed_panes.contains(&PaneId::Terminal(2))); // vim
     assert!(closed_panes.contains(&PaneId::Terminal(3))); // shell
     assert!(closed_panes.contains(&PaneId::Terminal(5))); // tail
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
@@ -5337,7 +5337,7 @@ fn test_override_full_tiled_and_floating_together() {
 
 #[test]
 fn test_override_viewport_adjustment_with_borderless() {
-    // Setup: Initial layout with borderless panes
+    // 设置: 初始 布局 with borderless 窗格
     let initial_kdl = r#"
         layout {
             pane borderless=true
@@ -5414,7 +5414,7 @@ fn test_override_viewport_adjustment_with_borderless() {
         )
         .unwrap();
 
-    // Override: Layout with different borderless configuration
+    // Override: 布局 with different borderless 配置
     let override_kdl = r#"
         layout {
             pane
@@ -5435,15 +5435,15 @@ fn test_override_viewport_adjustment_with_borderless() {
         )
         .unwrap();
 
-    // Viewport dimensions should be correctly adjusted for borderless panes
+    // 视口 dimensions should be correctly adjusted for borderless 窗格
 
-    // Verify close message was sent for at least the extra pane (Terminal(3))
-    // Generic panes without commands don't match exactly, so all 3 may be closed
+    // 验证 关闭 消息 was sent for at least the extra 窗格 (终端(3))
+    // 泛型 窗格 without 命令 don't 匹配 exactly, so all 3 may be 关闭的
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert!(closed_panes.len() >= 1);
     assert!(closed_panes.contains(&PaneId::Terminal(3)));
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
@@ -5458,9 +5458,9 @@ fn test_override_viewport_adjustment_with_borderless() {
 
 #[test]
 fn test_override_tiled_retain_terminal_panes_partial_match() {
-    // Test that when retain_existing_terminal_panes is true, terminal panes that don't match
-    // the new layout are retained instead of being closed.
-    // Setup: Apply initial layout with 3 panes running different commands
+    // 测试 that when retain_existing_terminal_panes is true, 终端 窗格 that don't 匹配
+    // the new 布局 are 保留的 instead of being 关闭的.
+    // 设置: Apply 初始 布局 with 3 窗格 running different 命令
     let initial_kdl = r#"
         layout {
             pane command="htop"
@@ -5539,7 +5539,7 @@ fn test_override_tiled_retain_terminal_panes_partial_match() {
         )
         .unwrap();
 
-    // Override: New layout with only vim and htop (tail is not in the new layout)
+    // Override: New 布局 with only vim and htop (tail is not in the new 布局)
     let override_kdl = r#"
         layout {
             pane command="vim"
@@ -5562,12 +5562,12 @@ fn test_override_tiled_retain_terminal_panes_partial_match() {
         .unwrap();
 
     // With retain_existing_terminal_panes = true:
-    // - NO terminal panes should be closed (not even tail)
-    // - All 3 original terminals (Terminal(1), Terminal(2), Terminal(3)) should still exist
-    // - vim and htop panes should match the new layout positions
-    // - tail pane should be retained and added after the matched panes
+    // - NO 终端 窗格 should be 关闭的 (not even tail)
+    // - All 3 原始 终端 (终端(1), 终端(2), 终端(3)) should still exist
+    // - vim and htop 窗格 should 匹配 the new 布局 positions
+    // - tail 窗格 should be 保留的 and added after the matched 窗格
 
-    // Verify NO close messages were sent
+    // 验证 NO 关闭 消息 were sent
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(
         closed_panes.len(),
@@ -5575,26 +5575,26 @@ fn test_override_tiled_retain_terminal_panes_partial_match() {
         "No terminal panes should be closed when retain_existing_terminal_panes is true"
     );
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
-    // All 3 original terminals should still exist
+    // All 3 原始 终端 should still exist
     assert_eq!(
         tiled_panes.visible_panes_count(),
         3,
         "All 3 terminal panes should be retained"
     );
 
-    // we're not asserting a snapshot here because adding panes uses unstable sorting and so the
-    // test would be flaky
+    // we're not 断言 a 快照 here because adding 窗格 uses unstable sorting and so the
+    // 测试 would be flaky
 }
 
 #[test]
 fn test_override_tiled_retain_terminal_panes_no_matches() {
-    // Test that when retain_existing_terminal_panes is true and NO panes match,
-    // all original terminals are retained AND new terminals are created.
-    // Setup: Apply initial layout with 3 panes
+    // 测试 that when retain_existing_terminal_panes is true and NO 窗格 匹配,
+    // all 原始 终端 are 保留的 AND new 终端 are 创建的.
+    // 设置: Apply 初始 布局 with 3 窗格
     let initial_kdl = r#"
         layout {
             pane command="htop"
@@ -5673,7 +5673,7 @@ fn test_override_tiled_retain_terminal_panes_no_matches() {
         )
         .unwrap();
 
-    // Override: New layout with completely different commands (no matches)
+    // Override: New 布局 with completely different 命令 (no matches)
     let override_kdl = r#"
         layout {
             pane command="cargo"
@@ -5698,12 +5698,12 @@ fn test_override_tiled_retain_terminal_panes_no_matches() {
         .unwrap();
 
     // With retain_existing_terminal_panes = true and no matches:
-    // - NO terminal panes should be closed
-    // - All 3 original terminals (Terminal(1), Terminal(2), Terminal(3)) should still exist
-    // - 3 NEW terminals (Terminal(4), Terminal(5), Terminal(6)) should be created
-    // - Total: 6 terminal panes
+    // - NO 终端 窗格 should be 关闭的
+    // - All 3 原始 终端 (终端(1), 终端(2), 终端(3)) should still exist
+    // - 3 NEW 终端 (终端(4), 终端(5), 终端(6)) should be 创建的
+    // - Total: 6 终端 窗格
 
-    // Verify NO close messages were sent
+    // 验证 NO 关闭 消息 were sent
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(
         closed_panes.len(),
@@ -5711,26 +5711,26 @@ fn test_override_tiled_retain_terminal_panes_no_matches() {
         "No terminal panes should be closed when retain_existing_terminal_panes is true"
     );
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
-    // Should have 6 total panes (3 original + 3 new)
+    // Should have 6 total 窗格 (3 原始 + 3 new)
     assert_eq!(
         tiled_panes.visible_panes_count(),
         6,
         "Should have 6 terminal panes (3 original + 3 new)"
     );
 
-    // we're not asserting a snapshot here because adding panes uses unstable sorting and so the
-    // test would be flaky
+    // we're not 断言 a 快照 here because adding 窗格 uses unstable sorting and so the
+    // 测试 would be flaky
 }
 
 #[test]
 fn test_override_floating_retain_terminal_panes_partial_match() {
-    // Test that when retain_existing_terminal_panes is true, floating terminal panes
-    // that don't match the new layout are retained instead of being closed.
-    // Setup: 1 tiled pane + 2 floating panes running htop and vim
+    // 测试 that when retain_existing_terminal_panes is true, 浮动 终端 窗格
+    // that don't 匹配 the new 布局 are 保留的 instead of being 关闭的.
+    // 设置: 1 平铺 窗格 + 2 浮动 窗格 running htop and vim
     let initial_kdl = r#"
         layout {
             pane
@@ -5822,7 +5822,7 @@ fn test_override_floating_retain_terminal_panes_partial_match() {
         )
         .unwrap();
 
-    // Override: Layout with only htop (vim is not in the new layout)
+    // Override: 布局 with only htop (vim is not in the new 布局)
     let override_kdl = r#"
         layout {
             pane
@@ -5852,12 +5852,12 @@ fn test_override_floating_retain_terminal_panes_partial_match() {
         .unwrap();
 
     // With retain_existing_terminal_panes = true:
-    // - NO terminal panes should be closed (not even vim)
-    // - Both original floating terminals (Terminal(2), Terminal(3)) should still exist
-    // - htop pane should match the new layout position
-    // - vim pane should be retained as a floating pane
+    // - NO 终端 窗格 should be 关闭的 (not even vim)
+    // - Both 原始 浮动 终端 (终端(2), 终端(3)) should still exist
+    // - htop 窗格 should 匹配 the new 布局 position
+    // - vim 窗格 should be 保留的 as a 浮动 窗格
 
-    // Verify NO close messages were sent
+    // 验证 NO 关闭 消息 were sent
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(
         closed_panes.len(),
@@ -5865,11 +5865,11 @@ fn test_override_floating_retain_terminal_panes_partial_match() {
         "No terminal panes should be closed when retain_existing_terminal_panes is true"
     );
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
-    // Both floating panes should still exist
+    // Both 浮动 窗格 should still exist
     assert_eq!(
         floating_panes.visible_panes_count(),
         2,
@@ -5887,9 +5887,9 @@ fn test_override_floating_retain_terminal_panes_partial_match() {
 
 #[test]
 fn test_override_floating_retain_terminal_panes_no_matches() {
-    // Test that when retain_existing_terminal_panes is true and NO floating panes match,
-    // all original floating terminals are retained AND new floating terminals are created.
-    // Setup: 1 tiled pane + 2 floating panes running htop and vim
+    // 测试 that when retain_existing_terminal_panes is true and NO 浮动 窗格 匹配,
+    // all 原始 浮动 终端 are 保留的 AND new 浮动 终端 are 创建的.
+    // 设置: 1 平铺 窗格 + 2 浮动 窗格 running htop and vim
     let initial_kdl = r#"
         layout {
             pane
@@ -5981,7 +5981,7 @@ fn test_override_floating_retain_terminal_panes_no_matches() {
         )
         .unwrap();
 
-    // Override: Layout with 2 different floating panes (top and emacs)
+    // Override: 布局 with 2 different 浮动 窗格 (top and emacs)
     let override_kdl = r#"
         layout {
             pane
@@ -6019,12 +6019,12 @@ fn test_override_floating_retain_terminal_panes_no_matches() {
         .unwrap();
 
     // With retain_existing_terminal_panes = true and no matches:
-    // - NO terminal panes should be closed
-    // - Both original floating terminals (Terminal(2), Terminal(3)) should still exist
-    // - 2 NEW floating terminals (Terminal(4), Terminal(5)) should be created
-    // - Total: 4 floating panes
+    // - NO 终端 窗格 should be 关闭的
+    // - Both 原始 浮动 终端 (终端(2), 终端(3)) should still exist
+    // - 2 NEW 浮动 终端 (终端(4), 终端(5)) should be 创建的
+    // - Total: 4 浮动 窗格
 
-    // Verify NO close messages were sent
+    // 验证 NO 关闭 消息 were sent
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(
         closed_panes.len(),
@@ -6032,11 +6032,11 @@ fn test_override_floating_retain_terminal_panes_no_matches() {
         "No terminal panes should be closed when retain_existing_terminal_panes is true"
     );
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
-    // Should have 4 floating panes (2 original + 2 new)
+    // Should have 4 浮动 窗格 (2 原始 + 2 new)
     assert_eq!(
         floating_panes.visible_panes_count(),
         4,
@@ -6054,9 +6054,9 @@ fn test_override_floating_retain_terminal_panes_no_matches() {
 
 #[test]
 fn test_override_mixed_retain_terminal_panes_both_tiled_and_floating() {
-    // Test that when retain_existing_terminal_panes is true, both tiled and floating
-    // terminal panes that don't match the new layout are retained.
-    // Setup: Apply initial layout with 3 tiled panes + 1 floating pane
+    // 测试 that when retain_existing_terminal_panes is true, both 平铺 and 浮动
+    // 终端 窗格 that don't 匹配 the new 布局 are 保留的.
+    // 设置: Apply 初始 布局 with 3 平铺 窗格 + 1 浮动 窗格
     let initial_kdl = r#"
         layout {
             pane command="htop"
@@ -6146,7 +6146,7 @@ fn test_override_mixed_retain_terminal_panes_both_tiled_and_floating() {
         )
         .unwrap();
 
-    // Override: 2 tiled (top, htop) + 1 floating (different watch command)
+    // Override: 2 平铺 (top, htop) + 1 浮动 (different 监视 命令)
     let override_kdl = r#"
         layout {
             pane command="top"
@@ -6184,14 +6184,14 @@ fn test_override_mixed_retain_terminal_panes_both_tiled_and_floating() {
         .unwrap();
 
     // With retain_existing_terminal_panes = true:
-    // - NO terminal panes should be closed (neither tiled nor floating)
-    // - Original tiled terminals: Terminal(1), Terminal(2), Terminal(3) retained
-    //   (htop matches, so it's reused; vim and tail are retained)
-    // - Original floating terminal: Terminal(4) retained
-    // - New tiled terminal: Terminal(5) created (for top, htop matches)
-    // - New floating terminal: Terminal(6) created (different watch command)
+    // - NO 终端 窗格 should be 关闭的 (neither 平铺 nor 浮动)
+    // - 原始 平铺 终端: 终端(1), 终端(2), 终端(3) 保留的
+    //   (htop matches, so it's 重用的; vim and tail are 保留的)
+    // - 原始 浮动 终端: 终端(4) 保留的
+    // - New 平铺 终端: 终端(5) 创建的 (for top, htop matches)
+    // - New 浮动 终端: 终端(6) 创建的 (different 监视 命令)
 
-    // Verify NO close messages were sent
+    // 验证 NO 关闭 消息 were sent
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(
         closed_panes.len(),
@@ -6199,33 +6199,33 @@ fn test_override_mixed_retain_terminal_panes_both_tiled_and_floating() {
         "No terminal panes should be closed when retain_existing_terminal_panes is true"
     );
 
-    // No plugins should be unloaded
+    // No 插件 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert!(unloaded_plugins.is_empty());
 
-    // Check tiled pane count (3 original + 1 new = 4)
+    // 检查 平铺 窗格 count (3 原始 + 1 new = 4)
     assert_eq!(
         tiled_panes.visible_panes_count(),
         4,
         "Should have 4 tiled panes (3 original + 1 new)"
     );
 
-    // Check floating pane count (1 original + 1 new = 2)
+    // 检查 浮动 窗格 count (1 原始 + 1 new = 2)
     assert_eq!(
         floating_panes.visible_panes_count(),
         2,
         "Should have 2 floating panes (1 original + 1 new)"
     );
 
-    // we're not asserting a snapshot here because adding panes uses unstable sorting and so the
-    // test would be flaky
+    // we're not 断言 a 快照 here because adding 窗格 uses unstable sorting and so the
+    // 测试 would be flaky
 }
 
 #[test]
 fn test_override_retain_terminal_but_close_plugin_panes() {
-    // Test that when retain_existing_terminal_panes is true, the flag ONLY affects
-    // terminal panes and plugin panes are still closed as normal.
-    // Setup: Initial layout with 2 terminal panes + 1 plugin pane
+    // 测试 that when retain_existing_terminal_panes is true, the 标志 ONLY affects
+    // 终端 窗格 and 插件 窗格 are still 关闭的 as normal.
+    // 设置: 初始 布局 with 2 终端 窗格 + 1 插件 窗格
     let initial_kdl = r#"
         layout {
             pane command="htop"
@@ -6308,7 +6308,7 @@ fn test_override_retain_terminal_but_close_plugin_panes() {
         )
         .unwrap();
 
-    // Override: New layout with only htop (vim and tab-bar plugin not in new layout)
+    // Override: New 布局 with only htop (vim and 标签页-bar 插件 not in new 布局)
     let override_kdl = r#"
         layout {
             pane command="htop"
@@ -6330,11 +6330,11 @@ fn test_override_retain_terminal_but_close_plugin_panes() {
         .unwrap();
 
     // With retain_existing_terminal_panes = true:
-    // - Terminal panes NOT closed: Terminal(1) matched (htop), Terminal(2) retained (vim)
-    // - Plugin pane IS closed: Plugin(100) unloaded (tab-bar)
-    // - Both terminals should exist, but plugin should be gone
+    // - 终端 窗格 NOT 关闭的: 终端(1) matched (htop), 终端(2) 保留的 (vim)
+    // - 插件 窗格 IS 关闭的: 插件(100) 卸载的 (标签页-bar)
+    // - Both 终端 should exist, but 插件 should be gone
 
-    // No terminal panes should be closed
+    // No 终端 窗格 should be 关闭的
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(
         closed_panes.len(),
@@ -6342,7 +6342,7 @@ fn test_override_retain_terminal_but_close_plugin_panes() {
         "No terminal panes should be closed when retain_existing_terminal_panes is true"
     );
 
-    // Plugin pane should be unloaded
+    // 插件 窗格 should be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert_eq!(
         unloaded_plugins.len(),
@@ -6354,7 +6354,7 @@ fn test_override_retain_terminal_but_close_plugin_panes() {
         "Tab-bar plugin (100) should be unloaded"
     );
 
-    // Both terminals should exist
+    // Both 终端 should exist
     assert_eq!(
         tiled_panes.visible_panes_count(),
         2,
@@ -6372,8 +6372,8 @@ fn test_override_retain_terminal_but_close_plugin_panes() {
 
 #[test]
 fn test_override_tiled_retain_plugin_panes_partial_match() {
-    // Verify that when retain_existing_plugin_panes = true, plugin panes that don't match
-    // the new layout are retained instead of being closed
+    // 验证 that when retain_existing_plugin_panes = true, 插件 窗格 that don't 匹配
+    // the new 布局 are 保留的 instead of being 关闭的
     let initial_kdl = r#"
         layout {
             pane
@@ -6492,7 +6492,7 @@ fn test_override_tiled_retain_plugin_panes_partial_match() {
         )
         .unwrap();
 
-    // Verify NO plugin panes were unloaded
+    // 验证 NO 插件 窗格 were 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert_eq!(
         unloaded_plugins.len(),
@@ -6500,11 +6500,11 @@ fn test_override_tiled_retain_plugin_panes_partial_match() {
         "No plugin panes should be unloaded when retain_existing_plugin_panes is true"
     );
 
-    // No terminals should be closed
+    // No 终端 should be 关闭的
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert!(closed_panes.is_empty());
 
-    // All 4 panes should exist (1 terminal + 3 plugins)
+    // All 4 窗格 should exist (1 终端 + 3 插件)
     assert_eq!(
         tiled_panes.visible_panes_count(),
         4,
@@ -6514,7 +6514,7 @@ fn test_override_tiled_retain_plugin_panes_partial_match() {
 
 #[test]
 fn test_override_tiled_retain_plugin_panes_no_matches() {
-    // When NO plugins match the new layout, all original plugins are retained AND new plugins are created
+    // When NO 插件 匹配 the new 布局, all 原始 插件 are 保留的 AND new 插件 are 创建的
     let initial_kdl = r#"
         layout {
             pane
@@ -6646,7 +6646,7 @@ fn test_override_tiled_retain_plugin_panes_no_matches() {
         )
         .unwrap();
 
-    // Verify NO plugin panes were unloaded
+    // 验证 NO 插件 窗格 were 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert_eq!(
         unloaded_plugins.len(),
@@ -6654,7 +6654,7 @@ fn test_override_tiled_retain_plugin_panes_no_matches() {
         "No plugin panes should be unloaded when retain_existing_plugin_panes is true"
     );
 
-    // Total: 1 terminal + 6 plugins (3 original + 3 new)
+    // Total: 1 终端 + 6 插件 (3 原始 + 3 new)
     assert_eq!(
         tiled_panes.visible_panes_count(),
         7,
@@ -6664,7 +6664,7 @@ fn test_override_tiled_retain_plugin_panes_no_matches() {
 
 #[test]
 fn test_override_floating_retain_plugin_panes_partial_match() {
-    // Floating plugin panes that don't match the new layout are retained
+    // 浮动 插件 窗格 that don't 匹配 the new 布局 are 保留的
     let initial_kdl = r#"
         layout {
             pane
@@ -6789,7 +6789,7 @@ fn test_override_floating_retain_plugin_panes_partial_match() {
         )
         .unwrap();
 
-    // Verify NO plugin panes were unloaded
+    // 验证 NO 插件 窗格 were 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert_eq!(
         unloaded_plugins.len(),
@@ -6797,24 +6797,24 @@ fn test_override_floating_retain_plugin_panes_partial_match() {
         "No floating plugin panes should be unloaded when retain_existing_plugin_panes is true"
     );
 
-    // No terminals should be closed
+    // No 终端 should be 关闭的
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert!(closed_panes.is_empty());
 
-    // Both floating plugins should still exist
+    // Both 浮动 插件 should still exist
     assert_eq!(
         floating_panes.visible_panes_count(),
         2,
         "Both floating plugin panes should be retained"
     );
 
-    // Verify tiled pane exists
+    // 验证 平铺 窗格 exists
     assert_eq!(tiled_panes.visible_panes_count(), 1);
 }
 
 #[test]
 fn test_override_floating_retain_plugin_panes_no_matches() {
-    // All original floating plugins are retained AND new floating plugins are created when there are no matches
+    // All 原始 浮动 插件 are 保留的 AND new 浮动 插件 are 创建的 when there are no matches
     let initial_kdl = r#"
         layout {
             pane
@@ -6954,7 +6954,7 @@ fn test_override_floating_retain_plugin_panes_no_matches() {
         )
         .unwrap();
 
-    // Verify NO plugin panes were unloaded
+    // 验证 NO 插件 窗格 were 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert_eq!(
         unloaded_plugins.len(),
@@ -6962,20 +6962,20 @@ fn test_override_floating_retain_plugin_panes_no_matches() {
         "No floating plugin panes should be unloaded when retain_existing_plugin_panes is true"
     );
 
-    // Total: 4 floating plugins (2 original + 2 new)
+    // Total: 4 浮动 插件 (2 原始 + 2 new)
     assert_eq!(
         floating_panes.visible_panes_count(),
         4,
         "All original floating plugins retained and new plugins created"
     );
 
-    // 1 tiled terminal pane
+    // 1 平铺 终端 窗格
     assert_eq!(tiled_panes.visible_panes_count(), 1);
 }
 
 #[test]
 fn test_override_mixed_retain_plugin_panes_both_tiled_and_floating() {
-    // Both tiled and floating plugin panes are retained when the flag is true
+    // Both 平铺 and 浮动 插件 窗格 are 保留的 when the 标志 is true
     let initial_kdl = r#"
         layout {
             pane command="htop"
@@ -7115,7 +7115,7 @@ fn test_override_mixed_retain_plugin_panes_both_tiled_and_floating() {
         )
         .unwrap();
 
-    // Verify NO plugin panes were unloaded
+    // 验证 NO 插件 窗格 were 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert_eq!(
         unloaded_plugins.len(),
@@ -7123,7 +7123,7 @@ fn test_override_mixed_retain_plugin_panes_both_tiled_and_floating() {
         "No plugin panes should be unloaded when retain_existing_plugin_panes is true"
     );
 
-    // vim terminal should be closed (doesn't match layout)
+    // vim 终端 should be 关闭的 (doesn't 匹配 布局)
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(closed_panes.len(), 1, "vim terminal should be closed");
     assert!(
@@ -7131,7 +7131,7 @@ fn test_override_mixed_retain_plugin_panes_both_tiled_and_floating() {
         "Terminal(2) (vim) should be closed"
     );
 
-    // Verify plugins exist (exact counts may vary based on where retained panes land)
+    // 验证 插件 exist (exact counts may vary based on where 保留的 窗格 land)
     assert!(
         tiled_panes.visible_panes_count() >= 2,
         "At least htop and matched plugins"
@@ -7144,7 +7144,7 @@ fn test_override_mixed_retain_plugin_panes_both_tiled_and_floating() {
 
 #[test]
 fn test_override_retain_plugin_but_close_terminal_panes() {
-    // Verify that retain_existing_plugin_panes = true ONLY affects plugin panes; terminals are still closed normally
+    // 验证 that retain_existing_plugin_panes = true ONLY affects 插件 窗格; 终端 are still 关闭的 normally
     let initial_kdl = r#"
         layout {
             pane command="htop"
@@ -7247,7 +7247,7 @@ fn test_override_retain_plugin_but_close_terminal_panes() {
         )
         .unwrap();
 
-    // vim terminal should be closed
+    // vim 终端 should be 关闭的
     let closed_panes = collect_close_pane_messages(&pty_receiver);
     assert_eq!(
         closed_panes.len(),
@@ -7259,7 +7259,7 @@ fn test_override_retain_plugin_but_close_terminal_panes() {
         "vim (Terminal(2)) should be closed"
     );
 
-    // Plugin should NOT be unloaded
+    // 插件 should NOT be 卸载的
     let unloaded_plugins = collect_unload_plugin_messages(&plugin_receiver);
     assert_eq!(
         unloaded_plugins.len(),
@@ -7267,7 +7267,7 @@ fn test_override_retain_plugin_but_close_terminal_panes() {
         "No plugin panes should be unloaded"
     );
 
-    // Final panes: htop + tab-bar = 2
+    // 最终 窗格: htop + 标签页-bar = 2
     assert_eq!(
         tiled_panes.visible_panes_count(),
         2,

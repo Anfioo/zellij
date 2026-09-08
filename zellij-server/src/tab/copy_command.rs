@@ -37,12 +37,12 @@ impl CopyCommand {
     }
 }
 
-/// Wait for the copy command's process in the background, so that it does not linger as a zombie
-/// once it exits.
+/// Wait for the 复制 命令's 进程 in the background, so that it does not linger as a zombie
+/// once it 退出.
 ///
-/// The process is deliberately not killed if it outlives the copy operation: X11 and Wayland
-/// clipboard helpers (eg. `xsel`, `xclip` or `wl-copy`) keep running for as long as they own the
-/// selection, and killing them clears the clipboard. Copy commands that do exit by themselves (eg.
+/// The 进程 is deliberately not 杀死的 if it outlives the 复制 operation: X11 and Wayland
+/// 剪贴板 helpers (eg. `xsel`, `xclip` or `wl-复制`) keep running for as long as they own the
+/// 选择, and 杀死 them clears the 剪贴板. 复制 命令 that do 退出 by themselves (eg.
 /// `pbcopy`) are reaped as soon as they do.
 fn reap(mut process: Child) -> JoinHandle<()> {
     std::thread::spawn(move || {
@@ -61,8 +61,8 @@ mod tests {
     use std::path::Path;
     use std::time::{Duration, Instant};
 
-    // stands in for an x11/wayland clipboard helper: consumes stdin and then keeps running the way
-    // `xsel` or `xclip` do while they own the selection
+    // stands in for an x11/wayland 剪贴板 helper: 消费 标准输入 and then keeps running the way
+    // `xsel` or `xclip` do while they own the 选择
     fn fake_clipboard_helper(dir: &Path, received: &Path, still_alive: &Path) -> String {
         let script = dir.join("fake-clipboard-helper");
         std::fs::write(
@@ -75,7 +75,7 @@ mod tests {
         )
         .unwrap();
         // run it through `sh` rather than making it executable, so that a concurrent fork/exec
-        // elsewhere in the test binary can't make this spawn fail with ETXTBSY
+        // elsewhere in the 测试 binary can't make this spawn fail with ETXTBSY
         format!("sh {}", script.display())
     }
 
@@ -90,7 +90,7 @@ mod tests {
             .set("some copied text".to_owned())
             .unwrap();
 
-        // poll (bounded to ~15s) for the helper to outlive the copy operation
+        // 轮询 (bounded to ~15s) for the helper to outlive the 复制 operation
         let deadline = Instant::now() + Duration::from_secs(15);
         while !still_alive.exists() && Instant::now() < deadline {
             std::thread::sleep(Duration::from_millis(20));
@@ -118,7 +118,7 @@ mod tests {
 
         reap(process).join().unwrap();
 
-        // having been waited for, the process is gone from the process table rather than left
+        // having been waited for, the 进程 is gone from the 进程 表格 rather than left
         // behind as a zombie
         assert_eq!(
             waitpid(pid, Some(WaitPidFlag::WNOHANG)).err(),

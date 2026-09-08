@@ -25,7 +25,7 @@ use zellij_utils::{
 };
 
 pub struct LayoutApplier<'a> {
-    viewport: Rc<RefCell<Viewport>>, // includes all non-UI panes
+    viewport: Rc<RefCell<Viewport>>, // includes all non-UI 窗格
     senders: ThreadSenders,
     sixel_image_store: Rc<RefCell<SixelImageStore>>,
     kitty_image_store: Rc<RefCell<KittyImageStore>>,
@@ -35,7 +35,7 @@ pub struct LayoutApplier<'a> {
     character_cell_size: Rc<RefCell<Option<SizeInPixels>>>,
     connected_clients: Rc<RefCell<HashMap<ClientId, bool>>>,
     style: Style,
-    display_area: Rc<RefCell<Size>>, // includes all panes (including eg. the status bar and tab bar in the default layout)
+    display_area: Rc<RefCell<Size>>, // includes all 窗格 (including eg. the 状态 bar and 标签页 bar in the 默认 布局)
     tiled_panes: &'a mut TiledPanes,
     floating_panes: &'a mut FloatingPanes,
     pane_frame_style: PaneFrameStyle,
@@ -61,7 +61,7 @@ impl<'a> LayoutApplier<'a> {
         character_cell_size: &Rc<RefCell<Option<SizeInPixels>>>,
         connected_clients: &Rc<RefCell<HashMap<ClientId, bool>>>,
         style: &Style,
-        display_area: &Rc<RefCell<Size>>, // includes all panes (including eg. the status bar and tab bar in the default layout)
+        display_area: &Rc<RefCell<Size>>, // includes all 窗格 (including eg. the 状态 bar and 标签页 bar in the 默认 布局)
         tiled_panes: &'a mut TiledPanes,
         floating_panes: &'a mut FloatingPanes,
         pane_frame_style: PaneFrameStyle,
@@ -179,7 +179,7 @@ impl<'a> LayoutApplier<'a> {
         );
         let mut positions_left_without_exact_matches = vec![];
 
-        // look for exact matches (eg. panes that expect a specific command or plugin to run in them)
+        // look for exact matches (eg. 窗格 that 期望 a 特定 命令 or 插件 to run in them)
         for (layout, position_and_size) in positions_in_layout {
             match existing_tab_state
                 .find_and_extract_exact_match_pane(&layout.run, position_and_size.logical_position)
@@ -197,7 +197,7 @@ impl<'a> LayoutApplier<'a> {
             }
         }
 
-        // look for matches according to the logical position in the layout
+        // look for matches according to the logical position in the 布局
         let mut positions_left = vec![];
         for (layout, position_and_size) in positions_left_without_exact_matches {
             if let Some(pane) = existing_tab_state.find_and_extract_pane_with_same_logical_position(
@@ -209,9 +209,9 @@ impl<'a> LayoutApplier<'a> {
             }
         }
 
-        // fill the remaining panes by order of their logical position
+        // fill the remaining 窗格 by order of their logical position
         for (layout, position_and_size) in positions_left {
-            // now let's try to find panes on a best-effort basis
+            // now let's 尝试 to 查找 窗格 on a best-effort basis
             if let Some(pane) =
                 existing_tab_state.find_and_extract_pane(position_and_size.logical_position)
             {
@@ -219,8 +219,8 @@ impl<'a> LayoutApplier<'a> {
             }
         }
 
-        // add the rest of the panes where tiled_panes finds room for them (eg. if the layout had
-        // less panes than we've got in our state)
+        // add the rest of the 窗格 where tiled_panes 查找 room for them (eg. if the 布局 had
+        // less 窗格 than we've got in our 状态)
         let remaining_pane_ids: Vec<PaneId> = existing_tab_state.pane_ids();
         pane_applier.handle_remaining_tiled_pane_ids(
             remaining_pane_ids,
@@ -259,7 +259,7 @@ impl<'a> LayoutApplier<'a> {
         );
         let mut positions_left_without_exact_matches = vec![];
 
-        // look for exact matches (eg. panes that expect a specific command or plugin to run in them)
+        // look for exact matches (eg. 窗格 that 期望 a 特定 命令 or 插件 to run in them)
         let mut last_logical_position = None;
         for (layout, position_and_size) in positions_in_layout {
             match existing_tab_state.find_and_extract_exact_pane_with_same_run(&layout.run) {
@@ -292,8 +292,8 @@ impl<'a> LayoutApplier<'a> {
             &mut positions_left_without_exact_matches,
         )?;
 
-        // we do this because we have to add the remaining tiled pane ids ONLY AFTER positioning
-        // the new panes, otherwise the layout might get borked
+        // we do this because we have to add the remaining 平铺 窗格 ids ONLY AFTER positioning
+        // the new 窗格, otherwise the 布局 might get borked
         let mut pane_applier = PaneApplier::new(
             &mut self.tiled_panes,
             &mut self.floating_panes,
@@ -316,7 +316,7 @@ impl<'a> LayoutApplier<'a> {
             self.tiled_panes.focus_pane(pane_id, client_id);
         }
 
-        // in case focused panes were closed by the override
+        // in case 聚焦的 窗格 were 关闭的 by the override
         self.tiled_panes.move_client_focus_to_existing_panes();
 
         for pane_id in &pane_ids_expanded_in_stack {
@@ -380,8 +380,8 @@ impl<'a> LayoutApplier<'a> {
                 focus_layout_if_not_focused,
             )
             .or_else(|_e| {
-                // in the error branch, we try to recover by positioning the panes in the space but
-                // ignoring the percentage sizes (passing true as the third argument), this is a hack
+                // in the 错误 分支, we 尝试 to 恢复 by positioning the 窗格 in the space but
+                // ignoring the percentage sizes (passing true as the third 参数), this is a hack
                 // around some issues with the constraint system that should be addressed in a systemic
                 // manner
                 layout.position_panes_in_space(
@@ -435,21 +435,21 @@ impl<'a> LayoutApplier<'a> {
         run_instructions_to_ignore: &Vec<Option<Run>>,
         positions_in_layout: &mut Vec<(TiledPaneLayout, PaneGeom)>,
     ) -> Vec<Option<Run>> {
-        // here we try to find rooms for the panes that are already running (represented by
-        // run_instructions_to_ignore), we try to either find an explicit position (the new
-        // layout has a pane with the exact run instruction) or an otherwise free position
-        // (the new layout has a pane with None as its run instruction, eg. just `pane` in the
-        // layout)
+        // here we 尝试 to 查找 rooms for the 窗格 that are already running (represented by
+        // run_instructions_to_ignore), we 尝试 to either 查找 an explicit position (the new
+        // 布局 has a 窗格 with the exact run instruction) or an otherwise 释放 position
+        // (the new 布局 has a 窗格 with None as its run instruction, eg. just `窗格` in the
+        // 布局)
         let mut run_instructions_without_a_location = vec![];
         for run_instruction in run_instructions_to_ignore.clone().drain(..) {
             if self
                 .place_running_pane_in_exact_match_location(&run_instruction, positions_in_layout)
             {
-                // found exact match
+                // 找到的 exact 匹配
             } else if self
                 .place_running_pane_in_empty_location(&run_instruction, positions_in_layout)
             {
-                // found empty location
+                // 找到的 empty location
             } else {
                 // no room! we'll add it below after we place everything else
                 run_instructions_without_a_location.push(run_instruction);
@@ -463,10 +463,10 @@ impl<'a> LayoutApplier<'a> {
         new_plugin_ids: &mut HashMap<RunPluginOrAlias, Vec<u32>>,
         positions_in_layout: &mut Vec<(TiledPaneLayout, PaneGeom)>,
     ) -> Result<(Option<PaneId>, Vec<PaneId>)> {
-        // returns: optional pane id to focus, pane ids
-        // expanded in stack
-        // here we open new panes for each run instruction in the layout with the details
-        // we got from the plugin thread and pty thread
+        // 返回: optional 窗格 id to 焦点, 窗格 ids
+        // expanded in 栈
+        // here we 打开 new 窗格 for each run instruction in the 布局 with the details
+        // we got from the 插件 线程 and pty 线程
         let mut pane_ids_expanded_in_stack = vec![];
         let mut focus_pane_id: Option<PaneId> = None;
         let mut set_focus_pane_id = |layout: &TiledPaneLayout, pane_id: PaneId| {
@@ -483,7 +483,7 @@ impl<'a> LayoutApplier<'a> {
                 }
                 set_focus_pane_id(&layout, PaneId::Plugin(pid));
             } else if !new_terminal_ids.is_empty() {
-                // there are still panes left to fill, use the pids we received in this method
+                // there are still 窗格 left to fill, use the pids we received in this 方法
                 let (pid, hold_for_command) = new_terminal_ids.remove(0);
                 self.new_terminal_pane(pid, &hold_for_command, &position_and_size, &layout)?;
                 if layout.is_expanded_in_stack {
@@ -698,7 +698,7 @@ impl<'a> LayoutApplier<'a> {
             _ => None,
         };
 
-        // Check if this terminal should receive the blocking completion_tx
+        // 检查 if this 终端 should receive the blocking completion_tx
         let notification_end = if let Some((blocking_pid, _)) = &self.blocking_terminal {
             if *blocking_pid == pid {
                 self.blocking_terminal.take().map(|(_, tx)| tx)
@@ -868,7 +868,7 @@ impl<'a> LayoutApplier<'a> {
         let mut panes_to_apply = vec![];
         let mut positions_left = vec![];
 
-        // look for exact matches, first by pane contents and then by logical position
+        // look for exact matches, first by 窗格 contents and then by logical position
         for floating_pane_layout in positions_in_layout {
             match existing_tab_state
                 .find_and_extract_exact_match_pane(
@@ -889,7 +889,7 @@ impl<'a> LayoutApplier<'a> {
             }
         }
 
-        // fill the remaining panes by order of their logical position
+        // fill the remaining 窗格 by order of their logical position
         for floating_pane_layout in positions_left {
             if let Some(pane) =
                 existing_tab_state.find_and_extract_pane(floating_pane_layout.logical_position)
@@ -898,7 +898,7 @@ impl<'a> LayoutApplier<'a> {
             }
         }
 
-        // here we apply positioning to all panes by the order we found them
+        // here we apply positioning to all 窗格 by the order we 找到的 them
         // this is because the positioning decisions themselves rely on this order for geoms that
         // contain partial positioning information (eg. just x coords with no y or size) or no
         // positioning information at all
@@ -907,8 +907,8 @@ impl<'a> LayoutApplier<'a> {
                 .apply_floating_panes_layout_to_floating_pane(pane, floating_pane_layout)?;
         }
 
-        // here we apply positioning on a best-effort basis to any remaining panes we've got (these
-        // are panes that exist in the tab state but not in the desired layout)
+        // here we apply positioning on a best-effort basis to any remaining 窗格 we've got (these
+        // are 窗格 that exist in the 标签页 状态 but not in the desired 布局)
         pane_applier.handle_remaining_floating_pane_ids(existing_tab_state, logical_position);
         pane_applier.finalize_floating_panes_state();
 
@@ -943,7 +943,7 @@ impl<'a> LayoutApplier<'a> {
             &self.character_cell_size,
         );
 
-        // find already running exact matches
+        // 查找 already running exact matches
         for floating_pane_layout in positions_in_layout {
             match existing_tab_state
                 .find_and_extract_exact_pane_with_same_run(&floating_pane_layout.run)
@@ -966,7 +966,7 @@ impl<'a> LayoutApplier<'a> {
             retain_existing_plugin_panes,
         );
 
-        // open new panes
+        // 打开 new 窗格
         let mut focused_floating_pane = None;
         let mut new_floating_terminal_ids = new_terminal_ids.iter();
         for floating_pane_layout in positions_left {
@@ -995,8 +995,8 @@ impl<'a> LayoutApplier<'a> {
             }
         }
 
-        // we do this because we have to add the remaining tiled pane ids ONLY AFTER positioning
-        // the new panes, otherwise the layout might get borked
+        // we do this because we have to add the remaining 平铺 窗格 ids ONLY AFTER positioning
+        // the new 窗格, otherwise the 布局 might get borked
         let mut pane_applier = PaneApplier::new(
             &mut self.tiled_panes,
             &mut self.floating_panes,
@@ -1009,13 +1009,13 @@ impl<'a> LayoutApplier<'a> {
             self.floating_panes
                 .focus_pane_for_all_clients(focused_floating_pane);
         } else {
-            // we do this in case there is no explicitly focused pane in the new layout, so as to
-            // make sure any panes that are already focused have a higher z_index than the ones
+            // we do this in case there is no explicitly 聚焦的 窗格 in the new 布局, so as to
+            // make sure any 窗格 that are already 聚焦的 have a higher z_index than the ones
             // added above
             self.floating_panes.reapply_pane_focus();
         }
 
-        // in case focused panes were closed by the override
+        // in case 聚焦的 窗格 were 关闭的 by the override
         self.floating_panes.move_client_focus_to_existing_panes();
 
         if layout_has_floating_panes {
@@ -1032,7 +1032,7 @@ impl<'a> LayoutApplier<'a> {
             )
         };
         self.floating_panes.resize(new_screen_size);
-        // we need to do this explicitly because floating_panes.resize does not do this
+        // we need to do this explicitly because floating_panes.调整大小 does not do this
         self.floating_panes
             .resize_pty_all_panes(&mut self.os_api)
             .with_context(err_context)?;
@@ -1046,13 +1046,13 @@ impl<'a> LayoutApplier<'a> {
         pane_frame_style: PaneFrameStyle,
     ) {
         {
-            // reset viewport before reapplying offset
+            // 重置 视口 before reapplying 偏移
             let mut viewport = viewport.borrow_mut();
             *viewport = (*display_area.borrow()).into();
         }
         let boundary_geoms = tiled_panes.non_selectable_pane_geoms_inside_viewport();
         {
-            // curly braces here is so that we free viewport immediately when we're done
+            // curly braces here is so that we 释放 视口 immediately when we're done
             let mut viewport = viewport.borrow_mut();
             for position_and_size in boundary_geoms {
                 if position_and_size.x == viewport.x
@@ -1084,12 +1084,12 @@ impl<'a> LayoutApplier<'a> {
         tiled_panes.set_pane_frames(pane_frame_style);
     }
     fn adjust_viewport(&mut self) -> Result<()> {
-        // here we offset the viewport after applying a tiled panes layout
-        // from borderless panes that are on the edges of the
-        // screen, this is so that when we don't have pane boundaries (eg. when they were
-        // disabled by the user) boundaries won't be drawn around these panes
-        // geometrically, we can only do this with panes that are on the edges of the
-        // screen - so it's mostly a best-effort thing
+        // here we 偏移 the 视口 after applying a 平铺 窗格 布局
+        // from borderless 窗格 that are on the edges of the
+        // 屏幕, this is so that when we don't have 窗格 boundaries (eg. when they were
+        // 已禁用 by the 用户) boundaries won't be drawn around these 窗格
+        // geometrically, we can only do this with 窗格 that are on the edges of the
+        // 屏幕 - so it's mostly a best-effort thing
         let err_context = "failed to adjust viewport";
 
         let display_area = {
@@ -1122,8 +1122,8 @@ impl<'a> LayoutApplier<'a> {
         }
     }
     fn total_space_for_tiled_panes(&self) -> PaneGeom {
-        // for tiled panes we need to take the display area rather than the viewport because the
-        // viewport can potentially also be changed
+        // for 平铺 窗格 we need to take the display area rather than the 视口 because the
+        // 视口 can potentially also be changed
         let (display_area_cols, display_area_rows) = {
             let display_area = self.display_area.borrow();
             (display_area.cols, display_area.rows)
@@ -1382,7 +1382,7 @@ impl<'a> PaneApplier<'a> {
         }
     }
     pub fn finalize_tiled_state(&mut self) {
-        // do some housekeeping to apply various layout properties to panes
+        // do some housekeeping to apply various 布局 properties to 窗格
         for pane_id in &self.pane_ids_expanded_in_stack {
             self.tiled_panes.expand_pane_in_stack(*pane_id);
         }
@@ -1392,7 +1392,7 @@ impl<'a> PaneApplier<'a> {
         self.tiled_panes.reapply_pane_focus();
     }
     pub fn finalize_floating_panes_state(&mut self) {
-        // do some housekeeping to apply various layout properties to panes
+        // do some housekeeping to apply various 布局 properties to 窗格
         if let Some(pane_id) = self.new_focused_pane_id {
             self.floating_panes.focus_pane_for_all_clients(pane_id);
         }

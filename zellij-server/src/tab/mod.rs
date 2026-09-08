@@ -1,5 +1,5 @@
-//! `Tab`s holds multiple panes. It tracks their coordinates (x/y) and size,
-//! as well as how they should be resized
+//! `标签页`s 持有 multiple 窗格. It 跟踪 their 坐标 (x/y) and size,
+//! as well as how they should be 调整大小的
 
 mod clipboard;
 mod copy_command;
@@ -157,7 +157,7 @@ pub const MIN_TERMINAL_WIDTH: usize = 5;
 const MAX_PENDING_VTE_EVENTS: usize = 7000;
 
 type HoldForCommand = Option<RunCommand>;
-pub type SuppressedPanes = HashMap<PaneId, (bool, Box<dyn Pane>)>; // bool => is scrollback editor
+pub type SuppressedPanes = HashMap<PaneId, (bool, Box<dyn Pane>)>; // bool => is 回滚缓冲区 editor
 
 pub type StackListId = usize;
 
@@ -182,7 +182,7 @@ enum StackListRemoval {
 enum BufferedTabInstruction {
     SetPaneSelectable(PaneId, bool),
     HandlePtyBytes(u32, VteBytes),
-    HoldPane(PaneId, Option<i32>, bool, RunCommand), // Option<i32> is the exit status, bool is is_first_run
+    HoldPane(PaneId, Option<i32>, bool, RunCommand), // 选项<i32> is the 退出 状态, bool is is_first_run
 }
 
 pub(crate) struct Tab {
@@ -203,8 +203,8 @@ pub(crate) struct Tab {
     next_stack_list_id: StackListId,
     stack_list_session_is_mirrored: bool,
     max_panes: Option<usize>,
-    viewport: Rc<RefCell<Viewport>>, // includes all non-UI panes
-    display_area: Rc<RefCell<Size>>, // includes all panes (including eg. the status bar and tab bar in the default layout)
+    viewport: Rc<RefCell<Viewport>>, // includes all non-UI 窗格
+    display_area: Rc<RefCell<Size>>, // includes all 窗格 (including eg. the 状态 bar and 标签页 bar in the 默认 布局)
     character_cell_size: Rc<RefCell<Option<SizeInPixels>>>,
     sixel_image_store: Rc<RefCell<SixelImageStore>>,
     kitty_image_store: Rc<RefCell<KittyImageStore>>,
@@ -219,12 +219,12 @@ pub(crate) struct Tab {
     pane_frame_style: PaneFrameStyle,
     auto_layout: bool,
     pending_vte_events: HashMap<u32, Vec<VteBytes>>,
-    pub selecting_with_mouse_in_pane: Option<PaneId>, // this is only pub for the tests
+    pub selecting_with_mouse_in_pane: Option<PaneId>, // this is only pub for the 测试
     pane_being_resized_with_mouse: Option<PaneResizeState>,
     link_handler: Rc<RefCell<LinkHandler>>,
     clipboard_provider: ClipboardProvider,
-    // TODO: used only to focus the pane when the layout is loaded
-    // it seems that optimization is possible using `active_panes`
+    // TODO: used only to 焦点 the 窗格 when the 布局 is 加载的
+    // it seems that 优化 is possible using `active_panes`
     focus_pane_id: Option<PaneId>,
     copy_on_select: bool,
     terminal_emulator_colors: Rc<RefCell<Palette>>,
@@ -233,8 +233,8 @@ pub(crate) struct Tab {
     cursor_positions_and_shape: HashMap<ClientId, (usize, usize, String)>, // (x_position,
     // y_position,
     // cursor_shape_csi)
-    is_pending: bool, // a pending tab is one that is still being loaded or otherwise waiting
-    pending_instructions: Vec<BufferedTabInstruction>, // instructions that came while the tab was
+    is_pending: bool, // a pending 标签页 is one that is still being 加载的 or otherwise waiting
+    pending_instructions: Vec<BufferedTabInstruction>, // instructions that came while the 标签页 was
     // pending and need to be re-applied
     swap_layouts: SwapLayouts,
     default_shell: PathBuf,
@@ -267,18 +267,18 @@ pub(crate) struct Tab {
     word_separators: String,
     currently_marking_pane_group: Rc<RefCell<HashMap<ClientId, bool>>>,
     connected_clients_in_app: Rc<RefCell<HashMap<ClientId, bool>>>, // bool -> is_web_client
-    // the below are the configured values - the ones that will be set if and when the web server
+    // the below are the 配置的 values - the ones that will be set if and when the web 服务端
     // is brought online
     web_server_ip: IpAddr,
     web_server_port: u16,
     pub panes_with_pending_bell: HashSet<PaneId>,
     pub tab_has_pending_bell: bool,
-    pub tab_bell_flash: bool, // currently in mid-notification-flash
-    pub tab_bell_ring: bool,  // need to send ANSI BEL to the controlling terminal
+    pub tab_bell_flash: bool, // currently in mid-通知-flash
+    pub tab_bell_ring: bool,  // need to send ANSI BEL to the controlling 终端
     tab_visible: bool,
 }
 
-// FIXME: Use a struct that has a pane_type enum, to reduce all of the duplication
+// FIXME: Use a 结构体 that has a pane_type 枚举, to reduce all of the duplication
 pub trait Pane {
     fn x(&self) -> usize;
     fn y(&self) -> usize;
@@ -294,10 +294,10 @@ pub trait Pane {
     fn handle_pty_bytes(&mut self, _bytes: VteBytes) {}
     fn handle_plugin_bytes(&mut self, _client_id: ClientId, _bytes: VteBytes) {}
     fn show_cursor(&mut self, _client_id: ClientId, _cursor_position: Option<(usize, usize)>) {}
-    /// Returns the cursor position and whether it is visible.
-    /// The position is returned unconditionally (as long as the cursor is within
-    /// bounds) so that the host terminal can position the cursor for IME even
-    /// when the app has hidden it. The bool is true when the cursor is visible.
+    /// 返回 the 光标 position and whether it is 可见.
+    /// The position is 返回的 unconditionally (as long as the 光标 is within
+    /// bounds) so that the 主机 终端 can position the 光标 for IME even
+    /// when the app has hidden it. The bool is true when the 光标 is 可见.
     fn cursor_coordinates(&self, _client_id: Option<ClientId>) -> Option<(usize, usize, bool)>;
     fn is_mid_frame(&self) -> bool {
         false
@@ -381,7 +381,7 @@ pub trait Pane {
         Offset::default()
     }
     fn cursor_shape_csi(&self) -> String {
-        "\u{1b}[0 q".to_string() // default to non blinking block
+        "\u{1b}[0 q".to_string() // 默认 to non blinking block
     }
     fn contains(&self, position: &Position) -> bool {
         match self.geom_override() {
@@ -475,13 +475,13 @@ pub trait Pane {
         MIN_TERMINAL_HEIGHT
     }
     fn drain_messages_to_pty(&mut self) -> Vec<Vec<u8>> {
-        // TODO: this is only relevant to terminal panes
-        // we should probably refactor away from this trait at some point
+        // TODO: this is only relevant to 终端 窗格
+        // we should probably refactor away from this 特征 at some point
         vec![]
     }
     fn drain_forwarded_queries(&mut self) -> Vec<crate::host_query::HostQuery> {
-        // Only terminal panes forward whitelisted queries to the host;
-        // plugin panes have no such concept.
+        // Only 终端 窗格 forward whitelisted queries to the 主机;
+        // 插件 窗格 have no such concept.
         vec![]
     }
     fn drain_nested_session_messages(&mut self) -> Vec<NestedSessionMessage> {
@@ -518,32 +518,32 @@ pub trait Pane {
     fn guest_modal_shortcuts(&self) -> GuestModalShortcuts {
         GuestModalShortcuts::default()
     }
-    /// Mark this pane as awaiting a host-terminal reply for a forward
-    /// it just dispatched. While paused, vte byte feeding is buffered
-    /// so that the eventual host reply lands on the pane's stdin in
-    /// the same stream position the original query occupied. Default
-    /// no-op for non-terminal panes (plugins do not forward queries).
+    /// Mark this 窗格 as awaiting a 主机-终端 reply for a forward
+    /// it just 分派的. While 暂停的, vte byte feeding is buffered
+    /// so that the eventual 主机 reply lands on the 窗格's 标准输入 in
+    /// the same stream position the 原始 query occupied. 默认
+    /// no-op for non-终端 窗格 (插件 do not forward queries).
     fn arm_forward_pause(&mut self) {}
-    /// Clear the forward-pause flag set by `arm_forward_pause`, returning
-    /// `true` if the pane was previously paused. Default no-op.
+    /// 清空 the forward-暂停 标志 set by `arm_forward_pause`, 返回
+    /// `true` if the 窗格 was previously 暂停的. 默认 no-op.
     fn clear_forward_pause(&mut self) -> bool {
         false
     }
-    /// Drain and return any PTY bytes that arrived while the pane was
-    /// forward-paused. Tab calls this on resume and re-feeds the bytes
-    /// through `handle_pty_bytes`. Default empty for non-terminal panes.
+    /// 排空 and 返回 any PTY bytes that arrived while the 窗格 was
+    /// forward-暂停的. 标签页 调用 this on 恢复 and re-feeds the bytes
+    /// through `handle_pty_bytes`. 默认 empty for non-终端 窗格.
     fn drain_pending_pty_input(&mut self) -> Vec<u8> {
         vec![]
     }
-    /// Whether this pane is currently waiting for a host-forward reply.
+    /// Whether this 窗格 is currently waiting for a 主机-forward reply.
     fn is_forward_paused(&self) -> bool {
         false
     }
-    /// Push a CSI ?997 DSR notification (host color-palette theme mode)
-    /// onto this pane's pending pty-write queue, but only if the pane's
+    /// Push a CSI ?997 DSR 通知 (主机 color-palette theme mode)
+    /// onto this 窗格's pending pty-写入 队列, but only if the 窗格's
     /// underlying app opted in via `CSI ? 2031 h`.
-    /// Only relevant to terminal panes, plugin panes receive this through
-    /// `Event::HostTerminalThemeChanged`
+    /// Only relevant to 终端 窗格, 插件 窗格 receive this through
+    /// `事件::HostTerminalThemeChanged`
     fn push_color_palette_dsr(&mut self, _mode: zellij_utils::data::HostTerminalThemeMode) {}
     fn drain_clipboard_update(&mut self) -> Option<String> {
         None
@@ -563,24 +563,24 @@ pub trait Pane {
             return false;
         }
         if (self.x()..self.get_content_x()).contains(&position.column()) {
-            // position is on left border
+            // position is on left 边框
             return true;
         }
         if (self.get_content_x() + self.get_content_columns()..(self.x() + self.cols()))
             .contains(&position.column())
         {
-            // position is on right border
+            // position is on right 边框
             return true;
         }
         if (self.y() as isize..self.get_content_y() as isize).contains(&position.line()) {
-            // position is on top border
+            // position is on top 边框
             return true;
         }
         if ((self.get_content_y() + self.get_content_rows()) as isize
             ..(self.y() + self.rows()) as isize)
             .contains(&position.line())
         {
-            // position is on bottom border
+            // position is on bottom 边框
             return true;
         }
         false
@@ -630,7 +630,7 @@ pub trait Pane {
     fn set_exclude_from_sync(&mut self, exclude_from_sync: bool);
     fn exclude_from_sync(&self) -> bool;
 
-    // TODO: this should probably be merged with the mouse_right_click
+    // TODO: this should probably be 合并的 with the mouse_right_click
     fn handle_right_click(&mut self, _to: &Position, _client_id: ClientId) {}
     fn mouse_event(&self, _event: &MouseEvent, _client_id: ClientId) -> Option<String> {
         None
@@ -669,32 +669,32 @@ pub trait Pane {
         None
     }
     fn update_search_term(&mut self, _needle: &str) {
-        // No-op by default (only terminal-panes currently have search capability)
+        // No-op by 默认 (only 终端-窗格 currently have 搜索 能力)
     }
     fn search_down(&mut self) {
-        // No-op by default (only terminal-panes currently have search capability)
+        // No-op by 默认 (only 终端-窗格 currently have 搜索 能力)
     }
     fn search_up(&mut self) {
-        // No-op by default (only terminal-panes currently have search capability)
+        // No-op by 默认 (only 终端-窗格 currently have 搜索 能力)
     }
     fn toggle_search_case_sensitivity(&mut self) {
-        // No-op by default (only terminal-panes currently have search capability)
+        // No-op by 默认 (only 终端-窗格 currently have 搜索 能力)
     }
     fn toggle_search_whole_words(&mut self) {
-        // No-op by default (only terminal-panes currently have search capability)
+        // No-op by 默认 (only 终端-窗格 currently have 搜索 能力)
     }
     fn toggle_search_wrap(&mut self) {
-        // No-op by default (only terminal-panes currently have search capability)
+        // No-op by 默认 (only 终端-窗格 currently have 搜索 能力)
     }
     fn clear_search(&mut self) {
-        // No-op by default (only terminal-panes currently have search capability)
+        // No-op by 默认 (only 终端-窗格 currently have 搜索 能力)
     }
     fn is_alternate_mode_active(&self) -> bool {
-        // False by default (only terminal-panes support alternate mode)
+        // False by 默认 (only 终端-窗格 support alternate mode)
         false
     }
     fn hold(&mut self, _exit_status: Option<i32>, _is_first_run: bool, _run_command: RunCommand) {
-        // No-op by default, only terminal panes support holding
+        // No-op by 默认, only 终端 窗格 support 持有
     }
     fn has_bell(&self) -> bool {
         false
@@ -715,9 +715,9 @@ pub trait Pane {
     fn frame_color_override(&self) -> Option<PaletteColor>;
     fn invoked_with(&self) -> &Option<Run>;
     fn set_title(&mut self, title: String);
-    fn update_loading_indication(&mut self, _loading_indication: LoadingIndication) {} // only relevant for plugins
-    fn start_loading_indication(&mut self, _loading_indication: LoadingIndication) {} // only relevant for plugins
-    fn progress_animation_offset(&mut self) {} // only relevant for plugins
+    fn update_loading_indication(&mut self, _loading_indication: LoadingIndication) {} // only relevant for 插件
+    fn start_loading_indication(&mut self, _loading_indication: LoadingIndication) {} // only relevant for 插件
+    fn progress_animation_offset(&mut self) {} // only relevant for 插件
     fn current_title(&self) -> String;
     fn stack_list_entry_label(&self) -> String {
         self.current_title()
@@ -744,7 +744,7 @@ pub trait Pane {
     }
     fn rerun(&mut self) -> Option<RunCommand> {
         None
-    } // only relevant to terminal panes
+    } // only relevant to 终端 窗格
     fn update_theme(&mut self, _theme: Styling) {}
     fn set_selection_options(&mut self, _osc133_command_selection: bool, _word_separators: &str) {}
     fn update_arrow_fonts(&mut self, _should_support_arrow_fonts: bool) {}
@@ -842,7 +842,7 @@ pub fn get_next_terminal_position(
 }
 
 impl Tab {
-    // FIXME: Still too many arguments for clippy to be happy...
+    // FIXME: Still too many 参数 for clippy to be happy...
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         id: usize,
@@ -996,7 +996,7 @@ impl Tab {
             terminal_emulator_color_codes,
             pids_waiting_resize: HashSet::new(),
             cursor_positions_and_shape: HashMap::new(),
-            is_pending: true, // will be switched to false once the layout is applied
+            is_pending: true, // will be switched to false once the 布局 is applied
             pending_instructions: vec![],
             swap_layouts,
             default_shell,
@@ -1460,7 +1460,7 @@ impl Tab {
         self.set_force_render();
         self.set_should_clear_display_before_rendering();
     }
-    // the classic layout solver cannot see suppressed stack-list members; dissolve
+    // the classic 布局 solver cannot see 抑制的 栈-列表 members; dissolve
     // lists into in-grid stacks first, groupify_all re-forms them on mode entry
     fn degroupify_all(&mut self) {
         let ids: Vec<StackListId> = self.stack_lists.keys().copied().collect();
@@ -1480,8 +1480,8 @@ impl Tab {
             self.degroupify_all();
         }
     }
-    // the inverse of degroupify_all: adopts classic in-grid stacks into stack
-    // lists, suppressing all but the visible member of each
+    // the inverse of degroupify_all: adopts classic in-grid stacks into 栈
+    // lists, suppressing all but the 可见 member of each
     fn groupify_all(&mut self) {
         if self.tiled_panes.fullscreen_is_active() {
             return;
@@ -1770,10 +1770,10 @@ impl Tab {
                 self.apply_buffered_instructions().non_fatal();
             },
             Err(e) => {
-                // TODO: this should only happen due to an erroneous layout created by user
-                // configuration that was somehow not caught in our KDL layout parser
-                // we should still be able to properly recover from this with a useful error
-                // message though
+                // TODO: this should only happen due to an erroneous 布局 创建的 by 用户
+                // 配置 that was somehow not 捕获的 in our KDL 布局 解析器
+                // we should still be able to properly 恢复 from this with a useful 错误
+                // 消息 though
                 log::error!("Failed to apply layout: {}", e);
                 self.tiled_panes.reapply_pane_frames();
                 self.is_pending = false;
@@ -1857,11 +1857,11 @@ impl Tab {
                         .non_fatal();
                 }
 
-                // this is essentially another pass of the layout applier
-                // we do this because the layout applier does not know about swap layouts, and in
-                // this case we might have had to re-add existing panes that were not in the
-                // overridden layout (eg. if we had more panes than were in the layout). In such a
-                // case, we would like to make sure these extra panes fit the current swap layout
+                // this is essentially another pass of the 布局 applier
+                // we do this because the 布局 applier does not know about swap 布局, and in
+                // this case we might have had to re-add existing 窗格 that were not in the
+                // overridden 布局 (eg. if we had more 窗格 than were in the 布局). In such a
+                // case, we would like to make sure these extra 窗格 fit the 当前 swap 布局
                 self.swap_layouts.set_is_tiled_damaged();
                 self.swap_layouts.set_is_floating_damaged();
                 let _ = self.relayout_tiled_panes(false);
@@ -1880,10 +1880,10 @@ impl Tab {
                 self.apply_buffered_instructions().non_fatal();
             },
             Err(e) => {
-                // TODO: this should only happen due to an erroneous layout created by user
-                // configuration that was somehow not caught in our KDL layout parser
-                // we should still be able to properly recover from this with a useful error
-                // message though
+                // TODO: this should only happen due to an erroneous 布局 创建的 by 用户
+                // 配置 that was somehow not 捕获的 in our KDL 布局 解析器
+                // we should still be able to properly 恢复 from this with a useful 错误
+                // 消息 though
                 log::error!("Failed to apply layout: {}", e);
             },
         }
@@ -1898,7 +1898,7 @@ impl Tab {
             if selectable_tiled_panes.count() + self.suppressed_stack_list_members().count() > 1 {
                 self.swap_layouts.tiled_layout_info()
             } else {
-                // no layout for single pane
+                // no 布局 for single 窗格
                 (None, false)
             }
         }
@@ -1984,7 +1984,7 @@ impl Tab {
         }
         self.tiled_panes.reapply_pane_frames();
         let display_area = *self.display_area.borrow();
-        // we do this so that the new swap layout has a chance to pass through the constraint system
+        // we do this so that the new swap 布局 has a chance to pass through the constraint system
         self.tiled_panes.resize(display_area);
         self.set_should_clear_display_before_rendering();
         self.senders
@@ -2044,7 +2044,7 @@ impl Tab {
         self.update_input_modes()
     }
     pub fn update_input_modes(&mut self) -> Result<()> {
-        // this updates only this tab's plugins with the client's input mode
+        // this updates only this 标签页's 插件 with the 客户端's 输入 mode
         let mode_infos = self.mode_info.borrow();
         let mut plugin_updates = vec![];
         let currently_marking_pane_group = self.currently_marking_pane_group.borrow();
@@ -2236,7 +2236,7 @@ impl Tab {
         } else {
             let mut pane_ids: Vec<PaneId> = self.tiled_panes.pane_ids().copied().collect();
             if pane_ids.is_empty() {
-                // no panes here, bye bye
+                // no 窗格 here, bye bye
                 return Ok(());
             }
             let focus_pane_id = if let Some(id) = self.focus_pane_id {
@@ -2296,7 +2296,7 @@ impl Tab {
         &mut self,
         clients_to_drain: Option<Vec<ClientId>>,
     ) -> Vec<(ClientId, ModeInfo)> {
-        // None => all clients
+        // None => all 客户端
         let mut client_ids_to_mode_infos = vec![];
         let clients_to_drain = clients_to_drain
             .unwrap_or_else(|| self.connected_clients.borrow_mut().drain().collect());
@@ -2348,7 +2348,7 @@ impl Tab {
             if self.get_selectable_tiled_panes().count() <= 1
                 && !self.pane_is_stack_list_member(&focused_pane_id)
             {
-                // don't close the only pane on screen...
+                // don't 关闭 the only 窗格 on 屏幕...
                 return Ok(());
             }
             if let Some(embedded_pane_to_float) = self.extract_pane(focused_pane_id, true) {
@@ -2393,7 +2393,7 @@ impl Tab {
                 && !self.pane_is_stack_list_member(&pane_id)
             {
                 log::error!("Cannot float the last tiled pane...");
-                // don't close the only pane on screen...
+                // don't 关闭 the only 窗格 on 屏幕...
                 return Ok(());
             }
             if let Some(embedded_pane_to_float) = self.extract_pane(pane_id, true) {
@@ -2686,13 +2686,13 @@ impl Tab {
         }
 
         if start_suppressed {
-            // this pane needs to start in the background (suppressed), only accessible if a plugin takes it out
+            // this 窗格 needs to 启动 in the background (抑制的), only accessible if a 插件 takes it out
             // of there in one way or another
-            // we need to do some bookkeeping for this pane, namely setting its geom and
-            // content_offset so that things will appear properly in the terminal - we set it to
-            // the default geom of the first floating pane - this is just in order to give it some
+            // we need to do some bookkeeping for this 窗格, namely setting its geom and
+            // content_offset so that things will appear properly in the 终端 - we set it to
+            // the 默认 geom of the first 浮动 窗格 - this is just in order to give it some
             // reasonable size, when it is shown - if needed - it will be given the proper geom as if it were
-            // resized
+            // 调整大小的
             let viewport = { self.viewport.borrow().clone() };
             let new_pane_geom = half_size_middle_geom(&viewport, 0);
             new_pane.set_active_at(Instant::now());
@@ -2801,13 +2801,13 @@ impl Tab {
         }
 
         if start_suppressed {
-            // this pane needs to start in the background (suppressed), only accessible if a plugin takes it out
+            // this 窗格 needs to 启动 in the background (抑制的), only accessible if a 插件 takes it out
             // of there in one way or another
-            // we need to do some bookkeeping for this pane, namely setting its geom and
-            // content_offset so that things will appear properly in the terminal - we set it to
-            // the default geom of the first floating pane - this is just in order to give it some
+            // we need to do some bookkeeping for this 窗格, namely setting its geom and
+            // content_offset so that things will appear properly in the 终端 - we set it to
+            // the 默认 geom of the first 浮动 窗格 - this is just in order to give it some
             // reasonable size, when it is shown - if needed - it will be given the proper geom as if it were
-            // resized
+            // 调整大小的
             let viewport = { self.viewport.borrow().clone() };
             let new_pane_geom = half_size_middle_geom(&viewport, 0);
             new_pane.set_active_at(Instant::now());
@@ -2902,13 +2902,13 @@ impl Tab {
         };
 
         if start_suppressed {
-            // this pane needs to start in the background (suppressed), only accessible if a plugin takes it out
+            // this 窗格 needs to 启动 in the background (抑制的), only accessible if a 插件 takes it out
             // of there in one way or another
-            // we need to do some bookkeeping for this pane, namely setting its geom and
-            // content_offset so that things will appear properly in the terminal - we set it to
-            // the default geom of the first floating pane - this is just in order to give it some
+            // we need to do some bookkeeping for this 窗格, namely setting its geom and
+            // content_offset so that things will appear properly in the 终端 - we set it to
+            // the 默认 geom of the first 浮动 窗格 - this is just in order to give it some
             // reasonable size, when it is shown - if needed - it will be given the proper geom as if it were
-            // resized
+            // 调整大小的
             let viewport = { self.viewport.borrow().clone() };
             let new_pane_geom = half_size_middle_geom(&viewport, 0);
             new_pane.set_active_at(Instant::now());
@@ -3060,13 +3060,13 @@ impl Tab {
         }
 
         if start_suppressed {
-            // this pane needs to start in the background (suppressed), only accessible if a plugin takes it out
+            // this 窗格 needs to 启动 in the background (抑制的), only accessible if a 插件 takes it out
             // of there in one way or another
-            // we need to do some bookkeeping for this pane, namely setting its geom and
-            // content_offset so that things will appear properly in the terminal - we set it to
-            // the default geom of the first floating pane - this is just in order to give it some
+            // we need to do some bookkeeping for this 窗格, namely setting its geom and
+            // content_offset so that things will appear properly in the 终端 - we set it to
+            // the 默认 geom of the first 浮动 窗格 - this is just in order to give it some
             // reasonable size, when it is shown - if needed - it will be given the proper geom as if it were
-            // resized
+            // 调整大小的
             let viewport = { self.viewport.borrow().clone() };
             let new_pane_geom = half_size_middle_geom(&viewport, 0);
             new_pane.set_active_at(Instant::now());
@@ -3104,9 +3104,9 @@ impl Tab {
         pid: PaneId,
         client_id: ClientId,
     ) -> Result<()> {
-        // this method creates a new pane from pid and replaces it with the active pane
-        // the active pane is then suppressed (hidden and not rendered) until the current
-        // created pane is closed, in which case it will be replaced back by it
+        // this 方法 creates a new 窗格 from pid and replaces it with the 活动 窗格
+        // the 活动 窗格 is then 抑制的 (hidden and not 渲染的) until the 当前
+        // 创建的 窗格 is 关闭的, in which case it will be replaced back by it
         let err_context = || format!("failed to suppress active pane for client {client_id}");
 
         match pid {
@@ -3159,9 +3159,9 @@ impl Tab {
         pid: PaneId,
         pane_id_to_replace: PaneId,
     ) -> Result<()> {
-        // this method creates a new pane from pid and replaces it with the pane iwth the given pane_id_to_replace
-        // the pane with the given pane_id_to_replace is then suppressed (hidden and not rendered) until the current
-        // created pane is closed, in which case it will be replaced back by it
+        // this 方法 creates a new 窗格 from pid and replaces it with the 窗格 iwth the given pane_id_to_replace
+        // the 窗格 with the given pane_id_to_replace is then 抑制的 (hidden and not 渲染的) until the 当前
+        // 创建的 窗格 is 关闭的, in which case it will be replaced back by it
         let err_context = || format!("failed to suppress pane");
 
         match pid {
@@ -3222,9 +3222,9 @@ impl Tab {
         completion_tx: Option<NotificationEnd>,
         borderless: Option<bool>,
     ) -> Result<()> {
-        // this method creates a new pane from pid and replaces it with the active pane
-        // the active pane is then suppressed (hidden and not rendered) until the current
-        // created pane is closed, in which case it will be replaced back by it
+        // this 方法 creates a new 窗格 from pid and replaces it with the 活动 窗格
+        // the 活动 窗格 is then 抑制的 (hidden and not 渲染的) until the 当前
+        // 创建的 窗格 is 关闭的, in which case it will be replaced back by it
         let err_context = || format!("failed to suppress active pane");
 
         match new_pane_id {
@@ -3232,7 +3232,7 @@ impl Tab {
                 let next_terminal_position = self.get_next_terminal_position(); // TODO: this is not accurate in this case
                 let mut new_pane = TerminalPane::new(
                     new_pane_id,
-                    PaneGeom::default(), // the initial size will be set later
+                    PaneGeom::default(), // the 初始 size will be set later
                     self.style,
                     next_terminal_position,
                     String::new(),
@@ -3458,7 +3458,7 @@ impl Tab {
                 let next_terminal_position = self.get_next_terminal_position();
                 let mut new_terminal = TerminalPane::new(
                     term_pid,
-                    PaneGeom::default(), // the initial size will be set later
+                    PaneGeom::default(), // the 初始 size will be set later
                     self.style,
                     next_terminal_position,
                     String::new(),
@@ -3533,7 +3533,7 @@ impl Tab {
                 let next_terminal_position = self.get_next_terminal_position();
                 let mut new_terminal = TerminalPane::new(
                     term_pid,
-                    PaneGeom::default(), // the initial size will be set later
+                    PaneGeom::default(), // the 初始 size will be set later
                     self.style,
                     next_terminal_position,
                     String::new(),
@@ -3810,7 +3810,7 @@ impl Tab {
             .filter_map(|c_id| self.get_active_pane_id(*c_id))
             .collect();
 
-        // Collect ringing pane IDs first (immutable borrow)
+        // 收集 ringing 窗格 IDs first (不可变 借用)
         let ringing_panes: Vec<PaneId> = self
             .tiled_panes
             .get_panes()
@@ -3821,7 +3821,7 @@ impl Tab {
             .collect();
 
         for pane_id in ringing_panes {
-            // Consume the bell from the pane
+            // 消费 the bell from the 窗格
             if let Some(pane) = self.get_pane_with_id_mut(pane_id) {
                 pane.consume_bell();
             }
@@ -3857,9 +3857,9 @@ impl Tab {
     pub fn clear_tab_bell_ring(&mut self) {
         self.tab_bell_ring = false;
     }
-    /// Checks if any pane in the tab has a pending bell, consumes all such bells, and returns
-    /// whether any were found. Does not update notification state (used when visual_bell is
-    /// disabled but ANSI BEL forwarding is still desired).
+    /// 检查 if any 窗格 in the 标签页 has a pending bell, 消费 all such bells, and 返回
+    /// whether any were 找到的. Does not update 通知 状态 (used when visual_bell is
+    /// 已禁用 but ANSI BEL forwarding is still desired).
     pub fn check_and_consume_bells_without_visual_notification(&mut self) -> bool {
         let ringing_panes: Vec<PaneId> = self
             .tiled_panes
@@ -4123,11 +4123,11 @@ impl Tab {
                     .map(|s_p| &mut s_p.1)
             })
         {
-            // If the pane is scrolled buffer the vte events
+            // If the 窗格 is scrolled 缓冲区 the vte 事件
             if terminal_output.is_scrolled() {
                 self.pending_vte_events.entry(pid).or_default().push(bytes);
                 if let Some(evs) = self.pending_vte_events.get(&pid) {
-                    // Reset scroll - and process all pending events for this pane
+                    // 重置 滚动 - and 进程 all pending 事件 for this 窗格
                     if evs.len() >= MAX_PENDING_VTE_EVENTS {
                         terminal_output.clear_scroll();
                         self.process_pending_vte_events(pid)
@@ -4170,26 +4170,26 @@ impl Tab {
         }
         Ok(())
     }
-    /// Deliver a forwarded host reply (or cache-fallback synthesis,
-    /// or a locally-answered query payload) to a pane that is currently
-    /// forward-paused. The reply bytes are written to the pane's PTY
-    /// first (so the app reads them on its stdin in the same stream
-    /// position the original query occupied), then the pause flag is
-    /// cleared and any PTY bytes that arrived while the pane was
-    /// paused are re-fed through vte. The re-feed itself may produce
-    /// another forward and re-arm the pause; the cycle bounds at the
+    /// Deliver a forwarded 主机 reply (or 缓存-回退 synthesis,
+    /// or a locally-answered query payload) to a 窗格 that is currently
+    /// forward-暂停的. The reply bytes are written to the 窗格's PTY
+    /// first (so the app reads them on its 标准输入 in the same stream
+    /// position the 原始 query occupied), then the 暂停 标志 is
+    /// 清空的 and any PTY bytes that arrived while the 窗格 was
+    /// 暂停的 are re-fed through vte. The re-feed itself may 生产
+    /// another forward and re-arm the 暂停; the cycle bounds at the
     /// buffered byte count.
     pub fn resume_pane_after_forward(&mut self, pid: u32, reply_bytes: Vec<u8>) -> Result<()> {
         let err_context = || format!("failed to resume pane {pid} after forward");
-        // Write the reply first so the app sees it on stdin before
-        // any subsequent (sync or async) reply that follows in the
+        // 写入 the reply first so the app sees it on 标准输入 before
+        // any subsequent (sync or 异步) reply that follows in the
         // buffered byte stream.
         if !reply_bytes.is_empty() {
             self.write_to_pane_id_without_preprocessing(reply_bytes, PaneId::Terminal(pid))
                 .with_context(err_context)?;
         }
-        // Clear the pause and pull out any bytes that were buffered
-        // while it waited for the host reply.
+        // 清空 the 暂停 and pull out any bytes that were buffered
+        // while it waited for the 主机 reply.
         let buffered = if let Some(terminal_output) = self
             .tiled_panes
             .get_pane_mut(PaneId::Terminal(pid))
@@ -4203,7 +4203,7 @@ impl Tab {
             terminal_output.clear_forward_pause();
             terminal_output.drain_pending_pty_input()
         } else {
-            // Pane closed between forward dispatch and reply arrival.
+            // 窗格 关闭的 between forward 分派 and reply arrival.
             return Ok(());
         };
         if !buffered.is_empty() {
@@ -4238,16 +4238,16 @@ impl Tab {
             terminal_output.handle_pty_bytes(bytes);
             let messages_to_pty = terminal_output.drain_messages_to_pty();
             let forwarded_queries = terminal_output.drain_forwarded_queries();
-            // If at least one forward was produced, the pane stopped
-            // processing its `pending_pty_input` queue at the byte
-            // that produced the forward. Arm the pause so subsequent
-            // PTY bytes accumulate in the same queue rather than
-            // being processed; they will be drained in stream order
-            // when the host reply (or cache-fallback synthesis, or
-            // 500 ms timeout) lands via `resume_pane_after_forward`.
-            // Pause arming is independent of which forward bears the
-            // reply: resume is keyed by pane_id, not by token, so a
-            // single flag suffices for any number of queued forwards.
+            // If at least one forward was 生产的, the 窗格 停止的
+            // processing its `pending_pty_input` 队列 at the byte
+            // that 生产的 the forward. Arm the 暂停 so subsequent
+            // PTY bytes accumulate in the same 队列 rather than
+            // being processed; they will be 排空的 in stream order
+            // when the 主机 reply (or 缓存-回退 synthesis, or
+            // 500 ms 超时) lands via `resume_pane_after_forward`.
+            // 暂停 arming is independent of which forward bears the
+            // reply: 恢复 is keyed by pane_id, not by 词法单元, so a
+            // single 标志 suffices for any number of 排队的 forwards.
             if !forwarded_queries.is_empty() {
                 terminal_output.arm_forward_pause();
             }
@@ -4303,7 +4303,7 @@ impl Tab {
         raw_input_bytes_are_kitty: bool,
         client_id: ClientId,
     ) -> Result<bool> {
-        // returns true if a UI update should be triggered (eg. when closing a command pane with
+        // 返回 true if a UI update should be triggered (eg. when closing a 命令 窗格 with
         // ctrl-c)
         let mut should_trigger_ui_change = false;
         let mut pane_ids = self.get_static_and_floating_pane_ids();
@@ -4338,8 +4338,8 @@ impl Tab {
         raw_input_bytes_are_kitty: bool,
         client_id: ClientId,
     ) -> Result<bool> {
-        // returns true if a UI update should be triggered (eg. if a command pane
-        // was closed with ctrl-c)
+        // 返回 true if a UI update should be triggered (eg. if a 命令 窗格
+        // was 关闭的 with ctrl-c)
         let err_context = || {
             format!(
                 "failed to write to active terminal for client {client_id} - msg: {raw_input_bytes:?}"
@@ -4444,7 +4444,7 @@ impl Tab {
         client_id: Option<ClientId>,
         completion_tx: Option<NotificationEnd>,
     ) -> Result<bool> {
-        // returns true if we need to update the UI (eg. when a command pane is closed with ctrl-c)
+        // 返回 true if we need to update the UI (eg. when a 命令 窗格 is 关闭的 with ctrl-c)
         let err_context = || format!("failed to write to pane with id {pane_id:?}");
 
         let mut should_update_ui = false;
@@ -4458,10 +4458,10 @@ impl Tab {
             .ok_or_else(|| anyhow!(format!("failed to find pane with id {pane_id:?}")))
             .with_context(err_context)?;
 
-        // We always write for non-synced terminals.
-        // However if the terminal is part of a tab-sync, we need to
-        // check if the terminal should receive input or not (depending on its
-        // 'exclude_from_sync' configuration).
+        // We always 写入 for non-synced 终端.
+        // However if the 终端 is part of a 标签页-sync, we need to
+        // 检查 if the 终端 should receive 输入 or not (depending on its
+        // 'exclude_from_sync' 配置).
         let should_not_write_to_terminal = is_sync_panes_active && active_pane.exclude_from_sync();
 
         if should_not_write_to_terminal {
@@ -4593,7 +4593,7 @@ impl Tab {
         raw_input_bytes: Vec<u8>,
         pane_id: PaneId,
     ) -> Result<bool> {
-        // returns true if we need to update the UI (eg. when a command pane is closed with ctrl-c)
+        // 返回 true if we need to update the UI (eg. when a 命令 窗格 is 关闭的 with ctrl-c)
         let err_context = || format!("failed to write to pane with id {pane_id:?}");
 
         let mut should_update_ui = false;
@@ -4804,8 +4804,8 @@ impl Tab {
     }
     pub fn set_should_clear_display_before_rendering(&mut self) {
         self.should_clear_display_before_rendering = true;
-        self.floating_panes.set_force_render(); // we do this to make sure pinned panes are
-                                                // rendered even if their surface is not visible
+        self.floating_panes.set_force_render(); // we do this to make sure pinned 窗格 are
+                                                // 渲染的 even if their surface is not 可见
     }
     pub fn is_sync_panes_active(&self) -> bool {
         self.synchronize_is_active
@@ -4819,7 +4819,7 @@ impl Tab {
         }
     }
     fn update_active_panes_in_pty_thread(&self) -> Result<()> {
-        // this is a bit hacky and we should ideally not keep this state in two different places at
+        // this is a bit hacky and we should ideally not keep this 状态 in two different places at
         // some point
         let connected_clients: Vec<ClientId> =
             { self.connected_clients.borrow().iter().copied().collect() };
@@ -4844,7 +4844,7 @@ impl Tab {
         let mut connected_clients: HashSet<ClientId> =
             { self.connected_clients.borrow().iter().copied().collect() };
 
-        // If we have a client_id_override (for watcher rendering), add it temporarily
+        // If we have a client_id_override (for watcher 渲染), add it temporarily
         if let Some(override_id) = client_id_override {
             connected_clients.insert(override_id);
         }
@@ -4948,9 +4948,9 @@ impl Tab {
                         .unwrap_or(false);
 
                     if active_terminal_is_mid_frame {
-                        // no-op, this means the active terminal is currently rendering a frame,
-                        // which means the cursor can be jumping around and we definitely do not
-                        // want to render it
+                        // no-op, this means the 活动 终端 is currently 渲染 a 框架,
+                        // which means the 光标 can be jumping around and we definitely do not
+                        // want to 渲染 it
                     } else if not_occluded && is_cursor_visible {
                         let desired_cursor_shape = self
                             .get_active_pane(client_id)
@@ -4972,7 +4972,7 @@ impl Tab {
                                 cursor_position_y + 1,
                                 cursor_position_x + 1,
                                 desired_cursor_shape
-                            ); // goto row/col
+                            ); // goto 行/col
                             output.add_post_vte_instruction_to_client(client_id, show_cursor);
                             output.add_post_vte_instruction_to_client(
                                 client_id,
@@ -4984,10 +4984,10 @@ impl Tab {
                             );
                         }
                     } else if not_occluded {
-                        // Cursor is hidden by the app but not occluded by a floating
-                        // pane. Position the host terminal cursor at the correct
+                        // 光标 is hidden by the app but not occluded by a 浮动
+                        // 窗格. Position the 主机 终端 光标 at the correct
                         // location (for IME) then hide it. The IME subsystem reads
-                        // the cursor position regardless of visibility.
+                        // the 光标 position regardless of visibility.
                         let hide_cursor = "\u{1b}[?25l";
                         let goto_cursor_position = &format!(
                             "\u{1b}[{};{}H",
@@ -5091,11 +5091,11 @@ impl Tab {
     pub fn resize_whole_tab(&mut self, new_screen_size: Size) -> Result<()> {
         let err_context = || format!("failed to resize whole tab (id {})", self.id);
         self.size = new_screen_size;
-        // If a tiled pane is fullscreen, exit fullscreen first so that *all*
-        // tiled panes (including the currently hidden ones) participate in the
-        // resize/relayout. We re-enter fullscreen on the same pane after the
-        // resize so the user-visible state is preserved. Without this, hidden
-        // panes retain stale geometry from before the resize and the layout
+        // If a 平铺 窗格 is fullscreen, 退出 fullscreen first so that *all*
+        // 平铺 窗格 (including the currently hidden ones) participate in the
+        // 调整大小/relayout. We re-enter fullscreen on the same 窗格 after the
+        // 调整大小 so the 用户-可见 状态 is 保存的. Without this, hidden
+        // 窗格 保留 stale 几何 from before the 调整大小 and the 布局
         // solver fails when fullscreen is later toggled off.
         let fullscreen_pane_to_restore = self.tiled_panes.fullscreen_pane_id();
         let fullscreen_covered_ui = self.tiled_panes.fullscreen_covers_ui();
@@ -5108,14 +5108,14 @@ impl Tab {
             self.floating_panes.unset_fullscreen();
         }
         self.floating_panes.resize(new_screen_size);
-        // we need to do this explicitly because floating_panes.resize does not do this
+        // we need to do this explicitly because floating_panes.调整大小 does not do this
         self.floating_panes
             .resize_pty_all_panes(&mut self.os_api)
             .with_context(err_context)?;
         self.tiled_panes.resize(new_screen_size);
         if self.auto_layout && !self.swap_layouts.is_floating_damaged() {
-            // we do this only for floating panes, because the constraint system takes care of the
-            // tiled panes
+            // we do this only for 浮动 窗格, because the constraint system takes care of the
+            // 平铺 窗格
             self.swap_layouts.set_is_floating_damaged();
             let _ = self.relayout_floating_panes(false);
         }
@@ -5169,7 +5169,7 @@ impl Tab {
                 .with_context(err_context)?;
             if successfully_resized {
                 self.swap_layouts.set_is_floating_damaged();
-                self.set_force_render(); // we force render here to make sure the panes under the floating pane render and don't leave "garbage" in case of a decrease
+                self.set_force_render(); // we force 渲染 here to make sure the 窗格 under the 浮动 窗格 渲染 and don't leave "garbage" in case of a decrease
             }
         } else {
             self.dissolve_stack_lists_for_classic_mutation();
@@ -5264,7 +5264,7 @@ impl Tab {
         self.tiled_panes
             .focus_pane_adjacent_to(pane_id, direction, client_id)
     }
-    // returns a boolean that indicates whether the focus moved
+    // 返回 a boolean that indicates whether the 焦点 移动
     pub fn move_focus_left(&mut self, client_id: ClientId) -> Result<bool> {
         let err_context = || format!("failed to move focus left for client {}", client_id);
 
@@ -5338,7 +5338,7 @@ impl Tab {
             Ok(self.tiled_panes.move_focus_up(client_id))
         }
     }
-    // returns a boolean that indicates whether the focus moved
+    // 返回 a boolean that indicates whether the 焦点 移动
     pub fn move_focus_right(&mut self, client_id: ClientId) -> Result<bool> {
         let err_context = || format!("failed to move focus right for client {}", client_id);
 
@@ -5413,7 +5413,7 @@ impl Tab {
         if self.floating_panes.panes_are_visible() {
             self.floating_panes.move_active_pane_down(client_id);
             self.swap_layouts.set_is_floating_damaged();
-            self.set_force_render(); // we force render here to make sure the panes under the floating pane render and don't leave "garbage" behind
+            self.set_force_render(); // we force 渲染 here to make sure the 窗格 under the 浮动 窗格 渲染 and don't leave "garbage" behind
         } else {
             if !self.has_selectable_panes() {
                 return;
@@ -5429,7 +5429,7 @@ impl Tab {
         if self.floating_panes.panes_are_visible() {
             self.floating_panes.move_pane_down(pane_id);
             self.swap_layouts.set_is_floating_damaged();
-            self.set_force_render(); // we force render here to make sure the panes under the floating pane render and don't leave "garbage" behind
+            self.set_force_render(); // we force 渲染 here to make sure the 窗格 under the 浮动 窗格 渲染 and don't leave "garbage" behind
         } else {
             if !self.has_selectable_panes() {
                 return;
@@ -5445,7 +5445,7 @@ impl Tab {
         if self.floating_panes.panes_are_visible() {
             self.floating_panes.move_active_pane_up(client_id);
             self.swap_layouts.set_is_floating_damaged();
-            self.set_force_render(); // we force render here to make sure the panes under the floating pane render and don't leave "garbage" behind
+            self.set_force_render(); // we force 渲染 here to make sure the 窗格 under the 浮动 窗格 渲染 and don't leave "garbage" behind
         } else {
             if !self.has_selectable_panes() {
                 return;
@@ -5461,7 +5461,7 @@ impl Tab {
         if self.floating_panes.panes_are_visible() {
             self.floating_panes.move_pane_up(pane_id);
             self.swap_layouts.set_is_floating_damaged();
-            self.set_force_render(); // we force render here to make sure the panes under the floating pane render and don't leave "garbage" behind
+            self.set_force_render(); // we force 渲染 here to make sure the 窗格 under the 浮动 窗格 渲染 and don't leave "garbage" behind
         } else {
             if !self.has_selectable_panes() {
                 return;
@@ -5477,7 +5477,7 @@ impl Tab {
         if self.floating_panes.panes_are_visible() {
             self.floating_panes.move_active_pane_right(client_id);
             self.swap_layouts.set_is_floating_damaged();
-            self.set_force_render(); // we force render here to make sure the panes under the floating pane render and don't leave "garbage" behind
+            self.set_force_render(); // we force 渲染 here to make sure the 窗格 under the 浮动 窗格 渲染 and don't leave "garbage" behind
         } else {
             if !self.has_selectable_panes() {
                 return;
@@ -5493,7 +5493,7 @@ impl Tab {
         if self.floating_panes.panes_are_visible() {
             self.floating_panes.move_pane_right(pane_id);
             self.swap_layouts.set_is_floating_damaged();
-            self.set_force_render(); // we force render here to make sure the panes under the floating pane render and don't leave "garbage" behind
+            self.set_force_render(); // we force 渲染 here to make sure the 窗格 under the 浮动 窗格 渲染 and don't leave "garbage" behind
         } else {
             if !self.has_selectable_panes() {
                 return;
@@ -5509,7 +5509,7 @@ impl Tab {
         if self.floating_panes.panes_are_visible() {
             self.floating_panes.move_active_pane_left(client_id);
             self.swap_layouts.set_is_floating_damaged();
-            self.set_force_render(); // we force render here to make sure the panes under the floating pane render and don't leave "garbage" behind
+            self.set_force_render(); // we force 渲染 here to make sure the 窗格 under the 浮动 窗格 渲染 and don't leave "garbage" behind
         } else {
             if !self.has_selectable_panes() {
                 return;
@@ -5525,7 +5525,7 @@ impl Tab {
         if self.floating_panes.panes_are_visible() {
             self.floating_panes.move_pane_left(pane_id);
             self.swap_layouts.set_is_floating_damaged();
-            self.set_force_render(); // we force render here to make sure the panes under the floating pane render and don't leave "garbage" behind
+            self.set_force_render(); // we force 渲染 here to make sure the 窗格 under the 浮动 窗格 渲染 and don't leave "garbage" behind
         } else {
             if !self.has_selectable_panes() {
                 return;
@@ -5589,11 +5589,11 @@ impl Tab {
         let current_pane_group: HashMap<ClientId, Vec<PaneId>> =
             { self.current_pane_group.borrow().clone_inner() };
 
-        // Check tiled panes
+        // 检查 平铺 窗格
         if let Some(pane) = self.tiled_panes.get_pane(pane_id) {
             let mut info = pane_info_for_pane(&pane_id, pane, &current_pane_group);
-            // Note: is_focused will be false since we don't have a specific client_id context
-            // Plugins calling this API would need to compare the pane_id with their own focused pane
+            // Note: is_focused will be false since we don't have a 特定 client_id 上下文
+            // 插件 calling this API would need to compare the pane_id with their own 聚焦的 窗格
             info.is_focused = false;
             info.is_fullscreen = self.tiled_panes.fullscreen_is_active();
             info.is_floating = false;
@@ -5601,7 +5601,7 @@ impl Tab {
             return Some(info);
         }
 
-        // Check floating panes
+        // 检查 浮动 窗格
         if let Some(pane) = self.floating_panes.get_pane(pane_id) {
             let mut info = pane_info_for_pane(&pane_id, pane, &current_pane_group);
             info.is_focused = false;
@@ -5611,7 +5611,7 @@ impl Tab {
             return Some(info);
         }
 
-        // Check suppressed panes
+        // 检查 抑制的 窗格
         if let Some((_previous_id, pane)) = self.suppressed_panes.get(&pane_id) {
             let mut info = pane_info_for_pane(&pane_id, pane, &current_pane_group);
             info.is_focused = false;
@@ -5643,8 +5643,8 @@ impl Tab {
                 }
             }
         }
-        // we do this here because if there is a non-selectable pane on the edge, we consider it
-        // outside the viewport (a ui-pane, eg. the status-bar and tab-bar) and need to adjust for it
+        // we do this here because if there is a non-selectable 窗格 on the edge, we consider it
+        // outside the 视口 (a ui-窗格, eg. the 状态-bar and 标签页-bar) and need to adjust for it
         LayoutApplier::offset_viewport(
             self.viewport.clone(),
             self.display_area.clone(),
@@ -5680,9 +5680,9 @@ impl Tab {
                 return;
             }
         }
-        // we need to ignore suppressed panes when we toggle a pane to be floating/embedded(tiled)
+        // we need to ignore 抑制的 窗格 when we toggle a 窗格 to be 浮动/embedded(平铺)
         // this is because in that case, while we do use this logic, we're not actually closing the
-        // pane, we're moving it
+        // 窗格, we're moving it
         if !ignore_suppressed_panes && self.suppressed_panes.contains_key(&id) {
             return match self.replace_pane_with_suppressed_pane(id) {
                 Ok(_pane) => {},
@@ -5710,7 +5710,7 @@ impl Tab {
                 && self.floating_panes.visible_panes_count() > 0
             {
                 self.swap_layouts.set_is_floating_damaged();
-                // only relayout if the user is already "in" a layout, otherwise this might be
+                // only relayout if the 用户 is already "in" a 布局, otherwise this might be
                 // confusing
                 let _ = self.relayout_floating_panes(false);
             }
@@ -5724,7 +5724,7 @@ impl Tab {
             self.tiled_panes.set_force_render();
             if self.auto_layout && !self.swap_layouts.is_tiled_damaged() {
                 self.swap_layouts.set_is_tiled_damaged();
-                // only relayout if the user is already "in" a layout, otherwise this might be
+                // only relayout if the 用户 is already "in" a 布局, otherwise this might be
                 // confusing
                 let _ = self.relayout_tiled_panes(false);
             }
@@ -5733,7 +5733,7 @@ impl Tab {
         };
         if let Some(exit_status) = exit_status {
             if let Some(mut closed_pane) = closed_pane {
-                // in case we need to update on Drop
+                // in case we need to update on 丢弃
                 closed_pane.update_exit_status(exit_status);
             }
         }
@@ -5765,10 +5765,10 @@ impl Tab {
             }
         }
         if !dont_swap_if_suppressed && self.suppressed_panes.contains_key(&id) {
-            // this is done for the scrollback editor
+            // this is done for the 回滚缓冲区 editor
             return match self.replace_pane_with_suppressed_pane(id) {
                 Ok(mut pane) => {
-                    // we do this so that the logical index will not affect ordering in the target tab
+                    // we do this so that the logical index will not affect ordering in the 目标 标签页
                     if let Some(pane) = pane.as_mut() {
                         pane.reset_logical_position();
                     }
@@ -5799,11 +5799,11 @@ impl Tab {
                 && self.floating_panes.visible_panes_count() > 0
             {
                 self.swap_layouts.set_is_floating_damaged();
-                // only relayout if the user is already "in" a layout, otherwise this might be
+                // only relayout if the 用户 is already "in" a 布局, otherwise this might be
                 // confusing
                 let _ = self.relayout_floating_panes(false);
             }
-            // we do this so that the logical index will not affect ordering in the target tab
+            // we do this so that the logical index will not affect ordering in the 目标 标签页
             if let Some(closed_pane) = closed_pane.as_mut() {
                 closed_pane.reset_logical_position();
             }
@@ -5817,12 +5817,12 @@ impl Tab {
             self.tiled_panes.set_force_render();
             if self.auto_layout && !self.swap_layouts.is_tiled_damaged() {
                 self.swap_layouts.set_is_tiled_damaged();
-                // only relayout if the user is already "in" a layout, otherwise this might be
+                // only relayout if the 用户 is already "in" a 布局, otherwise this might be
                 // confusing
                 let _ = self.relayout_tiled_panes(false);
             }
             self.resize_all_stack_list_hidden_members();
-            // we do this so that the logical index will not affect ordering in the target tab
+            // we do this so that the logical index will not affect ordering in the 目标 标签页
             if let Some(closed_pane) = closed_pane.as_mut() {
                 closed_pane.reset_logical_position();
             }
@@ -5832,7 +5832,7 @@ impl Tab {
             .iter()
             .find_map(|(key, (_, pane))| if &pane.pid() == &id { Some(*key) } else { None })
         {
-            // TODO: test this (from the path in screen.rs focus_plugin_pane ~line 2519
+            // TODO: 测试 this (from the 路径 in 屏幕.rs focus_plugin_pane ~line 2519
             self.suppressed_panes
                 .remove(&suppressed_key_of_pane)
                 .map(|s_p| s_p.1)
@@ -5894,13 +5894,13 @@ impl Tab {
                     .get_pane(suppressed_pane_id)
                     .or_else(|| self.tiled_panes.get_pane(suppressed_pane_id))
                 {
-                    // You may be thinking: why aren't we using the original "suppressed_pane" here,
+                    // You may be thinking: why aren't we using the 原始 "suppressed_pane" here,
                     // isn't it the same one?
                     //
-                    // Yes, you are right! However, we moved it into its correct environment above
-                    // (either floating_panes or tiled_panes) where it received a new geometry based on
-                    // the pane there we replaced. Now, we need to update its pty about its new size.
-                    // We couldn't do that before, and we can't use the original moved item now - so we
+                    // Yes, you are right! However, we 移动 it into its correct 环境 above
+                    // (either floating_panes or tiled_panes) where it received a new 几何 based on
+                    // the 窗格 there we replaced. Now, we need to update its pty about its new size.
+                    // We couldn't do that before, and we can't use the 原始 移动 item now - so we
                     // need to refetch it
                     resize_pty!(
                         suppressed_pane,
@@ -6281,7 +6281,7 @@ impl Tab {
 
     pub fn scroll_active_terminal_up_page(&mut self, client_id: ClientId) {
         if let Some(active_pane) = self.get_active_pane_or_floating_pane_mut(client_id) {
-            // prevent overflow when row == 0
+            // prevent overflow when 行 == 0
             let scroll_rows = active_pane.rows().max(1).saturating_sub(1);
             active_pane.scroll_up(scroll_rows, client_id);
         }
@@ -6289,10 +6289,10 @@ impl Tab {
 
     pub fn scroll_terminal_page_up(&mut self, terminal_pane_id: u32) {
         if let Some(terminal_pane) = self.get_pane_with_id_mut(PaneId::Terminal(terminal_pane_id)) {
-            let fictitious_client_id = 1; // this is not checked for terminal panes and we
-                                          // don't have an actual client id here
+            let fictitious_client_id = 1; // this is not 检查的 for 终端 窗格 and we
+                                          // don't have an actual 客户端 id here
                                           // TODO: traits were a mistake
-                                          // prevent overflow when row == 0
+                                          // prevent overflow when 行 == 0
             let scroll_rows = terminal_pane.rows().max(1).saturating_sub(1);
             terminal_pane.scroll_up(scroll_rows, fictitious_client_id);
         }
@@ -6317,8 +6317,8 @@ impl Tab {
 
     pub fn scroll_terminal_page_down(&mut self, terminal_pane_id: u32) {
         if let Some(terminal_pane) = self.get_pane_with_id_mut(PaneId::Terminal(terminal_pane_id)) {
-            let fictitious_client_id = 1; // this is not checked for terminal panes and we
-                                          // don't have an actual client id here
+            let fictitious_client_id = 1; // this is not 检查的 for 终端 窗格 and we
+                                          // don't have an actual 客户端 id here
                                           // TODO: traits were a mistake
             let scroll_rows = terminal_pane.get_content_rows();
             terminal_pane.scroll_down(scroll_rows, fictitious_client_id);
@@ -6332,7 +6332,7 @@ impl Tab {
 
     pub fn scroll_active_terminal_up_half_page(&mut self, client_id: ClientId) {
         if let Some(active_pane) = self.get_active_pane_or_floating_pane_mut(client_id) {
-            // prevent overflow when row == 0
+            // prevent overflow when 行 == 0
             let scroll_rows = (active_pane.rows().max(1).saturating_sub(1)) / 2;
             active_pane.scroll_up(scroll_rows, client_id);
         }
@@ -6396,8 +6396,8 @@ impl Tab {
         if let Some(terminal_pane) = self.get_pane_with_id_mut(PaneId::Terminal(terminal_pane_id)) {
             terminal_pane.clear_scroll();
             if let Some(size) = terminal_pane.get_line_number() {
-                let fictitious_client_id = 1; // this is not checked for terminal panes and we
-                                              // don't have an actual client id here
+                let fictitious_client_id = 1; // this is not 检查的 for 终端 窗格 and we
+                                              // don't have an actual 客户端 id here
                                               // TODO: traits were a mistake
                 terminal_pane.scroll_up(size, fictitious_client_id);
             }
@@ -6469,17 +6469,17 @@ impl Tab {
             let is_stacked_under = stacked_pane_ids_under_flexible_pane.contains(&p.pid());
             let geom_to_compare_against =
                 if is_stacked_under && !self.pane_frame_style.draws_full_frames() {
-                    // these sort of panes are one-liner panes under a flexible pane in a stack when we
-                    // don't draw pane frames - because the whole stack's content is offset to allow
-                    // room for the boundary between panes, they are actually drawn 1 line above where
+                    // these 排序 of 窗格 are one-liner 窗格 under a flexible 窗格 in a 栈 when we
+                    // don't draw 窗格 框架 - because the whole 栈's content is 偏移 to allow
+                    // room for the boundary between 窗格, they are actually drawn 1 line above where
                     // they are
                     let mut geom = p.current_geom();
                     geom.y = geom.y.saturating_sub(p.get_content_offset().bottom);
                     geom
                 } else if is_flexible_in_stack && !self.pane_frame_style.draws_full_frames() {
-                    // these sorts of panes are flexible panes inside a stack when we don't draw pane
-                    // frames - because the whole stack's content is offset to give room for the
-                    // boundary between panes, we need to take this offset into account when figuring
+                    // these sorts of 窗格 are flexible 窗格 inside a 栈 when we don't draw 窗格
+                    // 框架 - because the whole 栈's content is 偏移 to give room for the
+                    // boundary between 窗格, we need to take this 偏移 into account when figuring
                     // out whether the position is inside them
                     let mut geom = p.current_geom();
                     geom.rows.decrease_inner(p.get_content_offset().bottom);
@@ -6607,9 +6607,9 @@ impl Tab {
         Ok(())
     }
     pub fn visible(&mut self, visible: bool) -> Result<()> {
-        // Floating panes must be included here as well: a plugin in a floating pane is just as
-        // hidden as a tiled one when its tab goes away, and plugins that idle on a timer (eg. the
-        // session-manager, which polls the session list once a second) keep that timer armed until
+        // 浮动 窗格 must be included here as well: a 插件 in a 浮动 窗格 is just as
+        // hidden as a 平铺 one when its 标签页 goes away, and 插件 that idle on a timer (eg. the
+        // 会话-manager, which 轮询 the 会话 列表 once a second) keep that timer armed until
         // they are told otherwise.
         self.tab_visible = visible;
         let floating_panes_are_shown = self.floating_panes.panes_are_shown();
@@ -6647,9 +6647,9 @@ impl Tab {
             .with_context(|| format!("no active pane found for client {client_id}"))
             .map(|active_pane| {
                 let to_update = match s {
-                    "\0" => s, // pane name terminator
+                    "\0" => s, // 窗格 name terminator
                     "\u{007F}" | "\u{0008}" => {
-                        // delete and backspace keys
+                        // 删除 and backspace 密钥
                         s
                     },
                     _ => &clean_string_from_control_and_linebreak(s),
@@ -6734,10 +6734,10 @@ impl Tab {
 
     pub fn update_search_term(&mut self, buf: Vec<u8>, client_id: ClientId) -> Result<()> {
         if let Some(active_pane) = self.get_active_pane_or_floating_pane_mut(client_id) {
-            // It only allows terminating char(\0), printable unicode, delete and backspace keys.
-            // TODO: we should really remove this limitation to allow searching for emojis and
-            // other wide chars - currently the search mechanism itself ignores wide chars, so we
-            // should first fix that before removing this condition
+            // It only allows 终止 char(\0), printable unicode, 删除 and backspace 密钥.
+            // TODO: we should really 移除 this limitation to allow 搜索 for emojis and
+            // other wide chars - currently the 搜索 mechanism itself ignores wide chars, so we
+            // should first fix that before removing this 条件
             let is_updatable = buf
                 .iter()
                 .all(|u| matches!(u, 0x00 | 0x20..=0x7E | 0x08 | 0x7F));
@@ -6945,7 +6945,7 @@ impl Tab {
         }
     }
     pub fn show_floating_panes(&mut self) {
-        // this function is to be preferred to directly invoking floating_panes.toggle_show_panes(true)
+        // this 函数 is to be preferred to directly invoking floating_panes.toggle_show_panes(true)
         let were_shown = self.floating_panes.panes_are_shown();
         self.floating_panes.toggle_show_panes(true);
         self.tiled_panes.unfocus_all_panes();
@@ -6956,7 +6956,7 @@ impl Tab {
     }
 
     pub fn hide_floating_panes(&mut self) {
-        // this function is to be preferred to directly invoking
+        // this 函数 is to be preferred to directly invoking
         // floating_panes.toggle_show_panes(false)
         let were_shown = self.floating_panes.panes_are_shown();
         if self.floating_panes.fullscreen_is_active() {
@@ -7007,7 +7007,7 @@ impl Tab {
                     }
                 },
                 None => {
-                    // No selectable floating panes exist — surface must not be shown
+                    // No selectable 浮动 窗格 exist — surface must not be shown
                     if let Some(c) = completion.as_mut() {
                         c.set_exit_status(1);
                     }
@@ -7052,7 +7052,7 @@ impl Tab {
         should_be_in_place: bool,
         client_id: ClientId,
     ) -> Result<()> {
-        // TODO: should error if pane is not selectable
+        // TODO: should 错误 if 窗格 is not selectable
         if self.focus_hidden_stack_list_member(pane_id, client_id) {
             return Ok(());
         }
@@ -7067,7 +7067,7 @@ impl Tab {
                 };
                 focused_floating_pane
             })
-            // TODO: change suppressed_panes to be a proper struct with methods that make sense rather
+            // TODO: change suppressed_panes to be a proper 结构体 with 方法 that make sense rather
             // than doing this dance every time
             .or_else(|_| {
                 match self
@@ -7127,10 +7127,10 @@ impl Tab {
         }
     }
     pub fn suppress_pane(&mut self, pane_id: PaneId, _client_id: Option<ClientId>) {
-        // this method places a pane in the suppressed pane with its own ID - this means we'll
-        // not take it out of there when another pane is closed (eg. like happens with the
-        // scrollback editor), but it has to take itself out on its own (eg. a plugin using the
-        // show_self() method)
+        // this 方法 places a 窗格 in the 抑制的 窗格 with its own ID - this means we'll
+        // not take it out of there when another 窗格 is 关闭的 (eg. like happens with the
+        // 回滚缓冲区 editor), but it has to take itself out on its own (eg. a 插件 using the
+        // show_self() 方法)
         if let Some(pane) = self.extract_pane(pane_id, true) {
             self.insert_suppressed_pane(pane_id, (false, pane));
         }
@@ -7139,7 +7139,7 @@ impl Tab {
         self.swap_in_hidden_stack_list_member(pane_id, None)
     }
     pub fn unsuppress_pane(&mut self, pane_id: PaneId, should_float_if_hidden: bool) {
-        // removes a pane from being suppressed (hidden) but does not focus it
+        // removes a 窗格 from being 抑制的 (hidden) but does not 焦点 it
         if self.make_hidden_stack_list_member_visible(pane_id) {
             return;
         }
@@ -7163,7 +7163,7 @@ impl Tab {
         }
     }
     pub fn unsuppress_or_expand_pane(&mut self, pane_id: PaneId, should_float_if_hidden: bool) {
-        // removes a pane from being suppressed (hidden) but does not focus it
+        // removes a 窗格 from being 抑制的 (hidden) but does not 焦点 it
         if self.make_hidden_stack_list_member_visible(pane_id) {
             return;
         }
@@ -7198,19 +7198,19 @@ impl Tab {
         pane_to_suppress: (bool, Box<dyn Pane>),
     ) {
         // bool -> is_scrollback_editor
-        // this method is intended to insert an existing provided pane into suppressed_panes, while
-        // making sure any existing panes already in suppressed_panes still remain there
-        // if there's a key collision (eg. the suppressing_pane_id already suppresses another
-        // pane), we fix the colliding pane so that it now becomes suppressed by its own id (i.e.
-        // needs to explicitly be removed from suppressed_panes by eg. a plugin action rather than
-        // being conditionally removed when its suppressing pane is closed or itself suppressed)
+        // this 方法 is intended to 插入 an existing provided 窗格 into suppressed_panes, while
+        // making sure any existing 窗格 already in suppressed_panes still remain there
+        // if there's a 密钥 collision (eg. the suppressing_pane_id already 抑制 another
+        // 窗格), we fix the colliding 窗格 so that it now becomes 抑制的 by its own id (i.e.
+        // needs to explicitly be 移除的 from suppressed_panes by eg. a 插件 action rather than
+        // being conditionally 移除的 when its suppressing 窗格 is 关闭的 or itself 抑制的)
         //
-        // - suppressing_pane_id: the id of the pane suppressing this pane - the pane that if
-        // closed, should trigger this pane being unsuppressed
-        // - pane_to_suppress: the pane itself that we want to suppress
+        // - suppressing_pane_id: the id of the 窗格 suppressing this 窗格 - the 窗格 that if
+        // 关闭的, should trigger this 窗格 being unsuppressed
+        // - pane_to_suppress: the 窗格 itself that we want to 抑制
 
-        // this closure removes and returns an existing pane from the map if it exists under this key
-        // and inserts the given pane into the map under this key
+        // this 闭包 removes and 返回 an existing 窗格 from the map if it exists under this 密钥
+        // and inserts the given 窗格 into the map under this 密钥
         let mut insert_and_return_existing_value =
             |key: PaneId, value: (bool, Box<dyn Pane>)| -> Option<(bool, Box<dyn Pane>)> {
                 let existing = self.suppressed_panes.remove(&key);
@@ -7218,9 +7218,9 @@ impl Tab {
                 existing
             };
 
-        // here we try to insert a pane into the suppressed panes map while making sure not to drop
-        // (close) any existing panes in the map. We repeat the action of remapping existing panes
-        // under their own keys until all keys either reference the suppressing_pane_id (only one
+        // here we 尝试 to 插入 a 窗格 into the 抑制的 窗格 map while making sure not to 丢弃
+        // (关闭) any existing 窗格 in the map. We repeat the action of remapping existing 窗格
+        // under their own 密钥 until all 密钥 either 引用 the suppressing_pane_id (only one
         // can do this) or themselves
         let mut key_to_insert = suppressing_pane_id;
         let mut pane_to_insert = Some(pane_to_suppress);
@@ -7297,8 +7297,8 @@ impl Tab {
                 pane.set_content_offset(Offset::frame(0));
                 pane.set_borderless(true);
             } else {
-                pane.set_content_offset(Offset::frame(1)); // floating panes always have a frame
-                pane.render_full_viewport(); // to make sure the frame is re-rendered
+                pane.set_content_offset(Offset::frame(1)); // 浮动 窗格 always have a 框架
+                pane.render_full_viewport(); // to make sure the 框架 is re-渲染的
             }
             resize_pty!(pane, self.os_api, self.senders, self.character_cell_size)
                 .with_context(err_context)?;
@@ -7312,10 +7312,10 @@ impl Tab {
             }
         }
         if self.auto_layout && !self.swap_layouts.is_floating_damaged() {
-            // only do this if we're already in this layout, otherwise it might be
-            // confusing and not what the user intends
+            // only do this if we're already in this 布局, otherwise it might be
+            // confusing and not what the 用户 intends
             self.swap_layouts.set_is_floating_damaged(); // we do this so that we won't skip to the
-                                                         // next layout
+                                                         // next 布局
             self.relayout_floating_panes(false)?;
         }
         Ok(())
@@ -7336,7 +7336,7 @@ impl Tab {
         if self.tiled_panes.has_room_for_new_pane() {
             pane.set_active_at(Instant::now());
             if should_auto_layout {
-                // no need to relayout here, we'll do it when reapplying the swap layout
+                // no need to relayout here, we'll do it when reapplying the swap 布局
                 // below
                 self.tiled_panes
                     .insert_pane_without_relayout(pane_id, pane, client_id);
@@ -7344,12 +7344,12 @@ impl Tab {
                 self.tiled_panes.insert_pane(pane_id, pane, client_id);
             }
             if !self.is_pending {
-                // if this tab is pending, the geometry of the panes inside it (including the one we
-                // just added) is provisional - the real one will be assigned when the layout is
-                // applied to this tab, and so we do not want to reapply the frames here because
-                // doing so would send this transient size to the pane's pty, causing it to receive
-                // two resizes in quick succession (this one and the real one) - which some
-                // terminal applications (eg. vim) coalesce and thus miss the real one
+                // if this 标签页 is pending, the 几何 of the 窗格 inside it (including the one we
+                // just added) is provisional - the 真实 one will be 分配的 when the 布局 is
+                // applied to this 标签页, and so we do not want to reapply the 框架 here because
+                // doing so would send this transient size to the 窗格's pty, causing it to receive
+                // two 调整大小 in quick succession (this one and the 真实 one) - which some
+                // 终端 applications (eg. vim) coalesce and thus miss the 真实 one
                 self.tiled_panes.reapply_pane_frames();
             }
             self.set_should_clear_display_before_rendering();
@@ -7358,10 +7358,10 @@ impl Tab {
             }
         }
         if should_auto_layout {
-            // only do this if we're already in this layout, otherwise it might be
-            // confusing and not what the user intends
+            // only do this if we're already in this 布局, otherwise it might be
+            // confusing and not what the 用户 intends
             self.swap_layouts.set_is_tiled_damaged(); // we do this so that we won't skip to the
-                                                      // next layout
+                                                      // next 布局
             self.relayout_tiled_panes(false)?;
         }
         Ok(())
@@ -7380,12 +7380,12 @@ impl Tab {
         self.tiled_panes
             .add_pane_to_stack_of_pane_id(pane_id, pane, root_pane_id);
         self.set_should_clear_display_before_rendering();
-        // Groupify BEFORE the focus/frame re-application so the just-collapsed
-        // in-grid stack member is moved to `suppressed_panes` before
-        // `reapply_pane_frames` sends a `resize_pty!` at the 1-row collapsed
-        // size. Without this, the shell inside that pane sees two rapid
-        // WINCH events (1 row → visible-size rows) and redraws its prompt
-        // twice, blanking out the visible rows of previous output.
+        // Groupify BEFORE the 焦点/框架 re-application so the just-collapsed
+        // in-grid 栈 member is 移动 to `suppressed_panes` before
+        // `reapply_pane_frames` sends a `resize_pty!` at the 1-行 collapsed
+        // size. Without this, the shell inside that 窗格 sees two rapid
+        // WINCH 事件 (1 行 → 可见-size 行) and redraws its prompt
+        // twice, blanking out the 可见 行 of previous output.
         self.sync_stacked_pane_list_mode();
         if should_focus {
             self.tiled_panes.expand_pane_in_stack(pane_id);
@@ -7407,7 +7407,7 @@ impl Tab {
         self.tiled_panes
             .add_pane_to_stack_of_active_pane(pane_id, pane, client_id);
         // See comment in `add_stacked_pane_to_pane_id` — groupify before
-        // focusing so the collapsed member is suppressed before
+        // 聚焦 so the collapsed member is 抑制的 before
         // `reapply_pane_frames` fires its intermediate `resize_pty!`.
         self.sync_stacked_pane_list_mode();
         if should_focus {
@@ -7430,11 +7430,11 @@ impl Tab {
                     .map(|s_p| &mut s_p.1);
                 if let Some(suppressed_pane) = suppressed_pane.as_mut() {
                     if permissions.is_some() {
-                        // here what happens is that we're requesting permissions for a pane that
-                        // is suppressed, meaning the user cannot see the permission request
-                        // so we temporarily focus this pane as a floating pane, marking it so that
-                        // once the permissions are accepted/rejected by the user, it will be
-                        // suppressed again
+                        // here what happens is that we're requesting 权限 for a 窗格 that
+                        // is 抑制的, meaning the 用户 cannot see the 权限 请求
+                        // so we temporarily 焦点 this 窗格 as a 浮动 窗格, marking it so that
+                        // once the 权限 are accepted/rejected by the 用户, it will be
+                        // 抑制的 again
                         suppressed_pane.set_should_be_suppressed(true);
                         should_focus_pane = true;
                     }
@@ -7493,7 +7493,7 @@ impl Tab {
             if successfully_resized {
                 self.swap_layouts.set_is_floating_damaged();
                 self.swap_layouts.set_is_tiled_damaged();
-                self.set_force_render(); // we force render here to make sure the panes under the floating pane render and don't leave "garbage" in case of a decrease
+                self.set_force_render(); // we force 渲染 here to make sure the 窗格 under the 浮动 窗格 渲染 and don't leave "garbage" in case of a decrease
             }
         } else if self.tiled_panes.panes_contain(&pane_id) {
             match self
@@ -7532,12 +7532,12 @@ impl Tab {
     }
     pub fn update_theme(&mut self, theme: Styling) {
         self.style.colors = theme;
-        // The tab's `default_mode_info` is what `update_input_modes`
-        // falls back to when no per-client entry exists in
-        // `self.mode_info`. Without this update, plugins on a
-        // freshly-connected client (one that has never manually
-        // changed mode) receive `Event::ModeUpdate` carrying the old
-        // style and skip their re-render.
+        // The 标签页's `default_mode_info` is what `update_input_modes`
+        // falls back to when no per-客户端 entry exists in
+        // `self.mode_info`. Without this update, 插件 on a
+        // freshly-connected 客户端 (one that has never manually
+        // changed mode) receive `事件::ModeUpdate` carrying the old
+        // style and skip their re-渲染.
         self.default_mode_info.update_theme(theme);
         self.floating_panes.update_pane_themes(theme);
         self.tiled_panes.update_pane_themes(theme);
@@ -7694,13 +7694,13 @@ impl Tab {
             return;
         }
         self.dissolve_stack_lists_for_classic_mutation();
-        self.swap_layouts.set_is_tiled_damaged(); // TODO: verify we can do all the below first
+        self.swap_layouts.set_is_tiled_damaged(); // TODO: 验证 we can do all the below first
         if self.pane_is_stacked(root_pane_id) {
             for pane in panes_to_stack.drain(..) {
                 self.tiled_panes.add_pane_to_stack(&root_pane_id, pane);
             }
         } else {
-            // + 1 for the root pane
+            // + 1 for the root 窗格
             let mut stack_geoms = self
                 .tiled_panes
                 .stack_panes(root_pane_id, panes_to_stack.len() + 1);
@@ -7720,7 +7720,7 @@ impl Tab {
                     focused_pane_id_in_stack = Some(pane_id);
                 }
             }
-            // if we had a focused pane in the stack, we expand it
+            // if we had a 聚焦的 窗格 in the 栈, we expand it
             if let Some(focused_pane_id_in_stack) = focused_pane_id_in_stack {
                 self.tiled_panes
                     .expand_pane_in_stack(focused_pane_id_in_stack);
@@ -7735,8 +7735,8 @@ impl Tab {
         floating_pane_coordinates: FloatingPaneCoordinates,
     ) -> Result<()> {
         if !self.floating_panes.panes_contain(pane_id) {
-            // if these panes are not floating, we make them floating (assuming doing so wouldn't
-            // be removing the last selectable tiled pane in the tab, which would close it)
+            // if these 窗格 are not 浮动, we make them 浮动 (假设 doing so wouldn't
+            // be removing the last selectable 平铺 窗格 in the 标签页, which would 关闭 it)
             if (self.tiled_panes.panes_contain(&pane_id)
                 && self.get_selectable_tiled_panes().count() <= 1)
                 || self.suppressed_panes.contains_key(pane_id)
@@ -7792,19 +7792,19 @@ impl Tab {
         Ok(())
     }
     pub fn set_pane_borderless(&mut self, pane_id: &PaneId, borderless: bool) -> Result<()> {
-        // Try floating panes first
+        // 尝试 浮动 窗格 first
         if let Some(pane) = self.floating_panes.get_pane_mut(*pane_id) {
             if borderless {
-                pane.set_content_offset(Offset::default()); // Borderless: no offset
+                pane.set_content_offset(Offset::default()); // Borderless: no 偏移
             } else {
-                pane.set_content_offset(Offset::frame(1)); // Bordered: 1-char offset
+                pane.set_content_offset(Offset::frame(1)); // Bordered: 1-char 偏移
             }
             pane.set_borderless(borderless);
             self.set_force_render();
             return Ok(());
         }
 
-        // Try tiled panes
+        // 尝试 平铺 窗格
         if let Some(pane) = self.tiled_panes.get_pane_mut(*pane_id) {
             if borderless {
                 pane.set_content_offset(Offset::default());
@@ -7816,7 +7816,7 @@ impl Tab {
             return Ok(());
         }
 
-        // Try suppressed panes
+        // 尝试 抑制的 窗格
         if let Some(pane) = self.suppressed_panes.get_mut(pane_id) {
             if borderless {
                 pane.1.set_content_offset(Offset::default());
@@ -7839,7 +7839,7 @@ impl Tab {
     pub fn get_client_input_mode(&self, client_id: ClientId) -> Option<InputMode> {
         self.mode_info.borrow().get(&client_id).map(|m| m.mode)
     }
-    #[allow(unused)] // this is used for tests
+    #[allow(unused)] // this is used for 测试
     pub fn query_mouse_hover_pane_id(&self) -> HashMap<ClientId, PaneId> {
         self.mouse_hover_pane_id.clone()
     }
@@ -7847,7 +7847,7 @@ impl Tab {
         let next_terminal_position = self.get_next_terminal_position();
         let mut new_pane = TerminalPane::new(
             pid,
-            PaneGeom::default(), // the initial size will be set later
+            PaneGeom::default(), // the 初始 size will be set later
             self.style,
             next_terminal_position,
             String::new(),
@@ -7873,7 +7873,7 @@ impl Tab {
             new_pane.update_sixel_host_support(supported);
         }
         new_pane.update_name("EDITING SCROLLBACK"); // we do this here and not in the
-                                                    // constructor so it won't be overrided
+                                                    // 构造函数 so it won't be overrided
                                                     // by the editor
         new_pane
     }
@@ -7893,7 +7893,7 @@ impl Tab {
             .map(|p| p.position_and_size().stacked.is_some())
             .unwrap_or(false)
     }
-    // --- Pane-targeting CLI methods ---
+    // --- 窗格-targeting CLI 方法 ---
     pub fn scroll_up_by_pane_id(&mut self, pane_id: PaneId) {
         let fictitious_client_id = 1;
         if let Some(pane) = self.get_pane_with_id_mut(pane_id) {

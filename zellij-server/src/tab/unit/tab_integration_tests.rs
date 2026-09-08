@@ -675,7 +675,7 @@ fn create_new_tab_with_os_api(
         copy_options,
         terminal_emulator_colors,
         terminal_emulator_color_codes,
-        (vec![], vec![]), // swap layouts
+        (vec![], vec![]), // swap 布局
         PathBuf::from("my_default_shell"),
         debug,
         arrow_fonts,
@@ -769,7 +769,7 @@ fn create_new_tab_with_layout(size: Size, default_mode: ModeInfo, layout: &str) 
         copy_options,
         terminal_emulator_colors,
         terminal_emulator_color_codes,
-        (vec![], vec![]), // swap layouts
+        (vec![], vec![]), // swap 布局
         PathBuf::from("my_default_shell"),
         debug,
         arrow_fonts,
@@ -877,7 +877,7 @@ fn create_new_tab_with_mock_pty_writer(
         copy_options,
         terminal_emulator_colors,
         terminal_emulator_color_codes,
-        (vec![], vec![]), // swap layouts
+        (vec![], vec![]), // swap 布局
         PathBuf::from("my_default_shell"),
         debug,
         arrow_fonts,
@@ -915,7 +915,7 @@ fn create_new_tab_with_sixel_support(
     size: Size,
     sixel_image_store: Rc<RefCell<SixelImageStore>>,
 ) -> Tab {
-    // this is like the create_new_tab function but includes stuff needed for sixel,
+    // this is like the create_new_tab 函数 but includes stuff needed for sixel,
     // eg. character_cell_size
     set_session_name("test".into());
     let index = 0;
@@ -976,7 +976,7 @@ fn create_new_tab_with_sixel_support(
         copy_options,
         terminal_emulator_colors,
         terminal_emulator_color_codes,
-        (vec![], vec![]), // swap layouts
+        (vec![], vec![]), // swap 布局
         PathBuf::from("my_default_shell"),
         debug,
         arrow_fonts,
@@ -1102,7 +1102,7 @@ fn take_snapshot_and_cursor_position(
     columns: usize,
     palette: Palette,
 ) -> (String, Option<(usize, usize)>) {
-    // snapshot, x_coordinates, y_coordinates
+    // 快照, x_coordinates, y_coordinates
     let sixel_image_store = Rc::new(RefCell::new(SixelImageStore::default()));
     let terminal_emulator_color_codes = Rc::new(RefCell::new(HashMap::new()));
     let debug = false;
@@ -1136,7 +1136,7 @@ fn take_snapshot_and_cursor_position(
 
 #[test]
 fn increase_tiled_pane_sizes_with_stacked_resizes() {
-    // this is the default resizing algorithm
+    // this is the 默认 调整大小 algorithm
     let size = Size {
         cols: 200,
         rows: 40,
@@ -1173,7 +1173,7 @@ fn increase_tiled_pane_sizes_with_stacked_resizes() {
         assert_snapshot!(snapshot);
     }
 
-    // then we decrease until the original position
+    // then we decrease until the 原始 position
     for _ in 0..=5 {
         tab.resize(client_id, ResizeStrategy::new(Resize::Decrease, None))
             .unwrap();
@@ -1190,7 +1190,7 @@ fn increase_tiled_pane_sizes_with_stacked_resizes() {
 
 #[test]
 fn increase_tiled_pane_sizes_with_stacked_resizes_into_uneven_panes() {
-    // this is the default resizing algorithm
+    // this is the 默认 调整大小 algorithm
     let size = Size {
         cols: 200,
         rows: 40,
@@ -1220,8 +1220,8 @@ fn increase_tiled_pane_sizes_with_stacked_resizes_into_uneven_panes() {
         .unwrap();
     tab.move_focus_down(client_id).unwrap();
 
-    // increase twice, once to add the short pane into the stack and shorten the larger one, and
-    // once to add the remaining two panes (the one we shortened and the extra one near it)
+    // increase twice, once to add the short 窗格 into the 栈 and shorten the larger one, and
+    // once to add the remaining two 窗格 (the one we shortened and the extra one near it)
     for _ in 0..2 {
         tab.resize(client_id, ResizeStrategy::new(Resize::Increase, None))
             .unwrap();
@@ -1235,7 +1235,7 @@ fn increase_tiled_pane_sizes_with_stacked_resizes_into_uneven_panes() {
         assert_snapshot!(snapshot);
     }
 
-    // then we decrease until the original position
+    // then we decrease until the 原始 position
     for _ in 0..2 {
         tab.resize(client_id, ResizeStrategy::new(Resize::Decrease, None))
             .unwrap();
@@ -1273,7 +1273,7 @@ fn split_stack_vertically() {
         )
         .unwrap();
     }
-    // the below resizes will end up stacking the panes
+    // the below 调整大小 will end up stacking the 窗格
     tab.resize(client_id, ResizeStrategy::new(Resize::Increase, None))
         .unwrap();
     tab.resize(client_id, ResizeStrategy::new(Resize::Increase, None))
@@ -1314,7 +1314,7 @@ fn split_stack_horizontally() {
         )
         .unwrap();
     }
-    // the below resizes will end up stacking the panes
+    // the below 调整大小 will end up stacking the 窗格
     tab.resize(client_id, ResizeStrategy::new(Resize::Increase, None))
         .unwrap();
     tab.resize(client_id, ResizeStrategy::new(Resize::Increase, None))
@@ -1334,8 +1334,8 @@ fn split_stack_horizontally() {
 
 #[test]
 fn render_stacks_without_pane_frames() {
-    // this checks various cases and gotchas that have to do with rendering stacked panes when we
-    // don't draw frames around panes
+    // this 检查 various cases and gotchas that have to do with 渲染 堆叠 窗格 when we
+    // don't draw 框架 around 窗格
     let size = Size {
         cols: 100,
         rows: 40,
@@ -1357,7 +1357,7 @@ fn render_stacks_without_pane_frames() {
         )
         .unwrap();
     }
-    // the below resizes will end up stacking the panes
+    // the below 调整大小 will end up stacking the 窗格
     tab.resize(client_id, ResizeStrategy::new(Resize::Increase, None))
         .unwrap();
     tab.resize(client_id, ResizeStrategy::new(Resize::Increase, None))
@@ -1643,8 +1643,8 @@ fn floating_panes_persist_across_toggles() {
     .unwrap();
     tab.toggle_floating_panes(Some(client_id), None, None)
         .unwrap();
-    // here we send bytes to the pane when it's not visible to make sure they're still handled and
-    // we see them once we toggle the panes back
+    // here we send bytes to the 窗格 when it's not 可见 to make sure they're still handled and
+    // we see them once we toggle the 窗格 back
     tab.handle_pty_bytes(
         2,
         Vec::from("\n\n\n                   I am scratch terminal".as_bytes()),
@@ -3746,7 +3746,7 @@ fn cannot_float_only_embedded_pane() {
 
 #[test]
 fn replacing_existing_wide_characters() {
-    // this is a real world use case using ncmpcpp with wide characters and scrolling
+    // this is a 真实 world use case using ncmpcpp with wide characters and 滚动
     // the reason we don't break it down is that it exposes quite a few edge cases with wide
     // characters that we should handle properly
     let size = Size {
@@ -3835,7 +3835,7 @@ fn rename_floating_pane() {
 
 #[test]
 fn wide_characters_in_left_title_side() {
-    // this test makes sure the title doesn't overflow when it has wide characters
+    // this 测试 makes sure the 标题 doesn't overflow when it has wide characters
     let size = Size {
         cols: 238,
         rows: 48,
@@ -3857,8 +3857,8 @@ fn wide_characters_in_left_title_side() {
 
 #[test]
 fn save_cursor_position_across_resizes() {
-    // the save cursor position ANSI instruction (CSI s) needs to point to the same character after we
-    // resize the pane
+    // the 保存 光标 position ANSI instruction (CSI s) needs to point to the same character after we
+    // 调整大小 the 窗格
     let size = Size { cols: 100, rows: 5 };
     let client_id = 1;
     let mut tab = create_new_tab(size, ModeInfo::default());
@@ -3869,11 +3869,11 @@ fn save_cursor_position_across_resizes() {
         Vec::from("\n\n\rI am some text\n\rI am another line of text\n\rLet's save the cursor position here \u{1b}[sI should be ovewritten".as_bytes()),
     ).unwrap();
 
-    // We check cursor and saved cursor are handled separately by:
-    // 1. moving real cursor up two lines
+    // We 检查 光标 and 保存的 光标 are handled separately by:
+    // 1. moving 真实 光标 up two lines
     let _ = tab.handle_pty_bytes(1, Vec::from("\u{1b}[2A".as_bytes()));
-    // 2. resizing so real cursor gets lost above the viewport, which resets it to row 0
-    // The saved cursor ends up on row 1, allowing detection if it (incorrectly) gets reset too
+    // 2. 调整大小 so 真实 光标 gets lost above the 视口, which resets it to 行 0
+    // The 保存的 光标 ends up on 行 1, allowing detection if it (incorrectly) gets 重置 too
     tab.resize_whole_tab(Size { cols: 35, rows: 4 }).unwrap();
 
     // Now overwrite
@@ -4332,9 +4332,9 @@ fn enter_search_pane() {
     );
     assert_snapshot!("search_tab_nothing_highlighted", snapshot);
 
-    // Pane title should show 'tortor' as search term
-    // Only lines containing 'tortor' get marked as render-targets, so
-    // only those are updated (search-styling is not visible here).
+    // 窗格 标题 should show 'tortor' as 搜索 term
+    // Only lines containing 'tortor' get marked as 渲染-targets, so
+    // only those are updated (搜索-styling is not 可见 here).
     tab.update_search_term("tortor".as_bytes().to_vec(), client_id)
         .unwrap();
     tab.render(&mut output, None).unwrap();
@@ -4346,7 +4346,7 @@ fn enter_search_pane() {
     );
     assert_snapshot!("search_tab_highlight_tortor", snapshot);
 
-    // Pane title should show search modifiers
+    // 窗格 标题 should show 搜索 modifiers
     tab.toggle_search_wrap(client_id);
     tab.toggle_search_whole_words(client_id);
     tab.toggle_search_case_sensitivity(client_id);
@@ -4359,7 +4359,7 @@ fn enter_search_pane() {
     );
     assert_snapshot!("search_tab_highlight_tortor_modified", snapshot);
 
-    // And only the search term again
+    // And only the 搜索 term again
     tab.toggle_search_wrap(client_id);
     tab.toggle_search_whole_words(client_id);
     tab.toggle_search_case_sensitivity(client_id);
@@ -4413,7 +4413,7 @@ fn enter_search_floating_pane() {
     );
     assert_snapshot!("search_floating_tab_nothing_highlighted", snapshot);
 
-    // Only the line inside the floating tab which contain 'fring' should be in the new snapshot
+    // Only the line inside the 浮动 标签页 which contain 'fring' should be in the new 快照
     tab.update_search_term("fring".as_bytes().to_vec(), client_id)
         .unwrap();
     tab.render(&mut output, None).unwrap();
@@ -4442,7 +4442,7 @@ fn pane_in_sgr_button_event_tracking_mouse_mode() {
     );
     pty_instruction_bus.start();
 
-    let sgr_mouse_mode_any_button = String::from("\u{1b}[?1002;1006h"); // button event tracking (1002) with SGR encoding (1006)
+    let sgr_mouse_mode_any_button = String::from("\u{1b}[?1002;1006h"); // button 事件 跟踪 (1002) with SGR 编码 (1006)
     tab.handle_pty_bytes(1, sgr_mouse_mode_any_button.as_bytes().to_vec())
         .unwrap();
     tab.handle_mouse_event(
@@ -4470,7 +4470,7 @@ fn pane_in_sgr_button_event_tracking_mouse_mode() {
         client_id,
     )
     .unwrap();
-    // tab.handle_right_mouse_release(&Position::new(7, 75), client_id)
+    // 标签页.handle_right_mouse_release(&Position::new(7, 75), client_id)
     tab.handle_mouse_event(
         &MouseEvent::new_right_release_event(Position::new(7, 75)),
         client_id,
@@ -4486,7 +4486,7 @@ fn pane_in_sgr_button_event_tracking_mouse_mode() {
         client_id,
     )
     .unwrap();
-    // tab.handle_middle_mouse_release(&Position::new(7, 75), client_id)
+    // 标签页.handle_middle_mouse_release(&Position::new(7, 75), client_id)
     tab.handle_mouse_event(
         &MouseEvent::new_middle_release_event(Position::new(7, 75)),
         client_id,
@@ -4503,16 +4503,16 @@ fn pane_in_sgr_button_event_tracking_mouse_mode() {
         pty_instruction_bus.clone_output(),
         vec![
             "\u{1b}[<0;71;5M".to_string(),  // SGR left click
-            "\u{1b}[<32;72;9M".to_string(), // SGR left click (hold)
-            "\u{1b}[<0;75;7m".to_string(),  // SGR left button release
+            "\u{1b}[<32;72;9M".to_string(), // SGR left click (持有)
+            "\u{1b}[<0;75;7m".to_string(),  // SGR left button 释放
             "\u{1b}[<2;71;5M".to_string(),  // SGR right click
-            "\u{1b}[<34;72;9M".to_string(), // SGR right click (hold)
-            "\u{1b}[<2;75;7m".to_string(),  // SGR right button release
+            "\u{1b}[<34;72;9M".to_string(), // SGR right click (持有)
+            "\u{1b}[<2;75;7m".to_string(),  // SGR right button 释放
             "\u{1b}[<1;71;5M".to_string(),  // SGR middle click
-            "\u{1b}[<33;72;9M".to_string(), // SGR middle click (hold)
-            "\u{1b}[<1;75;7m".to_string(),  // SGR middle button release
-            "\u{1b}[<64;71;5M".to_string(), // SGR scroll up
-            "\u{1b}[<65;71;5M".to_string(), // SGR scroll down
+            "\u{1b}[<33;72;9M".to_string(), // SGR middle click (持有)
+            "\u{1b}[<1;75;7m".to_string(),  // SGR middle button 释放
+            "\u{1b}[<64;71;5M".to_string(), // SGR 滚动 up
+            "\u{1b}[<65;71;5M".to_string(), // SGR 滚动 down
         ]
     );
 }
@@ -4533,7 +4533,7 @@ fn pane_in_sgr_normal_event_tracking_mouse_mode() {
     );
     pty_instruction_bus.start();
 
-    let sgr_mouse_mode_any_button = String::from("\u{1b}[?1000;1006h"); // normal event tracking (1000) with sgr encoding (1006)
+    let sgr_mouse_mode_any_button = String::from("\u{1b}[?1000;1006h"); // normal 事件 跟踪 (1000) with sgr 编码 (1006)
     tab.handle_pty_bytes(1, sgr_mouse_mode_any_button.as_bytes().to_vec())
         .unwrap();
     tab.handle_mouse_event(
@@ -4561,7 +4561,7 @@ fn pane_in_sgr_normal_event_tracking_mouse_mode() {
         client_id,
     )
     .unwrap();
-    // tab.handle_right_mouse_release(&Position::new(7, 75), client_id)
+    // 标签页.handle_right_mouse_release(&Position::new(7, 75), client_id)
     tab.handle_mouse_event(
         &MouseEvent::new_right_release_event(Position::new(7, 75)),
         client_id,
@@ -4577,7 +4577,7 @@ fn pane_in_sgr_normal_event_tracking_mouse_mode() {
         client_id,
     )
     .unwrap();
-    // tab.handle_middle_mouse_release(&Position::new(7, 75), client_id)
+    // 标签页.handle_middle_mouse_release(&Position::new(7, 75), client_id)
     tab.handle_mouse_event(
         &MouseEvent::new_middle_release_event(Position::new(7, 75)),
         client_id,
@@ -4594,16 +4594,16 @@ fn pane_in_sgr_normal_event_tracking_mouse_mode() {
         pty_instruction_bus.clone_output(),
         vec![
             "\u{1b}[<0;71;5M".to_string(), // SGR left click
-            // no hold event here, as hold events are not reported in normal mode
-            "\u{1b}[<0;75;7m".to_string(), // SGR left button release
+            // no 持有 事件 here, as 持有 事件 are not 报告的 in normal mode
+            "\u{1b}[<0;75;7m".to_string(), // SGR left button 释放
             "\u{1b}[<2;71;5M".to_string(), // SGR right click
-            // no hold event here, as hold events are not reported in normal mode
-            "\u{1b}[<2;75;7m".to_string(), // SGR right button release
+            // no 持有 事件 here, as 持有 事件 are not 报告的 in normal mode
+            "\u{1b}[<2;75;7m".to_string(), // SGR right button 释放
             "\u{1b}[<1;71;5M".to_string(), // SGR middle click
-            // no hold event here, as hold events are not reported in normal mode
-            "\u{1b}[<1;75;7m".to_string(),  // SGR middle button release
-            "\u{1b}[<64;71;5M".to_string(), // SGR scroll up
-            "\u{1b}[<65;71;5M".to_string(), // SGR scroll down
+            // no 持有 事件 here, as 持有 事件 are not 报告的 in normal mode
+            "\u{1b}[<1;75;7m".to_string(),  // SGR middle button 释放
+            "\u{1b}[<64;71;5M".to_string(), // SGR 滚动 up
+            "\u{1b}[<65;71;5M".to_string(), // SGR 滚动 down
         ]
     );
 }
@@ -4624,7 +4624,7 @@ fn pane_in_sgr_any_event_tracking_mouse_mode() {
     );
     pty_instruction_bus.start();
 
-    let sgr_mouse_mode_any_button = String::from("\u{1b}[?1003;1006h"); // any event tracking (1003) with SGR encoding (1006)
+    let sgr_mouse_mode_any_button = String::from("\u{1b}[?1003;1006h"); // any 事件 跟踪 (1003) with SGR 编码 (1006)
     tab.handle_pty_bytes(1, sgr_mouse_mode_any_button.as_bytes().to_vec())
         .unwrap();
     tab.handle_mouse_event(
@@ -4652,7 +4652,7 @@ fn pane_in_sgr_any_event_tracking_mouse_mode() {
         client_id,
     )
     .unwrap();
-    // tab.handle_right_mouse_release(&Position::new(7, 75), client_id)
+    // 标签页.handle_right_mouse_release(&Position::new(7, 75), client_id)
     tab.handle_mouse_event(
         &MouseEvent::new_right_release_event(Position::new(7, 75)),
         client_id,
@@ -4668,7 +4668,7 @@ fn pane_in_sgr_any_event_tracking_mouse_mode() {
         client_id,
     )
     .unwrap();
-    // tab.handle_middle_mouse_release(&Position::new(7, 75), client_id)
+    // 标签页.handle_middle_mouse_release(&Position::new(7, 75), client_id)
     tab.handle_mouse_event(
         &MouseEvent::new_middle_release_event(Position::new(7, 75)),
         client_id,
@@ -4690,16 +4690,16 @@ fn pane_in_sgr_any_event_tracking_mouse_mode() {
         pty_instruction_bus.clone_output(),
         vec![
             "\u{1b}[<0;71;5M".to_string(),  // SGR left click
-            "\u{1b}[<32;72;9M".to_string(), // SGR left click (hold)
-            "\u{1b}[<0;75;7m".to_string(),  // SGR left button release
+            "\u{1b}[<32;72;9M".to_string(), // SGR left click (持有)
+            "\u{1b}[<0;75;7m".to_string(),  // SGR left button 释放
             "\u{1b}[<2;71;5M".to_string(),  // SGR right click
-            "\u{1b}[<34;72;9M".to_string(), // SGR right click (hold)
-            "\u{1b}[<2;75;7m".to_string(),  // SGR right button release
+            "\u{1b}[<34;72;9M".to_string(), // SGR right click (持有)
+            "\u{1b}[<2;75;7m".to_string(),  // SGR right button 释放
             "\u{1b}[<1;71;5M".to_string(),  // SGR middle click
-            "\u{1b}[<33;72;9M".to_string(), // SGR middle click (hold)
-            "\u{1b}[<1;75;7m".to_string(),  // SGR middle button release
-            "\u{1b}[<64;71;5M".to_string(), // SGR scroll up
-            "\u{1b}[<65;71;5M".to_string(), // SGR scroll down
+            "\u{1b}[<33;72;9M".to_string(), // SGR middle click (持有)
+            "\u{1b}[<1;75;7m".to_string(),  // SGR middle button 释放
+            "\u{1b}[<64;71;5M".to_string(), // SGR 滚动 up
+            "\u{1b}[<65;71;5M".to_string(), // SGR 滚动 down
             "\u{1b}[<35;72;9M".to_string(), // SGR buttonless motion
         ]
     );
@@ -4721,7 +4721,7 @@ fn pane_in_utf8_button_event_tracking_mouse_mode() {
     );
     pty_instruction_bus.start();
 
-    let sgr_mouse_mode_any_button = String::from("\u{1b}[?1002;1005h"); // button event tracking (1002) with utf8 encoding (1005)
+    let sgr_mouse_mode_any_button = String::from("\u{1b}[?1002;1005h"); // button 事件 跟踪 (1002) with utf8 编码 (1005)
     tab.handle_pty_bytes(1, sgr_mouse_mode_any_button.as_bytes().to_vec())
         .unwrap();
     tab.handle_mouse_event(
@@ -4749,7 +4749,7 @@ fn pane_in_utf8_button_event_tracking_mouse_mode() {
         client_id,
     )
     .unwrap();
-    // tab.handle_right_mouse_release(&Position::new(7, 75), client_id)
+    // 标签页.handle_right_mouse_release(&Position::new(7, 75), client_id)
     tab.handle_mouse_event(
         &MouseEvent::new_right_release_event(Position::new(7, 75)),
         client_id,
@@ -4765,7 +4765,7 @@ fn pane_in_utf8_button_event_tracking_mouse_mode() {
         client_id,
     )
     .unwrap();
-    // tab.handle_middle_mouse_release(&Position::new(7, 75), client_id)
+    // 标签页.handle_middle_mouse_release(&Position::new(7, 75), client_id)
     tab.handle_mouse_event(
         &MouseEvent::new_middle_release_event(Position::new(7, 75)),
         client_id,
@@ -4782,16 +4782,16 @@ fn pane_in_utf8_button_event_tracking_mouse_mode() {
         pty_instruction_bus.clone_output(),
         vec![
             "\u{1b}[M g%".to_string(),  // utf8 left click
-            "\u{1b}[M@h)".to_string(),  // utf8 left click (hold)
-            "\u{1b}[M#k'".to_string(),  // utf8 left button release
+            "\u{1b}[M@h)".to_string(),  // utf8 left click (持有)
+            "\u{1b}[M#k'".to_string(),  // utf8 left button 释放
             "\u{1b}[M\"g%".to_string(), // utf8 right click
-            "\u{1b}[MBh)".to_string(),  // utf8 right click (hold)
-            "\u{1b}[M#k'".to_string(),  // utf8 right button release
+            "\u{1b}[MBh)".to_string(),  // utf8 right click (持有)
+            "\u{1b}[M#k'".to_string(),  // utf8 right button 释放
             "\u{1b}[M!g%".to_string(),  // utf8 middle click
-            "\u{1b}[MAh)".to_string(),  // utf8 middle click (hold)
-            "\u{1b}[M#k'".to_string(),  // utf8 middle click release
-            "\u{1b}[M`g%".to_string(),  // utf8 scroll up
-            "\u{1b}[Mag%".to_string(),  // utf8 scroll down
+            "\u{1b}[MAh)".to_string(),  // utf8 middle click (持有)
+            "\u{1b}[M#k'".to_string(),  // utf8 middle click 释放
+            "\u{1b}[M`g%".to_string(),  // utf8 滚动 up
+            "\u{1b}[Mag%".to_string(),  // utf8 滚动 down
         ]
     );
 }
@@ -4812,7 +4812,7 @@ fn pane_in_utf8_normal_event_tracking_mouse_mode() {
     );
     pty_instruction_bus.start();
 
-    let sgr_mouse_mode_any_button = String::from("\u{1b}[?1000;1005h"); // normal event tracking (1000) with sgr encoding (1006)
+    let sgr_mouse_mode_any_button = String::from("\u{1b}[?1000;1005h"); // normal 事件 跟踪 (1000) with sgr 编码 (1006)
     tab.handle_pty_bytes(1, sgr_mouse_mode_any_button.as_bytes().to_vec())
         .unwrap();
     tab.handle_mouse_event(
@@ -4840,7 +4840,7 @@ fn pane_in_utf8_normal_event_tracking_mouse_mode() {
         client_id,
     )
     .unwrap();
-    // tab.handle_right_mouse_release(&Position::new(7, 75), client_id)
+    // 标签页.handle_right_mouse_release(&Position::new(7, 75), client_id)
     tab.handle_mouse_event(
         &MouseEvent::new_right_release_event(Position::new(7, 75)),
         client_id,
@@ -4856,7 +4856,7 @@ fn pane_in_utf8_normal_event_tracking_mouse_mode() {
         client_id,
     )
     .unwrap();
-    // tab.handle_middle_mouse_release(&Position::new(7, 75), client_id)
+    // 标签页.handle_middle_mouse_release(&Position::new(7, 75), client_id)
     tab.handle_mouse_event(
         &MouseEvent::new_middle_release_event(Position::new(7, 75)),
         client_id,
@@ -4873,16 +4873,16 @@ fn pane_in_utf8_normal_event_tracking_mouse_mode() {
         pty_instruction_bus.clone_output(),
         vec![
             "\u{1b}[M g%".to_string(), // utf8 left click
-            // no hold event here, as hold events are not reported in normal mode
-            "\u{1b}[M#k'".to_string(),  // utf8 left button release
+            // no 持有 事件 here, as 持有 事件 are not 报告的 in normal mode
+            "\u{1b}[M#k'".to_string(),  // utf8 left button 释放
             "\u{1b}[M\"g%".to_string(), // utf8 right click
-            // no hold event here, as hold events are not reported in normal mode
-            "\u{1b}[M#k'".to_string(), // utf8 right button release
+            // no 持有 事件 here, as 持有 事件 are not 报告的 in normal mode
+            "\u{1b}[M#k'".to_string(), // utf8 right button 释放
             "\u{1b}[M!g%".to_string(), // utf8 middle click
-            // no hold event here, as hold events are not reported in normal mode
-            "\u{1b}[M#k'".to_string(), // utf8 middle click release
-            "\u{1b}[M`g%".to_string(), // utf8 scroll up
-            "\u{1b}[Mag%".to_string(), // utf8 scroll down
+            // no 持有 事件 here, as 持有 事件 are not 报告的 in normal mode
+            "\u{1b}[M#k'".to_string(), // utf8 middle click 释放
+            "\u{1b}[M`g%".to_string(), // utf8 滚动 up
+            "\u{1b}[Mag%".to_string(), // utf8 滚动 down
         ]
     );
 }
@@ -4903,7 +4903,7 @@ fn pane_in_utf8_any_event_tracking_mouse_mode() {
     );
     pty_instruction_bus.start();
 
-    let sgr_mouse_mode_any_button = String::from("\u{1b}[?1003;1005h"); // any event tracking (1002) with utf8 encoding (1005)
+    let sgr_mouse_mode_any_button = String::from("\u{1b}[?1003;1005h"); // any 事件 跟踪 (1002) with utf8 编码 (1005)
     tab.handle_pty_bytes(1, sgr_mouse_mode_any_button.as_bytes().to_vec())
         .unwrap();
     tab.handle_mouse_event(
@@ -4931,7 +4931,7 @@ fn pane_in_utf8_any_event_tracking_mouse_mode() {
         client_id,
     )
     .unwrap();
-    // tab.handle_right_mouse_release(&Position::new(7, 75), client_id)
+    // 标签页.handle_right_mouse_release(&Position::new(7, 75), client_id)
     tab.handle_mouse_event(
         &MouseEvent::new_right_release_event(Position::new(7, 75)),
         client_id,
@@ -4947,7 +4947,7 @@ fn pane_in_utf8_any_event_tracking_mouse_mode() {
         client_id,
     )
     .unwrap();
-    // tab.handle_middle_mouse_release(&Position::new(7, 75), client_id)
+    // 标签页.handle_middle_mouse_release(&Position::new(7, 75), client_id)
     tab.handle_mouse_event(
         &MouseEvent::new_middle_release_event(Position::new(7, 75)),
         client_id,
@@ -4969,16 +4969,16 @@ fn pane_in_utf8_any_event_tracking_mouse_mode() {
         pty_instruction_bus.clone_output(),
         vec![
             "\u{1b}[M g%".to_string(),  // utf8 left click
-            "\u{1b}[M@h)".to_string(),  // utf8 left click (hold)
-            "\u{1b}[M#k'".to_string(),  // utf8 left button release
+            "\u{1b}[M@h)".to_string(),  // utf8 left click (持有)
+            "\u{1b}[M#k'".to_string(),  // utf8 left button 释放
             "\u{1b}[M\"g%".to_string(), // utf8 right click
-            "\u{1b}[MBh)".to_string(),  // utf8 right click (hold)
-            "\u{1b}[M#k'".to_string(),  // utf8 right button release
+            "\u{1b}[MBh)".to_string(),  // utf8 right click (持有)
+            "\u{1b}[M#k'".to_string(),  // utf8 right button 释放
             "\u{1b}[M!g%".to_string(),  // utf8 middle click
-            "\u{1b}[MAh)".to_string(),  // utf8 middle click (hold)
-            "\u{1b}[M#k'".to_string(),  // utf8 middle click release
-            "\u{1b}[M`g%".to_string(),  // utf8 scroll up
-            "\u{1b}[Mag%".to_string(),  // utf8 scroll down
+            "\u{1b}[MAh)".to_string(),  // utf8 middle click (持有)
+            "\u{1b}[M#k'".to_string(),  // utf8 middle click 释放
+            "\u{1b}[M`g%".to_string(),  // utf8 滚动 up
+            "\u{1b}[Mag%".to_string(),  // utf8 滚动 down
             "\u{1b}[MCh)".to_string(),  // urf8 buttonless motion
         ]
     );
@@ -5152,7 +5152,7 @@ fn tab_with_nested_uneven_layout() {
 
 #[test]
 fn pane_bracketed_paste_ignored_when_not_in_bracketed_paste_mode() {
-    // regression test for: https://github.com/zellij-org/zellij/issues/1687
+    // regression 测试 for: https://github.com/zellij-org/zellij/issues/1687
     let size = Size {
         cols: 121,
         rows: 20,
@@ -5198,10 +5198,10 @@ fn pane_faux_scrolling_in_alternate_mode() {
     );
     pty_instruction_bus.start();
 
-    let enable_alternate_screen = String::from("\u{1b}[?1049h"); // CSI ? 1049 h -> switch to the Alternate Screen Buffer
+    let enable_alternate_screen = String::from("\u{1b}[?1049h"); // CSI ? 1049 h -> switch to the Alternate 屏幕 缓冲区
     let set_application_mode = String::from("\u{1b}[?1h");
 
-    // no output since alternate scren not active yet
+    // no output since alternate scren not 活动 yet
     tab.handle_scrollwheel_up(&Position::new(1, 1), lines_to_scroll, client_id)
         .unwrap();
     tab.handle_scrollwheel_down(&Position::new(1, 1), lines_to_scroll, client_id)
@@ -5261,13 +5261,13 @@ fn move_pane_focus_sends_tty_csi_event() {
     .unwrap();
     tab.handle_pty_bytes(
         1,
-        // subscribe to focus events
+        // 订阅 to 焦点 事件
         Vec::from("\u{1b}[?1004h".as_bytes()),
     )
     .unwrap();
     tab.handle_pty_bytes(
         2,
-        // subscribe to focus events
+        // 订阅 to 焦点 事件
         Vec::from("\u{1b}[?1004h".as_bytes()),
     )
     .unwrap();
@@ -5317,19 +5317,19 @@ fn move_floating_pane_focus_sends_tty_csi_event() {
     .unwrap();
     tab.handle_pty_bytes(
         1,
-        // subscribe to focus events
+        // 订阅 to 焦点 事件
         Vec::from("\u{1b}[?1004h".as_bytes()),
     )
     .unwrap();
     tab.handle_pty_bytes(
         2,
-        // subscribe to focus events
+        // 订阅 to 焦点 事件
         Vec::from("\u{1b}[?1004h".as_bytes()),
     )
     .unwrap();
     tab.handle_pty_bytes(
         3,
-        // subscribe to focus events
+        // 订阅 to 焦点 事件
         Vec::from("\u{1b}[?1004h".as_bytes()),
     )
     .unwrap();
@@ -5381,19 +5381,19 @@ fn toggle_floating_panes_on_sends_tty_csi_event() {
         .unwrap();
     tab.handle_pty_bytes(
         1,
-        // subscribe to focus events
+        // 订阅 to 焦点 事件
         Vec::from("\u{1b}[?1004h".as_bytes()),
     )
     .unwrap();
     tab.handle_pty_bytes(
         2,
-        // subscribe to focus events
+        // 订阅 to 焦点 事件
         Vec::from("\u{1b}[?1004h".as_bytes()),
     )
     .unwrap();
     tab.handle_pty_bytes(
         3,
-        // subscribe to focus events
+        // 订阅 to 焦点 事件
         Vec::from("\u{1b}[?1004h".as_bytes()),
     )
     .unwrap();
@@ -5444,19 +5444,19 @@ fn toggle_floating_panes_off_sends_tty_csi_event() {
     .unwrap();
     tab.handle_pty_bytes(
         1,
-        // subscribe to focus events
+        // 订阅 to 焦点 事件
         Vec::from("\u{1b}[?1004h".as_bytes()),
     )
     .unwrap();
     tab.handle_pty_bytes(
         2,
-        // subscribe to focus events
+        // 订阅 to 焦点 事件
         Vec::from("\u{1b}[?1004h".as_bytes()),
     )
     .unwrap();
     tab.handle_pty_bytes(
         3,
-        // subscribe to focus events
+        // 订阅 to 焦点 事件
         Vec::from("\u{1b}[?1004h".as_bytes()),
     )
     .unwrap();
@@ -6067,8 +6067,8 @@ fn move_focus_down_with_stacked_panes() {
 
 #[test]
 fn move_focus_right_into_stacked_panes() {
-    // here we make sure that when we focus right into a stack,
-    // we will always focus on the "main" pane of the stack
+    // here we make sure that when we 焦点 right into a 栈,
+    // we will always 焦点 on the "main" 窗格 of the 栈
     // and not on one of its folds
     let size = Size {
         cols: 121,
@@ -6139,8 +6139,8 @@ fn move_focus_right_into_stacked_panes() {
 
 #[test]
 fn move_focus_left_into_stacked_panes() {
-    // here we make sure that when we focus left into a stack,
-    // we will always focus on the "main" pane of the stack
+    // here we make sure that when we 焦点 left into a 栈,
+    // we will always 焦点 on the "main" 窗格 of the 栈
     // and not on one of its folds
     let size = Size {
         cols: 121,
@@ -6211,9 +6211,9 @@ fn move_focus_left_into_stacked_panes() {
 
 #[test]
 fn move_focus_up_into_stacked_panes() {
-    // here we make sure that when we focus up into a stack,
-    // the main pane will become the lowest pane and the sizes
-    // in the stack will be adjusted accordingly
+    // here we make sure that when we 焦点 up into a 栈,
+    // the main 窗格 will become the lowest 窗格 and the sizes
+    // in the 栈 will be adjusted accordingly
     let size = Size {
         cols: 121,
         rows: 20,
@@ -6286,9 +6286,9 @@ fn move_focus_up_into_stacked_panes() {
 
 #[test]
 fn move_focus_down_into_stacked_panes() {
-    // here we make sure that when we focus down into a stack,
-    // the main pane will become the highest pane and the sizes
-    // in the stack will be adjusted accordingly
+    // here we make sure that when we 焦点 down into a 栈,
+    // the main 窗格 will become the highest 窗格 and the sizes
+    // in the 栈 will be adjusted accordingly
     let size = Size {
         cols: 121,
         rows: 20,
@@ -7393,7 +7393,7 @@ fn can_increase_size_into_pane_stack_vertically() {
 
 #[test]
 fn can_increase_size_into_pane_stack_non_directionally() {
-    // note - this is not the default behavior, by default stacked_resize is enabled (set to true)
+    // note - this is not the 默认 behavior, by 默认 stacked_resize is 已启用 (set to true)
     let size = Size {
         cols: 121,
         rows: 40,
@@ -8535,8 +8535,8 @@ fn layout_with_plugins_and_commands_swaped_properly() {
             }
         }
     "#;
-    // this swap layout changes both the split direction of the two command panes and the location
-    // of the plugins - we want to make sure that they are all placed properly and not switched
+    // this swap 布局 changes both the 分割 direction of the two 命令 窗格 and the location
+    // of the 插件 - we want to make sure that they are all placed properly and not switched
     // around
     let swap_layouts = r#"
         layout {
@@ -8635,8 +8635,8 @@ fn base_layout_is_included_in_swap_layouts() {
             }
         }
     "#;
-    // this swap layout changes both the split direction of the two command panes and the location
-    // of the plugins - we want to make sure that they are all placed properly and not switched
+    // this swap 布局 changes both the 分割 direction of the two 命令 窗格 and the location
+    // of the 插件 - we want to make sure that they are all placed properly and not switched
     // around
     let swap_layouts = r#"
         layout {
@@ -8699,7 +8699,7 @@ fn base_layout_is_included_in_swap_layouts() {
     let _ = tab.handle_plugin_bytes(1, 1, "I am a tab bar".as_bytes().to_vec());
     let _ = tab.handle_plugin_bytes(2, 1, "I am a\n\rstatus bar".as_bytes().to_vec());
     tab.next_swap_layout().unwrap();
-    tab.previous_swap_layout().unwrap(); // move back to the base layout
+    tab.previous_swap_layout().unwrap(); // move back to the base 布局
     tab.render(&mut output, None).unwrap();
     let snapshot = take_snapshot(
         output.serialize().unwrap().get(&client_id).unwrap(),
@@ -8734,8 +8734,8 @@ fn swap_layouts_including_command_panes_absent_from_existing_layout() {
             }
         }
     "#;
-    // this swap layout changes both the split direction of the two command panes and the location
-    // of the plugins - we want to make sure that they are all placed properly and not switched
+    // this swap 布局 changes both the 分割 direction of the two 命令 窗格 and the location
+    // of the 插件 - we want to make sure that they are all placed properly and not switched
     // around
     let swap_layouts = r#"
         layout {
@@ -8828,8 +8828,8 @@ fn swap_layouts_not_including_command_panes_present_in_existing_layout() {
             }
         }
     "#;
-    // this swap layout changes both the split direction of the two command panes and the location
-    // of the plugins - we want to make sure that they are all placed properly and not switched
+    // this swap 布局 changes both the 分割 direction of the two 命令 窗格 and the location
+    // of the 插件 - we want to make sure that they are all placed properly and not switched
     // around
     let swap_layouts = r#"
         layout {
@@ -8922,8 +8922,8 @@ fn swap_layouts_including_plugin_panes_absent_from_existing_layout() {
             pane size=1 borderless=true
         }
     "#;
-    // this swap layout changes both the split direction of the two command panes and the location
-    // of the plugins - we want to make sure that they are all placed properly and not switched
+    // this swap 布局 changes both the 分割 direction of the two 命令 窗格 and the location
+    // of the 插件 - we want to make sure that they are all placed properly and not switched
     // around
     let swap_layouts = r#"
         layout {
@@ -9006,8 +9006,8 @@ fn swap_layouts_not_including_plugin_panes_present_in_existing_layout() {
             }
         }
     "#;
-    // this swap layout changes both the split direction of the two command panes and the location
-    // of the plugins - we want to make sure that they are all placed properly and not switched
+    // this swap 布局 changes both the 分割 direction of the two 命令 窗格 and the location
+    // of the 插件 - we want to make sure that they are all placed properly and not switched
     // around
     let swap_layouts = r#"
         layout {
@@ -9585,7 +9585,7 @@ fn floating_layout_with_plugins_and_commands_swaped_properly() {
             }
         }
     "#;
-    // this swap layout swaps between the location of the plugins and the commands
+    // this swap 布局 swaps between the location of the 插件 and the 命令
     let swap_layouts = r#"
         layout {
             swap_floating_layout {
@@ -9681,7 +9681,7 @@ fn base_floating_layout_is_included_in_swap_layouts() {
             }
         }
     "#;
-    // this swap layout swaps between the location of the plugins and the commands
+    // this swap 布局 swaps between the location of the 插件 and the 命令
     let swap_layouts = r#"
         layout {
             swap_floating_layout {
@@ -9743,7 +9743,7 @@ fn base_floating_layout_is_included_in_swap_layouts() {
     let _ = tab.handle_plugin_bytes(1, 1, "I am a tab bar".as_bytes().to_vec());
     let _ = tab.handle_plugin_bytes(2, 1, "I am a\n\rstatus bar".as_bytes().to_vec());
     tab.next_swap_layout().unwrap();
-    tab.previous_swap_layout().unwrap(); // move back to the base layout
+    tab.previous_swap_layout().unwrap(); // move back to the base 布局
     tab.render(&mut output, None).unwrap();
     let snapshot = take_snapshot(
         output.serialize().unwrap().get(&client_id).unwrap(),
@@ -9778,8 +9778,8 @@ fn swap_floating_layouts_including_command_panes_absent_from_existing_layout() {
             }
         }
     "#;
-    // this swap layout changes both the split direction of the two command panes and the location
-    // of the plugins - we want to make sure that they are all placed properly and not switched
+    // this swap 布局 changes both the 分割 direction of the two 命令 窗格 and the location
+    // of the 插件 - we want to make sure that they are all placed properly and not switched
     // around
     let swap_layouts = r#"
         layout {
@@ -9872,8 +9872,8 @@ fn swap_floating_layouts_not_including_command_panes_present_in_existing_layout(
             }
         }
     "#;
-    // this swap layout changes both the split direction of the two command panes and the location
-    // of the plugins - we want to make sure that they are all placed properly and not switched
+    // this swap 布局 changes both the 分割 direction of the two 命令 窗格 and the location
+    // of the 插件 - we want to make sure that they are all placed properly and not switched
     // around
     let swap_layouts = r#"
         layout {
@@ -10041,8 +10041,8 @@ fn swap_floating_layouts_not_including_plugin_panes_present_in_existing_layout()
             }
         }
     "#;
-    // this swap layout changes both the split direction of the two command panes and the location
-    // of the plugins - we want to make sure that they are all placed properly and not switched
+    // this swap 布局 changes both the 分割 direction of the two 命令 窗格 and the location
+    // of the 插件 - we want to make sure that they are all placed properly and not switched
     // around
     let swap_layouts = r#"
         layout {
@@ -10580,9 +10580,9 @@ fn when_resizing_whole_tab_with_auto_layout_and_floating_panes_the_layout_is_mai
 
 #[test]
 fn when_applying_a_truncated_swap_layout_child_attributes_are_not_ignored() {
-    // here we want to make sure that the nested borderless is preserved on resize (when the layout
-    // is reapplied, and thus is truncated to just one pane rather than a logical container pane
-    // and an actual pane as it is described here)
+    // here we want to make sure that the nested borderless is 保存的 on 调整大小 (when the 布局
+    // is reapplied, and thus is 截断的 to just one 窗格 rather than a logical container 窗格
+    // and an actual 窗格 as it is described here)
     let layout = r#"
         layout {
             pane {
@@ -10655,7 +10655,7 @@ fn borderless_floating_pane() {
     let new_pane_id = PaneId::Terminal(2);
     let mut output = Output::default();
 
-    // Create borderless floating pane
+    // 创建 borderless 浮动 窗格
     let coordinates = FloatingPaneCoordinates {
         x: Some(PercentOrFixed::Fixed(10)),
         y: Some(PercentOrFixed::Fixed(5)),
@@ -10723,7 +10723,7 @@ fn borderless_pane_content_fills_edges() {
     )
     .unwrap();
 
-    // Fill with X's to verify content reaches edges
+    // Fill with X's to 验证 content reaches edges
     tab.handle_pty_bytes(
         2,
         Vec::from("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\r\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\r\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\r\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\r\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX".as_bytes()),
@@ -10771,7 +10771,7 @@ fn borderless_pinned_floating_pane() {
     )
     .unwrap();
 
-    // Toggle floating panes off to test pinned behavior
+    // Toggle 浮动 窗格 off to 测试 pinned behavior
     tab.toggle_floating_panes(Some(client_id), None, None)
         .unwrap();
 
@@ -10793,7 +10793,7 @@ fn borderless_pinned_floating_pane() {
 
 #[test]
 fn cursor_hidden_when_floating_pane_is_under_pinned_pane() {
-    // Test that cursor is correctly hidden when focused on a floating pane that's under a pinned pane
+    // 测试 that 光标 is correctly hidden when 聚焦的 on a 浮动 窗格 that's under a pinned 窗格
     let size = Size {
         cols: 121,
         rows: 20,
@@ -10802,7 +10802,7 @@ fn cursor_hidden_when_floating_pane_is_under_pinned_pane() {
     let mut tab = create_new_tab(size, ModeInfo::default());
     let mut output = Output::default();
 
-    // Create first floating pane (will be underneath)
+    // 创建 first 浮动 窗格 (will be underneath)
     let bottom_pane_coordinates = FloatingPaneCoordinates {
         x: Some(PercentOrFixed::Fixed(10)),
         y: Some(PercentOrFixed::Fixed(5)),
@@ -10823,7 +10823,7 @@ fn cursor_hidden_when_floating_pane_is_under_pinned_pane() {
     )
     .unwrap();
 
-    // Create overlapping pinned pane on top
+    // 创建 overlapping pinned 窗格 on top
     let top_pane_coordinates = FloatingPaneCoordinates {
         x: Some(PercentOrFixed::Fixed(15)),
         y: Some(PercentOrFixed::Fixed(6)),
@@ -10844,17 +10844,17 @@ fn cursor_hidden_when_floating_pane_is_under_pinned_pane() {
     )
     .unwrap();
 
-    // Add some text to both panes so we can see them
+    // Add some text to both 窗格 so we can see them
     tab.handle_pty_bytes(2, Vec::from("Bottom floating pane".as_bytes()))
         .unwrap();
     tab.handle_pty_bytes(3, Vec::from("Top pinned pane".as_bytes()))
         .unwrap();
 
-    // Explicitly focus the bottom floating pane (PaneId::Terminal(2))
-    // Use move_focus_left to switch from pane 3 to pane 2
+    // Explicitly 焦点 the bottom 浮动 窗格 (PaneId::终端(2))
+    // Use move_focus_left to switch from 窗格 3 to 窗格 2
     tab.move_focus_left(client_id).unwrap();
 
-    // Render
+    // 渲染
     tab.render(&mut output, None).unwrap();
     let (_snapshot, cursor_coordinates) = take_snapshot_and_cursor_position(
         output.serialize().unwrap().get(&client_id).unwrap(),
@@ -10863,8 +10863,8 @@ fn cursor_hidden_when_floating_pane_is_under_pinned_pane() {
         Palette::default(),
     );
 
-    // The cursor should be hidden because the focused pane (2) is under the pinned pane (3)
-    // and the cursor position falls within the overlapping area
+    // The 光标 should be hidden because the 聚焦的 窗格 (2) is under the pinned 窗格 (3)
+    // and the 光标 position falls within the overlapping area
     assert_eq!(
         cursor_coordinates, None,
         "Cursor should be hidden when focused floating pane is under a pinned pane that covers it"
@@ -10873,7 +10873,7 @@ fn cursor_hidden_when_floating_pane_is_under_pinned_pane() {
 
 #[test]
 fn cursor_visible_when_pinned_pane_is_focused() {
-    // Test that cursor is visible when focused on a pinned pane that's on top
+    // 测试 that 光标 is 可见 when 聚焦的 on a pinned 窗格 that's on top
     let size = Size {
         cols: 121,
         rows: 20,
@@ -10882,7 +10882,7 @@ fn cursor_visible_when_pinned_pane_is_focused() {
     let mut tab = create_new_tab(size, ModeInfo::default());
     let mut output = Output::default();
 
-    // Create first floating pane (will be underneath)
+    // 创建 first 浮动 窗格 (will be underneath)
     let bottom_pane_coordinates = FloatingPaneCoordinates {
         x: Some(PercentOrFixed::Fixed(10)),
         y: Some(PercentOrFixed::Fixed(5)),
@@ -10903,7 +10903,7 @@ fn cursor_visible_when_pinned_pane_is_focused() {
     )
     .unwrap();
 
-    // Create overlapping pinned pane on top
+    // 创建 overlapping pinned 窗格 on top
     let top_pane_coordinates = FloatingPaneCoordinates {
         x: Some(PercentOrFixed::Fixed(15)),
         y: Some(PercentOrFixed::Fixed(6)),
@@ -10924,14 +10924,14 @@ fn cursor_visible_when_pinned_pane_is_focused() {
     )
     .unwrap();
 
-    // Add some text to both panes
+    // Add some text to both 窗格
     tab.handle_pty_bytes(2, Vec::from("Bottom floating pane".as_bytes()))
         .unwrap();
     tab.handle_pty_bytes(3, Vec::from("Top pinned pane".as_bytes()))
         .unwrap();
 
-    // The pinned pane should be focused by default (last created)
-    // Render
+    // The pinned 窗格 should be 聚焦的 by 默认 (last 创建的)
+    // 渲染
     tab.render(&mut output, None).unwrap();
     let (_snapshot, cursor_coordinates) = take_snapshot_and_cursor_position(
         output.serialize().unwrap().get(&client_id).unwrap(),
@@ -10940,7 +10940,7 @@ fn cursor_visible_when_pinned_pane_is_focused() {
         Palette::default(),
     );
 
-    // The cursor should be visible because the focused pane is the pinned pane on top
+    // The 光标 should be 可见 because the 聚焦的 窗格 is the pinned 窗格 on top
     assert!(
         cursor_coordinates.is_some(),
         "Cursor should be visible when focused on pinned pane that's on top"
@@ -10988,25 +10988,25 @@ fn test_left_release_after_selection_copies_to_clipboard() {
     let mut tab = create_new_tab(size, ModeInfo::default());
     let _output = Output::default();
 
-    // Fill the pane with some text content
+    // Fill the 窗格 with some text content
     tab.handle_pty_bytes(1, Vec::from("Selectable text content here".as_bytes()))
         .unwrap();
 
-    // Start text selection with left press
+    // 启动 text 选择 with left press
     tab.handle_mouse_event(
         &MouseEvent::new_left_press_event(Position::new(1, 5)),
         client_id,
     )
     .unwrap();
 
-    // Drag to create selection
+    // Drag to 创建 选择
     tab.handle_mouse_event(
         &MouseEvent::new_left_motion_event(Position::new(1, 15)),
         client_id,
     )
     .unwrap();
 
-    // Release should trigger clipboard copy
+    // 释放 should trigger 剪贴板 复制
     let release_effect = tab
         .handle_mouse_event(
             &MouseEvent::new_left_release_event(Position::new(1, 15)),
@@ -11014,7 +11014,7 @@ fn test_left_release_after_selection_copies_to_clipboard() {
         )
         .unwrap();
 
-    // Verify clipboard message was sent
+    // 验证 剪贴板 消息 was sent
     assert!(release_effect.leave_clipboard_message);
 }
 
@@ -11086,7 +11086,7 @@ fn test_ctrl_click_on_tiled_pane_edge_starts_resize() {
     let new_pane_id = PaneId::Terminal(2);
     let _output = Output::default();
 
-    // Create a vertical split
+    // 创建 a vertical 分割
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
@@ -11095,8 +11095,8 @@ fn test_ctrl_click_on_tiled_pane_edge_starts_resize() {
     tab.handle_pty_bytes(2, Vec::from("Right".as_bytes()))
         .unwrap();
 
-    // Click on the edge between panes with Ctrl
-    // For a vertical split at cols=121, the edge is around column 60-61
+    // Click on the edge between 窗格 with Ctrl
+    // For a vertical 分割 at cols=121, the edge is around 列 60-61
     let edge_position = Position::new(5, 60);
     let effect = tab
         .handle_mouse_event(
@@ -11105,7 +11105,7 @@ fn test_ctrl_click_on_tiled_pane_edge_starts_resize() {
         )
         .unwrap();
 
-    // Verify resize started
+    // 验证 调整大小 启动的
     assert!(effect.state_changed);
 }
 
@@ -11263,7 +11263,7 @@ fn test_ctrl_drag_resizes_unfocused_tiled_pane_vertically() {
     );
 
     let edge_position = Position::new(10, 60);
-    let _ = tab.focus_pane_with_id(PaneId::Terminal(1), false, false, client_id); // focus top pane
+    let _ = tab.focus_pane_with_id(PaneId::Terminal(1), false, false, client_id); // 焦点 top 窗格
     tab.handle_mouse_event(
         &MouseEvent::new_left_press_with_ctrl_event(edge_position),
         client_id,
@@ -11312,7 +11312,7 @@ fn test_ctrl_click_on_pane_body_does_nothing() {
     let new_pane_id = PaneId::Terminal(2);
     let _output = Output::default();
 
-    // Create a vertical split
+    // 创建 a vertical 分割
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
@@ -11321,7 +11321,7 @@ fn test_ctrl_click_on_pane_body_does_nothing() {
     tab.handle_pty_bytes(2, Vec::from("Right".as_bytes()))
         .unwrap();
 
-    // Click in the center of a pane (not on an edge)
+    // Click in the center of a 窗格 (not on an edge)
     let center_position = Position::new(10, 30);
     let effect = tab
         .handle_mouse_event(
@@ -11330,7 +11330,7 @@ fn test_ctrl_click_on_pane_body_does_nothing() {
         )
         .unwrap();
 
-    // Should not trigger any state change
+    // Should not trigger any 状态 change
     assert!(!effect.state_changed);
 }
 
@@ -11588,7 +11588,7 @@ fn test_ctrl_click_on_floating_pin_button_toggles_pin() {
     let floating_pane_id = PaneId::Terminal(2);
     let mut output = Output::default();
 
-    // Toggle floating panes mode and create a floating pane
+    // Toggle 浮动 窗格 mode and 创建 a 浮动 窗格
     tab.toggle_floating_panes(Some(client_id), None, None)
         .unwrap();
     tab.new_pane(
@@ -11606,11 +11606,11 @@ fn test_ctrl_click_on_floating_pin_button_toggles_pin() {
     tab.handle_pty_bytes(2, Vec::from("Pin toggle test".as_bytes()))
         .unwrap();
 
-    // Render before pin toggle
+    // 渲染 before pin toggle
     tab.render(&mut output, None).unwrap();
 
-    // Calculate pin button position (3 cells left of top-right corner of floating pane)
-    // Default floating pane is roughly at y=5, right edge around x=90
+    // 计算 pin button position (3 单元格 left of top-right corner of 浮动 窗格)
+    // 默认 浮动 窗格 is roughly at y=5, right edge around x=90
     // Pin button should be at approximately (5, 87)
     let pin_position = Position::new(5, 87);
 
@@ -11621,10 +11621,10 @@ fn test_ctrl_click_on_floating_pin_button_toggles_pin() {
         )
         .unwrap();
 
-    // Verify state changed (pin toggle should trigger this)
+    // 验证 状态 changed (pin toggle should trigger this)
     assert!(effect.state_changed);
 
-    // Render after pin toggle
+    // 渲染 after pin toggle
     let mut output = Output::default();
     tab.render(&mut output, None).unwrap();
     let snapshot_after = take_snapshot(
@@ -11634,7 +11634,7 @@ fn test_ctrl_click_on_floating_pin_button_toggles_pin() {
         Palette::default(),
     );
 
-    // Snapshot should show pin indicator change
+    // 快照 should show pin indicator change
     assert_snapshot!(format!("{}", snapshot_after));
 }
 
@@ -11649,7 +11649,7 @@ fn test_ctrl_click_on_floating_frame_not_on_pin_starts_resize() {
     let floating_pane_id = PaneId::Terminal(2);
     let _output = Output::default();
 
-    // Toggle floating panes mode and create a floating pane
+    // Toggle 浮动 窗格 mode and 创建 a 浮动 窗格
     tab.toggle_floating_panes(Some(client_id), None, None)
         .unwrap();
     tab.new_pane(
@@ -11667,8 +11667,8 @@ fn test_ctrl_click_on_floating_frame_not_on_pin_starts_resize() {
     tab.handle_pty_bytes(2, Vec::from("Frame click test".as_bytes()))
         .unwrap();
 
-    // Click on frame but NOT on pin button location
-    // Use left edge of frame instead
+    // Click on 框架 but NOT on pin button location
+    // Use left edge of 框架 instead
     let frame_position = Position::new(5, 30);
 
     let effect = tab
@@ -11678,7 +11678,7 @@ fn test_ctrl_click_on_floating_frame_not_on_pin_starts_resize() {
         )
         .unwrap();
 
-    // Should start resize (if on edge), state_changed should be true
+    // Should 启动 调整大小 (if on edge), state_changed should be true
     assert!(effect.state_changed);
 }
 
@@ -11693,7 +11693,7 @@ fn test_left_drag_moves_floating_pane() {
     let floating_pane_id = PaneId::Terminal(2);
     let mut output = Output::default();
 
-    // Toggle floating panes mode and create a floating pane
+    // Toggle 浮动 窗格 mode and 创建 a 浮动 窗格
     tab.toggle_floating_panes(Some(client_id), None, None)
         .unwrap();
     tab.new_pane(
@@ -11711,7 +11711,7 @@ fn test_left_drag_moves_floating_pane() {
     tab.handle_pty_bytes(2, Vec::from("Moving pane".as_bytes()))
         .unwrap();
 
-    // Render before move
+    // 渲染 before move
     tab.render(&mut output, None).unwrap();
     let snapshot_before = take_snapshot(
         output.serialize().unwrap().get(&client_id).unwrap(),
@@ -11720,13 +11720,13 @@ fn test_left_drag_moves_floating_pane() {
         Palette::default(),
     );
 
-    // Click on frame (not ctrl, not pin location) to start move
+    // Click on 框架 (not ctrl, not pin location) to 启动 move
     let frame_position = Position::new(5, 30);
     let press_effect = tab
         .handle_mouse_event(&MouseEvent::new_left_press_event(frame_position), client_id)
         .unwrap();
 
-    // Drag to move the pane
+    // Drag to move the 窗格
     let motion_position = Position::new(6, 31);
     tab.handle_mouse_event(
         &MouseEvent::new_left_motion_event(motion_position),
@@ -11734,17 +11734,17 @@ fn test_left_drag_moves_floating_pane() {
     )
     .unwrap();
 
-    // Release
+    // 释放
     tab.handle_mouse_event(
         &MouseEvent::new_left_release_event(motion_position),
         client_id,
     )
     .unwrap();
 
-    // Verify state changed
+    // 验证 状态 changed
     assert!(press_effect.state_changed);
 
-    // Render after move
+    // 渲染 after move
     let mut output = Output::default();
     tab.render(&mut output, None).unwrap();
     let snapshot_after = take_snapshot(
@@ -11754,7 +11754,7 @@ fn test_left_drag_moves_floating_pane() {
         Palette::default(),
     );
 
-    // Snapshots should be different
+    // 快照 should be different
     assert_ne!(snapshot_before, snapshot_after);
     assert_snapshot!(format!("{}", snapshot_after));
 }
@@ -11891,7 +11891,7 @@ fn test_left_click_on_pinned_floating_pane() {
     tab.handle_pty_bytes(2, Vec::from("Pinned pane".as_bytes()))
         .unwrap();
 
-    // render once so that the client's frame will be registered
+    // 渲染 once so that the 客户端's 框架 will be registered
     tab.render(&mut output, None).unwrap();
 
     let pin_position = Position::new(5, 31);
@@ -11914,7 +11914,7 @@ fn test_left_click_on_pinned_floating_pane() {
         Palette::default(),
     );
 
-    // Verify pinned pane is still visible in snapshot
+    // 验证 pinned 窗格 is still 可见 in 快照
     assert_snapshot!(format!("{}", snapshot));
 }
 
@@ -11929,7 +11929,7 @@ fn test_alt_left_click_toggles_pane_group() {
     let new_pane_id = PaneId::Terminal(2);
     let _output = Output::default();
 
-    // Create a vertical split
+    // 创建 a vertical 分割
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
@@ -11938,7 +11938,7 @@ fn test_alt_left_click_toggles_pane_group() {
     tab.handle_pty_bytes(2, Vec::from("Right".as_bytes()))
         .unwrap();
 
-    // Alt+click on a pane to toggle group
+    // Alt+click on a 窗格 to toggle 分组
     let effect = tab
         .handle_mouse_event(
             &MouseEvent::new_left_press_with_alt_event(Position::new(5, 30)),
@@ -11946,7 +11946,7 @@ fn test_alt_left_click_toggles_pane_group() {
         )
         .unwrap();
 
-    // Verify group_toggle effect returned
+    // 验证 group_toggle effect 返回的
     assert!(effect.group_toggle.is_some());
     assert_eq!(effect.group_toggle, Some(PaneId::Terminal(1)));
 }
@@ -11963,7 +11963,7 @@ fn test_alt_left_drag_adds_panes_to_group() {
     let new_pane_id_3 = PaneId::Terminal(3);
     let _output = Output::default();
 
-    // Create two vertical splits (3 panes)
+    // 创建 two vertical splits (3 窗格)
     tab.vertical_split(new_pane_id_2, None, client_id, None, None)
         .unwrap();
     tab.vertical_split(new_pane_id_3, None, client_id, None, None)
@@ -11976,7 +11976,7 @@ fn test_alt_left_drag_adds_panes_to_group() {
     tab.handle_pty_bytes(3, Vec::from("Pane 3".as_bytes()))
         .unwrap();
 
-    // Alt+press on first pane
+    // Alt+press on first 窗格
     let press_effect = tab
         .handle_mouse_event(
             &MouseEvent::new_left_press_with_alt_event(Position::new(5, 10)),
@@ -11985,7 +11985,7 @@ fn test_alt_left_drag_adds_panes_to_group() {
         .unwrap();
     assert!(press_effect.group_toggle.is_some());
 
-    // Alt+drag to second pane
+    // Alt+drag to second 窗格
     let motion_effect_1 = tab
         .handle_mouse_event(
             &MouseEvent::new_left_motion_with_alt_event(Position::new(5, 40)),
@@ -11993,10 +11993,10 @@ fn test_alt_left_drag_adds_panes_to_group() {
         )
         .unwrap();
 
-    // Verify group_add effect
+    // 验证 group_add effect
     assert!(motion_effect_1.group_add.is_some());
 
-    // Alt+drag to third pane
+    // Alt+drag to third 窗格
     let motion_effect_2 = tab
         .handle_mouse_event(
             &MouseEvent::new_left_motion_with_alt_event(Position::new(5, 80)),
@@ -12004,7 +12004,7 @@ fn test_alt_left_drag_adds_panes_to_group() {
         )
         .unwrap();
 
-    // Verify group_add effect
+    // 验证 group_add effect
     assert!(motion_effect_2.group_add.is_some());
 }
 
@@ -12019,7 +12019,7 @@ fn test_right_alt_click_ungroups_panes() {
     let new_pane_id = PaneId::Terminal(2);
     let _output = Output::default();
 
-    // Create a vertical split
+    // 创建 a vertical 分割
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
@@ -12028,7 +12028,7 @@ fn test_right_alt_click_ungroups_panes() {
     tab.handle_pty_bytes(2, Vec::from("Right".as_bytes()))
         .unwrap();
 
-    // First, create a group with Alt+click
+    // First, 创建 a 分组 with Alt+click
     tab.handle_mouse_event(
         &MouseEvent::new_left_press_with_alt_event(Position::new(5, 30)),
         client_id,
@@ -12043,7 +12043,7 @@ fn test_right_alt_click_ungroups_panes() {
         )
         .unwrap();
 
-    // Verify ungroup effect returned
+    // 验证 ungroup effect 返回的
     assert!(effect.ungroup);
 }
 
@@ -12308,7 +12308,7 @@ fn test_scroll_wheel_up_scrolls_pane() {
     let mut tab = create_new_tab(size, ModeInfo::default());
     let mut output = Output::default();
 
-    // Fill the pane with many lines to enable scrolling
+    // Fill the 窗格 with many lines to 启用 滚动
     let mut content = String::new();
     for i in 0..50 {
         content.push_str(&format!("Line {}\r\n", i));
@@ -12316,7 +12316,7 @@ fn test_scroll_wheel_up_scrolls_pane() {
     tab.handle_pty_bytes(1, Vec::from(content.as_bytes()))
         .unwrap();
 
-    // Render before scroll
+    // 渲染 before 滚动
     tab.render(&mut output, None).unwrap();
     let snapshot_before = take_snapshot(
         output.serialize().unwrap().get(&client_id).unwrap(),
@@ -12325,7 +12325,7 @@ fn test_scroll_wheel_up_scrolls_pane() {
         Palette::default(),
     );
 
-    // Scroll up
+    // 滚动 up
     let _effect = tab
         .handle_mouse_event(
             &MouseEvent::new_scroll_up_event(Position::new(10, 60)),
@@ -12333,7 +12333,7 @@ fn test_scroll_wheel_up_scrolls_pane() {
         )
         .unwrap();
 
-    // Render after scroll
+    // 渲染 after 滚动
     let mut output = Output::default();
     tab.render(&mut output, None).unwrap();
     let snapshot_after = take_snapshot(
@@ -12343,7 +12343,7 @@ fn test_scroll_wheel_up_scrolls_pane() {
         Palette::default(),
     );
 
-    // Snapshots should be different (viewport moved)
+    // 快照 should be different (视口 移动)
     assert_ne!(snapshot_before, snapshot_after);
     assert_snapshot!(format!("{}", snapshot_after));
 }
@@ -12358,7 +12358,7 @@ fn test_scroll_wheel_down_scrolls_pane() {
     let mut tab = create_new_tab(size, ModeInfo::default());
     let _output = Output::default();
 
-    // Fill the pane with many lines to enable scrolling
+    // Fill the 窗格 with many lines to 启用 滚动
     let mut content = String::new();
     for i in 0..50 {
         content.push_str(&format!("Line {}\r\n", i));
@@ -12366,7 +12366,7 @@ fn test_scroll_wheel_down_scrolls_pane() {
     tab.handle_pty_bytes(1, Vec::from(content.as_bytes()))
         .unwrap();
 
-    // First scroll up to have content above viewport
+    // First 滚动 up to have content above 视口
     tab.handle_mouse_event(
         &MouseEvent::new_scroll_up_event(Position::new(10, 60)),
         client_id,
@@ -12383,7 +12383,7 @@ fn test_scroll_wheel_down_scrolls_pane() {
     )
     .unwrap();
 
-    // Render before scrolling down
+    // 渲染 before 滚动 down
     let mut output = Output::default();
     tab.render(&mut output, None).unwrap();
     let snapshot_before = take_snapshot(
@@ -12393,7 +12393,7 @@ fn test_scroll_wheel_down_scrolls_pane() {
         Palette::default(),
     );
 
-    // Scroll down
+    // 滚动 down
     let _effect = tab
         .handle_mouse_event(
             &MouseEvent::new_scroll_down_event(Position::new(10, 60)),
@@ -12401,7 +12401,7 @@ fn test_scroll_wheel_down_scrolls_pane() {
         )
         .unwrap();
 
-    // Render after scroll
+    // 渲染 after 滚动
     let mut output = Output::default();
     tab.render(&mut output, None).unwrap();
     let snapshot_after = take_snapshot(
@@ -12411,7 +12411,7 @@ fn test_scroll_wheel_down_scrolls_pane() {
         Palette::default(),
     );
 
-    // Snapshots should be different (viewport moved)
+    // 快照 should be different (视口 移动)
     assert_ne!(snapshot_before, snapshot_after);
     assert_snapshot!(format!("{}", snapshot_after));
 }
@@ -12427,11 +12427,11 @@ fn test_scroll_on_inactive_pane_scrolls_that_pane() {
     let new_pane_id = PaneId::Terminal(2);
     let mut output = Output::default();
 
-    // Create a vertical split
+    // 创建 a vertical 分割
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
-    // Fill both panes with scrollable content
+    // Fill both 窗格 with scrollable content
     let mut content = String::new();
     for i in 0..50 {
         content.push_str(&format!("Left Line {}\r\n", i));
@@ -12446,10 +12446,10 @@ fn test_scroll_on_inactive_pane_scrolls_that_pane() {
     tab.handle_pty_bytes(2, Vec::from(content.as_bytes()))
         .unwrap();
 
-    // Active pane is pane 2 (right), scroll on pane 1 (left)
+    // 活动 窗格 is 窗格 2 (right), 滚动 on 窗格 1 (left)
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 
-    // Render before scroll
+    // 渲染 before 滚动
     tab.render(&mut output, None).unwrap();
     let snapshot_before = take_snapshot(
         output.serialize().unwrap().get(&client_id).unwrap(),
@@ -12458,7 +12458,7 @@ fn test_scroll_on_inactive_pane_scrolls_that_pane() {
         Palette::default(),
     );
 
-    // Scroll up on the left (inactive) pane
+    // 滚动 up on the left (不活动) 窗格
     let _effect = tab
         .handle_mouse_event(
             &MouseEvent::new_scroll_up_event(Position::new(10, 30)),
@@ -12466,7 +12466,7 @@ fn test_scroll_on_inactive_pane_scrolls_that_pane() {
         )
         .unwrap();
 
-    // Render after scroll
+    // 渲染 after 滚动
     let mut output = Output::default();
     tab.render(&mut output, None).unwrap();
     let snapshot_after = take_snapshot(
@@ -12476,7 +12476,7 @@ fn test_scroll_on_inactive_pane_scrolls_that_pane() {
         Palette::default(),
     );
 
-    // Snapshots should be different (left pane scrolled)
+    // 快照 should be different (left 窗格 scrolled)
     assert_ne!(snapshot_before, snapshot_after);
     assert_snapshot!(format!("{}", snapshot_after));
 }
@@ -12494,7 +12494,7 @@ fn test_right_click_forwards_to_active_pane() {
     tab.handle_pty_bytes(1, Vec::from("Active pane".as_bytes()))
         .unwrap();
 
-    // Right click on the active pane
+    // Right click on the 活动 窗格
     let effect = tab
         .handle_mouse_event(
             &MouseEvent::new_right_press_event(Position::new(10, 60)),
@@ -12502,8 +12502,8 @@ fn test_right_click_forwards_to_active_pane() {
         )
         .unwrap();
 
-    // Event should be forwarded (verified via MouseEffect or no error)
-    // The effect may not indicate state change, but should succeed
+    // 事件 should be forwarded (验证的 via MouseEffect or no 错误)
+    // The effect may not indicate 状态 change, but should succeed
     assert!(effect.group_toggle.is_none());
 }
 
@@ -12520,7 +12520,7 @@ fn test_middle_click_forwards_to_active_pane() {
     tab.handle_pty_bytes(1, Vec::from("Active pane".as_bytes()))
         .unwrap();
 
-    // Middle click on the active pane
+    // Middle click on the 活动 窗格
     let effect = tab
         .handle_mouse_event(
             &MouseEvent::new_middle_press_event(Position::new(10, 60)),
@@ -12528,7 +12528,7 @@ fn test_middle_click_forwards_to_active_pane() {
         )
         .unwrap();
 
-    // Event should be forwarded (verified via MouseEffect or no error)
+    // 事件 should be forwarded (验证的 via MouseEffect or no 错误)
     assert!(effect.group_toggle.is_none());
 }
 
@@ -12543,7 +12543,7 @@ fn test_hover_over_inactive_pane_sets_hover_state() {
     let new_pane_id = PaneId::Terminal(2);
     let _output = Output::default();
 
-    // Create a vertical split
+    // 创建 a vertical 分割
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
@@ -12552,10 +12552,10 @@ fn test_hover_over_inactive_pane_sets_hover_state() {
     tab.handle_pty_bytes(2, Vec::from("Right".as_bytes()))
         .unwrap();
 
-    // Active pane is pane 2 (right)
+    // 活动 窗格 is 窗格 2 (right)
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 
-    // Hover over inactive pane (left) with buttonless motion
+    // Hover over 不活动 窗格 (left) with buttonless motion
     let effect = tab
         .handle_mouse_event(
             &MouseEvent::new_buttonless_motion(Position::new(10, 30)),
@@ -12579,7 +12579,7 @@ fn test_hover_over_active_pane_unsets_hover() {
     let new_pane_id = PaneId::Terminal(2);
     let _output = Output::default();
 
-    // Create a vertical split
+    // 创建 a vertical 分割
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
@@ -12588,17 +12588,17 @@ fn test_hover_over_active_pane_unsets_hover() {
     tab.handle_pty_bytes(2, Vec::from("Right".as_bytes()))
         .unwrap();
 
-    // Active pane is pane 2 (right)
+    // 活动 窗格 is 窗格 2 (right)
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 
-    // Hover over inactive pane (left) with buttonless motion
+    // Hover over 不活动 窗格 (left) with buttonless motion
     let _effect = tab
         .handle_mouse_event(
             &MouseEvent::new_buttonless_motion(Position::new(10, 30)),
             client_id,
         )
         .unwrap();
-    // Hover over active pane (right) with buttonless motion
+    // Hover over 活动 窗格 (right) with buttonless motion
     let effect = tab
         .handle_mouse_event(
             &MouseEvent::new_buttonless_motion(Position::new(10, 90)),
@@ -12623,7 +12623,7 @@ fn test_resize_tiled_then_move_floating_sequence() {
     let floating_pane_id = PaneId::Terminal(3);
     let _output = Output::default();
 
-    // Create tiled split
+    // 创建 平铺 分割
     tab.vertical_split(tiled_pane_id, None, client_id, None, None)
         .unwrap();
 
@@ -12632,7 +12632,7 @@ fn test_resize_tiled_then_move_floating_sequence() {
     tab.handle_pty_bytes(2, Vec::from("Tiled Right".as_bytes()))
         .unwrap();
 
-    // Resize tiled pane with Ctrl+drag
+    // 调整大小 平铺 窗格 with Ctrl+drag
     let edge_position = Position::new(5, 60);
     tab.handle_mouse_event(
         &MouseEvent::new_left_press_with_ctrl_event(edge_position),
@@ -12654,7 +12654,7 @@ fn test_resize_tiled_then_move_floating_sequence() {
 
     assert!(resize_effect.state_changed);
 
-    // Now toggle floating and create a floating pane
+    // Now toggle 浮动 and 创建 a 浮动 窗格
     tab.toggle_floating_panes(Some(client_id), None, None)
         .unwrap();
     tab.new_pane(
@@ -12672,7 +12672,7 @@ fn test_resize_tiled_then_move_floating_sequence() {
     tab.handle_pty_bytes(3, Vec::from("Floating".as_bytes()))
         .unwrap();
 
-    // Move floating pane
+    // Move 浮动 窗格
     let frame_position = Position::new(5, 30);
     let move_effect = tab
         .handle_mouse_event(&MouseEvent::new_left_press_event(frame_position), client_id)
@@ -12692,7 +12692,7 @@ fn test_resize_tiled_then_move_floating_sequence() {
     // Both operations should have succeeded
     assert!(move_effect.state_changed);
 
-    // Render final state
+    // 渲染 最终 状态
     let mut output = Output::default();
     tab.render(&mut output, None).unwrap();
     let snapshot = take_snapshot(
@@ -12716,7 +12716,7 @@ fn test_alt_click_works_on_floating_panes() {
     let floating_pane_id = PaneId::Terminal(2);
     let _output = Output::default();
 
-    // Toggle floating panes mode and create a floating pane
+    // Toggle 浮动 窗格 mode and 创建 a 浮动 窗格
     tab.toggle_floating_panes(Some(client_id), None, None)
         .unwrap();
     tab.new_pane(
@@ -12734,7 +12734,7 @@ fn test_alt_click_works_on_floating_panes() {
     tab.handle_pty_bytes(2, Vec::from("Floating pane".as_bytes()))
         .unwrap();
 
-    // Alt+click on floating pane to toggle group
+    // Alt+click on 浮动 窗格 to toggle 分组
     let effect = tab
         .handle_mouse_event(
             &MouseEvent::new_left_press_with_alt_event(Position::new(10, 60)),
@@ -12742,7 +12742,7 @@ fn test_alt_click_works_on_floating_panes() {
         )
         .unwrap();
 
-    // Verify group_toggle effect returned
+    // 验证 group_toggle effect 返回的
     assert!(effect.group_toggle.is_some());
     assert_eq!(effect.group_toggle, Some(PaneId::Terminal(2)));
 }
@@ -12758,7 +12758,7 @@ fn test_left_click_on_tiled_frame_edge_starts_resize() {
     let new_pane_id = PaneId::Terminal(2);
     let _output = Output::default();
 
-    // Create a vertical split
+    // 创建 a vertical 分割
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
@@ -12767,13 +12767,13 @@ fn test_left_click_on_tiled_frame_edge_starts_resize() {
     tab.handle_pty_bytes(2, Vec::from("Right".as_bytes()))
         .unwrap();
 
-    // Click on the edge between panes (without Ctrl)
+    // Click on the edge between 窗格 (without Ctrl)
     let edge_position = Position::new(5, 60);
     let effect = tab
         .handle_mouse_event(&MouseEvent::new_left_press_event(edge_position), client_id)
         .unwrap();
 
-    // Edge detection should start resize even without Ctrl for tiled panes
+    // Edge detection should 启动 调整大小 even without Ctrl for 平铺 窗格
     assert!(effect.state_changed);
 }
 
@@ -13472,21 +13472,21 @@ fn test_ctrl_scroll_up_merging_stacks_preserves_all_panes() {
     assert_snapshot!(snapshot);
 }
 
-// Regression: when stacked_pane_list mode is active, adding a stacked pane
-// used to send the pre-existing pane an intermediate `resize_pty!` at 1 row
-// (from the classic in-grid collapse) before groupify_all moved it into
-// suppressed_panes and resized it back to the visible size. Shells (nushell,
+// Regression: when stacked_pane_list mode is 活动, adding a 堆叠 窗格
+// used to send the pre-existing 窗格 an intermediate `resize_pty!` at 1 行
+// (from the classic in-grid collapse) before groupify_all 移动 it into
+// suppressed_panes and 调整大小的 it back to the 可见 size. Shells (nushell,
 // pwsh, bash) redraw their prompt on each WINCH, which blanks out
-// previously-visible rows of output — visible to the user as "truncated
-// scrollback" when they focus back to that pane.
+// previously-可见 行 of output — 可见 to the 用户 as "截断的
+// 回滚缓冲区" when they 焦点 back to that 窗格.
 //
 // The fix syncs stacked_pane_list mode immediately after the classic in-grid
-// mutation (before focus/frame reapplication), so the collapsed pane is
-// promoted to a stack-list suppressed pane before any resize_pty at the
-// 1-row size can leak out to its shell. This test pins that end-state:
-// after adding a stacked pane, the pre-existing pane must have been moved
+// mutation (before 焦点/框架 reapplication), so the collapsed 窗格 is
+// promoted to a 栈-列表 抑制的 窗格 before any resize_pty at the
+// 1-行 size can leak out to its shell. This 测试 pins that end-状态:
+// after adding a 堆叠 窗格, the pre-existing 窗格 must have been 移动
 // into suppressed_panes (indicating groupify_all ran), rather than left in
-// tiled_panes at rows=1 waiting for the next render.
+// tiled_panes at 行=1 waiting for the next 渲染.
 #[test]
 fn adding_stacked_pane_in_stack_list_mode_moves_existing_pane_to_suppressed_immediately() {
     let size = Size {
@@ -13496,7 +13496,7 @@ fn adding_stacked_pane_in_stack_list_mode_moves_existing_pane_to_suppressed_imme
     let client_id = 1;
     let mut tab = create_new_tab_with_stacked_pane_list(size, ModeInfo::default(), true, None);
 
-    // Add a second tiled pane so we have a real stack candidate.
+    // Add a second 平铺 窗格 so we have a 真实 栈 candidate.
     let existing_pane_id = PaneId::Terminal(2);
     tab.new_pane(
         existing_pane_id,
@@ -13510,12 +13510,12 @@ fn adding_stacked_pane_in_stack_list_mode_moves_existing_pane_to_suppressed_imme
     )
     .unwrap();
 
-    // Sanity: pane 2 is a tiled pane and no stack lists exist yet.
+    // Sanity: 窗格 2 is a 平铺 窗格 and no 栈 lists exist yet.
     assert!(tab.tiled_panes.get_pane(existing_pane_id).is_some());
     assert!(!tab.has_stack_lists());
     assert!(!tab.suppressed_panes.contains_key(&existing_pane_id));
 
-    // Now add a stacked pane on top of the active pane (pane 2).
+    // Now add a 堆叠 窗格 on top of the 活动 窗格 (窗格 2).
     let stacked_pane_id = PaneId::Terminal(3);
     tab.new_pane(
         stacked_pane_id,
@@ -13533,9 +13533,9 @@ fn adding_stacked_pane_in_stack_list_mode_moves_existing_pane_to_suppressed_imme
     .unwrap();
 
     // After the operation, stacked_pane_list mode should have picked up the
-    // new stack: pane 2 (the pre-existing member) must be in suppressed_panes,
-    // and the visible member (pane 3) must be in tiled_panes with a non-fixed
-    // row dimension (i.e., not the collapsed 1-row tab-strip form).
+    // new 栈: 窗格 2 (the pre-existing member) must be in suppressed_panes,
+    // and the 可见 member (窗格 3) must be in tiled_panes with a non-fixed
+    // 行 dimension (i.e., not the collapsed 1-行 标签页-strip form).
     assert!(
         tab.has_stack_lists(),
         "stacked_pane_list mode should have groupified the new stack immediately"
@@ -13733,8 +13733,8 @@ fn plugin_hover_tooltip_still_renders_when_mouse_hover_tips_disabled() {
 
 #[test]
 fn in_place_pane_with_close_replaced_pane_false_restores_original() {
-    // When an in-place pane is closed and close_replaced_pane=false (the default),
-    // the pane that was replaced is restored to its original position.
+    // When an in-place 窗格 is 关闭的 and close_replaced_pane=false (the 默认),
+    // the 窗格 that was replaced is restored to its 原始 position.
     let size = Size {
         cols: 121,
         rows: 20,
@@ -13743,7 +13743,7 @@ fn in_place_pane_with_close_replaced_pane_false_restores_original() {
     let mut tab = create_new_tab(size, ModeInfo::default());
     let mut output = Output::default();
 
-    // Create a second tiled pane so closing the in-place pane doesn't leave an empty tab
+    // 创建 a second 平铺 窗格 so closing the in-place 窗格 doesn't leave an empty 标签页
     tab.new_pane(
         PaneId::Terminal(2),
         None,
@@ -13759,13 +13759,13 @@ fn in_place_pane_with_close_replaced_pane_false_restores_original() {
     )
     .unwrap();
 
-    // Write distinguishing content to each pane
+    // 写入 distinguishing content to each 窗格
     tab.handle_pty_bytes(1, Vec::from("\n\n\nI am pane one".as_bytes()))
         .unwrap();
     tab.handle_pty_bytes(2, Vec::from("\n\n\nI am pane two".as_bytes()))
         .unwrap();
 
-    // Open pane 3 in-place of pane 2 without closing the replaced pane (suppress it)
+    // 打开 窗格 3 in-place of 窗格 2 without closing the replaced 窗格 (抑制 it)
     tab.new_in_place_pane(
         PaneId::Terminal(3),
         None,
@@ -13780,7 +13780,7 @@ fn in_place_pane_with_close_replaced_pane_false_restores_original() {
     tab.handle_pty_bytes(3, Vec::from("\n\n\nI am the in-place pane".as_bytes()))
         .unwrap();
 
-    // Close the in-place pane — pane 2 should be restored
+    // 关闭 the in-place 窗格 — 窗格 2 should be restored
     tab.close_pane(PaneId::Terminal(3), false, None);
 
     tab.render(&mut output, None).unwrap();
@@ -13790,14 +13790,14 @@ fn in_place_pane_with_close_replaced_pane_false_restores_original() {
         size.cols,
         Palette::default(),
     );
-    // Snapshot shows both pane 1 and the restored pane 2
+    // 快照 shows both 窗格 1 and the restored 窗格 2
     assert_snapshot!(snapshot);
 }
 
 #[test]
 fn in_place_pane_with_close_replaced_pane_true_closes_original() {
-    // When an in-place pane is closed and close_replaced_pane=true,
-    // the replaced pane is permanently destroyed rather than restored.
+    // When an in-place 窗格 is 关闭的 and close_replaced_pane=true,
+    // the replaced 窗格 is permanently 销毁的 rather than restored.
     let size = Size {
         cols: 121,
         rows: 20,
@@ -13806,7 +13806,7 @@ fn in_place_pane_with_close_replaced_pane_true_closes_original() {
     let mut tab = create_new_tab(size, ModeInfo::default());
     let mut output = Output::default();
 
-    // Create a second tiled pane
+    // 创建 a second 平铺 窗格
     tab.new_pane(
         PaneId::Terminal(2),
         None,
@@ -13827,7 +13827,7 @@ fn in_place_pane_with_close_replaced_pane_true_closes_original() {
     tab.handle_pty_bytes(2, Vec::from("\n\n\nI am pane two".as_bytes()))
         .unwrap();
 
-    // Open pane 3 in-place of pane 2, closing the replaced pane permanently
+    // 打开 窗格 3 in-place of 窗格 2, closing the replaced 窗格 permanently
     tab.new_in_place_pane(
         PaneId::Terminal(3),
         None,
@@ -13842,7 +13842,7 @@ fn in_place_pane_with_close_replaced_pane_true_closes_original() {
     tab.handle_pty_bytes(3, Vec::from("\n\n\nI am the in-place pane".as_bytes()))
         .unwrap();
 
-    // Close the in-place pane — pane 2 should NOT be restored (it was closed)
+    // 关闭 the in-place 窗格 — 窗格 2 should NOT be restored (it was 关闭的)
     tab.close_pane(PaneId::Terminal(3), false, None);
 
     tab.render(&mut output, None).unwrap();
@@ -13852,12 +13852,12 @@ fn in_place_pane_with_close_replaced_pane_true_closes_original() {
         size.cols,
         Palette::default(),
     );
-    // Snapshot shows only pane 1 (pane 2 was permanently closed, not restored)
+    // 快照 shows only 窗格 1 (窗格 2 was permanently 关闭的, not restored)
     assert_snapshot!(snapshot);
 }
 
 // =====================================================================
-// Plugin Highlight Mouse Integration Tests
+// 插件 Highlight Mouse Integration 测试
 // =====================================================================
 
 use zellij_utils::data::{HighlightLayer, HighlightStyle, RegexHighlight};
@@ -13970,11 +13970,11 @@ fn click_on_plugin_highlight_sends_highlight_clicked() {
     let (mut tab, mock_plugin_receiver) =
         create_new_tab_with_plugin_receiver(size, ModeInfo::default());
 
-    // Feed PTY bytes to pane 1
+    // Feed PTY bytes to 窗格 1
     tab.handle_pty_bytes(1, Vec::from("click here foo bar".as_bytes()))
         .unwrap();
 
-    // Set plugin highlight on pane 1 for pattern "foo"
+    // Set 插件 highlight on 窗格 1 for 模式 "foo"
     let highlights = vec![RegexHighlight {
         pattern: "foo".into(),
         style: HighlightStyle::Emphasis0,
@@ -13994,8 +13994,8 @@ fn click_on_plugin_highlight_sends_highlight_clicked() {
     );
 
     // Alt+Click at position where "foo" appears
-    // With draw_pane_frames=true, content starts at row 1, col 1
-    // "click here foo bar" -> "foo" starts at offset 11, so col = 1 + 11 = 12
+    // With draw_pane_frames=true, content 启动 at 行 1, col 1
+    // "click here foo bar" -> "foo" 启动 at 偏移 11, so col = 1 + 11 = 12
     let click_position = Position::new(1, 12);
     let mut alt_click = MouseEvent::new_left_press_event(click_position);
     alt_click.alt = true;
@@ -14003,7 +14003,7 @@ fn click_on_plugin_highlight_sends_highlight_clicked() {
 
     assert!(effect.state_changed);
 
-    // Check that HighlightClicked was sent to the plugin channel
+    // 检查 that HighlightClicked was sent to the 插件 通道
     let mut found_highlight_clicked = false;
     while let Ok((instruction, _ctx)) = mock_plugin_receiver.try_recv() {
         if let PluginInstruction::HighlightClicked {
@@ -14077,7 +14077,7 @@ fn click_outside_highlight_starts_normal_selection() {
         "HighlightClicked should NOT be sent for miss"
     );
 
-    // Selection should have started
+    // 选择 should have 启动的
     assert!(tab.selecting_with_mouse_in_pane.is_some());
 }
 
@@ -14107,7 +14107,7 @@ fn hover_over_highlight_shows_styling() {
     }];
     tab.set_plugin_regex_highlights_for_pane(PaneId::Terminal(1), 1, highlights, &Style::default());
 
-    // Hover over the match (link_text starts at offset 6, with frame offset col = 7)
+    // Hover over the 匹配 (link_text 启动 at 偏移 6, with 框架 偏移 col = 7)
     let hover_position = Position::new(1, 9);
     let _effect = tab
         .handle_mouse_event(
@@ -14125,7 +14125,7 @@ fn hover_over_highlight_shows_styling() {
     );
     assert_snapshot!(snapshot_with_hover);
 
-    // Move hover away from the match
+    // Move hover away from the 匹配
     let mut output2 = Output::default();
     let far_position = Position::new(1, 1);
     let _effect2 = tab
@@ -14153,7 +14153,7 @@ fn hover_on_unfocused_pane_no_highlight() {
     let new_pane_id = PaneId::Terminal(2);
     let mut output = Output::default();
 
-    // Create a vertical split
+    // 创建 a vertical 分割
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
@@ -14162,10 +14162,10 @@ fn hover_on_unfocused_pane_no_highlight() {
     tab.handle_pty_bytes(2, Vec::from("right pane".as_bytes()))
         .unwrap();
 
-    // Active pane is pane 2 (right)
+    // 活动 窗格 is 窗格 2 (right)
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 
-    // Set on_hover highlight on pane 1 (left, unfocused)
+    // Set on_hover highlight on 窗格 1 (left, unfocused)
     let highlights = vec![RegexHighlight {
         pattern: "link_text".into(),
         style: HighlightStyle::None,
@@ -14179,7 +14179,7 @@ fn hover_on_unfocused_pane_no_highlight() {
     }];
     tab.set_plugin_regex_highlights_for_pane(PaneId::Terminal(1), 1, highlights, &Style::default());
 
-    // Hover over left pane (unfocused)
+    // Hover over left 窗格 (unfocused)
     let hover_position = Position::new(1, 5);
     let _effect = tab
         .handle_mouse_event(
@@ -14195,7 +14195,7 @@ fn hover_on_unfocused_pane_no_highlight() {
         size.cols,
         Palette::default(),
     );
-    // Hover highlight should NOT be visible on the unfocused pane
+    // Hover highlight should NOT be 可见 on the unfocused 窗格
     assert_snapshot!(snapshot);
 }
 
@@ -14209,14 +14209,14 @@ fn highlight_click_in_mouse_mode_pane_suppressed() {
     let (mut tab, mock_plugin_receiver) =
         create_new_tab_with_plugin_receiver(size, ModeInfo::default());
 
-    // Feed PTY bytes that enable mouse tracking (SGR mode + any-event tracking)
+    // Feed PTY bytes that 启用 mouse 跟踪 (SGR mode + any-事件 跟踪)
     tab.handle_pty_bytes(1, Vec::from("\x1b[?1006h\x1b[?1003h".as_bytes()))
         .unwrap();
     // Then feed text with matchable content
     tab.handle_pty_bytes(1, Vec::from("foo bar baz".as_bytes()))
         .unwrap();
 
-    // Set plugin highlight
+    // Set 插件 highlight
     let highlights = vec![RegexHighlight {
         pattern: "foo".into(),
         style: HighlightStyle::Emphasis0,
@@ -14236,13 +14236,13 @@ fn highlight_click_in_mouse_mode_pane_suppressed() {
     );
 
     // Left-click on the highlight position
-    // With mouse tracking, the click goes through SendToTerminal, not StartSelection
+    // With mouse 跟踪, the click goes through SendToTerminal, not StartSelection
     let click_position = Position::new(1, 1);
     let _effect = tab
         .handle_mouse_event(&MouseEvent::new_left_press_event(click_position), client_id)
         .unwrap();
 
-    // No HighlightClicked should be sent (the click is forwarded to the terminal)
+    // No HighlightClicked should be sent (the click is forwarded to the 终端)
     let mut found_highlight_clicked = false;
     while let Ok((instruction, _ctx)) = mock_plugin_receiver.try_recv() {
         if matches!(instruction, PluginInstruction::HighlightClicked { .. }) {
@@ -14266,11 +14266,11 @@ fn set_and_clear_highlights_across_tiled_and_floating() {
     let pane2 = PaneId::Terminal(2);
     let pane3 = PaneId::Terminal(3);
 
-    // Create a second tiled pane
+    // 创建 a second 平铺 窗格
     tab.vertical_split(pane2, None, client_id, None, None)
         .unwrap();
 
-    // Create a floating pane
+    // 创建 a 浮动 窗格
     tab.toggle_floating_panes(Some(client_id), None, None)
         .unwrap();
     tab.new_pane(
@@ -14285,7 +14285,7 @@ fn set_and_clear_highlights_across_tiled_and_floating() {
     )
     .unwrap();
 
-    // Feed content to all panes
+    // Feed content to all 窗格
     tab.handle_pty_bytes(1, Vec::from("aaa bbb".as_bytes()))
         .unwrap();
     tab.handle_pty_bytes(2, Vec::from("aaa bbb".as_bytes()))
@@ -14293,7 +14293,7 @@ fn set_and_clear_highlights_across_tiled_and_floating() {
     tab.handle_pty_bytes(3, Vec::from("aaa bbb".as_bytes()))
         .unwrap();
 
-    // Set highlights from plugin 1 (pattern "aaa") on all panes
+    // Set highlights from 插件 1 (模式 "aaa") on all 窗格
     let h1 = vec![RegexHighlight {
         pattern: "aaa".into(),
         style: HighlightStyle::Emphasis0,
@@ -14309,7 +14309,7 @@ fn set_and_clear_highlights_across_tiled_and_floating() {
     tab.set_plugin_regex_highlights_for_pane(pane2, 1, h1.clone(), &Style::default());
     tab.set_plugin_regex_highlights_for_pane(pane3, 1, h1.clone(), &Style::default());
 
-    // Set highlights from plugin 2 (pattern "bbb") on all panes
+    // Set highlights from 插件 2 (模式 "bbb") on all 窗格
     let h2 = vec![RegexHighlight {
         pattern: "bbb".into(),
         style: HighlightStyle::Emphasis1,
@@ -14325,14 +14325,14 @@ fn set_and_clear_highlights_across_tiled_and_floating() {
     tab.set_plugin_regex_highlights_for_pane(pane2, 2, h2.clone(), &Style::default());
     tab.set_plugin_regex_highlights_for_pane(pane3, 2, h2.clone(), &Style::default());
 
-    // Clear plugin 1 highlights across all panes
+    // 清空 插件 1 highlights across all 窗格
     tab.clear_all_plugin_highlights(1);
 
-    // Verify plugin 2 highlights remain — we can use the tab render to snapshot,
-    // or directly check that plugin 2 pattern still matches on pane 1
-    // Since clear_all_plugin_highlights iterates all panes, we test via
-    // the set_plugin_regex_highlights_for_pane / clear flow:
-    // Plugin 2 "bbb" highlights should still be active.
+    // 验证 插件 2 highlights remain — we can use the 标签页 渲染 to 快照,
+    // or directly 检查 that 插件 2 模式 still matches on 窗格 1
+    // Since clear_all_plugin_highlights iterates all 窗格, we 测试 via
+    // the set_plugin_regex_highlights_for_pane / 清空 flow:
+    // 插件 2 "bbb" highlights should still be 活动.
     let mut output = Output::default();
     tab.render(&mut output, None).unwrap();
     let snapshot = take_snapshot(
@@ -14375,7 +14375,7 @@ fn plain_click_on_highlight_does_not_send_highlight_clicked() {
         &Style::default(),
     );
 
-    // Plain left-click on "foo" — should start selection, NOT send HighlightClicked
+    // Plain left-click on "foo" — should 启动 选择, NOT send HighlightClicked
     let click_position = Position::new(1, 12);
     let _effect = tab
         .handle_mouse_event(&MouseEvent::new_left_press_event(click_position), client_id)
@@ -14392,7 +14392,7 @@ fn plain_click_on_highlight_does_not_send_highlight_clicked() {
         "Plain click should NOT send HighlightClicked after Alt+Click change"
     );
 
-    // Selection should have started instead
+    // 选择 should have 启动的 instead
     assert!(tab.selecting_with_mouse_in_pane.is_some());
 }
 
@@ -14427,7 +14427,7 @@ fn alt_click_outside_highlight_falls_through_to_group_toggle() {
         &Style::default(),
     );
 
-    // Alt+Click on "click" (col 1), not on "foo" — should fall through to group toggle
+    // Alt+Click on "click" (col 1), not on "foo" — should fall through to 分组 toggle
     let click_position = Position::new(1, 1);
     let mut alt_click = MouseEvent::new_left_press_event(click_position);
     alt_click.alt = true;
@@ -14445,7 +14445,7 @@ fn alt_click_outside_highlight_falls_through_to_group_toggle() {
         "Alt+Click outside highlight should NOT send HighlightClicked"
     );
 
-    // Group toggle effect should have been produced
+    // 分组 toggle effect should have been 生产的
     assert_eq!(effect.group_toggle, Some(PaneId::Terminal(1)));
 }
 
@@ -14475,7 +14475,7 @@ fn hover_over_highlight_with_tooltip_caches_tooltip() {
     }];
     tab.set_plugin_regex_highlights_for_pane(PaneId::Terminal(1), 1, highlights, &Style::default());
 
-    // Hover over the match (link_text starts at offset 6, with frame offset col = 7)
+    // Hover over the 匹配 (link_text 启动 at 偏移 6, with 框架 偏移 col = 7)
     let hover_position = Position::new(1, 9);
     let _effect = tab
         .handle_mouse_event(
@@ -14491,10 +14491,10 @@ fn hover_over_highlight_with_tooltip_caches_tooltip() {
         size.cols,
         Palette::default(),
     );
-    // The bottom frame row should contain the tooltip text
+    // The bottom 框架 行 should contain the 工具提示 text
     assert_snapshot!(snapshot_with_tooltip);
 
-    // Move hover away — tooltip should disappear
+    // Move hover away — 工具提示 should disappear
     let mut output2 = Output::default();
     let far_position = Position::new(1, 1);
     let _effect2 = tab
@@ -14512,7 +14512,7 @@ fn hover_over_highlight_with_tooltip_caches_tooltip() {
 }
 
 // =====================================================================
-// Highlight Layer Priority Integration Tests
+// Highlight Layer Priority Integration 测试
 // =====================================================================
 
 #[test]
@@ -14528,7 +14528,7 @@ fn higher_layer_highlight_style_wins_in_rendered_output() {
     tab.handle_pty_bytes(1, Vec::from("overlap_text here\n".as_bytes()))
         .unwrap();
 
-    // Plugin 1 (id: 10): Hint layer, underline only
+    // 插件 1 (id: 10): 提示 layer, underline only
     let h1 = vec![RegexHighlight {
         pattern: "overlap_text".into(),
         style: HighlightStyle::Emphasis0,
@@ -14540,7 +14540,7 @@ fn higher_layer_highlight_style_wins_in_rendered_output() {
         underline: true,
         tooltip_text: None,
     }];
-    // Plugin 2 (id: 20): Tool layer, bold only
+    // 插件 2 (id: 20): Tool layer, bold only
     let h2 = vec![RegexHighlight {
         pattern: "overlap_text".into(),
         style: HighlightStyle::Emphasis1,
@@ -14560,14 +14560,14 @@ fn higher_layer_highlight_style_wins_in_rendered_output() {
     let raw_str = raw_output.get(&client_id).unwrap();
 
     // The renderer emits a series of individual SGR codes before the
-    // highlighted text.  Extract the full escape prefix preceding
-    // "overlap_text" and verify that bold (\x1b[1m) is present and
+    // highlighted text.  提取 the full escape prefix preceding
+    // "overlap_text" and 验证 that bold (\x1b[1m) is present and
     // underline (\x1b[4m) is absent.
     let idx = raw_str
         .find("overlap_text")
         .expect("overlap_text should appear in raw output");
     let preceding = &raw_str[..idx];
-    // Walk backwards to find the reset (\x1b[m) that starts this cell's styling
+    // Walk backwards to 查找 the 重置 (\x1b[m) that 启动 this 单元格's styling
     let reset_pos = preceding
         .rfind("\x1b[m")
         .expect("should find a reset before overlap_text");
@@ -14598,7 +14598,7 @@ fn click_dispatches_to_higher_layer_plugin() {
     tab.handle_pty_bytes(1, Vec::from("click here shared_text bar\n".as_bytes()))
         .unwrap();
 
-    // Plugin 1 (id: 10): Hint layer
+    // 插件 1 (id: 10): 提示 layer
     let h1 = vec![RegexHighlight {
         pattern: "shared_text".into(),
         style: HighlightStyle::Emphasis0,
@@ -14610,7 +14610,7 @@ fn click_dispatches_to_higher_layer_plugin() {
         underline: true,
         tooltip_text: None,
     }];
-    // Plugin 2 (id: 20): Tool layer
+    // 插件 2 (id: 20): Tool layer
     let h2 = vec![RegexHighlight {
         pattern: "shared_text".into(),
         style: HighlightStyle::Emphasis1,
@@ -14625,13 +14625,13 @@ fn click_dispatches_to_higher_layer_plugin() {
     tab.set_plugin_regex_highlights_for_pane(PaneId::Terminal(1), 10, h1, &Style::default());
     tab.set_plugin_regex_highlights_for_pane(PaneId::Terminal(1), 20, h2, &Style::default());
 
-    // Alt+Click on "shared_text" (starts at offset 11, frame adds +1 => col 12)
+    // Alt+Click on "shared_text" (启动 at 偏移 11, 框架 adds +1 => col 12)
     let click_position = Position::new(1, 12);
     let mut alt_click = MouseEvent::new_left_press_event(click_position);
     alt_click.alt = true;
     let _effect = tab.handle_mouse_event(&alt_click, client_id).unwrap();
 
-    // Drain the plugin receiver and find the HighlightClicked instruction
+    // 排空 the 插件 接收者 and 查找 the HighlightClicked instruction
     let mut found_plugin_id = None;
     while let Ok((instruction, _ctx)) = mock_plugin_receiver.try_recv() {
         if let PluginInstruction::HighlightClicked { plugin_id, .. } = instruction {
@@ -14658,7 +14658,7 @@ fn hover_tooltip_shows_higher_layer_tooltip() {
     tab.handle_pty_bytes(1, Vec::from("hover here tooltipped bar\n".as_bytes()))
         .unwrap();
 
-    // Plugin 1 (id: 10): Hint layer with tooltip
+    // 插件 1 (id: 10): 提示 layer with 工具提示
     let h1 = vec![RegexHighlight {
         pattern: "tooltipped".into(),
         style: HighlightStyle::None,
@@ -14670,7 +14670,7 @@ fn hover_tooltip_shows_higher_layer_tooltip() {
         underline: true,
         tooltip_text: Some("Hint Tooltip".to_string()),
     }];
-    // Plugin 2 (id: 20): Tool layer with tooltip
+    // 插件 2 (id: 20): Tool layer with 工具提示
     let h2 = vec![RegexHighlight {
         pattern: "tooltipped".into(),
         style: HighlightStyle::None,
@@ -14685,7 +14685,7 @@ fn hover_tooltip_shows_higher_layer_tooltip() {
     tab.set_plugin_regex_highlights_for_pane(PaneId::Terminal(1), 10, h1, &Style::default());
     tab.set_plugin_regex_highlights_for_pane(PaneId::Terminal(1), 20, h2, &Style::default());
 
-    // Hover over "tooltipped" (starts at offset 11, frame adds +1 => col 12)
+    // Hover over "tooltipped" (启动 at 偏移 11, 框架 adds +1 => col 12)
     let hover_position = Position::new(1, 12);
     let _effect = tab
         .handle_mouse_event(
@@ -14701,7 +14701,7 @@ fn hover_tooltip_shows_higher_layer_tooltip() {
         size.cols,
         Palette::default(),
     );
-    // The bottom frame row should contain "Tool Tooltip" from the Tool layer
+    // The bottom 框架 行 should contain "Tool 工具提示" from the Tool layer
     assert_snapshot!(snapshot);
 }
 
@@ -14718,7 +14718,7 @@ fn non_overlapping_highlights_from_different_layers_coexist() {
     tab.handle_pty_bytes(1, Vec::from("aaa bbb ccc\n".as_bytes()))
         .unwrap();
 
-    // Plugin 1 (id: 10): Hint layer, underline on "aaa"
+    // 插件 1 (id: 10): 提示 layer, underline on "aaa"
     let h1 = vec![RegexHighlight {
         pattern: "aaa".into(),
         style: HighlightStyle::None,
@@ -14730,7 +14730,7 @@ fn non_overlapping_highlights_from_different_layers_coexist() {
         underline: true,
         tooltip_text: None,
     }];
-    // Plugin 2 (id: 20): Tool layer, bold on "bbb"
+    // 插件 2 (id: 20): Tool layer, bold on "bbb"
     let h2 = vec![RegexHighlight {
         pattern: "bbb".into(),
         style: HighlightStyle::None,
@@ -14742,7 +14742,7 @@ fn non_overlapping_highlights_from_different_layers_coexist() {
         underline: false,
         tooltip_text: None,
     }];
-    // Plugin 3 (id: 30): ActionFeedback layer, italic on "ccc"
+    // 插件 3 (id: 30): ActionFeedback layer, italic on "ccc"
     let h3 = vec![RegexHighlight {
         pattern: "ccc".into(),
         style: HighlightStyle::None,
@@ -14763,10 +14763,10 @@ fn non_overlapping_highlights_from_different_layers_coexist() {
     let raw_str = raw_output.get(&client_id).unwrap();
 
     // The renderer emits individual SGR codes in sequence before each
-    // highlighted word.  Extract the escape prefix block before each word
-    // and verify the expected attribute is present.
+    // highlighted word.  提取 the escape prefix block before each word
+    // and 验证 the 期望的 属性 is present.
 
-    // Helper: extract the SGR block between the last \x1b[m reset and the text
+    // Helper: 提取 the SGR block between the last \x1b[m 重置 and the text
     let sgr_before = |text: &str| -> String {
         let idx = raw_str
             .find(text)
@@ -14809,17 +14809,17 @@ fn focus_follows_mouse_focuses_tiled_pane_on_hover() {
     let mut tab = create_new_tab(size, ModeInfo::default());
     let new_pane_id = PaneId::Terminal(2);
 
-    // Create a vertical split: pane 1 (left), pane 2 (right)
+    // 创建 a vertical 分割: 窗格 1 (left), 窗格 2 (right)
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
-    // Active pane is pane 2 (right) after split
+    // 活动 窗格 is 窗格 2 (right) after 分割
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 
-    // Enable focus follows mouse
+    // 启用 焦点 follows mouse
     tab.update_focus_follows_mouse(true);
 
-    // Hover over the left pane (pane 1) — column 30 is in the left half of 121 cols
+    // Hover over the left 窗格 (窗格 1) — 列 30 is in the left half of 121 cols
     let effect = tab
         .handle_mouse_event(
             &MouseEvent::new_buttonless_motion(Position::new(10, 30)),
@@ -14827,7 +14827,7 @@ fn focus_follows_mouse_focuses_tiled_pane_on_hover() {
         )
         .unwrap();
 
-    // Focus should have changed to pane 1
+    // 焦点 should have changed to 窗格 1
     assert!(effect.state_changed);
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(1)));
 }
@@ -14845,12 +14845,12 @@ fn focus_follows_mouse_disabled_does_not_change_focus() {
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
-    // Active pane is pane 2 (right) after split
+    // 活动 窗格 is 窗格 2 (right) after 分割
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 
-    // focus_follows_mouse is false by default — do NOT enable it
+    // focus_follows_mouse is false by 默认 — do NOT 启用 it
 
-    // Hover over the left pane (pane 1)
+    // Hover over the left 窗格 (窗格 1)
     let _effect = tab
         .handle_mouse_event(
             &MouseEvent::new_buttonless_motion(Position::new(10, 30)),
@@ -14858,7 +14858,7 @@ fn focus_follows_mouse_disabled_does_not_change_focus() {
         )
         .unwrap();
 
-    // Focus should remain on pane 2
+    // 焦点 should remain on 窗格 2
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 }
 
@@ -14916,13 +14916,13 @@ fn focus_follows_mouse_focuses_floating_pane_on_hover() {
     )
     .unwrap();
 
-    // Active pane is floating_pane_id_2 (last created)
+    // 活动 窗格 is floating_pane_id_2 (last 创建的)
     assert_eq!(tab.get_active_pane_id(client_id), Some(floating_pane_id_2));
 
-    // Enable focus follows mouse
+    // 启用 焦点 follows mouse
     tab.update_focus_follows_mouse(true);
 
-    // Hover over floating pane 1 (at coordinates x=5, y=5, so position row=7, col=7 is inside it)
+    // Hover over 浮动 窗格 1 (at 坐标 x=5, y=5, so position 行=7, col=7 is inside it)
     let effect = tab
         .handle_mouse_event(
             &MouseEvent::new_buttonless_motion(Position::new(7, 7)),
@@ -14930,7 +14930,7 @@ fn focus_follows_mouse_focuses_floating_pane_on_hover() {
         )
         .unwrap();
 
-    // Focus should have changed to floating pane 1
+    // 焦点 should have changed to 浮动 窗格 1
     assert!(effect.state_changed);
     assert_eq!(tab.get_active_pane_id(client_id), Some(floating_pane_id_1));
 }
@@ -14948,16 +14948,16 @@ fn focus_follows_mouse_skips_unselectable_panes() {
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
-    // Mark pane 1 (left) as unselectable
+    // Mark 窗格 1 (left) as unselectable
     tab.set_pane_selectable(PaneId::Terminal(1), false);
 
-    // Active pane is pane 2 (right)
+    // 活动 窗格 is 窗格 2 (right)
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 
-    // Enable focus follows mouse
+    // 启用 焦点 follows mouse
     tab.update_focus_follows_mouse(true);
 
-    // Hover over the unselectable left pane (pane 1)
+    // Hover over the unselectable left 窗格 (窗格 1)
     let _effect = tab
         .handle_mouse_event(
             &MouseEvent::new_buttonless_motion(Position::new(10, 30)),
@@ -14965,7 +14965,7 @@ fn focus_follows_mouse_skips_unselectable_panes() {
         )
         .unwrap();
 
-    // Focus should remain on pane 2 — unselectable panes are skipped
+    // 焦点 should remain on 窗格 2 — unselectable 窗格 are skipped
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 }
 
@@ -14982,13 +14982,13 @@ fn focus_follows_mouse_no_op_on_active_pane() {
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
-    // Active pane is pane 2 (right)
+    // 活动 窗格 is 窗格 2 (right)
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 
-    // Enable focus follows mouse
+    // 启用 焦点 follows mouse
     tab.update_focus_follows_mouse(true);
 
-    // Hover over the already-active right pane (pane 2) — column 90 is in the right half
+    // Hover over the already-活动 right 窗格 (窗格 2) — 列 90 is in the right half
     let _effect = tab
         .handle_mouse_event(
             &MouseEvent::new_buttonless_motion(Position::new(10, 90)),
@@ -14996,7 +14996,7 @@ fn focus_follows_mouse_no_op_on_active_pane() {
         )
         .unwrap();
 
-    // Focus should remain on pane 2
+    // 焦点 should remain on 窗格 2
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 }
 
@@ -15013,10 +15013,10 @@ fn focus_follows_mouse_respects_live_toggle() {
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
-    // Active pane is pane 2 (right)
+    // 活动 窗格 is 窗格 2 (right)
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 
-    // Enable focus follows mouse and hover left — should switch focus
+    // 启用 焦点 follows mouse and hover left — should switch 焦点
     tab.update_focus_follows_mouse(true);
     tab.handle_mouse_event(
         &MouseEvent::new_buttonless_motion(Position::new(10, 30)),
@@ -15025,17 +15025,17 @@ fn focus_follows_mouse_respects_live_toggle() {
     .unwrap();
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(1)));
 
-    // Disable focus follows mouse (simulating live config reload)
+    // 禁用 焦点 follows mouse (simulating live config 重新加载)
     tab.update_focus_follows_mouse(false);
 
-    // Hover back to the right pane — should NOT switch focus
+    // Hover back to the right 窗格 — should NOT switch 焦点
     tab.handle_mouse_event(
         &MouseEvent::new_buttonless_motion(Position::new(10, 90)),
         client_id,
     )
     .unwrap();
 
-    // Focus should remain on pane 1 (where it was left)
+    // 焦点 should remain on 窗格 1 (where it was left)
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(1)));
 }
 
@@ -15056,7 +15056,7 @@ fn focus_follows_mouse_repeated_hover_same_pane() {
 
     tab.update_focus_follows_mouse(true);
 
-    // First hover over left pane — switches focus
+    // First hover over left 窗格 — switches 焦点
     tab.handle_mouse_event(
         &MouseEvent::new_buttonless_motion(Position::new(10, 30)),
         client_id,
@@ -15064,7 +15064,7 @@ fn focus_follows_mouse_repeated_hover_same_pane() {
     .unwrap();
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(1)));
 
-    // Second hover over same left pane at a different position — focus stays
+    // Second hover over same left 窗格 at a different position — 焦点 stays
     tab.handle_mouse_event(
         &MouseEvent::new_buttonless_motion(Position::new(5, 25)),
         client_id,
@@ -15083,11 +15083,11 @@ fn focus_follows_mouse_ignores_tiled_pane_when_floating_visible() {
     let mut tab = create_new_tab(size, ModeInfo::default());
     let new_pane_id = PaneId::Terminal(2);
 
-    // Create a vertical split so there are two tiled panes
+    // 创建 a vertical 分割 so there are two 平铺 窗格
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
-    // Open floating layer with a floating pane
+    // 打开 浮动 layer with a 浮动 窗格
     let floating_pane_id = PaneId::Terminal(3);
     tab.toggle_floating_panes(Some(client_id), None, None)
         .unwrap();
@@ -15110,20 +15110,20 @@ fn focus_follows_mouse_ignores_tiled_pane_when_floating_visible() {
     )
     .unwrap();
 
-    // Active pane is the floating pane
+    // 活动 窗格 is the 浮动 窗格
     assert_eq!(tab.get_active_pane_id(client_id), Some(floating_pane_id));
 
-    // Enable focus follows mouse
+    // 启用 焦点 follows mouse
     tab.update_focus_follows_mouse(true);
 
-    // Hover over a tiled pane (left side, column 10) — should NOT change focus
+    // Hover over a 平铺 窗格 (left side, 列 10) — should NOT change 焦点
     tab.handle_mouse_event(
         &MouseEvent::new_buttonless_motion(Position::new(10, 10)),
         client_id,
     )
     .unwrap();
 
-    // Focus should remain on the floating pane
+    // 焦点 should remain on the 浮动 窗格
     assert_eq!(tab.get_active_pane_id(client_id), Some(floating_pane_id));
 }
 
@@ -15136,7 +15136,7 @@ fn focus_follows_mouse_focuses_floating_pane_when_floating_visible() {
     let client_id = 1;
     let mut tab = create_new_tab(size, ModeInfo::default());
 
-    // Open floating layer with two floating panes
+    // 打开 浮动 layer with two 浮动 窗格
     let floating_pane_id_1 = PaneId::Terminal(2);
     let floating_pane_id_2 = PaneId::Terminal(3);
     tab.toggle_floating_panes(Some(client_id), None, None)
@@ -15178,13 +15178,13 @@ fn focus_follows_mouse_focuses_floating_pane_when_floating_visible() {
     )
     .unwrap();
 
-    // Active pane is floating_pane_id_2 (last created)
+    // 活动 窗格 is floating_pane_id_2 (last 创建的)
     assert_eq!(tab.get_active_pane_id(client_id), Some(floating_pane_id_2));
 
-    // Enable focus follows mouse
+    // 启用 焦点 follows mouse
     tab.update_focus_follows_mouse(true);
 
-    // Hover over floating pane 1 (at x=5, y=5 — position row=7, col=7 is inside it)
+    // Hover over 浮动 窗格 1 (at x=5, y=5 — position 行=7, col=7 is inside it)
     let effect = tab
         .handle_mouse_event(
             &MouseEvent::new_buttonless_motion(Position::new(7, 7)),
@@ -15192,7 +15192,7 @@ fn focus_follows_mouse_focuses_floating_pane_when_floating_visible() {
         )
         .unwrap();
 
-    // Focus should have changed to floating pane 1
+    // 焦点 should have changed to 浮动 窗格 1
     assert!(effect.state_changed);
     assert_eq!(tab.get_active_pane_id(client_id), Some(floating_pane_id_1));
 }
@@ -15229,7 +15229,7 @@ fn focus_follows_mouse_skips_stacked_one_liner_pane() {
         stacked_resize,
     );
 
-    // Add panes so the stack has one-liners
+    // Add 窗格 so the 栈 has one-liners
     let new_pane_id_1 = PaneId::Terminal(2);
     let new_pane_id_2 = PaneId::Terminal(3);
     let new_pane_id_3 = PaneId::Terminal(4);
@@ -15267,14 +15267,14 @@ fn focus_follows_mouse_skips_stacked_one_liner_pane() {
     )
     .unwrap();
 
-    // Focus the left (non-stacked) tiled pane
+    // 焦点 the left (non-堆叠) 平铺 窗格
     let _ = tab.move_focus_left(client_id);
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(1)));
 
-    // Enable focus follows mouse
+    // 启用 焦点 follows mouse
     tab.update_focus_follows_mouse(true);
 
-    // Find a one-liner pane dynamically by inspecting geometries
+    // 查找 a one-liner 窗格 dynamically by 检查 geometries
     let one_liner_geom = tab
         .get_all_pane_ids()
         .iter()
@@ -15290,7 +15290,7 @@ fn focus_follows_mouse_skips_stacked_one_liner_pane() {
         .next()
         .expect("Expected at least one stacked one-liner pane");
 
-    // Hover in the middle of the one-liner pane
+    // Hover in the middle of the one-liner 窗格
     let hover_row = one_liner_geom.y as i32;
     let hover_col = (one_liner_geom.x + one_liner_geom.cols.as_usize() / 2) as u16;
     let _effect = tab
@@ -15300,7 +15300,7 @@ fn focus_follows_mouse_skips_stacked_one_liner_pane() {
         )
         .unwrap();
 
-    // Focus should remain on the left tiled pane — the one-liner should be skipped
+    // 焦点 should remain on the left 平铺 窗格 — the one-liner should be skipped
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(1)));
 }
 
@@ -15324,18 +15324,18 @@ fn mouse_click_through_sends_click_to_newly_focused_tiled_pane() {
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
-    // Active pane is pane 2 (right) after split
+    // 活动 窗格 is 窗格 2 (right) after 分割
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 
-    // Enable SGR mouse mode on pane 1 (left, inactive)
+    // 启用 SGR mouse mode on 窗格 1 (left, 不活动)
     let sgr_mouse_mode = String::from("\u{1b}[?1000;1006h");
     tab.handle_pty_bytes(1, sgr_mouse_mode.as_bytes().to_vec())
         .unwrap();
 
-    // Enable click-through
+    // 启用 click-through
     tab.update_mouse_click_through(true);
 
-    // Click on pane 1 (left half) — column 30 is in the left pane of a 121-col split
+    // Click on 窗格 1 (left half) — 列 30 is in the left 窗格 of a 121-col 分割
     let click_position = Position::new(5, 30);
     let effect = tab
         .handle_mouse_event(&MouseEvent::new_left_press_event(click_position), client_id)
@@ -15346,7 +15346,7 @@ fn mouse_click_through_sends_click_to_newly_focused_tiled_pane() {
 
     pty_instruction_bus.exit();
 
-    // Verify the SGR left-click escape sequence was sent to the terminal.
+    // 验证 the SGR left-click escape sequence was sent to the 终端.
     let output = pty_instruction_bus.clone_output();
     assert!(
         !output.is_empty(),
@@ -15380,14 +15380,14 @@ fn mouse_click_through_disabled_does_not_send_click_to_focused_pane() {
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
-    // Enable SGR mouse mode on pane 1 (inactive)
+    // 启用 SGR mouse mode on 窗格 1 (不活动)
     let sgr_mouse_mode = String::from("\u{1b}[?1000;1006h");
     tab.handle_pty_bytes(1, sgr_mouse_mode.as_bytes().to_vec())
         .unwrap();
 
-    // mouse_click_through is false by default — do NOT enable it
+    // mouse_click_through is false by 默认 — do NOT 启用 it
 
-    // Click on pane 1
+    // Click on 窗格 1
     let effect = tab
         .handle_mouse_event(
             &MouseEvent::new_left_press_event(Position::new(5, 30)),
@@ -15395,7 +15395,7 @@ fn mouse_click_through_disabled_does_not_send_click_to_focused_pane() {
         )
         .unwrap();
 
-    // Focus changed
+    // 焦点 changed
     assert!(effect.state_changed);
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(1)));
 
@@ -15426,7 +15426,7 @@ fn mouse_click_through_sends_click_to_newly_focused_floating_pane() {
     );
     pty_instruction_bus.start();
 
-    // Create two floating panes
+    // 创建 two 浮动 窗格
     let floating_pane_id_1 = PaneId::Terminal(2);
     let floating_pane_id_2 = PaneId::Terminal(3);
     tab.toggle_floating_panes(Some(client_id), None, None)
@@ -15454,23 +15454,23 @@ fn mouse_click_through_sends_click_to_newly_focused_floating_pane() {
     )
     .unwrap();
 
-    // Enable SGR mouse mode on floating pane 1
+    // 启用 SGR mouse mode on 浮动 窗格 1
     let sgr_mouse_mode = String::from("\u{1b}[?1000;1006h");
     tab.handle_pty_bytes(2, sgr_mouse_mode.as_bytes().to_vec())
         .unwrap();
 
     tab.update_mouse_click_through(true);
 
-    // Click on floating pane 1 (need to find its position — render first)
+    // Click on 浮动 窗格 1 (need to 查找 its position — 渲染 first)
     let mut output = Output::default();
     tab.render(&mut output, None).unwrap();
 
-    // Focus floating pane 2 first to make pane 1 inactive
+    // 焦点 浮动 窗格 2 first to make 窗格 1 不活动
     tab.focus_pane_with_id(floating_pane_id_2, false, false, client_id)
         .unwrap();
     assert_eq!(tab.get_active_pane_id(client_id), Some(floating_pane_id_2));
 
-    // Now click on floating pane 1's area
+    // Now click on 浮动 窗格 1's area
     let _effect = tab
         .handle_mouse_event(
             &MouseEvent::new_left_press_event(Position::new(5, 30)),
@@ -15478,7 +15478,7 @@ fn mouse_click_through_sends_click_to_newly_focused_floating_pane() {
         )
         .unwrap();
 
-    // Verify focus changed and click was forwarded
+    // 验证 焦点 changed and click was forwarded
     if tab.get_active_pane_id(client_id) == Some(floating_pane_id_1) {
         pty_instruction_bus.exit();
         let pty_output = pty_instruction_bus.clone_output();
@@ -15488,8 +15488,8 @@ fn mouse_click_through_sends_click_to_newly_focused_floating_pane() {
         );
     } else {
         pty_instruction_bus.exit();
-        // Position may not have landed on floating pane 1 — this is a layout-dependent test.
-        // Adjust the position if this branch is hit.
+        // Position may not have landed on 浮动 窗格 1 — this is a 布局-dependent 测试.
+        // Adjust the position if this 分支 is hit.
     }
 }
 
@@ -15514,16 +15514,16 @@ fn mouse_click_through_does_not_apply_when_focus_follows_mouse_is_enabled() {
         .unwrap();
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 
-    // Enable SGR mouse mode on pane 1
+    // 启用 SGR mouse mode on 窗格 1
     let sgr_mouse_mode = String::from("\u{1b}[?1000;1006h");
     tab.handle_pty_bytes(1, sgr_mouse_mode.as_bytes().to_vec())
         .unwrap();
 
-    // Enable BOTH features
+    // 启用 BOTH 特性
     tab.update_focus_follows_mouse(true);
     tab.update_mouse_click_through(true);
 
-    // Step 1: Hover over pane 1 — this focuses it via focus-follows-mouse
+    // Step 1: Hover over 窗格 1 — this focuses it via 焦点-follows-mouse
     let hover_position = Position::new(5, 30);
     tab.handle_mouse_event(
         &MouseEvent::new_buttonless_motion(hover_position),
@@ -15532,15 +15532,15 @@ fn mouse_click_through_does_not_apply_when_focus_follows_mouse_is_enabled() {
     .unwrap();
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(1)));
 
-    // Step 2: Click on pane 1 — now this is a click on the ACTIVE pane
-    // It should go through the normal SendToTerminal path
+    // Step 2: Click on 窗格 1 — now this is a click on the 活动 窗格
+    // It should go through the normal SendToTerminal 路径
     let click_position = Position::new(5, 30);
     tab.handle_mouse_event(&MouseEvent::new_left_press_event(click_position), client_id)
         .unwrap();
 
     pty_instruction_bus.exit();
 
-    // Click was sent to terminal via the normal path (not click-through)
+    // Click was sent to 终端 via the normal 路径 (not click-through)
     let output = pty_instruction_bus.clone_output();
     assert!(
         !output.is_empty(),
@@ -15562,11 +15562,11 @@ fn mouse_click_through_starts_selection_on_non_mouse_mode_pane() {
         .unwrap();
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 
-    // Pane 1 is NOT in mouse mode — no SGR escape sent
+    // 窗格 1 is NOT in mouse mode — no SGR escape sent
 
     tab.update_mouse_click_through(true);
 
-    // Click on pane 1
+    // Click on 窗格 1
     let effect = tab
         .handle_mouse_event(
             &MouseEvent::new_left_press_event(Position::new(5, 30)),
@@ -15577,7 +15577,7 @@ fn mouse_click_through_starts_selection_on_non_mouse_mode_pane() {
     assert!(effect.state_changed);
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(1)));
 
-    // Selection should have started
+    // 选择 should have 启动的
     assert_eq!(
         tab.selecting_with_mouse_in_pane,
         Some(PaneId::Terminal(1)),
@@ -15605,14 +15605,14 @@ fn mouse_click_through_respects_live_toggle() {
     tab.vertical_split(new_pane_id, None, client_id, None, None)
         .unwrap();
 
-    // Enable SGR mouse mode on pane 1
+    // 启用 SGR mouse mode on 窗格 1
     let sgr_mouse_mode = String::from("\u{1b}[?1000;1006h");
     tab.handle_pty_bytes(1, sgr_mouse_mode.as_bytes().to_vec())
         .unwrap();
 
-    // mouse_click_through starts disabled
+    // mouse_click_through 启动 已禁用
 
-    // Click pane 1 — should only focus, no forwarding
+    // Click 窗格 1 — should only 焦点, no forwarding
     tab.handle_mouse_event(
         &MouseEvent::new_left_press_event(Position::new(5, 30)),
         client_id,
@@ -15620,7 +15620,7 @@ fn mouse_click_through_respects_live_toggle() {
     .unwrap();
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(1)));
 
-    // Click pane 2 to refocus it
+    // Click 窗格 2 to refocus it
     tab.handle_mouse_event(
         &MouseEvent::new_left_press_event(Position::new(5, 90)),
         client_id,
@@ -15628,10 +15628,10 @@ fn mouse_click_through_respects_live_toggle() {
     .unwrap();
     assert_eq!(tab.get_active_pane_id(client_id), Some(PaneId::Terminal(2)));
 
-    // Now enable click-through
+    // Now 启用 click-through
     tab.update_mouse_click_through(true);
 
-    // Click pane 1 again — this time the click should be forwarded
+    // Click 窗格 1 again — this time the click should be forwarded
     tab.handle_mouse_event(
         &MouseEvent::new_left_press_event(Position::new(5, 30)),
         client_id,
@@ -15641,7 +15641,7 @@ fn mouse_click_through_respects_live_toggle() {
 
     pty_instruction_bus.exit();
 
-    // Only the LAST click (after enabling) should have produced terminal output
+    // Only the LAST click (after 启用) should have 生产的 终端 output
     let output = pty_instruction_bus.clone_output();
     assert_eq!(
         output.len(),
@@ -15657,7 +15657,7 @@ fn mouse_click_through_respects_live_toggle() {
 }
 
 // ========================================================================
-// OSC 99 Desktop Notification Integration Tests
+// OSC 99 Desktop 通知 Integration 测试
 // ========================================================================
 
 fn create_new_tab_with_server_receiver(
@@ -15713,7 +15713,7 @@ fn create_new_tab_with_server_receiver(
         terminal_emulator_color_codes,
         (vec![], vec![]),
         PathBuf::from("my_default_shell"),
-        false, // debug
+        false, // 调试
         true,  // arrow_fonts
         true,  // styled_underlines
         true,  // osc8_hyperlinks
@@ -15784,12 +15784,12 @@ fn collect_render_output(receiver: &Receiver<(ScreenInstruction, ErrorContext)>)
 
 #[test]
 fn osc99_notification_forwarded_through_tab_to_server_render() {
-    // Integration test: OSC 99 sequence emitted by a pane's PTY is parsed by Grid,
-    // drained by Tab, namespaced, and forwarded via ServerInstruction::Render.
+    // Integration 测试: OSC 99 sequence emitted by a 窗格's PTY is 解析的 by Grid,
+    // 排空的 by 标签页, namespaced, and forwarded via ServerInstruction::渲染.
     let size = Size { cols: 80, rows: 24 };
     let (mut tab, server_receiver) = create_new_tab_with_server_receiver(size, ModeInfo::default());
 
-    // Feed OSC 99 sequence to pane (pid=1) — BEL terminated
+    // Feed OSC 99 sequence to 窗格 (pid=1) — BEL 终止的
     tab.handle_pty_bytes(1, Vec::from("\x1b]99;i=test1:p=title;Hello World\x07"))
         .unwrap();
 
@@ -15801,13 +15801,13 @@ fn osc99_notification_forwarded_through_tab_to_server_render() {
         "Render output should contain OSC 99 prefix, got: {:?}",
         output
     );
-    // The identifier should be namespaced with pane ID (pid=1)
+    // The identifier should be namespaced with 窗格 ID (pid=1)
     assert!(
         output.contains("i=p1.test1"),
         "Identifier should be namespaced as i=p1.test1, got: {:?}",
         output
     );
-    // The payload should be preserved
+    // The payload should be 保存的
     assert!(
         output.contains("Hello World"),
         "Payload 'Hello World' should be forwarded, got: {:?}",
@@ -15840,7 +15840,7 @@ fn osc99_notification_st_terminator_forwarded() {
 
 #[test]
 fn osc99_notification_without_identifier_gets_default() {
-    // When no i= key is present, namespace_notification_id adds i=p<N>.0
+    // When no i= 密钥 is present, namespace_notification_id adds i=p<N>.0
     let size = Size { cols: 80, rows: 24 };
     let (mut tab, server_receiver) = create_new_tab_with_server_receiver(size, ModeInfo::default());
 
@@ -15863,7 +15863,7 @@ fn osc99_notification_without_identifier_gets_default() {
 
 #[test]
 fn osc99_multiple_notifications_forwarded() {
-    // Multiple OSC 99 sequences in one PTY write should all be forwarded
+    // Multiple OSC 99 sequences in one PTY 写入 should all be forwarded
     let size = Size { cols: 80, rows: 24 };
     let (mut tab, server_receiver) = create_new_tab_with_server_receiver(size, ModeInfo::default());
 
@@ -15915,7 +15915,7 @@ fn osc99_chunks_of_one_notification_share_an_identifier() {
 
 #[test]
 fn osc99_notification_mixed_with_regular_output() {
-    // OSC 99 embedded in regular terminal output should be extracted and forwarded
+    // OSC 99 embedded in regular 终端 output should be 提取的 and forwarded
     let size = Size { cols: 80, rows: 24 };
     let (mut tab, server_receiver) = create_new_tab_with_server_receiver(size, ModeInfo::default());
 
@@ -15941,7 +15941,7 @@ fn osc99_notification_mixed_with_regular_output() {
 
 #[test]
 fn osc99_notification_preserves_metadata_keys() {
-    // All metadata keys (p=, a=, u=, etc.) should be preserved through forwarding
+    // All metadata 密钥 (p=, a=, u=, etc.) should be 保存的 through forwarding
     let size = Size { cols: 80, rows: 24 };
     let (mut tab, server_receiver) = create_new_tab_with_server_receiver(size, ModeInfo::default());
 
@@ -15977,8 +15977,8 @@ fn osc99_notification_preserves_metadata_keys() {
 
 #[test]
 fn osc99_grid_parses_and_stores_notification() {
-    // Direct Grid-level test: feed OSC 99 bytes through vte parser,
-    // verify pending_desktop_notifications is populated correctly.
+    // Direct Grid-level 测试: feed OSC 99 bytes through vte 解析器,
+    // 验证 pending_desktop_notifications is populated correctly.
     use crate::panes::grid::Grid;
     use crate::panes::link_handler::LinkHandler;
 
@@ -15999,14 +15999,14 @@ fn osc99_grid_parses_and_stores_notification() {
         sixel_image_store,
         Rc::new(RefCell::new(KittyImageStore::default())),
         Style::default(),
-        false, // debug
+        false, // 调试
         true,  // arrow_fonts
         true,  // styled_underlines
         true,  // osc8_hyperlinks
         false, // explicitly_disable_kitty_keyboard_protocol
     );
 
-    // Feed OSC 99 through vte parser
+    // Feed OSC 99 through vte 解析器
     let mut vte_parser = vte::Parser::new();
     vte_parser.advance(
         &mut grid,
@@ -16033,7 +16033,7 @@ fn osc99_grid_parses_and_stores_notification() {
 
 #[test]
 fn osc99_namespace_denormalize_roundtrip() {
-    // Test that namespace_notification_id and denormalize_notification_response
+    // 测试 that namespace_notification_id and denormalize_notification_response
     // are inverse operations.
     use crate::panes::grid::namespace_notification_id;
     use crate::screen::denormalize_notification_response;
@@ -16041,7 +16041,7 @@ fn osc99_namespace_denormalize_roundtrip() {
     let original_metadata = "i=mynotif:p=title:a=report";
     let pane_id: u32 = 42;
 
-    // Namespace — a=report means 'r' flag is set
+    // Namespace — a=报告 means 'r' 标志 is set
     let namespaced = namespace_notification_id(original_metadata, pane_id, true);
     assert!(
         namespaced.contains("i=p42r.mynotif"),
@@ -16049,7 +16049,7 @@ fn osc99_namespace_denormalize_roundtrip() {
         namespaced
     );
 
-    // Simulate a response with the namespaced ID
+    // Simulate a 响应 with the namespaced ID
     let response_payload = format!("i=p42r.mynotif;activated");
     let result = denormalize_notification_response(response_payload.as_bytes());
     assert!(result.is_some(), "Should successfully denormalize");
@@ -16082,7 +16082,7 @@ fn osc99_namespace_denormalize_roundtrip() {
 fn osc99_denormalize_with_no_namespace_returns_none() {
     use crate::screen::denormalize_notification_response;
 
-    // A response without the p<N>. namespace pattern should return None
+    // A 响应 without the p<N>. namespace 模式 should 返回 None
     let result = denormalize_notification_response(b"i=plain_id;data");
     assert!(
         result.is_none(),
@@ -16094,7 +16094,7 @@ fn osc99_denormalize_with_no_namespace_returns_none() {
 fn osc99_namespace_without_identifier_adds_default() {
     use crate::panes::grid::namespace_notification_id;
 
-    // With a=report → 'r' flag
+    // With a=报告 → 'r' 标志
     let metadata = "p=title:a=report";
     let namespaced = namespace_notification_id(metadata, 7, true);
     assert!(
@@ -16103,7 +16103,7 @@ fn osc99_namespace_without_identifier_adds_default() {
         namespaced
     );
 
-    // Without a=report → no 'r' flag
+    // Without a=报告 → no 'r' 标志
     let metadata = "p=title";
     let namespaced = namespace_notification_id(metadata, 7, false);
     assert!(
@@ -16147,7 +16147,7 @@ fn osc99_namespace_is_stable_across_the_escapes_of_one_notification() {
 fn osc99_namespace_ensures_report_action() {
     use crate::panes::grid::namespace_notification_id;
 
-    // a=focus → a=focus,report
+    // a=焦点 → a=焦点,报告
     let result = namespace_notification_id("i=test:p=title:a=focus", 1, false);
     assert!(
         result.contains("a=focus,report"),
@@ -16155,7 +16155,7 @@ fn osc99_namespace_ensures_report_action() {
         result
     );
 
-    // a=report → unchanged
+    // a=报告 → unchanged
     let result = namespace_notification_id("i=test:p=title:a=report", 1, true);
     assert!(
         result.contains("a=report"),
@@ -16168,7 +16168,7 @@ fn osc99_namespace_ensures_report_action() {
         result
     );
 
-    // a=focus,report → unchanged
+    // a=焦点,报告 → unchanged
     let result = namespace_notification_id("i=test:p=title:a=focus,report", 1, true);
     assert!(
         result.contains("a=focus,report"),

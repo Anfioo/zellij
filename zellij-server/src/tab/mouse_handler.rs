@@ -1615,7 +1615,7 @@ impl MouseHandler {
         tab: &'a mut Tab,
         point: &Position,
     ) -> Option<&'a mut Box<dyn Pane>> {
-        // the repetition in this function is to appease the borrow checker, I don't like it either
+        // the repetition in this 函数 is to appease the 借用 checker, I don't like it either
         let floating_panes_are_visible = tab.floating_panes.panes_are_visible();
         if floating_panes_are_visible {
             if let Ok(Some(clicked_pane_id)) = tab.floating_panes.get_pane_id_at(point, true) {
@@ -1698,7 +1698,7 @@ impl MouseHandler {
                 tab.write_to_terminal_at(mouse_event.into_bytes(), point, client_id)
                     .with_context(err_context)?;
             } else if pane.is_alternate_mode_active() {
-                // separate writes so each sequence gets adjusted for cursor keys mode
+                // separate writes so each sequence gets adjusted for 光标 密钥 mode
                 for _ in 0..lines {
                     tab.write_to_terminal_at("\u{1b}[A".as_bytes().to_owned(), point, client_id)
                         .with_context(err_context)?;
@@ -1728,7 +1728,7 @@ impl MouseHandler {
                 tab.write_to_terminal_at(mouse_event.into_bytes(), point, client_id)
                     .with_context(err_context)?;
             } else if pane.is_alternate_mode_active() {
-                // separate writes so each sequence gets adjusted for cursor keys mode
+                // separate writes so each sequence gets adjusted for 光标 密钥 mode
                 for _ in 0..lines {
                     tab.write_to_terminal_at("\u{1b}[B".as_bytes().to_owned(), point, client_id)
                         .with_context(err_context)?;

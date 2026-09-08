@@ -17,7 +17,7 @@ pub struct SwapLayouts {
     current_tiled_layout_position: usize,
     is_floating_damaged: bool,
     is_tiled_damaged: bool,
-    display_area: Rc<RefCell<Size>>, // includes all panes (including eg. the status bar and tab bar in the default layout)
+    display_area: Rc<RefCell<Size>>, // includes all 窗格 (including eg. the 状态 bar and 标签页 bar in the 默认 布局)
 }
 
 impl SwapLayouts {
@@ -40,11 +40,11 @@ impl SwapLayouts {
         let mut base_swap_floating_layout = BTreeMap::new();
         let tiled_panes_count = layout.0.pane_count();
         let floating_panes_count = layout.1.len();
-        // we set ExactPanes to the current panes in the layout, because the base layout is not
-        // intended to be progressive - i.e. to have additional panes added to it
-        // we also don't want it to be applied for less than the expected amount of panes, because
+        // we set ExactPanes to the 当前 窗格 in the 布局, because the base 布局 is not
+        // intended to be progressive - i.e. to have additional 窗格 added to it
+        // we also don't want it to be applied for less than the 期望的 amount of 窗格, because
         // then unintended things can happen
-        // we still want to keep it around in case we'd like to swap layouts without adding panes
+        // we still want to keep it around in case we'd like to swap 布局 without adding 窗格
         base_swap_tiled_layout.insert(LayoutConstraint::ExactPanes(tiled_panes_count), layout.0);
         base_swap_floating_layout
             .insert(LayoutConstraint::ExactPanes(floating_panes_count), layout.1);
@@ -260,7 +260,7 @@ impl SwapLayouts {
                         if self.state_fits_tiled_panes_constraint(constraint, tiled_panes) {
                             let focus_layout_if_not_focused = true;
                             let display_area = self.display_area.borrow();
-                            // TODO: reuse the assets from position_panes_in_space here?
+                            // TODO: 重用 the assets from position_panes_in_space here?
                             let pane_count = tiled_panes.visible_panes_count();
                             let display_area = PaneGeom::from(&*display_area);
                             if layout

@@ -217,7 +217,7 @@ fn create_new_tab_with_plugin_receiver(
         copy_options,
         terminal_emulator_colors,
         terminal_emulator_color_codes,
-        (vec![], vec![]), // swap layouts
+        (vec![], vec![]), // swap 布局
         PathBuf::from("my_default_shell"),
         debug,
         arrow_fonts,
@@ -308,7 +308,7 @@ fn create_new_tab_with_layout(size: Size, layout: TiledPaneLayout) -> Tab {
         copy_options,
         terminal_emulator_colors,
         terminal_emulator_color_codes,
-        (vec![], vec![]), // swap layouts
+        (vec![], vec![]), // swap 布局
         PathBuf::from("my_default_shell"),
         debug,
         arrow_fonts,
@@ -405,7 +405,7 @@ fn create_new_tab_with_cell_size(
         copy_options,
         terminal_emulator_colors,
         terminal_emulator_color_codes,
-        (vec![], vec![]), // swap layouts
+        (vec![], vec![]), // swap 布局
         PathBuf::from("my_default_shell"),
         debug,
         arrow_fonts,
@@ -450,14 +450,14 @@ fn write_to_suppressed_pane() {
     tab.vertical_split(PaneId::Terminal(2), None, 1, None, None)
         .unwrap();
 
-    // Suppress pane 2 and remove it from active panes
+    // 抑制 窗格 2 and 移除 it from 活动 窗格
     tab.replace_active_pane_with_editor_pane(PaneId::Terminal(2), 1)
         .unwrap();
     tab.tiled_panes.remove_pane(PaneId::Terminal(2));
 
-    // Make sure it's suppressed now
+    // Make sure it's 抑制的 now
     tab.suppressed_panes.get(&PaneId::Terminal(2)).unwrap();
-    // Write content to it
+    // 写入 content to it
     tab.write_to_pane_id(
         &None,
         vec![34, 127, 31, 82, 17, 182],
@@ -673,7 +673,7 @@ fn split_largest_pane() {
         cols: 121,
         rows: 20,
     };
-    let stacked_resize = false; // note - this is not the default
+    let stacked_resize = false; // note - this is not the 默认
     let mut tab = create_new_tab(size, stacked_resize);
     for i in 2..5 {
         let new_pane_id = PaneId::Terminal(i);
@@ -1025,7 +1025,7 @@ pub fn toggle_focused_pane_fullscreen() {
         cols: 121,
         rows: 20,
     };
-    let stacked_resize = false; // note - this is not the default
+    let stacked_resize = false; // note - this is not the 默认
     let mut tab = create_new_tab(size, stacked_resize);
     for i in 2..5 {
         let new_pane_id = PaneId::Terminal(i);
@@ -1099,13 +1099,13 @@ pub fn toggle_focused_pane_fullscreen() {
         10,
         "Pane rows match fullscreen rows"
     );
-    // we don't test if all other panes are hidden because this logic is done in the render
-    // function and we already test that in the e2e tests
+    // we don't 测试 if all other 窗格 are hidden because this logic is done in the 渲染
+    // 函数 and we already 测试 that in the e2e 测试
 }
 
 #[test]
 pub fn toggle_focused_pane_fullscreen_with_stacked_resizes() {
-    // note - this is the default
+    // note - this is the 默认
     let size = Size {
         cols: 121,
         rows: 20,
@@ -1184,14 +1184,14 @@ pub fn toggle_focused_pane_fullscreen_with_stacked_resizes() {
         18,
         "Pane rows are back at their original position"
     );
-    // we don't test if all other panes are hidden because this logic is done in the render
-    // function and we already test that in the e2e tests
+    // we don't 测试 if all other 窗格 are hidden because this logic is done in the 渲染
+    // 函数 and we already 测试 that in the e2e 测试
 }
 
 #[test]
 pub fn resize_whole_tab_while_fullscreen_preserves_fullscreen() {
-    // A host-terminal resize (e.g. a font size change) that arrives while a
-    // pane is fullscreen must keep the active pane fullscreened, sized to the
+    // A 主机-终端 调整大小 (e.g. a font size change) that arrives while a
+    // 窗格 is fullscreen must keep the 活动 窗格 fullscreened, sized to the
     // new display dimensions.
     let initial_size = Size {
         cols: 121,
@@ -1247,15 +1247,15 @@ pub fn resize_whole_tab_while_fullscreen_preserves_fullscreen() {
 
 #[test]
 pub fn resize_while_fullscreen_updates_hidden_pane_geometry() {
-    // When a host-terminal resize arrives while a pane is fullscreen, every
-    // hidden pane's geometry must be updated to match the new display area.
-    // Otherwise their `inner` cell counts stay sized for the old display and
-    // toggling fullscreen off hands the layout solver coordinates that
-    // fall outside the viewport, producing layout-solve failures and a
-    // corrupt render.
+    // When a 主机-终端 调整大小 arrives while a 窗格 is fullscreen, every
+    // hidden 窗格's 几何 must be updated to 匹配 the new display area.
+    // Otherwise their `inner` 单元格 counts stay sized for the old display and
+    // toggling fullscreen off hands the 布局 solver 坐标 that
+    // fall outside the 视口, 生产 布局-solve failures and a
+    // corrupt 渲染.
     //
-    // The assertion here is the direct invariant: after the resize, every
-    // pane that is currently hidden behind the fullscreen pane fits inside
+    // The 断言 here is the direct invariant: after the 调整大小, every
+    // 窗格 that is currently hidden behind the fullscreen 窗格 fits inside
     // the new display area.
     let initial_size = Size {
         cols: 200,
@@ -1286,9 +1286,9 @@ pub fn resize_while_fullscreen_updates_hidden_pane_geometry() {
 
     tab.resize_whole_tab(new_size).unwrap();
 
-    // Collect the panes hidden by the fullscreen state and verify each one
-    // already fits the new display area; if any extends beyond it, exiting
-    // fullscreen would hand the layout solver an unsatisfiable layout.
+    // 收集 the 窗格 hidden by the fullscreen 状态 and 验证 each one
+    // already fits the new display area; if any extends beyond it, 退出
+    // fullscreen would hand the 布局 solver an unsatisfiable 布局.
     let hidden_pane_ids: Vec<PaneId> = tab
         .tiled_panes
         .panes
@@ -2248,13 +2248,13 @@ pub fn closing_the_no_ui_fullscreen_pane_restores_remaining_layout() {
 
 #[test]
 pub fn closing_fullscreen_scrollback_editor_restores_consistent_layout() {
-    // Replacing a pane (e.g. opening or closing a scrollback editor) swaps
-    // the pane id occupying its tiled slot. If the replaced pane was the
-    // fullscreen pane, the fullscreen bookkeeping must follow the swap so
+    // Replacing a 窗格 (e.g. opening or closing a 回滚缓冲区 editor) swaps
+    // the 窗格 id occupying its 平铺 slot. If the replaced 窗格 was the
+    // fullscreen 窗格, the fullscreen bookkeeping must follow the swap so
     // that toggling fullscreen off later resets the geom_override on the
-    // pane that actually carries it. Otherwise the restored pane keeps the
-    // 100% override, the previously-hidden panes come back into a layout
-    // that overlaps it, and the screen renders incorrectly.
+    // 窗格 that actually carries it. Otherwise the restored 窗格 keeps the
+    // 100% override, the previously-hidden 窗格 come back into a 布局
+    // that overlaps it, and the 屏幕 渲染 incorrectly.
     let size = Size {
         cols: 121,
         rows: 20,
@@ -2299,9 +2299,9 @@ pub fn closing_fullscreen_scrollback_editor_restores_consistent_layout() {
         "fullscreen tracks the editor pane id",
     );
 
-    // Close the editor: this restores the originally-suppressed pane in the
+    // 关闭 the editor: this restores the originally-抑制的 窗格 in the
     // editor's slot. Fullscreen bookkeeping must retarget to the restored
-    // pane id so subsequent fullscreen-off cleanup hits the right pane.
+    // 窗格 id so subsequent fullscreen-off 清理 hits the right 窗格.
     tab.close_pane(editor_pane_id, false, None);
     assert!(
         tab.is_fullscreen_active(),
@@ -2355,11 +2355,11 @@ pub fn closing_fullscreen_scrollback_editor_restores_consistent_layout() {
 
 #[test]
 pub fn opening_scrollback_editor_on_fullscreen_pane_retargets_fullscreen() {
-    // Reverse-direction variant: fullscreen the pane *first*, then open the
-    // scrollback editor on it. The editor takes the fullscreen pane's slot
+    // Reverse-direction variant: fullscreen the 窗格 *first*, then 打开 the
+    // 回滚缓冲区 editor on it. The editor takes the fullscreen 窗格's slot
     // and inherits its 100% geom_override, so the fullscreen bookkeeping
-    // must follow the swap onto the editor's pane id. Otherwise toggling
-    // fullscreen off later cannot reset the override on the editor.
+    // must follow the swap onto the editor's 窗格 id. Otherwise toggling
+    // fullscreen off later cannot 重置 the override on the editor.
     let size = Size {
         cols: 121,
         rows: 20,
@@ -2613,14 +2613,14 @@ fn switch_to_next_pane_fullscreen() {
         .unwrap();
     active_tab.toggle_active_pane_fullscreen(1);
 
-    // order is now 1 ->2 -> 3 -> 4 due to how new panes are inserted
+    // order is now 1 ->2 -> 3 -> 4 due to how new 窗格 are 插入的
 
     active_tab.switch_next_pane_fullscreen(1);
     active_tab.switch_next_pane_fullscreen(1);
     active_tab.switch_next_pane_fullscreen(1);
     active_tab.switch_next_pane_fullscreen(1);
 
-    // position should now be back in terminal 4.
+    // position should now be back in 终端 4.
 
     assert_eq!(
         active_tab.get_active_pane_id(1).unwrap(),
@@ -2638,7 +2638,7 @@ fn switch_to_prev_pane_fullscreen() {
     let stacked_resize = true;
     let mut active_tab = create_new_tab(size, stacked_resize);
 
-    //testing four consecutive switches in fullscreen mode
+    //测试 four consecutive switches in fullscreen mode
 
     active_tab
         .new_pane(
@@ -2696,7 +2696,7 @@ fn switch_to_prev_pane_fullscreen() {
     active_tab.switch_prev_pane_fullscreen(1);
     active_tab.switch_prev_pane_fullscreen(1);
 
-    // the position should now be in Terminal 4.
+    // the position should now be in 终端 4.
 
     assert_eq!(
         active_tab.get_active_pane_id(1).unwrap(),
@@ -2714,7 +2714,7 @@ fn switch_to_last_pane_fullscreen() {
     let stacked_resize = true;
     let mut active_tab = create_new_tab(size, stacked_resize);
 
-    //testing four consecutive switches in fullscreen mode
+    //测试 four consecutive switches in fullscreen mode
 
     active_tab
         .new_pane(
@@ -2766,11 +2766,11 @@ fn switch_to_last_pane_fullscreen() {
         .unwrap();
     active_tab.toggle_active_pane_fullscreen(1);
 
-    // order is now 1 2 3 4, current active is Terminal 4
+    // order is now 1 2 3 4, 当前 活动 is 终端 4
 
     active_tab.switch_last_pane_fullscreen(1);
 
-    // the position should now be in Terminal 3
+    // the position should now be in 终端 3
 
     assert_eq!(
         active_tab.get_active_pane_id(1).unwrap(),
@@ -2780,7 +2780,7 @@ fn switch_to_last_pane_fullscreen() {
 
     active_tab.switch_last_pane_fullscreen(1);
 
-    // the position should now be back in Terminal 4
+    // the position should now be back in 终端 4
 
     assert_eq!(
         active_tab.get_active_pane_id(1).unwrap(),
@@ -2798,7 +2798,7 @@ pub fn close_pane_with_another_pane_above_it() {
     // │███████████│            │xxxxxxxxxxx│
     // │███████████│            │xxxxxxxxxxx│
     // └───────────┘            └───────────┘
-    // █ == pane being closed
+    // █ == 窗格 being 关闭的
 
     let size = Size {
         cols: 121,
@@ -2865,7 +2865,7 @@ pub fn close_pane_with_another_pane_below_it() {
     // │xxxxxxxxxxx│            │xxxxxxxxxxx│
     // │xxxxxxxxxxx│            │xxxxxxxxxxx│
     // └───────────┘            └───────────┘
-    // █ == pane being closed
+    // █ == 窗格 being 关闭的
 
     let size = Size {
         cols: 121,
@@ -2928,10 +2928,10 @@ pub fn close_pane_with_another_pane_below_it() {
 pub fn close_pane_with_another_pane_to_the_left() {
     // ┌─────┬─────┐            ┌──────────┐
     // │xxxxx│█████│            │xxxxxxxxxx│
-    // │xxxxx│█████│ ==close==> │xxxxxxxxxx│
+    // │xxxxx│█████│ ==关闭==> │xxxxxxxxxx│
     // │xxxxx│█████│            │xxxxxxxxxx│
     // └─────┴─────┘            └──────────┘
-    // █ == pane being closed
+    // █ == 窗格 being 关闭的
     let size = Size {
         cols: 121,
         rows: 20,
@@ -2992,10 +2992,10 @@ pub fn close_pane_with_another_pane_to_the_left() {
 pub fn close_pane_with_another_pane_to_the_right() {
     // ┌─────┬─────┐            ┌──────────┐
     // │█████│xxxxx│            │xxxxxxxxxx│
-    // │█████│xxxxx│ ==close==> │xxxxxxxxxx│
+    // │█████│xxxxx│ ==关闭==> │xxxxxxxxxx│
     // │█████│xxxxx│            │xxxxxxxxxx│
     // └─────┴─────┘            └──────────┘
-    // █ == pane being closed
+    // █ == 窗格 being 关闭的
     let size = Size {
         cols: 121,
         rows: 20,
@@ -3062,7 +3062,7 @@ pub fn close_pane_with_multiple_panes_above_it() {
     // │███████████│            │xxxxx│xxxxx│
     // │███████████│            │xxxxx│xxxxx│
     // └───────────┘            └─────┴─────┘
-    // █ == pane being closed
+    // █ == 窗格 being 关闭的
     let size = Size {
         cols: 121,
         rows: 20,
@@ -3176,7 +3176,7 @@ pub fn close_pane_with_multiple_panes_below_it() {
     // │xxxxx│xxxxx│            │xxxxx│xxxxx│
     // │xxxxx│xxxxx│            │xxxxx│xxxxx│
     // └─────┴─────┘            └─────┴─────┘
-    // █ == pane being closed
+    // █ == 窗格 being 关闭的
     let size = Size {
         cols: 121,
         rows: 20,
@@ -3289,7 +3289,7 @@ pub fn close_pane_with_multiple_panes_to_the_left() {
     // │xxxxx│█████│            │xxxxxxxxxx│
     // │xxxxx│█████│            │xxxxxxxxxx│
     // └─────┴─────┘            └──────────┘
-    // █ == pane being closed
+    // █ == 窗格 being 关闭的
     let size = Size {
         cols: 121,
         rows: 20,
@@ -3403,7 +3403,7 @@ pub fn close_pane_with_multiple_panes_to_the_right() {
     // │█████│xxxxx│            │xxxxxxxxxx│
     // │█████│xxxxx│            │xxxxxxxxxx│
     // └─────┴─────┘            └──────────┘
-    // █ == pane being closed
+    // █ == 窗格 being 关闭的
     let size = Size {
         cols: 121,
         rows: 20,
@@ -3516,7 +3516,7 @@ pub fn close_pane_with_multiple_panes_above_it_away_from_screen_edges() {
     // │xxx│███████│xxx│            │xxx│xxx│xxx│xxx│
     // │xxx│███████│xxx│            │xxx│xxx│xxx│xxx│
     // └───┴───────┴───┘            └───┴───┴───┴───┘
-    // █ == pane being closed
+    // █ == 窗格 being 关闭的
     let size = Size {
         cols: 121,
         rows: 20,
@@ -3822,7 +3822,7 @@ pub fn close_pane_with_multiple_panes_below_it_away_from_screen_edges() {
     // ├───┤xxx│xxx├───┤            ├───┤xxx│xxx├───┤
     // │xxx│xxx│xxx│xxx│            │xxx│xxx│xxx│xxx│
     // └───┴───┴───┴───┘            └───┴───┴───┴───┘
-    // █ == pane being closed
+    // █ == 窗格 being 关闭的
 
     let size = Size {
         cols: 121,
@@ -4130,7 +4130,7 @@ pub fn close_pane_with_multiple_panes_to_the_left_away_from_screen_edges() {
     // ├────┬┴─────┤            ├────┬──────┤
     // │xxxx│xxxxxx│            │xxxx│xxxxxx│
     // └────┴──────┘            └────┴──────┘
-    // █ == pane being closed
+    // █ == 窗格 being 关闭的
 
     let size = Size {
         cols: 121,
@@ -4441,7 +4441,7 @@ pub fn close_pane_with_multiple_panes_to_the_right_away_from_screen_edges() {
     // ├────┬┴─────┤            ├────┬──────┤
     // │xxxx│xxxxxx│            │xxxx│xxxxxx│
     // └────┴──────┘            └────┴──────┘
-    // █ == pane being closed
+    // █ == 窗格 being 关闭的
 
     let size = Size {
         cols: 121,
@@ -5232,7 +5232,7 @@ pub fn resize_down_with_pane_above() {
     // │███████████│                  │███████████│
     // │███████████│                  │███████████│
     // └───────────┘                  └───────────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 20,
@@ -5340,7 +5340,7 @@ pub fn resize_down_with_pane_below() {
     // │           │                  ├───────────┤
     // │           │                  │           │
     // └───────────┘                  └───────────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 20,
@@ -5453,7 +5453,7 @@ pub fn resize_down_with_panes_above_and_below() {
     // │           │                  ├───────────┤
     // │           │                  │           │
     // └───────────┘                  └───────────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 30,
@@ -5609,7 +5609,7 @@ pub fn resize_down_with_multiple_panes_above() {
     // │███████████│                    ├─────┴─────┤
     // │███████████│                    │███████████│
     // └───────────┘                    └───────────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 30,
@@ -5766,7 +5766,7 @@ pub fn resize_down_with_panes_above_aligned_left_with_current_pane() {
     // │     │█████│                    │     ├─────┤
     // │     │█████│                    │     │█████│
     // └─────┴─────┘                    └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 30,
@@ -5968,7 +5968,7 @@ pub fn resize_down_with_panes_below_aligned_left_with_current_pane() {
     // │     │     │                    │     ├─────┤
     // │     │     │                    │     │     │
     // └─────┴─────┘                    └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -6170,7 +6170,7 @@ pub fn resize_down_with_panes_above_aligned_right_with_current_pane() {
     // │█████│     │                    ├─────┤     │
     // │█████│     │                    │█████│     │
     // └─────┴─────┘                    └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -6375,7 +6375,7 @@ pub fn resize_down_with_panes_below_aligned_right_with_current_pane() {
     // │     │     │                    ├─────┤     │
     // │     │     │                    │     │     │
     // └─────┴─────┘                    └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -6579,7 +6579,7 @@ pub fn resize_down_with_panes_above_aligned_left_and_right_with_current_pane() {
     // │   │███│   │                    │   ├───┤   │
     // │   │███│   │                    │   │███│   │
     // └───┴───┴───┘                    └───┴───┴───┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -6870,7 +6870,7 @@ pub fn resize_down_with_panes_below_aligned_left_and_right_with_current_pane() {
     // │   │   │   │                    │   ├───┤   │
     // │   │   │   │                    │   │   │   │
     // └───┴───┴───┘                    └───┴───┴───┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -7160,7 +7160,7 @@ pub fn resize_down_with_panes_above_aligned_left_and_right_with_panes_to_the_lef
     // │ │ │███│ │ │                    │ ├─┬───┬─┤ │
     // │ │ │███│ │ │                    │ │ │███│ │ │
     // └─┴─┴───┴─┴─┘                    └─┴─┴───┴─┴─┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 122,
@@ -7542,7 +7542,7 @@ pub fn resize_down_with_panes_below_aligned_left_and_right_with_to_the_left_and_
     // │ │       │ │                    │ ├─┴───┴─┤ │
     // │ │       │ │                    │ │       │ │
     // └─┴───────┴─┘                    └─┴───────┴─┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 122,
@@ -7924,7 +7924,7 @@ pub fn cannot_resize_down_when_pane_below_is_at_minimum_height() {
     // ├───────────┤ ==resize=down==> ├───────────┤
     // │           │                  │           │
     // └───────────┘                  └───────────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -7968,7 +7968,7 @@ pub fn cannot_resize_down_when_pane_has_fixed_rows() {
     // ├───────────┤ ==resize=down==> ├───────────┤
     // │           │                  │           │
     // └───────────┘                  └───────────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -8014,7 +8014,7 @@ pub fn cannot_resize_down_when_pane_below_has_fixed_rows() {
     // ├───────────┤ ==resize=down==> ├───────────┤
     // │           │                  │           │
     // └───────────┘                  └───────────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -8060,7 +8060,7 @@ pub fn cannot_resize_up_when_pane_below_has_fixed_rows() {
     // ├───────────┤ ==resize=down==> ├───────────┤
     // │           │                  │           │
     // └───────────┘                  └───────────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -8106,7 +8106,7 @@ pub fn resize_left_with_pane_to_the_left() {
     // │     │█████│  ==resize=left==>  │   │███████│
     // │     │█████│                    │   │███████│
     // └─────┴─────┘                    └───┴───────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -8212,7 +8212,7 @@ pub fn resize_left_with_pane_to_the_right() {
     // │█████│     │  ==resize=left==>  │███│       │
     // │█████│     │                    │███│       │
     // └─────┴─────┘                    └───┴───────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 20,
@@ -8315,10 +8315,10 @@ pub fn resize_left_with_pane_to_the_right() {
 pub fn resize_left_with_panes_to_the_left_and_right() {
     // ┌─────┬─────┬─────┐                    ┌─────┬───┬───────┐
     // │     │█████│     │                    │     │███│       │
-    // │     │█████│     │  ==resize=left==>  │     │███│       │
+    // │     │█████│     │  ==调整大小=left==>  │     │███│       │
     // │     │█████│     │                    │     │███│       │
     // └─────┴─────┴─────┘                    └─────┴───┴───────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -8470,7 +8470,7 @@ pub fn resize_left_with_multiple_panes_to_the_left() {
     // ├─────┤█████│  ==resize=left==>  ├───┤███████│
     // │     │█████│                    │   │███████│
     // └─────┴─────┘                    └───┴───────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 20,
@@ -8622,7 +8622,7 @@ pub fn resize_left_with_panes_to_the_left_aligned_top_with_current_pane() {
     // ├─────┼─────┤  ==resize=left==>  ├───┬─┴─────┤
     // │     │█████│                    │   │███████│
     // └─────┴─────┘                    └───┴───────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -8820,7 +8820,7 @@ pub fn resize_left_with_panes_to_the_right_aligned_top_with_current_pane() {
     // ├─────┼─────┤  ==resize=left==>  ├───┬─┴─────┤
     // │█████│     │                    │███│       │
     // └─────┴─────┘                    └───┴───────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -9019,7 +9019,7 @@ pub fn resize_left_with_panes_to_the_left_aligned_bottom_with_current_pane() {
     // ├─────┼─────┤  ==resize=left==>  ├───┴─┬─────┤
     // │     │     │                    │     │     │
     // └─────┴─────┘                    └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -9216,7 +9216,7 @@ pub fn resize_left_with_panes_to_the_right_aligned_bottom_with_current_pane() {
     // ├─────┼─────┤  ==resize=left==>  ├───┴─┬─────┤
     // │     │     │                    │     │     │
     // └─────┴─────┘                    └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -9416,7 +9416,7 @@ pub fn resize_left_with_panes_to_the_left_aligned_top_and_bottom_with_current_pa
     // ├─────┼─────┤                    ├───┴─┬─────┤
     // │     │     │                    │     │     │
     // └─────┴─────┘                    └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -9707,7 +9707,7 @@ pub fn resize_left_with_panes_to_the_right_aligned_top_and_bottom_with_current_p
     // ├─────┼─────┤                    ├───┴─┬─────┤
     // │     │     │                    │     │     │
     // └─────┴─────┘                    └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -9999,7 +9999,7 @@ pub fn resize_left_with_panes_to_the_left_aligned_top_and_bottom_with_panes_abov
     // │     ├─────┤                    │   ├───────┤
     // ├─────┼─────┤                    ├───┴─┬─────┤
     // └─────┴─────┘                    └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -10382,7 +10382,7 @@ pub fn resize_left_with_panes_to_the_right_aligned_top_and_bottom_with_panes_abo
     // ├─────┤     │                    ├───┤       │
     // ├─────┼─────┤                    ├───┴─┬─────┤
     // └─────┴─────┘                    └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -10761,10 +10761,10 @@ pub fn resize_left_with_panes_to_the_right_aligned_top_and_bottom_with_panes_abo
 pub fn cannot_resize_left_when_pane_to_the_left_is_at_minimum_width() {
     // ┌─┬─┐                    ┌─┬─┐
     // │ │█│                    │ │█│
-    // │ │█│  ==resize=left==>  │ │█│
+    // │ │█│  ==调整大小=left==>  │ │█│
     // │ │█│                    │ │█│
     // └─┴─┘                    └─┴─┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size { cols: 10, rows: 20 };
     let stacked_resize = true;
@@ -10804,7 +10804,7 @@ pub fn resize_right_with_pane_to_the_left() {
     // │     │█████│ ==resize=right==> │       │███│
     // │     │█████│                   │       │███│
     // └─────┴─────┘                   └───────┴───┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -10910,7 +10910,7 @@ pub fn resize_right_with_pane_to_the_right() {
     // │█████│     │ ==resize=right==> │███████│   │
     // │█████│     │                   │███████│   │
     // └─────┴─────┘                   └───────┴───┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -11017,7 +11017,7 @@ pub fn resize_right_with_panes_to_the_left_and_right() {
     // │     │█████│     │ ==resize=right==> │     │███████│   │
     // │     │█████│     │                   │     │███████│   │
     // └─────┴─────┴─────┘                   └─────┴───────┴───┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -11169,7 +11169,7 @@ pub fn resize_right_with_multiple_panes_to_the_left() {
     // ├─────┤█████│ ==resize=right==> ├───────┤███│
     // │     │█████│                   │       │███│
     // └─────┴─────┘                   └───────┴───┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -11322,7 +11322,7 @@ pub fn resize_right_with_panes_to_the_left_aligned_top_with_current_pane() {
     // ├─────┼─────┤ ==resize=right==> ├─────┴─┬───┤
     // │     │█████│                   │       │███│
     // └─────┴─────┘                   └───────┴───┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -11520,7 +11520,7 @@ pub fn resize_right_with_panes_to_the_right_aligned_top_with_current_pane() {
     // ├─────┼─────┤ ==resize=right==> ├─────┴─┬───┤
     // │█████│     │                   │███████│   │
     // └─────┴─────┘                   └───────┴───┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 20,
@@ -11718,7 +11718,7 @@ pub fn resize_right_with_panes_to_the_left_aligned_bottom_with_current_pane() {
     // ├─────┼─────┤ ==resize=right==> ├─────┬─┴───┤
     // │     │     │                   │     │     │
     // └─────┴─────┘                   └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -11917,7 +11917,7 @@ pub fn resize_right_with_panes_to_the_right_aligned_bottom_with_current_pane() {
     // ├─────┼─────┤ ==resize=right==> ├─────┬─┴───┤
     // │     │     │                   │     │     │
     // └─────┴─────┘                   └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -12119,7 +12119,7 @@ pub fn resize_right_with_panes_to_the_left_aligned_top_and_bottom_with_current_p
     // ├─────┼─────┤                   ├─────┬─┴───┤
     // │     │     │                   │     │     │
     // └─────┴─────┘                   └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -12410,7 +12410,7 @@ pub fn resize_right_with_panes_to_the_right_aligned_top_and_bottom_with_current_
     // ├─────┼─────┤                   ├─────┬─┴───┤
     // │     │     │                   │     │     │
     // └─────┴─────┘                   └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 20,
@@ -12701,7 +12701,7 @@ pub fn resize_right_with_panes_to_the_left_aligned_top_and_bottom_with_panes_abo
     // │     ├─────┤                   │       ├───┤
     // ├─────┼─────┤                   ├─────┬─┴───┤
     // └─────┴─────┘                   └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 70,
@@ -13083,7 +13083,7 @@ pub fn resize_right_with_panes_to_the_right_aligned_top_and_bottom_with_panes_ab
     // ├─────┤     │                   ├───────┤   │
     // ├─────┼─────┤                   ├─────┬─┴───┤
     // └─────┴─────┘                   └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 70,
@@ -13461,10 +13461,10 @@ pub fn resize_right_with_panes_to_the_right_aligned_top_and_bottom_with_panes_ab
 pub fn cannot_resize_right_when_pane_to_the_left_is_at_minimum_width() {
     // ┌─┬─┐                   ┌─┬─┐
     // │ │█│                   │ │█│
-    // │ │█│ ==resize=right==> │ │█│
+    // │ │█│ ==调整大小=right==> │ │█│
     // │ │█│                   │ │█│
     // └─┴─┘                   └─┴─┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size { cols: 10, rows: 20 };
     let stacked_resize = true;
     let mut tab = create_new_tab(size, stacked_resize);
@@ -13503,7 +13503,7 @@ pub fn cannot_resize_right_when_pane_has_fixed_columns() {
     // │██│  │ ==resize=right==> │██│  │
     // │██│  │                   │██│  │
     // └──┴──┘                   └──┴──┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -13551,7 +13551,7 @@ pub fn resize_up_with_pane_above() {
     // │███████████│                │███████████│
     // │███████████│                │███████████│
     // └───────────┘                └───────────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 20,
@@ -13658,7 +13658,7 @@ pub fn resize_up_with_pane_below() {
     // │           │                │           │
     // │           │                │           │
     // └───────────┘                └───────────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 20,
@@ -13769,7 +13769,7 @@ pub fn resize_up_with_panes_above_and_below() {
     // │           │                │           │
     // │           │                │           │
     // └───────────┘                └───────────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 30,
@@ -13921,7 +13921,7 @@ pub fn resize_up_with_multiple_panes_above() {
     // ├─────┴─────┤  ==resize=up==> │███████████│
     // │███████████│                 │███████████│
     // └───────────┘                 └───────────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 30,
@@ -14073,7 +14073,7 @@ pub fn resize_up_with_panes_above_aligned_left_with_current_pane() {
     // ├─────┼─────┤  ==resize=up==>  ├─────┤█████│
     // │     │█████│                  │     │█████│
     // └─────┴─────┘                  └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 30,
@@ -14272,7 +14272,7 @@ pub fn resize_up_with_panes_below_aligned_left_with_current_pane() {
     // │     │     │                  │     │     │
     // │     │     │                  │     │     │
     // └─────┴─────┘                  └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 30,
@@ -14472,7 +14472,7 @@ pub fn resize_up_with_panes_above_aligned_right_with_current_pane() {
     // │█████│     │                  │█████│     │
     // │█████│     │                  │█████│     │
     // └─────┴─────┘                  └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 30,
@@ -14672,7 +14672,7 @@ pub fn resize_up_with_panes_below_aligned_right_with_current_pane() {
     // │     │     │                  │     │     │
     // │     │     │                  │     │     │
     // └─────┴─────┘                  └─────┴─────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 30,
@@ -14873,7 +14873,7 @@ pub fn resize_up_with_panes_above_aligned_left_and_right_with_current_pane() {
     // │   │███│   │                  │   │███│   │
     // │   │███│   │                  │   │███│   │
     // └───┴───┴───┘                  └───┴───┴───┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 30,
@@ -15162,7 +15162,7 @@ pub fn resize_up_with_panes_below_aligned_left_and_right_with_current_pane() {
     // │   │   │   │                  │   │   │   │
     // │   │   │   │                  │   │   │   │
     // └───┴───┴───┘                  └───┴───┴───┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 121,
         rows: 30,
@@ -15452,7 +15452,7 @@ pub fn resize_up_with_panes_above_aligned_left_and_right_with_panes_to_the_left_
     // │ │ │███│ │ │                  │ │ │███│ │ │
     // │ │ │███│ │ │                  │ │ │███│ │ │
     // └─┴─┴───┴─┴─┘                  └─┴─┴───┴─┴─┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 122,
         rows: 30,
@@ -15833,7 +15833,7 @@ pub fn resize_up_with_panes_below_aligned_left_and_right_with_to_the_left_and_ri
     // │ │       │ │                  │ │       │ │
     // │ │       │ │                  │ │       │ │
     // └─┴───────┴─┘                  └─┴───────┴─┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
     let size = Size {
         cols: 122,
         rows: 30,
@@ -16213,7 +16213,7 @@ pub fn cannot_resize_up_when_pane_above_is_at_minimum_height() {
     // ├───────────┤ ==resize=up==> ├───────────┤
     // │███████████│                │███████████│
     // └───────────┘                └───────────┘
-    // █ == focused pane
+    // █ == 聚焦的 窗格
 
     let size = Size {
         cols: 121,
@@ -16255,7 +16255,7 @@ pub fn nondirectional_resize_increase_with_1_pane() {
         cols: 121,
         rows: 10,
     };
-    let stacked_resize = false; // note - this is not the default
+    let stacked_resize = false; // note - this is not the 默认
     let mut tab = create_new_tab(size, stacked_resize);
     tab_resize_increase(&mut tab, 1);
 
@@ -16278,7 +16278,7 @@ pub fn nondirectional_resize_increase_with_1_pane_with_stacked_resizes() {
         cols: 121,
         rows: 10,
     };
-    let stacked_resize = true; // note - this is not the default
+    let stacked_resize = true; // note - this is not the 默认
     let mut tab = create_new_tab(size, stacked_resize);
     tab_resize_increase(&mut tab, 1);
 
@@ -16301,7 +16301,7 @@ pub fn nondirectional_resize_increase_with_1_pane_to_left() {
         cols: 121,
         rows: 10,
     };
-    let stacked_resize = false; // note - this is not the default
+    let stacked_resize = false; // note - this is not the 默认
     let mut tab = create_new_tab(size, stacked_resize);
     let new_pane_id_1 = PaneId::Terminal(2);
     tab.vertical_split(new_pane_id_1, None, 1, None, None)
@@ -16337,7 +16337,7 @@ pub fn nondirectional_resize_increase_with_2_panes_to_left() {
         cols: 121,
         rows: 20,
     };
-    let stacked_resize = false; // note - this is not the default
+    let stacked_resize = false; // note - this is not the 默认
     let mut tab = create_new_tab(size, stacked_resize);
     tab.vertical_split(PaneId::Terminal(2), None, 1, None, None)
         .unwrap();
@@ -16398,7 +16398,7 @@ pub fn nondirectional_resize_increase_with_1_pane_to_right_1_pane_above() {
         cols: 121,
         rows: 20,
     };
-    let stacked_resize = false; // note - this is not the default
+    let stacked_resize = false; // note - this is not the 默认
     let mut tab = create_new_tab(size, stacked_resize);
     tab.vertical_split(PaneId::Terminal(2), None, 1, None, None)
         .unwrap();
@@ -16457,7 +16457,7 @@ pub fn nondirectional_resize_increase_with_1_pane_to_right_1_pane_to_left() {
         cols: 121,
         rows: 20,
     };
-    let stacked_resize = false; // note - this is not the default
+    let stacked_resize = false; // note - this is not the 默认
     let mut tab = create_new_tab(size, stacked_resize);
     tab.vertical_split(PaneId::Terminal(2), None, 1, None, None)
         .unwrap();
@@ -16516,7 +16516,7 @@ pub fn nondirectional_resize_increase_with_pane_above_aligned_right_with_current
         cols: 121,
         rows: 20,
     };
-    let stacked_resize = false; // note - this is not the default
+    let stacked_resize = false; // note - this is not the 默认
     let mut tab = create_new_tab(size, stacked_resize);
     tab.vertical_split(PaneId::Terminal(2), None, 1, None, None)
         .unwrap();
@@ -16596,7 +16596,7 @@ pub fn custom_cursor_height_width_ratio() {
 
 #[test]
 fn correctly_resize_frameless_panes_on_pane_close() {
-    // check that https://github.com/zellij-org/zellij/issues/1773 is fixed
+    // 检查 that https://github.com/zellij-org/zellij/issues/1773 is fixed
     let cols = 60;
     let rows = 20;
     let size = Size { cols, rows };
@@ -16604,7 +16604,7 @@ fn correctly_resize_frameless_panes_on_pane_close() {
     let mut tab = create_new_tab(size, stacked_resize);
     tab.set_pane_frames(PaneFrameStyle::None);
 
-    // a single frameless pane should take up all available space
+    // a single frameless 窗格 should take up all 可用 space
     let pane = tab.tiled_panes.panes.get(&PaneId::Terminal(1)).unwrap();
     let content_size = (pane.get_content_columns(), pane.get_content_rows());
     assert_eq!(content_size, (cols, rows));
@@ -16622,7 +16622,7 @@ fn correctly_resize_frameless_panes_on_pane_close() {
     .unwrap();
     tab.close_pane(PaneId::Terminal(2), true, None);
 
-    // the size should be the same after adding and then removing a pane
+    // the size should be the same after adding and then removing a 窗格
     let pane = tab.tiled_panes.panes.get(&PaneId::Terminal(1)).unwrap();
     let content_size = (pane.get_content_columns(), pane.get_content_rows());
     assert_eq!(content_size, (cols, rows));
@@ -16638,15 +16638,15 @@ fn floating_pane_z_index_is_tracked() {
     let mut tab = create_new_tab(size, stacked_resize);
     let _client_id = 1;
 
-    // Create first floating pane (should_float = true means it will be a floating pane)
+    // 创建 first 浮动 窗格 (should_float = true means it will be a 浮动 窗格)
     tab.new_floating_pane(PaneId::Terminal(2), None, None, false, true, None, None)
         .unwrap();
 
-    // Create second floating pane
+    // 创建 second 浮动 窗格
     tab.new_floating_pane(PaneId::Terminal(3), None, None, false, true, None, None)
         .unwrap();
 
-    // Verify z-indices exist and are different
+    // 验证 z-indices exist and are different
     let z_index_pane2 = tab.floating_panes.get_pane_z_index(PaneId::Terminal(2));
     let z_index_pane3 = tab.floating_panes.get_pane_z_index(PaneId::Terminal(3));
 
@@ -16674,11 +16674,11 @@ fn pinned_floating_pane_has_higher_z_index() {
     let mut tab = create_new_tab(size, stacked_resize);
     let _client_id = 1;
 
-    // Create first floating pane (will be unpinned)
+    // 创建 first 浮动 窗格 (will be unpinned)
     tab.new_floating_pane(PaneId::Terminal(2), None, None, false, true, None, None)
         .unwrap();
 
-    // Create second floating pane and pin it
+    // 创建 second 浮动 窗格 and pin it
     tab.new_floating_pane(PaneId::Terminal(3), None, None, false, true, None, None)
         .unwrap();
     tab.set_floating_pane_pinned(PaneId::Terminal(3), true);
@@ -16711,18 +16711,18 @@ fn pinned_pane_z_index_higher_than_regular_floating_panes() {
     let mut tab = create_new_tab(size, stacked_resize);
     let _client_id = 1;
 
-    // Create first floating pane
+    // 创建 first 浮动 窗格
     tab.new_floating_pane(PaneId::Terminal(2), None, None, false, true, None, None)
         .unwrap();
 
-    // Create second floating pane
+    // 创建 second 浮动 窗格
     tab.new_floating_pane(PaneId::Terminal(3), None, None, false, true, None, None)
         .unwrap();
 
-    // Pin the second pane so it's on top
+    // Pin the second 窗格 so it's on top
     tab.set_floating_pane_pinned(PaneId::Terminal(3), true);
 
-    // Verify that get_pane_z_index returns correct values for both panes
+    // 验证 that get_pane_z_index 返回 correct values for both 窗格
     let z_index_bottom = tab.floating_panes.get_pane_z_index(PaneId::Terminal(2));
     let z_index_top = tab.floating_panes.get_pane_z_index(PaneId::Terminal(3));
 
@@ -16752,7 +16752,7 @@ fn active_pane_z_index_retrieved_for_cursor_visibility() {
     let mut tab = create_new_tab(size, stacked_resize);
     let client_id = 1;
 
-    // Start with tiled panes - active pane should not have z-index
+    // 启动 with 平铺 窗格 - 活动 窗格 should not have z-index
     let active_pane_id_tiled = tab.get_active_pane_id(client_id).unwrap();
     let z_index_tiled = tab.floating_panes.get_pane_z_index(active_pane_id_tiled);
     assert!(
@@ -16760,11 +16760,11 @@ fn active_pane_z_index_retrieved_for_cursor_visibility() {
         "Tiled pane should not have z-index in floating panes"
     );
 
-    // Create a floating pane
+    // 创建 a 浮动 窗格
     tab.new_floating_pane(PaneId::Terminal(2), None, None, false, true, None, None)
         .unwrap();
 
-    // Active pane should now have a z-index
+    // 活动 窗格 should now have a z-index
     let active_pane_id_floating = tab.get_active_pane_id(client_id).unwrap();
     let z_index_floating = tab.floating_panes.get_pane_z_index(active_pane_id_floating);
     assert!(
@@ -16783,13 +16783,13 @@ fn get_pane_z_index_returns_none_for_nonexistent_pane() {
     let mut tab = create_new_tab(size, stacked_resize);
     let _client_id = 1;
 
-    // Create two floating panes
+    // 创建 two 浮动 窗格
     tab.new_floating_pane(PaneId::Terminal(2), None, None, false, true, None, None)
         .unwrap();
     tab.new_floating_pane(PaneId::Terminal(3), None, None, false, true, None, None)
         .unwrap();
 
-    // Query for a pane that doesn't exist
+    // Query for a 窗格 that doesn't exist
     let z_index_nonexistent = tab.floating_panes.get_pane_z_index(PaneId::Terminal(999));
 
     assert!(
@@ -16797,7 +16797,7 @@ fn get_pane_z_index_returns_none_for_nonexistent_pane() {
         "Non-existent pane should return None for z-index"
     );
 
-    // Query for existing panes
+    // Query for existing 窗格
     let z_index_2 = tab.floating_panes.get_pane_z_index(PaneId::Terminal(2));
     let z_index_3 = tab.floating_panes.get_pane_z_index(PaneId::Terminal(3));
 
@@ -16826,16 +16826,16 @@ pub fn bell_in_unfocused_pane_sets_notification() {
     let new_pane_id = PaneId::Terminal(2);
     let client_id = 1;
 
-    // Create a second pane; client is focused on pane 1 (PaneId::Terminal(1))
+    // 创建 a second 窗格; 客户端 is 聚焦的 on 窗格 1 (PaneId::终端(1))
     tab.horizontal_split(new_pane_id, None, client_id, None, None)
         .unwrap();
-    // Move focus back to pane 1
+    // Move 焦点 back to 窗格 1
     tab.move_focus_up(client_id).unwrap();
 
-    // Simulate bell in pane 2 via pty bytes (\x07)
+    // Simulate bell in 窗格 2 via pty bytes (\x07)
     tab.handle_pty_bytes(2, vec![7u8]).unwrap();
 
-    // Now call check_and_handle_bell_notifications as non-active tab
+    // Now 调用 check_and_handle_bell_notifications as non-活动 标签页
     let (new_panes, tab_newly_set) = tab.check_and_handle_bell_notifications(false);
 
     assert!(
@@ -16874,7 +16874,7 @@ pub fn clearing_last_pane_bell_clears_tab_bell() {
         .unwrap();
     tab.move_focus_up(client_id).unwrap();
 
-    // Set bell on unfocused pane 2 via check_and_handle_bell_notifications
+    // Set bell on unfocused 窗格 2 via check_and_handle_bell_notifications
     tab.handle_pty_bytes(2, vec![7u8]).unwrap();
     tab.check_and_handle_bell_notifications(false);
 
@@ -16883,7 +16883,7 @@ pub fn clearing_last_pane_bell_clears_tab_bell() {
         "tab_has_pending_bell should be set before clearing"
     );
 
-    // Clear bell for pane 2
+    // 清空 bell for 窗格 2
     tab.clear_bell_notification_for_pane(new_pane_id);
 
     assert!(
@@ -16896,7 +16896,7 @@ pub fn clearing_last_pane_bell_clears_tab_bell() {
     );
 }
 
-// Category 5: pane-id-based operations
+// Category 5: 窗格-id-based operations
 
 #[test]
 pub fn scroll_up_by_pane_id() {
@@ -17181,7 +17181,7 @@ pub fn rename_pane_to_empty_clears_name() {
     let _ = tab.rename_pane_by_pane_id(pane_id, "flame".as_bytes().to_vec());
     let _ = tab.rename_pane_by_pane_id(pane_id, "".as_bytes().to_vec());
     let pane = tab.get_pane_with_id(pane_id).unwrap();
-    // Empty name should fall through to the fallback title
+    // Empty name should fall through to the 回退 标题
     assert_ne!(pane.current_title(), "flame");
 }
 
@@ -17233,7 +17233,7 @@ pub fn named_pane_not_overridden_by_osc_title() {
     let mut tab = create_new_tab(size, true);
     let pane_id = PaneId::Terminal(1);
     let _ = tab.rename_pane_by_pane_id(pane_id, "flame".as_bytes().to_vec());
-    // Simulate shell sending OSC 0 title
+    // Simulate shell sending OSC 0 标题
     let osc_title = b"\x1b]0;user@host: ~/code\x07";
     let _ = tab.handle_pty_bytes(1, osc_title.to_vec());
     let pane = tab.get_pane_with_id(pane_id).unwrap();
@@ -17248,7 +17248,7 @@ pub fn unnamed_pane_shows_osc_title() {
     };
     let mut tab = create_new_tab(size, true);
     let pane_id = PaneId::Terminal(1);
-    // Send OSC 0 title without renaming the pane
+    // Send OSC 0 标题 without renaming the 窗格
     let osc_title = b"\x1b]0;user@host: ~/code\x07";
     let _ = tab.handle_pty_bytes(1, osc_title.to_vec());
     let pane = tab.get_pane_with_id(pane_id).unwrap();
@@ -17388,11 +17388,11 @@ pub fn interactive_rename_backspace_all_then_retype() {
     if let Some(pane) = tab.get_active_pane_or_floating_pane_mut(client_id) {
         pane.store_pane_name();
     }
-    // Backspace 5 times to clear "flame"
+    // Backspace 5 times to 清空 "flame"
     for _ in 0..5 {
         let _ = tab.update_active_pane_name(vec![0x7f], client_id);
     }
-    // Type "new"
+    // 类型 "new"
     let _ = tab.update_active_pane_name(vec![b'n'], client_id);
     let _ = tab.update_active_pane_name(vec![b'e'], client_id);
     let _ = tab.update_active_pane_name(vec![b'w'], client_id);
@@ -17414,7 +17414,7 @@ pub fn interactive_rename_esc_reverts() {
     if let Some(pane) = tab.get_active_pane_or_floating_pane_mut(client_id) {
         pane.store_pane_name();
     }
-    // Type some chars
+    // 类型 some chars
     let _ = tab.update_active_pane_name(vec![b'x'], client_id);
     let _ = tab.update_active_pane_name(vec![b'y'], client_id);
     // Esc — undo
@@ -17433,7 +17433,7 @@ pub fn interactive_rename_esc_on_unnamed_stays_unnamed() {
     let client_id = 1;
     let pane_id = PaneId::Terminal(1);
     let title_before = tab.get_pane_with_id(pane_id).unwrap().current_title();
-    // Enter rename mode on unnamed pane
+    // Enter rename mode on unnamed 窗格
     if let Some(pane) = tab.get_active_pane_or_floating_pane_mut(client_id) {
         pane.store_pane_name();
     }
@@ -17491,9 +17491,9 @@ pub fn cli_rename_active_pane_replaces_name() {
     let mut tab = create_new_tab(size, true);
     let client_id = 1;
     let pane_id = PaneId::Terminal(1);
-    // Set initial name
+    // Set 初始 name
     let _ = tab.rename_pane_by_pane_id(pane_id, "flame".as_bytes().to_vec());
-    // CLI rename (focused pane) — full replacement
+    // CLI rename (聚焦的 窗格) — full replacement
     let _ = tab.rename_active_pane("spark".as_bytes().to_vec(), client_id);
     let pane = tab.get_pane_with_id(pane_id).unwrap();
     assert_eq!(pane.current_title(), "spark");
@@ -17509,7 +17509,7 @@ pub fn cli_rename_active_pane_single_char() {
     let client_id = 1;
     let pane_id = PaneId::Terminal(1);
     let _ = tab.rename_pane_by_pane_id(pane_id, "flame".as_bytes().to_vec());
-    // CLI rename with single character — should replace, not append
+    // CLI rename with single character — should replace, not 追加
     let _ = tab.rename_active_pane("x".as_bytes().to_vec(), client_id);
     let pane = tab.get_pane_with_id(pane_id).unwrap();
     assert_eq!(pane.current_title(), "x");
@@ -17524,7 +17524,7 @@ pub fn cli_rename_active_pane_on_unnamed_pane() {
     let mut tab = create_new_tab(size, true);
     let client_id = 1;
     let pane_id = PaneId::Terminal(1);
-    // Pane has no name — CLI rename should set it
+    // 窗格 has no name — CLI rename should set it
     let _ = tab.rename_active_pane("spark".as_bytes().to_vec(), client_id);
     let pane = tab.get_pane_with_id(pane_id).unwrap();
     assert_eq!(pane.current_title(), "spark");
@@ -17541,7 +17541,7 @@ pub fn cli_rename_active_pane_to_empty_clears_name() {
     let pane_id = PaneId::Terminal(1);
     let fallback = tab.get_pane_with_id(pane_id).unwrap().current_title();
     let _ = tab.rename_pane_by_pane_id(pane_id, "flame".as_bytes().to_vec());
-    // CLI rename to empty — should clear name
+    // CLI rename to empty — should 清空 name
     let _ = tab.rename_active_pane("".as_bytes().to_vec(), client_id);
     let pane = tab.get_pane_with_id(pane_id).unwrap();
     assert_eq!(pane.current_title(), fallback);
@@ -17558,7 +17558,7 @@ pub fn cli_rename_active_pane_then_interactive_esc_restores() {
     let pane_id = PaneId::Terminal(1);
     // CLI rename
     let _ = tab.rename_active_pane("spark".as_bytes().to_vec(), client_id);
-    // Enter interactive rename, type something
+    // Enter interactive rename, 类型 something
     if let Some(pane) = tab.get_active_pane_or_floating_pane_mut(client_id) {
         pane.store_pane_name();
     }
@@ -17758,10 +17758,10 @@ pub fn scroll_terminal_down_nonexistent_pane_id_is_a_noop() {
 
 #[test]
 fn floating_plugin_panes_are_notified_when_their_tab_is_hidden() {
-    // Regression test: Tab::visible() used to only walk the tiled panes, so a plugin living in a
-    // floating pane never learned that its tab had gone away. Plugins that idle on a timer (the
-    // session-manager re-reads the whole session list once a second) went on doing that work
-    // forever, even with no client attached to the session at all.
+    // Regression 测试: 标签页::可见() used to only walk the 平铺 窗格, so a 插件 living in a
+    // 浮动 窗格 never learned that its 标签页 had gone away. 插件 that idle on a timer (the
+    // 会话-manager re-reads the whole 会话 列表 once a second) went on doing that 工作
+    // forever, even with no 客户端 连接的 to the 会话 at all.
     let size = Size {
         cols: 121,
         rows: 20,

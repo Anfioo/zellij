@@ -27,7 +27,7 @@ impl ClipboardProvider {
                 let dest = match clipboard {
                     #[cfg(not(target_os = "macos"))]
                     Clipboard::Primary => 'p',
-                    #[cfg(target_os = "macos")] // primary selection does not exist on macos
+                    #[cfg(target_os = "macos")] // primary 选择 does not exist on macos
                     Clipboard::Primary => 'c',
                     Clipboard::System => 'c',
                 };
