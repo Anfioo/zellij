@@ -20,8 +20,8 @@ fn dim_style(bg: PaletteColor) -> ansi_term::Style {
         .dimmed()
 }
 
-// move elements from before_active and after_active into tabs_to_render while they fit in cols
-// adds collapsed_tabs to the left and right if there's left over tabs that don't fit
+// 将 before_active 和 after_active 中的元素移入 tabs_to_render，只要它们能放入 cols
+// 如果有剩余的标签页放不下，则在左右两侧添加折叠标签页
 fn populate_tabs_in_tab_line(
     tabs_before_active: &mut Vec<LinePart>,
     tabs_after_active: &mut Vec<LinePart>,
@@ -39,7 +39,7 @@ fn populate_tabs_in_tab_line(
         let left_count = tabs_before_active.len();
         let right_count = tabs_after_active.len();
 
-        // left_more_tab_index is first tab to the left of the leftmost visible tab
+        // left_more_tab_index 是最左侧可见标签页左边的第一个标签页
         let left_more_tab_index = left_count.saturating_sub(1);
         let collapsed_left = left_more_message(
             left_count,
@@ -49,7 +49,7 @@ fn populate_tabs_in_tab_line(
             dimmed,
         );
 
-        // right_more_tab_index is the first tab to the right of the rightmost visible tab
+        // right_more_tab_index 是最右侧可见标签页右边的第一个标签页
         let right_more_tab_index = left_count + tabs_to_render.len();
         let collapsed_right = right_more_message(
             right_count,
@@ -62,7 +62,7 @@ fn populate_tabs_in_tab_line(
         let total_size = collapsed_left.len + middle_size + collapsed_right.len;
 
         if total_size > cols {
-            // break and dont add collapsed tabs to tabs_to_render, they will not fit
+            // 中断且不将折叠标签页添加到 tabs_to_render，它们放不下
             break;
         }
 
@@ -78,7 +78,7 @@ fn populate_tabs_in_tab_line(
             usize::MAX
         };
 
-        // total size is shortened if the next tab to be added is the last one, as that will remove the collapsed tab
+        // 如果要添加的下一个标签页是最后一个，则总大小会缩短，因为这会移除折叠标签页
         let size_by_adding_left =
             left.saturating_add(total_size)
                 .saturating_sub(if left_count == 1 {
@@ -97,22 +97,22 @@ fn populate_tabs_in_tab_line(
 
         let left_fits = size_by_adding_left <= cols;
         let right_fits = size_by_adding_right <= cols;
-        // active tab is kept in the middle by adding to the side that
-        // has less width, or if the tab on the other side doesn't fit
+        // 通过向宽度较小的一侧添加标签页，或当另一侧的标签页放不下时，
+        // 活动标签页保持在中间
         if (total_left <= total_right || !right_fits) && left_fits {
-            // add left tab
+            // 添加左侧标签页
             let tab = tabs_before_active.pop().unwrap();
             middle_size += tab.len;
             total_left += tab.len;
             tabs_to_render.insert(0, tab);
         } else if right_fits {
-            // add right tab
+            // 添加右侧标签页
             let tab = tabs_after_active.remove(0);
             middle_size += tab.len;
             total_right += tab.len;
             tabs_to_render.push(tab);
         } else {
-            // there's either no space to add more tabs or no more tabs to add, so we're done
+            // 要么没有空间添加更多标签页，要么没有更多标签页可添加，因此我们完成了
             tabs_to_render.insert(0, collapsed_left);
             tabs_to_render.push(collapsed_right);
             break;
@@ -136,7 +136,7 @@ fn left_more_message(
         " ← +many ".to_string()
     };
     // 238
-    // chars length plus separator length on both sides
+    // 字符长度加上两侧分隔符的长度
     let more_text_len = more_text.width() + 2 * separator.width();
     let (text_color, sep_color) = (
         palette.ribbon_unselected.base,
@@ -174,7 +174,7 @@ fn right_more_message(
     } else {
         " +many → ".to_string()
     };
-    // chars length plus separator length on both sides
+    // 字符长度加上两侧分隔符的长度
     let more_text_len = more_text.width() + 2 * separator.width();
     let (text_color, sep_color) = (
         palette.ribbon_unselected.base,
@@ -343,7 +343,7 @@ pub fn tab_line(
             active_pane_scroll.map(|scroll| scroll_status(scroll, palette, dimmed));
     }
 
-    // Drop indicator if it would cause wrapping (active tab always rendered unconditionally)
+    // 如果会导致换行则丢弃指示器（活动标签页始终无条件渲染）
     let prefix_len = get_current_title_len(&prefix);
     let hint_budget = cols.saturating_sub(prefix_len + active_tab.len);
     if let Some(hint_part) = hint.and_then(|hint| hint_line_part(hint, hint_budget, dimmed)) {
@@ -574,7 +574,7 @@ pub fn style_key_with_modifier(
         .collect::<Vec<_>>()
         .join("-");
 
-    // Prints the keys
+    // 打印按键
     let key = keyvec
         .iter()
         .map(|key| {
@@ -586,7 +586,7 @@ pub fn style_key_with_modifier(
         })
         .collect::<Vec<String>>();
 
-    // Special handling of some pre-defined keygroups
+    // 对某些预定义按键组的特殊处理
     let key_string = key.join("");
     let key_separator = match &key_string[..] {
         "HJKL" => "",

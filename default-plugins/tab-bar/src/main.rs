@@ -88,7 +88,7 @@ impl ZellijPlugin for State {
             },
             Event::TabUpdate(tabs) => {
                 if let Some(active_tab_index) = tabs.iter().position(|t| t.active) {
-                    // tabs are indexed starting from 1 so we need to add 1
+                    // 标签页从 1 开始索引，所以我们需要加 1
                     let active_tab_idx = active_tab_index + 1;
 
                     if self.active_tab_idx != active_tab_idx || self.tabs != tabs {
@@ -187,8 +187,8 @@ impl ZellijPlugin for State {
             },
         }
         if self.tabs.is_empty() {
-            // no need to render if we have no tabs, this can sometimes happen on startup before we
-            // get the tab update and then we definitely don't want to render
+            // 如果没有标签页则无需渲染，这有时会在启动时、收到标签页更新之前发生，
+            // 那时我们肯定不想渲染
             should_render = false;
         }
         should_render

@@ -8,7 +8,7 @@ fn cursors<'a>(
     focused_clients: &'a [ClientId],
     multiplayer_colors: MultiplayerColors,
 ) -> (Vec<ANSIString<'a>>, usize) {
-    // cursor section, text length
+    // 光标部分，文本长度
     let mut len = 0;
     let mut cursors = vec![];
     for client_id in focused_clients.iter() {
@@ -71,14 +71,14 @@ pub fn render_tab(
     };
     let left_separator = style!(separator_fill_color, background_color).paint(separator);
     let right_separator_style = style!(background_color, separator_fill_color);
-    let mut tab_text_len = text.width() + (separator_width * 2) + 2; // +2 for padding
+    let mut tab_text_len = text.width() + (separator_width * 2) + 2; // +2 用于内边距
     let tab_styled_text = text_style.paint(format!(" {} ", text));
 
     let right_separator = right_separator_style.paint(separator);
     let tab_styled_text = if !focused_clients.is_empty() {
         let (cursor_section, extra_length) =
             cursors(focused_clients, palette.multiplayer_user_colors);
-        tab_text_len += extra_length + 2; // 2 for cursor_beginning and cursor_end
+        tab_text_len += extra_length + 2; // 2 用于 cursor_beginning 和 cursor_end
         let mut s = String::new();
         let cursor_beginning = text_style.paint("[").to_string();
         let cursor_section = ANSIStrings(&cursor_section).to_string();
@@ -120,7 +120,7 @@ pub fn tab_style(
     if tab.has_bell_notification || tab.is_flashing_bell {
         tabname.push_str(" [!]");
     }
-    // we only color alternate tabs differently if we can't use the arrow fonts to separate them
+    // 只有在无法使用箭头字体来分隔标签页时，我们才会对交替标签页使用不同颜色
     if !capabilities.arrow_fonts {
         is_alternate_tab = false;
     }
@@ -143,7 +143,7 @@ pub(crate) fn get_tab_to_focus(
 ) -> Option<usize> {
     let clicked_line_part = get_clicked_line_part(tab_line, mouse_click_col)?;
     let clicked_tab_idx = clicked_line_part.tab_index?;
-    // tabs are indexed starting from 1 so we need to add 1
+    // 标签页从 1 开始索引，所以我们需要加 1
     let clicked_tab_idx = clicked_tab_idx + 1;
     if clicked_tab_idx != active_tab_idx {
         return Some(clicked_tab_idx);
