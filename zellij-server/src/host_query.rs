@@ -1,23 +1,13 @@
-//! Classified representation of the host-terminal queries Zellij
-//! forwards on behalf of apps running inside panes.
+//! Zellij 代表窗格内运行的应用程序转发的主机终端查询的分类表示。
 //!
-//! The grid dispatcher already parses incoming OSC / CSI sequences
-//! via `vte`; rather than stashing the raw bytes and re-parsing them
-//! at the reply-synthesis stage, we capture the classification at
-//! intercept time into a [`HostQuery`]. The pipeline from Grid →
-//! Tab → Screen carries this enum; Screen's cache-fallback synthesis
-//! matches on the variants directly (no byte-level regex). When we
-//! have to actually send bytes on the wire (server → client → host
-//! terminal), [`HostQuery::to_query_bytes`] re-derives them from the
-//! enum.
+//! 网格调度器已经通过 `vte` 解析了传入的 OSC / CSI 序列；我们不在回复合成阶段存储原始字节并重新解析它们，而是在拦截时将分类捕获到 [`HostQuery`] 中。从 Grid → Tab → Screen 的流水线携带此枚举；Screen 的缓存回退合成直接匹配变体（无需字节级正则表达式）。当我们必须真正在线路上发送字节时（服务端 → 客户端 → 主机终端），[`HostQuery::to_query_bytes`] 会从枚举重新派生它们。
 
-/// The two OSC string terminators in common use. Apps that phrase
-/// their query with one expect the reply to mirror it.
+/// 常用的两种 OSC 字符串终止符。使用其中一种表述查询的应用程序期望回复能镜像它。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OscTerminator {
-    /// `ESC \` (String Terminator, xterm-style).
+    /// `ESC \`（字符串终止符，xterm 风格）。
     St,
-    /// `BEL` (`\x07`).
+    /// `BEL`（`\x07`）。
     Bel,
 }
 
@@ -38,20 +28,18 @@ impl OscTerminator {
     }
 }
 
-/// A whitelisted host-terminal query. Variants correspond one-to-one
-/// with the entries Grid intercepts and pushes on
-/// `pending_forwarded_queries`.
+/// 白名单中的主机终端查询。变体与 Grid 拦截并推送到 `pending_forwarded_queries` 上的条目一一对应。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum HostQuery {
-    /// `CSI 14 t` — text-area pixel dimensions.
+    /// `CSI 14 t` — 文本区域像素尺寸。
     TextAreaPixelSize,
-    /// `CSI 16 t` — character-cell pixel dimensions.
+    /// `CSI 16 t` — 字符单元格像素尺寸。
     CharacterCellPixelSize,
-    /// `OSC 10 ; ? <term>` — default foreground colour.
+    /// `OSC 10 ; ? <term>` — 默认前景色。
     DefaultForeground { terminator: OscTerminator },
-    /// `OSC 11 ; ? <term>` — default background colour.
+    /// `OSC 11 ; ? <term>` — 默认背景色。
     DefaultBackground { terminator: OscTerminator },
-    /// `OSC 4 ; N ; ? <term>` — palette register `N`.
+    /// `OSC 4 ; N ; ? <term>` — 调色板寄存器 `N`。
     PaletteRegister {
         index: u8,
         terminator: OscTerminator,
@@ -60,21 +48,12 @@ pub enum HostQuery {
         selection: char,
         terminator: OscTerminator,
     },
-    /// `CSI ? 996 n` — query the host terminal's color-palette theme
-    /// mode (light or dark). NOT forwarded to the host. Zellij has
-    /// already queried the host once at startup (via the client's
-    /// `\e[?996n` write) and tracks unsolicited DSR 997 updates while
-    /// `\e[?2031h` is enabled, so it can answer this from cache. The
-    /// Screen handler short-circuits this variant: rather than writing
-    /// to the wire it synthesises `\e[?997;{0|1|2}n` directly into the
-    /// originating pane's pty.
+    /// `CSI ? 996 n` — 查询主机终端的调色板主题模式（浅色或深色）。不转发给主机。Zellij 在启动时已经通过客户端的 `\e[?996n` 写入查询过主机一次，并在 `\e[?2031h` 启用期间跟踪未经请求的 DSR 997 更新，因此可以从缓存中回答。Screen 处理程序会短路此变体：它不向线路写入，而是直接将 `\e[?997;{0|1|2}n` 合成到发起窗格的 pty 中。
     ColorPaletteMode,
 }
 
 impl HostQuery {
-    /// Re-serialize this query as the byte sequence the host terminal
-    /// expects. Used by the client when it writes the query to its
-    /// stdout, and by tests that assert on wire shape.
+    /// 将此查询重新序列化为主机终端期望的字节序列。客户端在将查询写入其标准输出时使用，断言线路形状的测试也使用。
     pub fn to_query_bytes(&self) -> Vec<u8> {
         match self {
             HostQuery::TextAreaPixelSize => b"\x1b[14t".to_vec(),
@@ -102,11 +81,7 @@ impl HostQuery {
                 v.extend_from_slice(terminator.as_bytes());
                 v
             },
-            // `ColorPaletteMode` is answered locally by Zellij and never
-            // sent on the wire. Returning empty bytes keeps the call
-            // total without dirtying the wire format. Callers that
-            // bypass `Screen::forward_host_query` for this variant
-            // shouldn't be calling `to_query_bytes` on it at all.
+            // `ColorPaletteMode` 由 Zellij 本地回答，永远不会在线路上发送。返回空字节可以保持调用总数不变而不污染线路格式。绕过 `Screen::forward_host_query` 处理此变体的调用者根本不应该对它调用 `to_query_bytes`。
             HostQuery::ColorPaletteMode => Vec::new(),
         }
     }

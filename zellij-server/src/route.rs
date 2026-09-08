@@ -91,12 +91,10 @@ pub fn wait_for_action_completion(
     }
 }
 
-// This is used to wait for actions that span multiple threads until they logically end
-// dropping this struct sends a notification through the oneshot channel to the receiver, letting
-// it know the action is ended and thus releasing it
+// 这用于等待跨多个线程的操作直到它们逻辑上结束
+// 删除此结构体会通过 oneshot 通道向接收者发送通知，让它知道操作已结束从而释放它
 //
-// Note: Cloning this struct DOES NOT clone that internal receiver, it only implements Clone so
-// that it can be included in various other larger structs - DO NOT RELY ON CLONING IT!
+// 注意：克隆此结构体不会克隆该内部接收者，它仅实现 Clone 以便可以包含在各种其他更大的结构体中 — 不要依赖克隆它！
 #[derive(Debug)]
 pub struct NotificationEnd {
     channel: Option<oneshot::Sender<ActionCompletionResult>>,
@@ -110,7 +108,7 @@ pub struct NotificationEnd {
 
 impl Clone for NotificationEnd {
     fn clone(&self) -> Self {
-        // Always clone as None - only the original holder should signal completion
+        // 始终克隆为 None — 只有原始持有者应发出完成信号
         NotificationEnd {
             channel: None,
             exit_status: self.exit_status,
@@ -191,10 +189,9 @@ impl Drop for NotificationEnd {
     }
 }
 
-// `route_action` must not borrow from the `session_data` read guard.
-// otherwise blocking-CLI actions
-// (`wait_forever=true`) park this function while still holding the guard,
-// deadlocking concurrent `session_data.write()`s.
+// `route_action` 不得从 `session_data` 读取守卫中借用。
+// 否则阻塞式 CLI 操作 (`wait_forever=true`) 会在仍持有守卫的情况下挂起此函数，
+// 导致并发的 `session_data.write()` 死锁。
 fn new_pane_routing(
     no_focus: bool,
     near_current_pane: bool,
@@ -233,8 +230,7 @@ pub(crate) fn route_action(
     let action_name = action.to_string();
 
     if !action.is_mouse_action() {
-        // mouse actions should only send InputReceived to plugins
-        // if they do not result in text being marked, this is handled in Tab
+        // 鼠标操作应仅在不导致文本被标记时才向插件发送 InputReceived，这在 Tab 中处理
         senders
             .send_to_plugin(PluginInstruction::Update(vec![(
                 None,
@@ -244,11 +240,7 @@ pub(crate) fn route_action(
             .with_context(err_context)?;
     }
 
-    // we use this oneshot channel to wait for an action to be "logically"
-    // done, meaning that it traveled through all the threads it needed to travel through and the
-    // app has confirmed that it is complete. Once this happens, we get a signal through the
-    // wait_for_action_completion call below (or timeout after 1 second) and release this thread,
-    // allowing the client to produce another action without risking races
+    // 我们使用此 oneshot 通道等待操作 "逻辑上" 完成，这意味着它已经遍历了所有需要遍历的线程，并且应用程序已确认它已完成。一旦发生这种情况，我们通过下面的 wait_for_action_completion 调用获得信号（或在 1 秒后超时）并释放此线程，允许客户端产生另一个操作而不会有竞争风险
     let (completion_tx, completion_rx) = oneshot::channel();
 
     let mut wait_forever = false;
@@ -499,8 +491,7 @@ pub(crate) fn route_action(
                 .send_to_screen(ScreenInstruction::DumpLayout(
                     default_shell,
                     cli_client_id.unwrap_or(client_id), // we prefer the cli client here because
-                    // this is a cli query and we want to print
-                    // it there
+                    // 这是一个 cli 查询，我们想在那里打印它
                     Some(NotificationEnd::new(completion_tx)),
                 ))
                 .with_context(err_context)?;
@@ -716,11 +707,7 @@ pub(crate) fn route_action(
                 Some(NotificationEnd::new(completion_tx))
             };
 
-            // we prefer the pane id provided by the action explicitly over the one that originated
-            // it (this might be a bit misleading with "near_current_pane", but it's still the
-            // right behavior - in the latter case, if the originator does not wish for this
-            // behavior, they should not provide pane
-            // inside the placement, but rather have the current pane id be picked up instead)
+            // 我们优先使用操作显式提供的 pane id，而不是源自它的那个（这对于 "near_current_pane" 可能有点误导，但它仍然是正确的行为 — 在后一种情况下，如果发起者不希望此行为，他们不应在放置中提供 pane，而是让当前 pane id 被拾取）
             let pane_id = match placement {
                 NewPanePlacement::Stacked {
                     pane_id_to_stack_under,
@@ -794,8 +781,7 @@ pub(crate) fn route_action(
             senders.send_to_pty(pty_instr).with_context(err_context)?;
         },
         Action::SwitchModeForAllClients { input_mode } => {
-            // ModeUpdate broadcast is handled by the screen thread via
-            // change_mode_for_all_clients() -> change_mode() -> update_input_modes()
+            // ModeUpdate 广播由 screen 线程通过 change_mode_for_all_clients() -> change_mode() -> update_input_modes() 处理
             senders
                 .send_to_server(ServerInstruction::ChangeModeForAllClients(input_mode))
                 .with_context(err_context)?;
@@ -1038,7 +1024,7 @@ pub(crate) fn route_action(
             let shell = default_shell.clone();
             let is_web_client = false; // actions cannot be initiated directly from the web
 
-            // Construct completion_tx conditionally
+            // 有条件地构造 completion_tx
             let (completion_tx, block_on_first_terminal) = if let Some(condition) =
                 first_pane_unblock_condition
             {
@@ -1261,12 +1247,10 @@ pub(crate) fn route_action(
                 .with_context(err_context)?;
         },
         Action::Confirm => {
-            // no-op, these are deprecated and should be removed when we upgrade the server/client
-            // contract
+            // 空操作，这些已弃用，应在我们升级服务端/客户端契约时移除
         },
         Action::Deny => {
-            // no-op, these are deprecated and should be removed when we upgrade the server/client
-            // contract
+            // 空操作，这些已弃用，应在我们升级服务端/客户端契约时移除
         },
         #[allow(clippy::single_match)]
         Action::SkipConfirm { action } => match *action {
@@ -1503,7 +1487,7 @@ pub(crate) fn route_action(
                 .send_to_screen(ScreenInstruction::ClosePane(
                     PaneId::Terminal(terminal_pane_id),
                     None, // we send None here so that the terminal pane would be closed anywhere
-                    // in the app, not just in the client's tab
+                    // 在应用程序中，而不仅仅是在客户端的标签页中
                     Some(NotificationEnd::new(completion_tx)),
                     None,
                 ))
@@ -1516,7 +1500,7 @@ pub(crate) fn route_action(
                 .send_to_screen(ScreenInstruction::ClosePane(
                     PaneId::Plugin(plugin_pane_id),
                     None, // we send None here so that the terminal pane would be closed anywhere
-                    // in the app, not just in the client's tab
+                    // 在应用程序中，而不仅仅是在客户端的标签页中
                     Some(NotificationEnd::new(completion_tx)),
                     None,
                 ))
@@ -1661,7 +1645,7 @@ pub(crate) fn route_action(
             ..
         } => {
             drop(completion_tx); // releasing pipes is handled by the plugins, so we don't want
-                                 // this to block additionallu
+                                 // 这会额外阻塞
             if let Some(seen_cli_pipes) = seen_cli_pipes.as_mut() {
                 if !seen_cli_pipes.contains(&pipe_id) {
                     seen_cli_pipes.insert(pipe_id.clone());
@@ -1718,7 +1702,7 @@ pub(crate) fn route_action(
                 let should_open_in_place = in_place.unwrap_or(false);
                 let pane_id_to_replace = if should_open_in_place { pane_id } else { None };
                 if launch_new && plugin_id.is_none() {
-                    // we do this to make sure the plugin is unique (has a unique configuration parameter)
+                    // 我们这样做是为了确保插件是唯一的（具有唯一的配置参数）
                     configuration
                         .get_or_insert_with(BTreeMap::new)
                         .insert("_zellij_id".to_owned(), Uuid::new_v4().to_string());
@@ -1753,8 +1737,7 @@ pub(crate) fn route_action(
                 .send_to_screen(ScreenInstruction::ListClientsMetadata(
                     default_shell,
                     cli_client_id.unwrap_or(client_id), // we prefer the cli client here because
-                    // this is a cli query and we want to print
-                    // it there
+                    // 这是一个 cli 查询，我们想在那里打印它
                     Some(NotificationEnd::new(completion_tx)),
                 ))
                 .with_context(err_context)?;
@@ -1940,7 +1923,7 @@ pub(crate) fn route_action(
                 })
                 .with_context(err_context)?;
         },
-        // Pane-targeting CLI-only variants
+        // 面向窗格的仅 CLI 变体
         Action::ScrollUpByPaneId { pane_id } => {
             senders
                 .send_to_screen(ScreenInstruction::ScrollUpWithPaneId(
@@ -2118,7 +2101,7 @@ pub(crate) fn route_action(
                 ))
                 .with_context(err_context)?;
         },
-        // Tab-targeting CLI-only variants
+        // 面向标签页的仅 CLI 变体
         Action::UndoRenameTabByTabId { id } => {
             senders
                 .send_to_screen(ScreenInstruction::UndoRenameTabWithTabId(
@@ -2205,7 +2188,7 @@ pub(crate) fn route_action(
             }
         }
     }
-    // Return tab ID to CLI clients as plain text
+    // 以纯文本形式向 CLI 客户端返回标签页 ID
     if let Some(tab_id) = result.affected_tab_id {
         if let Some(cli_client_id) = cli_client_id {
             if let Some(ref os_input) = os_input {
@@ -2218,7 +2201,7 @@ pub(crate) fn route_action(
             }
         }
     }
-    // Return pane ID to CLI clients as plain text
+    // 以纯文本形式向 CLI 客户端返回窗格 ID
     if let Some(pane_id) = result.affected_pane_id {
         if let Some(cli_client_id) = cli_client_id {
             if let Some(ref os_input) = os_input {
@@ -2234,7 +2217,7 @@ pub(crate) fn route_action(
     Ok((should_break, Some(result)))
 }
 
-// this should only be used for one-off startup instructions
+// 这应仅用于一次性启动指令
 macro_rules! send_to_screen_or_retry_queue {
     ($senders:expr, $message:expr, $instruction: expr, $retry_queue:expr) => {{
         match $senders.as_ref() {
@@ -2279,7 +2262,7 @@ pub(crate) fn route_thread_main(
                         .ok()
                         .and_then(|r| r.as_ref().map(|r| r.senders.clone()));
 
-                    // Check if this is a watcher client and ignore input messages
+                    // 检查这是否是观察器客户端并忽略输入消息
                     let is_watcher = session_state.read().unwrap().is_watcher(&client_id);
                     if is_watcher {
                         match &instruction {
@@ -2305,8 +2288,7 @@ pub(crate) fn route_thread_main(
                                 }
                             },
                             ClientToServerMsg::TerminalResize { new_size } => {
-                                // For watchers: send size to Screen for rendering adjustments, but
-                                // this does not affect the screen size
+                                // 对于观察器：将尺寸发送到 Screen 以进行渲染调整，但这不影响屏幕尺寸
                                 send_to_screen_or_retry_queue!(
                                     senders,
                                     ScreenInstruction::WatcherTerminalResize(client_id, *new_size),
@@ -2316,10 +2298,10 @@ pub(crate) fn route_thread_main(
                                 .with_context(err_context)?;
                             },
                             _ => {
-                                // Ignore all input from watcher clients
+                                // 忽略来自观察器客户端的所有输入
                             },
                         }
-                        // don't do anything else for watchers
+                        // 对观察器不做任何其他操作
                         return Ok(should_break);
                     }
 
@@ -2329,15 +2311,13 @@ pub(crate) fn route_thread_main(
                             raw_bytes,
                             is_kitty_keyboard_protocol,
                         } => {
-                            // Track this as the last active client
+                            // 将此跟踪为最后活动的客户端
                             session_state
                                 .write()
                                 .unwrap()
                                 .set_last_active_client(client_id);
 
-                            // The read guard ends as a temporary in this expression so
-                            // `route_action` runs without holding `session_data.read()` —
-                            // see the doc comment on `route_action` for why this matters.
+                            // 读取守卫在此表达式中作为临时变量结束，因此 `route_action` 在不持有 `session_data.read()` 的情况下运行 — 有关其重要性，请参阅 `route_action` 上的文档注释。
                             let dispatch_inputs =
                                 session_data.read().unwrap().as_ref().and_then(|s| {
                                     let in_passthrough =
@@ -2377,7 +2357,7 @@ pub(crate) fn route_thread_main(
                                 dispatch_inputs
                             {
                                 for action in actions {
-                                    // Send user input to plugin thread for logging
+                                    // 将用户输入发送到插件线程以进行日志记录
                                     let _ = senders.send_to_plugin(PluginInstruction::UserInput {
                                         client_id,
                                         action: action.clone(),
@@ -2416,12 +2396,7 @@ pub(crate) fn route_thread_main(
                         } => {
                             let cli_client_id = client_id;
                             let client_id = if is_cli_client {
-                                // for cli clients, we want to default to the last active client
-                                // (i.e. the last client to have issued a keystroke) this is to
-                                // interpret actions that require a client_id (such as move focus,
-                                // detach, etc.) for which using the cli client id will not be
-                                // doing the right thing - using the last_active_client is almost
-                                // certainly correct in almost all cases
+                                // 对于 cli 客户端，我们希望默认为最后活动的客户端（即最后发出击键的客户端），这是为了解释需要 client_id 的操作（例如移动焦点、分离等），使用 cli 客户端 id 不会做正确的事情 — 使用 last_active_client 在几乎所有情况下几乎肯定是正确的
                                 session_state
                                     .read()
                                     .unwrap()
@@ -2432,7 +2407,7 @@ pub(crate) fn route_thread_main(
                                 maybe_client_id.unwrap_or(client_id)
                             };
 
-                            // Send user input to plugin thread for logging
+                            // 将用户输入发送到插件线程以进行日志记录
                             if let Some(ref senders) = senders {
                                 let _ = senders.send_to_plugin(PluginInstruction::UserInput {
                                     client_id,
@@ -2446,9 +2421,7 @@ pub(crate) fn route_thread_main(
                                 });
                             }
 
-                            // The read guard ends as a temporary in this expression so
-                            // `route_action` runs without holding `session_data.read()` —
-                            // see the doc comment on `route_action` for why this matters.
+                            // 读取守卫在此表达式中作为临时变量结束，因此 `route_action` 在不持有 `session_data.read()` 的情况下运行 — 有关其重要性，请参阅 `route_action` 上的文档注释。
                             let session_data_assets =
                                 session_data.read().unwrap().as_ref().map(|s| {
                                     (
@@ -2484,9 +2457,9 @@ pub(crate) fn route_thread_main(
                             }
                         },
                         ClientToServerMsg::TerminalResize { new_size } => {
-                            // Check if this is a watcher or regular client
+                            // 检查这是观察器还是常规客户端
                             if is_watcher {
-                                // For watchers: send size to Screen for tracking, don't affect screen size
+                                // 对于观察器：将尺寸发送到 Screen 进行跟踪，不影响屏幕尺寸
                                 send_to_screen_or_retry_queue!(
                                     senders.clone(),
                                     ScreenInstruction::WatcherTerminalResize(client_id, new_size),
@@ -2500,11 +2473,7 @@ pub(crate) fn route_thread_main(
                                     .to_anyhow()
                                     .with_context(err_context)?
                                     .set_client_size(client_id, new_size);
-                                // Per-tab sizing: Screen's RecomputeTabSize
-                                // handler is a no-op for clients without an
-                                // active tab yet (i.e. resizes arriving
-                                // before AddClient is processed), so no
-                                // session-level gating is needed.
+                                // 每标签页尺寸调整：Screen 的 RecomputeTabSize 处理程序对于尚未有活动标签页的客户端是空操作（即在 AddClient 处理之前到达的调整大小），因此不需要会话级别的门控。
                                 let _ = senders.as_ref().map(|s| {
                                     s.send_to_screen(ScreenInstruction::RecomputeTabSize(
                                         client_id, new_size,
@@ -2713,11 +2682,7 @@ pub(crate) fn route_thread_main(
                             token,
                             ref reply_bytes,
                         } => {
-                            // The client that owns this forward
-                            // answered — drop the in-flight entry
-                            // first so a later disconnect of that
-                            // client can't synthesize a spurious
-                            // empty reply for the same token.
+                            // 拥有此转发的客户端已回答 — 首先删除进行中条目，以便该客户端稍后断开连接时无法为同一令牌合成虚假的空回复。
                             session_state
                                 .write()
                                 .unwrap()
@@ -2881,13 +2846,7 @@ pub(crate) fn route_thread_main(
                     }
                     Ok(should_break)
                 };
-                // the parked instructions and the one just received form a single
-                // FIFO sequence: the server can become ready in the middle of the
-                // retry pass below, and handing it the fresh instruction while
-                // older ones are still parked would deliver them out of order (a
-                // stale nested AnnounceAck landing after the AncestryUpdate that
-                // supersedes it, for instance). Once one instruction has to be
-                // parked, every instruction behind it is parked too.
+                // 暂停的指令和刚收到的指令形成一个单一的 FIFO 序列：服务端可能在下面的重试过程中变得就绪，而在较旧的指令仍暂停时将新指令交给它会导致它们无序交付（例如，过时的嵌套 AnnounceAck 在取代它的 AncestryUpdate 之后到达）。一旦一个指令必须被暂停，它后面的每个指令也都会被暂停。
                 let retried_count = retry_queue.len();
                 let mut pending_instructions = std::mem::take(&mut retry_queue);
                 pending_instructions.push_back(instruction);
@@ -2907,7 +2866,7 @@ pub(crate) fn route_thread_main(
                         break 'route_loop;
                     }
                 }
-                // retry on loop around
+                // 在循环时重试
                 retry_queue = deferred_instructions;
             },
             Err(IpcReceiveError::Disconnected) => {
@@ -2932,12 +2891,10 @@ pub(crate) fn route_thread_main(
             },
         }
 
-        // signal to the client that the action has finished processing and it can either exit (if
-        // it's a cli client) or allow the user to perform another action (if it's an actively
-        // connected user)
+        // 向客户端发出信号，表明操作已完成处理，它可以退出（如果是 cli 客户端）或允许用户执行另一个操作（如果是主动连接的用户）
         let _ = os_input.send_to_client(client_id, ServerToClientMsg::UnblockInputThread);
     }
-    // route thread exited, make sure we clean up
+    // route 线程已退出，确保我们进行清理
     let _ = to_server.send(ServerInstruction::RemoveClient(client_id));
     Ok(())
 }
@@ -3267,7 +3224,7 @@ fn build_tabs_table_header(
 ) -> String {
     let mut header = Vec::new();
 
-    // Core fields (always shown)
+    // 核心字段（始终显示）
     header.push("TAB_ID");
     header.push("POSITION");
     header.push("NAME");
@@ -3309,7 +3266,7 @@ fn build_tabs_table_row(
 ) -> String {
     let mut row = Vec::new();
 
-    // Core fields
+    // 核心字段
     row.push(tab_info.tab_id.to_string());
     row.push(tab_info.position.to_string());
     row.push(tab_info.name.clone());
@@ -3458,9 +3415,9 @@ mod tests {
 
         let cloned = notification_end.clone();
 
-        // Verify the clone has the same data
+        // 验证克隆具有相同的数据
         assert_eq!(cloned.affected_tab_id, Some(99));
-        // But channel should be None (as per the Clone implementation comment)
+        // 但 channel 应为 None（根据 Clone 实现注释）
         assert!(cloned.channel.is_none());
     }
 }

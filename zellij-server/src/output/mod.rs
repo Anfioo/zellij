@@ -26,7 +26,7 @@ fn vte_goto_instruction(x_coords: usize, y_coords: usize, vte_output: &mut Strin
     write!(
         vte_output,
         "\u{1b}[{};{}H\u{1b}[m",
-        y_coords + 1, // + 1 because VTE is 1 indexed
+        y_coords + 1, // + 1 因为 VTE 是从 1 开始索引的
         x_coords + 1,
     )
     .with_context(|| {
@@ -41,7 +41,7 @@ fn vte_hide_cursor_instruction(vte_output: &mut String) -> Result<()> {
     write!(vte_output, "\u{1b}[?25l").context("failed to execute VTE instruction to hide cursor")
 }
 
-/// A selection region with associated styling for highlights and text selection.
+/// 具有高亮和文本选择相关样式的选择区域。
 #[derive(Debug, Clone, Copy)]
 pub struct HighlightSelection {
     pub selection: Selection,
@@ -146,7 +146,7 @@ fn serialize_chunks_with_newlines(
     let mut vte_output = String::new();
     let link_handler = link_handler.map(|l_h| l_h.borrow());
     for character_chunk in character_chunks {
-        // Skip chunks that are completely outside the size bounds
+        // 跳过完全在尺寸边界之外的块
         if let Some(size) = max_size {
             if character_chunk.y >= size.rows {
                 continue; // Chunk is below visible area
@@ -163,7 +163,7 @@ fn serialize_chunks_with_newlines(
         vte_output.push_str("\n\r");
         let mut chunk_width = character_chunk.x;
         for t_character in character_chunk.terminal_characters.iter() {
-            // Stop rendering if the next character would exceed max_size.cols
+            // 如果下一个字符将超过 max_size.cols，则停止渲染
             if let Some(size) = max_size {
                 if chunk_width + t_character.width() > size.cols {
                     break; // Stop rendering this chunk
@@ -211,7 +211,7 @@ fn serialize_chunks(
     let mut sixel_vte: Option<String> = None;
     let link_handler = link_handler.map(|l_h| l_h.borrow());
     for character_chunk in character_chunks {
-        // Skip chunks that are completely outside the size bounds
+        // 跳过完全在尺寸边界之外的块
         if let Some(size) = max_size {
             if character_chunk.y >= size.rows {
                 continue; // Chunk is below visible area
@@ -229,7 +229,7 @@ fn serialize_chunks(
             .with_context(err_context)?;
         let mut chunk_width = character_chunk.x;
         for t_character in character_chunk.terminal_characters.iter() {
-            // Stop rendering if the next character would exceed max_size.cols
+            // 如果下一个字符将超过 max_size.cols，则停止渲染
             if let Some(size) = max_size {
                 if chunk_width + t_character.width() > size.cols {
                     break; // Stop rendering this chunk
@@ -262,7 +262,7 @@ fn serialize_chunks(
     if let Some(sixel_image_store) = sixel_image_store {
         if let Some(sixel_chunks) = sixel_chunks {
             for sixel_chunk in sixel_chunks {
-                // Skip sixel chunks that are completely outside the size bounds
+                // 跳过完全在尺寸边界之外的 sixel 块
                 if let Some(size) = max_size {
                     if sixel_chunk.cell_y >= size.rows {
                         continue; // Sixel chunk is below visible area
@@ -289,9 +289,8 @@ fn serialize_chunks(
         }
     }
     if let Some(ref sixel_vte) = sixel_vte {
-        // we do this at the end because of the implied z-index,
-        // images should be above text unless the text was explicitly inserted after them (the
-        // latter being a case we handle in our own internal state and not in the output)
+        // 我们在最后这样做是因为隐含的 z-index，
+        // 图像应该在文本之上，除非文本是在它们之后显式插入的（后者是我们在自己的内部状态中处理的情况，而不是在输出中）
         let save_cursor_position = "\u{1b}[s";
         let restore_cursor_position = "\u{1b}[u";
         vte_output.push_str(save_cursor_position);
@@ -716,7 +715,7 @@ impl Output {
         for client_id in client_ids {
             self.add_character_chunks_to_client(client_id, character_chunks.clone(), z_index)
                 .context("failed to add character chunks for multiple clients")?;
-            // TODO: forgo clone by adding an all_clients thing?
+            // TODO: 通过添加 all_clients 来避免 clone？
         }
         Ok(())
     }
@@ -886,7 +885,7 @@ impl Output {
         for (client_id, client_character_chunks) in self.client_character_chunks.drain() {
             let mut client_serialized_render_instructions = String::new();
 
-            // append pre-vte instructions for this client
+            // 为此客户端附加 pre-vte 指令
             let host_display_cleared = self.clients_with_cleared_host_display.remove(&client_id);
             if let Some(pre_vte_instructions_for_client) =
                 self.pre_vte_instructions.remove(&client_id)
@@ -928,7 +927,7 @@ impl Output {
                 None
             };
 
-            // append the actual vte
+            // 附加实际的 vte
             let sixel_chunks_for_client = if client_host_is_sixel_capable {
                 self.sixel_chunks.get(&client_id)
             } else {
@@ -948,7 +947,7 @@ impl Output {
                 .with_context(err_context)?,
             ); // TODO: less allocations?
 
-            // append post-vte instructions for this client
+            // 为此客户端附加 post-vte 指令
             if let Some(post_vte_instructions_for_client) =
                 self.post_vte_instructions.remove(&client_id)
             {
@@ -973,7 +972,7 @@ impl Output {
         for (client_id, client_character_chunks) in self.client_character_chunks.drain() {
             let mut client_serialized_render_instructions = String::new();
 
-            // append pre-vte instructions for this client
+            // 为此客户端附加 pre-vte 指令
             if let Some(pre_vte_instructions_for_client) =
                 self.pre_vte_instructions.remove(&client_id)
             {
@@ -982,10 +981,10 @@ impl Output {
                 }
             }
 
-            // Add padding instructions if max_size is larger than content_size
+            // 如果 max_size 大于 content_size，则添加填充指令
             if let (Some(max_size), Some(content_size)) = (max_size, content_size) {
                 if max_size.rows > content_size.rows || max_size.cols > content_size.cols {
-                    // Clear each line from the end of rendered content to the end of the watcher's line
+                    // 清除从渲染内容末尾到观察器行末尾的每一行
                     for y in 0..content_size.rows {
                         let padding_instruction = format!(
                             "\u{1b}[{};{}H\u{1b}[m\u{1b}[K",
@@ -995,14 +994,14 @@ impl Output {
                         client_serialized_render_instructions.push_str(&padding_instruction);
                     }
 
-                    // Clear all content below the last rendered line
+                    // 清除最后渲染行下方的所有内容
                     let clear_below_instruction =
                         format!("\u{1b}[{};{}H\u{1b}[m\u{1b}[J", content_size.rows + 1, 1);
                     client_serialized_render_instructions.push_str(&clear_below_instruction);
                 }
             }
 
-            // append the actual vte with size constraints
+            // 附加实际的 vte with size constraints
             let client_host_is_sixel_capable = self
                 .sixel_host_capabilities
                 .borrow()
@@ -1028,7 +1027,7 @@ impl Output {
                 .with_context(err_context)?,
             );
 
-            // append post-vte instructions for this client
+            // 为此客户端附加 post-vte 指令
             if let Some(post_vte_instructions_for_client) =
                 self.post_vte_instructions.remove(&client_id)
             {
@@ -1037,7 +1036,7 @@ impl Output {
                 }
             }
 
-            // Check if cursor was cropped and hide it if necessary
+            // 检查光标是否被裁剪，并在必要时隐藏它
             if let (Some(max_size), Some((cursor_x, cursor_y))) =
                 (max_size, self.cursor_coordinates)
             {
@@ -1073,7 +1072,7 @@ impl Output {
         })
     }
     pub fn has_rendered_assets(&self) -> bool {
-        // pre_vte and post_vte are not considered rendered assets as they should not be visible
+        // pre_vte 和 post_vte 不被视为渲染资产，因为它们不应该可见
         self.client_character_chunks.values().any(|c| !c.is_empty())
             || self.sixel_chunks.values().any(|c| !c.is_empty())
             || self
@@ -1120,10 +1119,8 @@ impl Output {
     }
 }
 
-// this struct represents the geometry of a group of floating panes
-// we use it to filter out CharacterChunks who are behind these geometries
-// and so would not be visible. If a chunk is partially covered, it is adjusted
-// to include only the non-covered parts
+// 此结构体表示一组浮动窗格的几何形状
+// 我们用它来过滤掉在这些几何形状之后的 CharacterChunks，因此不可见。如果块被部分覆盖，则调整它以仅包含未被覆盖的部分
 #[derive(Debug, Clone, Default)]
 pub struct FloatingPanesStack {
     pub layers: Vec<PaneGeom>,
@@ -1154,9 +1151,7 @@ impl FloatingPanesStack {
                             .remove_covered_parts(pane_geom, &mut c_chunk)
                             .with_context(err_context)?;
                         if let Some(new_chunk_to_check) = new_chunk_to_check {
-                            // this happens when the pane covers the middle of the chunk, and so we
-                            // end up with an extra chunk we need to check (eg. against panes above
-                            // this one)
+                            // 当窗格覆盖块的中间时会发生这种情况，因此我们最终得到一个需要检查的额外块（例如，针对此窗格上方的窗格）
                             chunks_to_check.push(new_chunk_to_check);
                         }
                         if c_chunk.terminal_characters.is_empty() {
@@ -1384,14 +1379,14 @@ impl FloatingPanesStack {
         let c_chunk_right_side = c_chunk.x + (c_chunk.width()).saturating_sub(1);
         if pane_top_edge <= c_chunk.y && pane_bottom_edge >= c_chunk.y {
             if pane_left_edge <= c_chunk_left_side && pane_right_edge >= c_chunk_right_side {
-                // pane covers chunk completely
+                // 窗格完全覆盖块
                 drop(c_chunk.terminal_characters.drain(..));
                 return Ok(None);
             } else if pane_right_edge >= c_chunk_left_side
                 && pane_right_edge < c_chunk_right_side
                 && pane_left_edge <= c_chunk_left_side
             {
-                // pane covers chunk partially to the left
+                // 窗格部分覆盖块的左侧
                 let covered_part = c_chunk.drain_by_width(pane_right_edge + 1 - c_chunk_left_side);
                 drop(covered_part);
                 c_chunk.x = pane_right_edge + 1;
@@ -1400,11 +1395,11 @@ impl FloatingPanesStack {
                 && pane_left_edge >= c_chunk_left_side
                 && pane_right_edge >= c_chunk_right_side
             {
-                // pane covers chunk partially to the right
+                // 窗格部分覆盖块的右侧
                 c_chunk.retain_by_width(pane_left_edge - c_chunk_left_side);
                 return Ok(None);
             } else if pane_left_edge >= c_chunk_left_side && pane_right_edge <= c_chunk_right_side {
-                // pane covers chunk middle
+                // 窗格覆盖块的中间
                 let (left_chunk_characters, right_chunk_characters) = c_chunk
                     .cut_middle_out(
                         pane_left_edge - c_chunk_left_side,
@@ -1435,7 +1430,7 @@ impl FloatingPanesStack {
         s_chunk: &SixelImageChunk,
         character_cell_size: &SizeInPixels,
     ) -> Vec<SixelImageChunk> {
-        // round these up to the nearest cell edge
+        // 将这些向上舍入到最近的单元格边缘
         let rounded_sixel_image_pixel_height =
             if s_chunk.sixel_image_pixel_height % character_cell_size.height > 0 {
                 let modulus = s_chunk.sixel_image_pixel_height % character_cell_size.height;
@@ -1482,7 +1477,7 @@ impl FloatingPanesStack {
             && pane_top_edge <= s_chunk_bottom_edge
             && pane_intersects_with_chunk_vertically
         {
-            // pane covers image bottom
+            // 窗格覆盖图像底部
             let top_image_chunk = SixelImageChunk {
                 cell_x: s_chunk.cell_x,
                 cell_y: s_chunk.cell_y,
@@ -1498,7 +1493,7 @@ impl FloatingPanesStack {
             && pane_bottom_edge >= s_chunk_top_edge
             && pane_intersects_with_chunk_vertically
         {
-            // pane covers image top
+            // 窗格覆盖图像顶部
             let bottom_image_chunk = SixelImageChunk {
                 cell_x: s_chunk.cell_x,
                 cell_y: (pane_bottom_edge / character_cell_size.height) + 1,
@@ -1518,7 +1513,7 @@ impl FloatingPanesStack {
             && pane_left_edge <= s_chunk_right_edge
             && pane_intersects_with_chunk_horizontally
         {
-            // pane covers image right
+            // 窗格覆盖图像右侧
             let sixel_image_pixel_y = if s_chunk_top_edge < pane_top_edge {
                 s_chunk.sixel_image_pixel_y + (pane_top_edge - s_chunk_top_edge)
             } else {
@@ -1531,8 +1526,7 @@ impl FloatingPanesStack {
             };
             let left_image_chunk = SixelImageChunk {
                 cell_x: s_chunk.cell_x,
-                // if the pane_top_edge is lower than the image, we want to start there, because we
-                // already cut that part above when checking if the pane covered the chunk bottom
+                // 如果 pane_top_edge 低于图像，我们想从那里开始，因为我们在检查窗格是否覆盖块底部时已经在上面切掉了那部分
                 cell_y: std::cmp::max(s_chunk.cell_y, pane_top_edge / character_cell_size.height),
                 sixel_image_pixel_x: s_chunk.sixel_image_pixel_x,
                 sixel_image_pixel_y,
@@ -1550,7 +1544,7 @@ impl FloatingPanesStack {
             && pane_right_edge >= s_chunk_left_edge
             && pane_intersects_with_chunk_horizontally
         {
-            // pane covers image left
+            // 窗格覆盖图像左侧
             let sixel_image_pixel_y = if s_chunk_top_edge < pane_top_edge {
                 s_chunk.sixel_image_pixel_y + (pane_top_edge - s_chunk_top_edge)
             } else {
@@ -1566,8 +1560,7 @@ impl FloatingPanesStack {
                 + character_cell_size.width;
             let right_image_chunk = SixelImageChunk {
                 cell_x: (pane_right_edge / character_cell_size.width) + 1,
-                // if the pane_top_edge is lower than the image, we want to start there, because we
-                // already cut that part above when checking if the pane covered the chunk bottom
+                // 如果 pane_top_edge 低于图像，我们想从那里开始，因为我们在检查窗格是否覆盖块底部时已经在上面切掉了那部分
                 cell_y: std::cmp::max(s_chunk.cell_y, pane_top_edge / character_cell_size.height),
                 sixel_image_pixel_x,
                 sixel_image_pixel_y,
@@ -1583,7 +1576,7 @@ impl FloatingPanesStack {
             uncovered_chunks.push(right_image_chunk);
         }
         if uncovered_chunks.is_empty() {
-            // the pane doesn't cover the chunk at all, so we return it as is
+            // 窗格根本不覆盖块，所以我们原样返回它
             uncovered_chunks.push(*s_chunk);
         }
         uncovered_chunks
@@ -1852,7 +1845,7 @@ impl OutputBuffer {
         viewport_width: usize,
     ) -> Vec<TerminalCharacter> {
         let mut terminal_characters: Vec<TerminalCharacter> = row.columns.iter().cloned().collect();
-        // pad row
+        // 填充行
         let row_width = row.width();
         if row_width < viewport_width {
             let mut pad_character = EMPTY_TERMINAL_CHARACTER;
@@ -1879,7 +1872,7 @@ impl OutputBuffer {
         viewport_width: usize,
     ) -> Vec<TerminalCharacter> {
         match viewport.get(line_index) {
-            // TODO: iterator?
+            // TODO: 迭代器？
             Some(row) => self.extract_characters_from_row(row, viewport_width),
             None => {
                 vec![EMPTY_TERMINAL_CHARACTER; viewport_width]
@@ -1887,8 +1880,7 @@ impl OutputBuffer {
         }
     }
     pub fn changed_rects_in_viewport(&self, viewport_height: usize) -> HashMap<usize, usize> {
-        // group the changed lines into "changed_rects", which indicate where the line starts (the
-        // hashmap key) and how many lines are in there (its value)
+        // 将更改的行分组为 "changed_rects"，表示行从哪里开始（hashmap 键）以及其中有多少行（其值）
         let mut changed_rects: HashMap<usize, usize> = HashMap::new(); // <start_line_index, line_count>
         let mut last_changed_line_index: Option<usize> = None;
         let mut changed_line_count = 0;
@@ -1908,7 +1900,7 @@ impl OutputBuffer {
             },
         };
 
-        // TODO: move this whole thing to output_buffer
+        // TODO: 将这整个东西移到 output_buffer
         if self.should_update_all_lines {
             // for line_index in 0..self.viewport.len() {
             for line_index in 0..viewport_height {

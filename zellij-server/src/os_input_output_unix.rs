@@ -38,21 +38,19 @@ use zellij_utils::{errors::prelude::*, input::command::RunCommand};
 
 pub use async_trait::async_trait;
 
-/// An `AsyncReader` that wraps a `RawFd` using epoll via `AsyncFd`.
+/// 使用 `AsyncFd` 通过 epoll 包装 `RawFd` 的 `AsyncReader`。
 ///
-/// Construction sets O_NONBLOCK but defers `AsyncFd` registration to the first
-/// `read()` call, because `AsyncFd::new()` requires a live Tokio reactor and
-/// `spawn_terminal` runs on the plain PTY thread (outside the runtime).
+/// 构造时设置 O_NONBLOCK，但将 `AsyncFd` 注册推迟到第一次 `read()` 调用，因为 `AsyncFd::new()` 需要一个活动的 Tokio 反应器，而 `spawn_terminal` 在普通的 PTY 线程上运行（在运行时之外）。
 struct RawFdAsyncReader {
-    /// Holds the file before reactor registration; `None` after promotion.
+    /// 在反应器注册之前保存文件；提升后为 `None`。
     pending: Option<File>,
-    /// Populated on first `read()` inside the Tokio runtime.
+    /// 在 Tokio 运行时内的第一次 `read()` 时填充。
     async_fd: Option<AsyncFd<File>>,
 }
 
 impl RawFdAsyncReader {
     fn new(fd: RawFd) -> io::Result<Self> {
-        // Set O_NONBLOCK so AsyncFd can use epoll correctly
+        // 设置 O_NONBLOCK 以便 AsyncFd 能正确使用 epoll
         let borrowed_fd = unsafe { BorrowedFd::borrow_raw(fd) };
         let flags = fcntl(borrowed_fd, FcntlArg::F_GETFL)
             .map_err(|e| io::Error::from_raw_os_error(e as i32))?;
@@ -68,7 +66,7 @@ impl RawFdAsyncReader {
         })
     }
 
-    /// Lazily register with the Tokio reactor on first use.
+    /// 在首次使用时惰性注册到 Tokio 反应器。
     fn get_async_fd(&mut self) -> io::Result<&mut AsyncFd<File>> {
         if self.async_fd.is_none() {
             let file = self
@@ -111,7 +109,7 @@ fn set_terminal_size_using_fd(
     width_in_pixels: Option<u16>,
     height_in_pixels: Option<u16>,
 ) {
-    // TODO: do this with the nix ioctl
+    // TODO: 使用 nix ioctl 来做这件事
     let ws_xpixel = width_in_pixels.unwrap_or(0);
     let ws_ypixel = height_in_pixels.unwrap_or(0);
     let winsize = Winsize {
@@ -120,17 +118,14 @@ fn set_terminal_size_using_fd(
         ws_xpixel,
         ws_ypixel,
     };
-    // TIOCGWINSZ is an u32, but the second argument to ioctl is u64 on
-    // some platforms. When checked on Linux, clippy will complain about
-    // useless conversion.
+    // TIOCGWINSZ 是 u32，但在某些平台上 ioctl 的第二个参数是 u64。在 Linux 上检查时，clippy 会抱怨无用的转换。
     #[allow(clippy::useless_conversion)]
     unsafe {
         ioctl(fd, TIOCSWINSZ.into(), &winsize)
     };
 }
 
-/// Handle some signals for the child process. This will loop until the child
-/// process exits.
+/// 处理子进程的一些信号。这将循环直到子进程退出。
 fn handle_command_exit(mut child: Child) -> Result<Option<i32>> {
     let id = child.id();
     let err_context = || {
@@ -140,18 +135,17 @@ fn handle_command_exit(mut child: Child) -> Result<Option<i32>> {
         )
     };
 
-    // returns the exit status, if any
+    // 返回退出状态（如果有）
     let mut should_exit = false;
     let mut attempts = 3;
     let mut signals =
         signal_hook::iterator::Signals::new(&[SIGINT, SIGTERM]).with_context(err_context)?;
     'handle_exit: loop {
-        // test whether the child process has exited
+        // 测试子进程是否已退出
         match child.try_wait() {
             Ok(Some(status)) => {
-                // if the child process has exited, break outside of the loop
-                // and exit this function
-                // TODO: handle errors?
+                // 如果子进程已退出，跳出循环并退出此函数
+                // TODO: 处理错误？
                 break 'handle_exit Ok(status.code());
             },
             Ok(None) => {
@@ -167,7 +161,7 @@ fn handle_command_exit(mut child: Child) -> Result<Option<i32>> {
                 }
             }
         } else if attempts > 0 {
-            // let's try nicely first...
+            // 我们先友好地尝试一下...
             attempts -= 1;
             kill(
                 unistd::Pid::from_raw(child.id() as i32),
@@ -176,7 +170,7 @@ fn handle_command_exit(mut child: Child) -> Result<Option<i32>> {
             .with_context(err_context)?;
             continue;
         } else {
-            // when I say whoa, I mean WHOA!
+            // 当我说停的时候，我是说真的停！
             let _ = child.kill();
             break 'handle_exit Ok(None);
         }
@@ -196,7 +190,7 @@ fn handle_openpty(
         )
     };
 
-    // primary side of pty and child fd
+    // pty 的主端和子进程 fd
     let pid_primary = open_pty_res.master.into_raw_fd();
     let pid_secondary = open_pty_res.slave.into_raw_fd();
 
@@ -248,8 +242,7 @@ fn handle_openpty(
     Ok((pid_primary, child_id as RawFd))
 }
 
-/// Spawns a new terminal from the parent terminal with [`termios`](termios::Termios)
-/// `orig_termios`.
+/// 使用 [`termios`](termios::Termios) `orig_termios` 从父终端生成新终端。
 fn handle_terminal(
     cmd: RunCommand,
     failover_cmd: Option<RunCommand>,
@@ -259,8 +252,7 @@ fn handle_terminal(
 ) -> Result<(RawFd, RawFd)> {
     let err_context = || "failed to spawn child terminal".to_string();
 
-    // Create a pipe to allow the child the communicate the shell's pid to its
-    // parent.
+    // 创建一个管道，允许子进程将 shell 的 pid 传达给其父进程。
     match openpty(None, &orig_termios) {
         Ok(open_pty_res) => handle_openpty(open_pty_res, cmd, quit_cb, terminal_id),
         Err(e) => match failover_cmd {
@@ -276,7 +268,7 @@ fn handle_terminal(
     }
 }
 
-/// The Unix PTY backend. Manages native PTY file descriptors and signals.
+/// Unix PTY 后端。管理原生 PTY 文件描述符和信号。
 #[derive(Clone)]
 pub(crate) struct UnixPtyBackend {
     orig_termios: Arc<Mutex<Option<termios::Termios>>>,
@@ -284,17 +276,14 @@ pub(crate) struct UnixPtyBackend {
     next_terminal_id_counter: Arc<AtomicU32>,
 }
 
-/// Try to write as many bytes from `buf` as possible to `fd` without blocking.
+/// 尝试在不阻塞的情况下将 `buf` 中尽可能多的字节写入 `fd`。
 ///
-/// Loops on successful short writes and EINTR to drain as much as the kernel
-/// will accept. On EAGAIN (fd buffer full), stops and returns how many bytes
-/// were written so far (which may be 0). The caller is expected to re-queue
-/// any unwritten remainder.
+/// 在成功的短写入和 EINTR 上循环，以耗尽内核能接受的尽可能多的字节。在 EAGAIN（fd 缓冲区满）时，停止并返回到目前为止写入了多少字节（可能为 0）。调用者应重新排队任何未写入的剩余部分。
 fn try_write_to_fd(fd: RawFd, buf: &[u8]) -> Result<usize> {
     let mut written = 0;
     while written < buf.len() {
         match unistd::write(unsafe { BorrowedFd::borrow_raw(fd) }, &buf[written..]) {
-            Ok(0) => break, // fd returned 0 on non-empty buf; treat like EAGAIN
+            Ok(0) => break, // fd 在非空 buf 上返回 0；视为 EAGAIN
             Ok(n) => written += n,
             Err(nix::errno::Errno::EINTR) => continue,
             Err(nix::errno::Errno::EAGAIN) => break,
@@ -471,13 +460,9 @@ mod tests {
     use nix::sys::termios;
     use std::io::Read;
 
-    /// Verify that `try_write_to_fd` writes as many bytes as the kernel will
-    /// accept in one pass and returns a partial count (not an error) when the
-    /// PTY buffer fills up.
+    /// 验证 `try_write_to_fd` 在一次遍历中写入内核能接受的尽可能多的字节，并在 PTY 缓冲区填满时返回部分计数（而不是错误）。
     ///
-    /// A concurrent reader drains the slave side so some bytes are accepted.
-    /// The key assertion: the function returns Ok(n) where n <= buf.len(),
-    /// and the caller (PtyWriter) is responsible for re-queuing the rest.
+    /// 并发读取器排空从端，以便接受一些字节。关键断言：函数返回 Ok(n)，其中 n <= buf.len()，调用者 (PtyWriter) 负责重新排队其余部分。
     #[test]
     fn try_write_to_fd_returns_partial_on_full_buffer() {
         let pty = openpty(None, &None).expect("openpty failed");
@@ -491,13 +476,13 @@ mod tests {
         termios::tcsetattr(borrowed_slave, termios::SetArg::TCSANOW, &attrs)
             .expect("tcsetattr failed");
 
-        // O_NONBLOCK so write() returns EAGAIN instead of blocking
+        // O_NONBLOCK 使 write() 返回 EAGAIN 而不是阻塞
         let flags = fcntl(borrowed_master, FcntlArg::F_GETFL).expect("F_GETFL");
         let mut oflags = OFlag::from_bits_truncate(flags);
         oflags.insert(OFlag::O_NONBLOCK);
         fcntl(borrowed_master, FcntlArg::F_SETFL(oflags)).expect("F_SETFL");
 
-        // Fill most of the buffer, leaving some space
+        // 填满大部分缓冲区，留一些空间
         let chunk = vec![0x42u8; 1024];
         let mut total_filled = 0;
         loop {
@@ -512,16 +497,16 @@ mod tests {
             "should have written some bytes to fill buffer"
         );
 
-        // Read a small amount from the slave to free partial space
+        // 从从端读取少量数据以释放部分空间
         let mut drain = vec![0u8; 512];
         let slave_file = unsafe { std::fs::File::from_raw_fd(slave_fd) };
         let mut slave_reader = std::io::BufReader::new(&slave_file);
         let drained = slave_reader.read(&mut drain).expect("slave read failed");
         assert!(drained > 0, "should have drained some bytes");
-        // Prevent File from closing the slave fd — we close it manually below
+        // 防止 File 关闭从端 fd — 我们在下面手动关闭它
         std::mem::forget(slave_file);
 
-        // Now write more than the freed space — should get a partial write
+        // 现在写入比释放空间更多的数据 — 应该得到部分写入
         let size = 128 * 1024;
         let data: Vec<u8> = (0..size).map(|i| (i % 256) as u8).collect();
         let written = super::try_write_to_fd(master_fd, &data)
@@ -538,8 +523,7 @@ mod tests {
         }
     }
 
-    /// Verify that `try_write_to_fd` returns Ok(0) — not an error — when the
-    /// fd is completely full and cannot accept any bytes at all.
+    /// 验证当 fd 完全满且无法接受任何字节时，`try_write_to_fd` 返回 Ok(0) — 而不是错误。
     #[test]
     fn try_write_to_fd_returns_zero_on_stuck_pty() {
         let pty = openpty(None, &None).expect("openpty failed");
@@ -558,7 +542,7 @@ mod tests {
         oflags.insert(OFlag::O_NONBLOCK);
         fcntl(borrowed_master, FcntlArg::F_SETFL(oflags)).expect("F_SETFL");
 
-        // Fill the buffer completely — keep writing until we get Ok(0)
+        // 完全填满缓冲区 — 继续写入直到得到 Ok(0)
         let fill = vec![0x42u8; 1024];
         loop {
             match super::try_write_to_fd(master_fd, &fill) {
@@ -568,7 +552,7 @@ mod tests {
             }
         }
 
-        // Now the buffer is full — next write should return Ok(0)
+        // 现在缓冲区已满 — 下一次写入应返回 Ok(0)
         let written = super::try_write_to_fd(master_fd, &[0x01, 0x02, 0x03])
             .expect("try_write_to_fd should not error on EAGAIN");
 

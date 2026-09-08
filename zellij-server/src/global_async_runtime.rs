@@ -1,8 +1,8 @@
 use once_cell::sync::OnceCell;
 use tokio::runtime::Runtime;
 
-// Global tokio runtime for async I/O operations
-// Shared between plugin downloads, timers, and action completion tracking
+// 用于异步 I/O 操作的全局 tokio 运行时
+// 在插件下载、计时器和操作完成跟踪之间共享
 static TOKIO_RUNTIME: OnceCell<Runtime> = OnceCell::new();
 
 pub fn get_tokio_runtime() -> &'static Runtime {

@@ -6,7 +6,7 @@ use zellij_utils::errors::prelude::*;
 
 use serde::{Deserialize, Serialize};
 
-// 16kB log buffer
+// 16kB 日志缓冲区
 const ZELLIJ_MAX_PIPE_BUFFER_SIZE: usize = 16_384;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LoggingPipe {
@@ -56,9 +56,9 @@ impl Write for LoggingPipe {
         Ok(buf.len())
     }
 
-    // When we flush, check if current buffer is valid utf8 string, split by '\n' and truncate buffer in the process.
-    // We assume that eventually, flush will be called on valid string boundary (i.e. std::str::from_utf8(..).is_ok() returns true at some point).
-    // Above assumption might not be true, in which case we'll have to think about it. Make it simple for now.
+    // 当我们刷新时，检查当前缓冲区是否为有效的 utf8 字符串，按 '\n' 分割并在此过程中截断缓冲区。
+    // 我们假设最终会在有效的字符串边界上调用 flush（即 std::str::from_utf8(..).is_ok() 在某个时刻返回 true）。
+    // 上述假设可能不成立，在这种情况下我们将不得不考虑它。目前先简化处理。
     fn flush(&mut self) -> std::io::Result<()> {
         self.buffer.make_contiguous();
 
@@ -70,7 +70,7 @@ impl Write for LoggingPipe {
 
                     while let Some(msg) = split_converted_buffer.next() {
                         if split_converted_buffer.peek().is_none() {
-                            // Log last chunk iff the last char is endline. Otherwise do not do it.
+                            // 仅当最后一个字符是换行符时才记录最后一块。否则不记录。
                             if converted_buffer.ends_with('\n') && !msg.is_empty() {
                                 self.log_message(msg);
                                 consumed_bytes += msg.len() + 1;
@@ -92,7 +92,7 @@ impl Write for LoggingPipe {
     }
 }
 
-// Unit tests
+// 单元测试
 #[cfg(test)]
 mod logging_pipe_test {
 
@@ -175,7 +175,7 @@ mod logging_pipe_test {
 
         let test_buffer = "😱".as_bytes();
 
-        // make sure it's not valid utf-8 string if we drop last symbol
+        // 确保如果去掉最后一个符号，它不是有效的 utf8 字符串
         assert!(std::str::from_utf8(&test_buffer[..test_buffer.len() - 1]).is_err());
 
         pipe.write_all(&test_buffer[..test_buffer.len() - 1])

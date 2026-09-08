@@ -14,24 +14,24 @@ use zellij_utils::ipc::{ClientToServerMsg, IpcReceiverWithContext, ServerToClien
 
 use crate::ClientId;
 
-/// Per-terminal write behavior for the mock.
+/// 模拟对象的每终端写入行为。
 #[derive(Clone)]
 enum WriteBehavior {
-    /// Accept all bytes (like a healthy terminal).
+    /// 接受所有字节（像健康的终端一样）。
     AcceptAll,
-    /// Accept at most `n` bytes per write call (simulates short writes).
+    /// 每次写入调用最多接受 `n` 个字节（模拟短写入）。
     AcceptAtMost(usize),
-    /// Accept zero bytes (simulates EAGAIN / full buffer).
+    /// 接受零字节（模拟 EAGAIN / 缓冲区满）。
     AcceptNone,
-    /// Return an error (simulates EBADF, EIO, etc).
+    /// 返回错误（模拟 EBADF、EIO 等）。
     Error,
 }
 
 #[derive(Clone)]
 struct MockServerOsApi {
-    /// Controls how each terminal behaves on write.
+    /// 控制每个终端在写入时的行为。
     write_behavior: Arc<Mutex<HashMap<u32, WriteBehavior>>>,
-    /// Log of (terminal_id, bytes) for each successful write.
+    /// 每次成功写入的 (terminal_id, bytes) 日志。
     write_log: Arc<Mutex<Vec<(u32, Vec<u8>)>>>,
 }
 
@@ -169,7 +169,7 @@ impl ServerOsApi for MockServerOsApi {
     }
 }
 
-/// Helper: create a Bus and sender for PtyWriteInstruction with the given mock.
+/// 辅助函数：使用给定的模拟对象为 PtyWriteInstruction 创建 Bus 和发送器。
 fn make_test_bus(
     mock: MockServerOsApi,
 ) -> (
@@ -191,13 +191,13 @@ fn make_test_bus(
     (bus, sender_with_ctx)
 }
 
-/// Helper: send instructions and then Exit, run pty_writer_main, return when done.
+/// 辅助函数：发送指令然后 Exit，运行 pty_writer_main，完成后返回。
 fn run_pty_writer(
     bus: Bus<PtyWriteInstruction>,
     sender: SenderWithContext<PtyWriteInstruction>,
     instructions: Vec<PtyWriteInstruction>,
 ) {
-    // Send all instructions followed by Exit
+    // 发送所有指令，然后发送 Exit
     for instruction in instructions {
         sender.send(instruction).unwrap();
     }
@@ -226,7 +226,7 @@ fn full_write_completes_immediately() {
 #[test]
 fn partial_write_is_buffered_and_drained() {
     let mock = MockServerOsApi::new();
-    // Accept only 3 bytes at a time
+    // 一次只接受 3 个字节
     mock.set_behavior(1, WriteBehavior::AcceptAtMost(3));
     let mock_clone = mock.clone();
 
@@ -247,9 +247,9 @@ fn partial_write_is_buffered_and_drained() {
 #[test]
 fn eagain_on_one_terminal_does_not_block_another() {
     let mock = MockServerOsApi::new();
-    // Terminal 1 is stuck (EAGAIN)
+    // 终端 1 卡住了 (EAGAIN)
     mock.set_behavior(1, WriteBehavior::AcceptNone);
-    // Terminal 2 accepts everything
+    // 终端 2 接受一切
     mock.set_behavior(2, WriteBehavior::AcceptAll);
     let mock_clone = mock.clone();
 
@@ -263,18 +263,18 @@ fn eagain_on_one_terminal_does_not_block_another() {
         ],
     );
 
-    // Terminal 2 should have received its bytes despite terminal 1 being stuck
+    // 尽管终端 1 卡住了，终端 2 应该已收到其字节
     let written_2 = mock_clone.get_written_bytes(2);
     assert_eq!(written_2, b"good data");
 
-    // Terminal 1 data is lost (stuck until Exit, then dropped)
-    // — this is expected behavior; no assertion on terminal 1
+    // 终端 1 数据丢失（卡住直到 Exit，然后被丢弃）
+    // — 这是预期行为；不对终端 1 做断言
 }
 
 #[test]
 fn writes_to_same_terminal_preserve_order() {
     let mock = MockServerOsApi::new();
-    // Accept only 4 bytes at a time — forces buffering
+    // 一次只接受 4 个字节 — 强制缓冲
     mock.set_behavior(1, WriteBehavior::AcceptAtMost(4));
     let mock_clone = mock.clone();
 
@@ -299,20 +299,19 @@ fn writes_to_same_terminal_preserve_order() {
 #[test]
 fn memory_cap_drops_buffer_when_exceeded() {
     let mock = MockServerOsApi::new();
-    // Terminal is stuck — nothing drains
+    // 终端卡住了 — 没有任何东西被排空
     mock.set_behavior(1, WriteBehavior::AcceptNone);
     let mock_clone = mock.clone();
 
     let (bus, sender) = make_test_bus(mock);
 
-    // Send enough data to exceed MAX_PENDING_BYTES
+    // 发送足够多的数据以超过 MAX_PENDING_BYTES
     let chunk_size = 1024 * 1024; // 1 MB
     let mut instructions = Vec::new();
     for _ in 0..(MAX_PENDING_BYTES / chunk_size + 1) {
         instructions.push(PtyWriteInstruction::Write(vec![0x42; chunk_size], 1, None));
     }
-    // After the cap is exceeded, send a write to terminal 2 to verify
-    // the writer thread is still functional
+    // 超过上限后，向终端 2 发送一次写入以验证写入线程仍然正常工作
     instructions.push(PtyWriteInstruction::Write(b"still alive".to_vec(), 2, None));
     mock_clone.set_behavior(2, WriteBehavior::AcceptAll);
 
@@ -343,14 +342,14 @@ fn write_error_clears_terminal_queue() {
         ],
     );
 
-    // Terminal 1 should have nothing written (error cleared queue)
+    // 终端 1 应该没有写入任何内容（错误清除了队列）
     let written_1 = mock_clone.get_written_bytes(1);
     assert!(
         written_1.is_empty(),
         "errored terminal should have no written bytes"
     );
 
-    // Terminal 2 should be unaffected
+    // 终端 2 应该不受影响
     let written_2 = mock_clone.get_written_bytes(2);
     assert_eq!(written_2, b"should work");
 }

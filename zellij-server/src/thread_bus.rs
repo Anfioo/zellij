@@ -1,4 +1,4 @@
-//! Definitions and helpers for sending and receiving messages between threads.
+//! 用于在线程之间发送和接收消息的定义和辅助函数。
 
 use crate::{
     background_jobs::BackgroundJob, os_input_output::ServerOsApi, plugins::PluginInstruction,
@@ -8,7 +8,7 @@ use crate::{
 use zellij_utils::errors::prelude::*;
 use zellij_utils::{channels, channels::SenderWithContext, errors::ErrorContext};
 
-/// A container for senders to the different threads in zellij on the server side
+/// 服务端 zellij 中不同线程的发送器容器
 #[derive(Default, Clone)]
 pub struct ThreadSenders {
     pub to_screen: Option<SenderWithContext<ScreenInstruction>>,
@@ -17,8 +17,8 @@ pub struct ThreadSenders {
     pub to_server: Option<SenderWithContext<ServerInstruction>>,
     pub to_pty_writer: Option<SenderWithContext<PtyWriteInstruction>>,
     pub to_background_jobs: Option<SenderWithContext<BackgroundJob>>,
-    // this is a convenience for the unit tests
-    // it's not advisable to set it to true in production code
+    // 这是为单元测试提供的便利
+    // 不建议在生产代码中将其设置为 true
     pub should_silently_fail: bool,
 }
 
@@ -131,7 +131,7 @@ impl ThreadSenders {
 
     #[allow(unused)]
     pub fn silently_fail_on_send(mut self) -> Self {
-        // this is mostly used for the tests, see struct
+        // 这主要用于测试，参见结构体
         self.should_silently_fail = true;
         self
     }
@@ -140,23 +140,23 @@ impl ThreadSenders {
         &mut self,
         new_pty_writer: SenderWithContext<PtyWriteInstruction>,
     ) {
-        // this is mostly used for the tests, see struct
+        // 这主要用于测试，参见结构体
         self.to_pty_writer.replace(new_pty_writer);
     }
     #[allow(unused)]
     pub fn replace_to_pty(&mut self, new_pty: SenderWithContext<PtyInstruction>) {
-        // this is mostly used for the tests, see struct
+        // 这主要用于测试，参见结构体
         self.to_pty.replace(new_pty);
     }
 
     #[allow(unused)]
     pub fn replace_to_plugin(&mut self, new_to_plugin: SenderWithContext<PluginInstruction>) {
-        // this is mostly used for the tests, see struct
+        // 这主要用于测试，参见结构体
         self.to_plugin.replace(new_to_plugin);
     }
 }
 
-/// A container for a receiver, OS input and the senders to a given thread
+/// 给定线程的接收器、OS 输入和发送器的容器
 #[derive(Default)]
 pub(crate) struct Bus<T> {
     receivers: Vec<channels::Receiver<(T, ErrorContext)>>,
@@ -191,13 +191,13 @@ impl<T> Bus<T> {
     }
     #[allow(unused)]
     pub fn should_silently_fail(mut self) -> Self {
-        // this is mostly used for the tests
+        // 这主要用于测试
         self.senders.should_silently_fail = true;
         self
     }
     #[allow(unused)]
     pub fn empty() -> Self {
-        // this is mostly used for the tests
+        // 这主要用于测试
         Bus {
             receivers: vec![],
             senders: ThreadSenders {

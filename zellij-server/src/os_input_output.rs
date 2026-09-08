@@ -35,14 +35,9 @@ use std::{
 
 pub use async_trait::async_trait;
 
-/// Check whether a candidate path refers to an executable file, considering
-/// PATHEXT extensions on Windows (e.g. `.exe`, `.cmd`).
+/// 检查候选路径是否指向可执行文件，考虑 Windows 上的 PATHEXT 扩展名（如 `.exe`、`.cmd`）。
 ///
-/// On Windows, when the candidate has no extension we try each PATHEXT
-/// variant BEFORE the bare match, mirroring cmd.exe's resolution. Tools like
-/// Composer install both `composer` (a Unix launcher) and `composer.bat`
-/// (the Windows launcher) side by side; returning the bare file would send
-/// a non-PE binary to CreateProcessW and fail with ERROR_BAD_EXE_FORMAT.
+/// 在 Windows 上，当候选文件没有扩展名时，我们会在裸匹配之前尝试每个 PATHEXT 变体，镜像 cmd.exe 的解析方式。像 Composer 这样的工具会同时安装 `composer`（Unix 启动器）和 `composer.bat`（Windows 启动器）；返回裸文件会将非 PE 二进制文件发送给 CreateProcessW 并因 ERROR_BAD_EXE_FORMAT 而失败。
 fn find_executable(candidate: &std::path::Path) -> Option<PathBuf> {
     #[cfg(windows)]
     {
@@ -70,8 +65,7 @@ fn find_executable(candidate: &std::path::Path) -> Option<PathBuf> {
     None
 }
 
-/// Resolve a command to its absolute path, searching the working directory,
-/// then PATH (and PATHEXT on Windows).
+/// 将命令解析为其绝对路径，先搜索工作目录，再搜索 PATH（Windows 上还包括 PATHEXT）。
 pub(crate) fn resolve_command(cmd: &RunCommand) -> Option<PathBuf> {
     let command = &cmd.command;
     match cmd.cwd.as_ref() {
@@ -101,8 +95,7 @@ pub(crate) fn command_exists(cmd: &RunCommand) -> bool {
     resolve_command(cmd).is_some()
 }
 
-// this is a utility method to separate the arguments from a pathbuf before we turn it into a
-// Command. eg. "/usr/bin/vim -e" ==> "/usr/bin/vim" + "-e" (the latter will be pushed to args)
+// 这是一个实用方法，用于在将 pathbuf 转换为 Command 之前从中分离参数。例如 "/usr/bin/vim -e" ==> "/usr/bin/vim" + "-e"（后者将被推送到 args）
 fn separate_command_arguments(command: &mut PathBuf, args: &mut Vec<String>) {
     let mut parts = vec![];
     let mut current_part = String::new();
@@ -122,15 +115,11 @@ fn separate_command_arguments(command: &mut PathBuf, args: &mut Vec<String>) {
     }
 }
 
-/// If a [`TerminalAction::OpenFile(file)`] is given, the text editor specified by environment variable `EDITOR`
-/// (or `VISUAL`, if `EDITOR` is not set) will be started in the new terminal, with the given
-/// file open.
-/// If [`TerminalAction::RunCommand(RunCommand)`] is given, the command will be started
-/// in the new terminal.
-/// If None is given, the shell specified by environment variable `SHELL` will
-/// be started in the new terminal.
+/// 如果给定 [`TerminalAction::OpenFile(file)`]，将在新终端中启动由环境变量 `EDITOR` 指定的文本编辑器（如果未设置 `EDITOR` 则使用 `VISUAL`），并打开给定文件。
+/// 如果给定 [`TerminalAction::RunCommand(RunCommand)`]，将在新终端中启动该命令。
+/// 如果给定 None，将在新终端中启动由环境变量 `SHELL` 指定的 shell。
 ///
-/// Returns (cmd, failover_cmd).
+/// 返回 (cmd, failover_cmd)。
 fn build_command(
     terminal_action: TerminalAction,
     default_editor: Option<PathBuf>,
@@ -171,9 +160,9 @@ fn build_command(
                     args.push(format!("+{}", line_number));
                     args.push(file_to_open);
                 } else if command.ends_with("hx") || command.ends_with("helix") {
-                    // at the time of writing, helix only supports this syntax
-                    // and it might be a good idea to leave this here anyway
-                    // to keep supporting old versions
+                    // 在编写本文时，helix 仅支持此语法
+                    // 而且无论如何将其保留在这里可能是个好主意
+                    // 以继续支持旧版本
                     args.push(format!("{}:{}", file_to_open, line_number));
                 } else {
                     args.push(file_to_open);
@@ -202,15 +191,11 @@ fn build_command(
     (cmd, failover_cmd)
 }
 
-// The ClientSender is in charge of sending messages to the client on a special thread
-// This is done so that when the unix socket buffer is full, we won't block the entire router
-// thread
-// When the above happens, the ClientSender buffers messages in hopes that the congestion will be
-// freed until we runs out of buffer space.
-// If we run out of buffer space, we bubble up an error sot hat the router thread will give up on
-// this client and we'll stop sending messages to it.
-// If the client ever becomes responsive again, we'll send one final "Buffer full" message so it
-// knows what happened.
+// ClientSender 负责在一个特殊线程上向客户端发送消息
+// 这样做是为了在 unix socket 缓冲区已满时，不会阻塞整个路由器线程
+// 当上述情况发生时，ClientSender 会缓冲消息，希望拥塞能被解除，直到我们耗尽缓冲区空间。
+// 如果我们耗尽了缓冲区空间，会向上抛出错误，以便路由器线程放弃此客户端，我们将停止向其发送消息。
+// 如果客户端再次变得有响应，我们会发送最后一条 "Buffer full" 消息，让它知道发生了什么。
 #[derive(Clone)]
 struct ClientSender {
     client_id: ClientId,
@@ -219,16 +204,8 @@ struct ClientSender {
 
 impl ClientSender {
     pub fn new(client_id: ClientId, mut sender: IpcSenderWithContext<ServerToClientMsg>) -> Self {
-        // FIXME(hartan): This queue is responsible for buffering messages between server and
-        // client. If it fills up, the client is disconnected with a "Buffer full" sort of error
-        // message. It was previously found to be too small (with depth 50), so it was increased to
-        // 5000 instead. This decision was made because it was found that a queue of depth 5000
-        // doesn't cause noticeable increase in RAM usage, but there's no reason beyond that. If in
-        // the future this is found to fill up too quickly again, it may be worthwhile to increase
-        // the size even further (or better yet, implement a redraw-on-backpressure mechanism).
-        // We, the zellij maintainers, have decided against an unbounded
-        // queue for the time being because we want to prevent e.g. the whole session being killed
-        // (by OOM-killers or some other mechanism) just because a single client doesn't respond.
+        // FIXME(hartan): 此队列负责在服务端和客户端之间缓冲消息。如果它满了，客户端会因类似 "Buffer full" 的错误消息而断开连接。之前发现它太小（深度为 50），因此增加到了 5000。做出这个决定是因为发现深度为 5000 的队列不会导致 RAM 使用量明显增加，但除此之外没有其他原因。如果将来发现它又太快填满，可能值得进一步增加大小（或者更好的是，实现一个背压时重绘机制）。
+        // 我们 zellij 维护者暂时决定不使用无界队列，因为我们希望防止例如整个会话仅仅因为单个客户端不响应而被杀死（由 OOM-killer 或其他机制）。
         let (client_buffer_sender, client_buffer_receiver) = channels::bounded(5000);
         std::thread::spawn(move || {
             let err_context = || format!("failed to send message to client {client_id}");
@@ -277,11 +254,10 @@ pub struct ServerOsInputOutput {
     cached_resizes: Arc<Mutex<Option<BTreeMap<u32, (u16, u16, Option<u16>, Option<u16>)>>>>,
 }
 
-/// A null `AsyncReader` for held panes (produces EOF immediately).
+/// 用于挂起窗格的空 `AsyncReader`（立即产生 EOF）。
 pub(crate) struct NullAsyncReader;
 
-// async fn in traits is not supported by rust, so dtolnay's excellent async_trait macro is being
-// used. See https://smallcultfollowing.com/babysteps/blog/2019/10/26/async-fn-in-traits-are-hard/
+// Rust 不支持 trait 中的 async fn，因此使用了 dtolnay 出色的 async_trait 宏。参见 https://smallcultfollowing.com/babysteps/blog/2019/10/26/async-fn-in-traits-are-hard/
 #[async_trait]
 pub trait AsyncReader: Send + Sync {
     async fn read(&mut self, buf: &mut [u8]) -> Result<usize, io::Error>;
@@ -294,8 +270,7 @@ impl AsyncReader for NullAsyncReader {
     }
 }
 
-/// The `ServerOsApi` trait represents an abstract interface to the features of an operating system that
-/// Zellij server requires.
+/// `ServerOsApi` trait 表示 Zellij 服务端所需的操作系统功能的抽象接口。
 pub trait ServerOsApi: Send + Sync {
     fn set_terminal_size_using_terminal_id(
         &self,
@@ -305,31 +280,31 @@ pub trait ServerOsApi: Send + Sync {
         width_in_pixels: Option<u16>,
         height_in_pixels: Option<u16>,
     ) -> Result<()>;
-    /// Spawn a new terminal, with a terminal action. The returned tuple contains:
+    /// 使用终端操作生成新终端。返回的元组包含：
     /// - terminal_id (u32)
-    /// - an async reader for the PTY output
-    /// - the child process PID, if available (Option<u32>)
+    /// PTY 输出的异步读取器
+    /// - 子进程 PID（如果可用）(Option<u32>)
     fn spawn_terminal(
         &self,
         terminal_action: TerminalAction,
         quit_cb: Box<dyn Fn(PaneId, Option<i32>, RunCommand) + Send>,
         default_editor: Option<PathBuf>,
     ) -> Result<(u32, Box<dyn AsyncReader>, Option<u32>)>;
-    // reserves a terminal id without actually opening a terminal
+    // 保留终端 ID 而不实际打开终端
     fn reserve_terminal_id(&self) -> Result<u32> {
         unimplemented!()
     }
-    /// Write bytes to the standard input of the virtual terminal referred to by `terminal_id`.
+    /// 将字节写入由 `terminal_id` 引用的虚拟终端的标准输入。
     fn write_to_tty_stdin(&self, terminal_id: u32, buf: &[u8]) -> Result<usize>;
-    /// Wait until all output written to the terminal has been transmitted.
+    /// 等待直到写入终端的所有输出都已传输完毕。
     fn tcdrain(&self, terminal_id: u32) -> Result<()>;
-    /// Terminate the process with process ID `pid`. (SIGHUP)
+    /// 终止进程 ID 为 `pid` 的进程。(SIGHUP)
     fn kill(&self, pid: u32) -> Result<()>;
-    /// Terminate the process with process ID `pid`. (SIGKILL)
+    /// 终止进程 ID 为 `pid` 的进程。(SIGKILL)
     fn force_kill(&self, pid: u32) -> Result<()>;
-    /// Send SIGINT to the process with process ID `pid`
+    /// 向进程 ID 为 `pid` 的进程发送 SIGINT
     fn send_sigint(&self, pid: u32) -> Result<()>;
-    /// Returns a [`Box`] pointer to this [`ServerOsApi`] struct.
+    /// 返回指向此 [`ServerOsApi`] 结构体的 [`Box`] 指针。
     fn box_clone(&self) -> Box<dyn ServerOsApi>;
     fn send_to_client(&self, client_id: ClientId, msg: ServerToClientMsg) -> Result<()>;
     fn new_client(
@@ -337,7 +312,7 @@ pub trait ServerOsApi: Send + Sync {
         client_id: ClientId,
         stream: LocalSocketStream,
     ) -> Result<IpcReceiverWithContext<ClientToServerMsg>>;
-    /// Create a new client with a separate reply stream (Windows dual-pipe IPC).
+    /// 使用单独的回复流创建新客户端（Windows 双管道 IPC）。
     fn new_client_with_reply(
         &mut self,
         client_id: ClientId,
@@ -346,18 +321,17 @@ pub trait ServerOsApi: Send + Sync {
     ) -> Result<IpcReceiverWithContext<ClientToServerMsg>>;
     fn remove_client(&mut self, client_id: ClientId) -> Result<()>;
     fn load_palette(&self) -> Palette;
-    /// Returns the current working directory for a given pid
+    /// 返回给定 pid 的当前工作目录
     fn get_cwd(&self, pid: u32) -> Option<PathBuf>;
-    /// Returns the current working directory for multiple pids
+    /// 返回多个 pid 的当前工作目录
     fn get_cwds(&self, _pids: Vec<u32>) -> (HashMap<u32, PathBuf>, HashMap<u32, Vec<String>>) {
         (HashMap::new(), HashMap::new())
     }
-    /// Get a list of all running commands by their parent process id
+    /// 按父进程 ID 获取所有正在运行的命令的列表
     fn get_all_cmds_by_ppid(&self, _post_hook: &Option<String>) -> HashMap<String, Vec<String>> {
         HashMap::new()
     }
-    /// For each `(terminal_id, shell_pid)` pane, return the foreground command running in its
-    /// controlling terminal, keyed by `terminal_id`.
+    /// 对于每个 `(terminal_id, shell_pid)` 窗格，返回在其控制终端中运行的前台命令，以 `terminal_id` 为键。
     fn get_foreground_cmds(
         &self,
         _panes: &[(u32, u32)],
@@ -365,7 +339,7 @@ pub trait ServerOsApi: Send + Sync {
     ) -> HashMap<u32, Vec<String>> {
         HashMap::new()
     }
-    /// Writes the given buffer to a string
+    /// 将给定缓冲区写入字符串
     fn write_to_file(&mut self, buf: String, file: Option<String>) -> Result<()>;
 
     fn re_run_command_in_terminal(
@@ -640,8 +614,7 @@ impl ServerOsApi for ServerOsInputOutput {
         panes: &[(u32, u32)],
         post_hook: &Option<String>,
     ) -> HashMap<u32, Vec<String>> {
-        // Use ppid-based discovery on Windows, because it has no controlling-terminal
-        // foreground group.
+        // 在 Windows 上使用基于 ppid 的发现，因为它没有控制终端前台组。
         let ppids_to_cmds = self.get_all_cmds_by_ppid(post_hook);
         let mut cmds = HashMap::new();
         for &(terminal_id, shell_pid) in panes {

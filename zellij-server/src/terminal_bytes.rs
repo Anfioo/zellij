@@ -35,17 +35,10 @@ impl TerminalBytes {
         }
     }
     pub async fn listen(&mut self) -> Result<()> {
-        // This function reads bytes from the pty and then sends them as
-        // ScreenInstruction::PtyBytes to screen to be parsed there
-        // We also send a separate instruction to Screen to render as ScreenInstruction::Render
+        // 此函数从 pty 读取字节，然后将它们作为 ScreenInstruction::PtyBytes 发送到 screen 以在那里解析
+        // 我们还向 Screen 发送单独的指令以作为 ScreenInstruction::Render 进行渲染
         //
-        // We endeavour to send a Render instruction to screen immediately after having send bytes
-        // to parse - this is so that the rendering is quick and smooth. However, this can cause
-        // latency if the screen is backed up. For this reason, if we detect a peak in the time it
-        // takes to send the render instruction, we assume the screen thread is backed up and so
-        // only send a render instruction sparingly, giving screen time to process bytes and render
-        // while still allowing the user to see an indication that things are happening (the
-        // sparing render instructions)
+        // 我们努力在发送字节进行解析后立即向 screen 发送 Render 指令 — 这样渲染快速且流畅。然而，如果 screen 积压，这可能会导致延迟。因此，如果我们检测到发送渲染指令所需时间出现峰值，我们假设 screen 线程已积压，因此只少量发送渲染指令，给 screen 时间来处理字节和渲染，同时仍允许用户看到事情正在发生的指示（少量渲染指令）
         let err_context = || "failed to listen for bytes from PTY".to_string();
 
         let mut err_ctx = get_current_ctx();
@@ -74,20 +67,14 @@ impl TerminalBytes {
             }
         }
 
-        // Ignore any errors that happen here.
-        // We only leave the loop above when the pane exits. This can happen in a lot of ways, but
-        // the most problematic is when quitting zellij with `Ctrl+q`. That is because the channel
-        // for `Screen` will have exited already, so this send *will* fail. This isn't a problem
-        // per-se because the application terminates anyway, but it will print a lengthy error
-        // message into the log for every pane that was still active when we quit the application.
-        // This:
+        // 忽略这里发生的任何错误。
+        // 我们只在窗格退出时离开上面的循环。这可能以多种方式发生，但最有问题的是使用 `Ctrl+q` 退出 zellij 时。这是因为 `Screen` 的通道已经退出，所以此发送*将*失败。这本身不是问题，因为应用程序无论如何都会终止，但它会为我们退出应用程序时仍处于活动状态的每个窗格在日志中打印一条冗长的错误消息。
+        // 这：
         //
-        // 1. Makes the log rather pointless, because even when the application exits "normally",
-        //    there will be errors inside and
-        // 2. Leaves the impression we have a bug in the code and can't terminate properly
+        // 1. 使日志变得相当无意义，因为即使应用程序 "正常" 退出，里面也会有错误
+        // 2. 给人留下我们代码中有 bug 且无法正确终止的印象
         //
-        // FIXME: Ideally we detect whether the application is being quit and only ignore the error
-        // in that particular case?
+        // FIXME: 理想情况下，我们检测应用程序是否正在退出，并且只在那种特定情况下忽略错误？
         let _ = self.async_send_to_screen(ScreenInstruction::Render).await;
 
         Ok(())
@@ -96,7 +83,7 @@ impl TerminalBytes {
         &self,
         screen_instruction: ScreenInstruction,
     ) -> Result<Duration> {
-        // returns the time it blocked the thread for
+        // 返回它阻塞线程的时间
         let sent_at = Instant::now();
         let senders = self.senders.clone();
         task::spawn_blocking(move || senders.send_to_screen(screen_instruction))

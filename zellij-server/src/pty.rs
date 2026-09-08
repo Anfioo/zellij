@@ -45,7 +45,7 @@ pub enum ClientTabIndexOrPaneId {
     PaneId(PaneId),
 }
 
-/// Instructions related to PTYs (pseudoterminals).
+/// 与 PTY（伪终端）相关的指令。
 #[derive(Clone, Debug)]
 pub enum PtyInstruction {
     SpawnTerminal(
@@ -57,7 +57,7 @@ pub enum PtyInstruction {
         Option<NotificationEnd>, // completion signal
         bool,                    // set_blocking
     ), // bool (if Some) is
-    // should_float, String is an optional pane name
+    // should_float，String 是可选的窗格名称
     OpenInPlaceEditor(
         PathBuf,
         Option<usize>,
@@ -234,8 +234,7 @@ pub(crate) fn pty_thread_main(mut pty: Pty, layout: Box<Layout>) -> Result<()> {
                             run_command.hold_on_close,
                             Some(run_command.clone()),
                             if name.is_some() {
-                                // User explicitly provided a name — use it regardless
-                                // of use_terminal_title
+                                // 用户显式提供了名称 — 无论 use_terminal_title 如何都使用它
                                 name
                             } else if run_command.use_terminal_title {
                                 None
@@ -271,8 +270,7 @@ pub(crate) fn pty_thread_main(mut pty: Pty, layout: Box<Layout>) -> Result<()> {
                             None
                         };
 
-                        // if this command originated in a plugin, we send the plugin back an event
-                        // to let it know the command started and which pane_id it has
+                        // 如果此命令源自插件，我们向插件发回一个事件，让它知道命令已启动以及它具有哪个 pane_id
                         if let Some(originating_plugin) =
                             run_command.and_then(|r| r.originating_plugin)
                         {
@@ -537,7 +535,7 @@ pub(crate) fn pty_thread_main(mut pty: Pty, layout: Box<Layout>) -> Result<()> {
 
                 let mut all_tab_results = Vec::new();
 
-                // Process each tab
+                // 处理每个标签页
                 for (tab_layout_info, plugin_ids) in tab_layouts_with_plugin_ids {
                     match pty.spawn_terminals_for_layout_override(
                         cwd.clone(),
@@ -560,12 +558,12 @@ pub(crate) fn pty_thread_main(mut pty: Pty, layout: Box<Layout>) -> Result<()> {
                                 tab_layout_info.tab_index,
                                 e
                             );
-                            // Continue with other tabs (best-effort approach)
+                            // 继续处理其他标签页（尽力而为的方法）
                         },
                     }
                 }
 
-                // Send all results back to screen in one message
+                // 在一条消息中将所有结果发回 screen
                 pty.bus
                     .senders
                     .send_to_screen(ScreenInstruction::OverrideLayoutComplete(
@@ -640,9 +638,7 @@ pub(crate) fn pty_thread_main(mut pty: Pty, layout: Box<Layout>) -> Result<()> {
             } => {
                 let err_context = || format!("failed to rerun command in pane {:?}", pane_id);
 
-                // TODO: get configured default_shell from screen/tab as an option and default to
-                // this otherwise (also look for a place that turns get_default_shell into a
-                // RunCommand, we might have done this before)
+                // TODO: 从 screen/tab 获取配置的 default_shell 作为选项，否则默认使用此值（也寻找一个将 get_default_shell 转换为 RunCommand 的地方，我们之前可能已经这样做过）
                 let run_command = RunCommand {
                     command: shell.unwrap_or_else(|| get_default_shell()),
                     hold_on_close: false,
@@ -809,7 +805,7 @@ pub(crate) fn pty_thread_main(mut pty: Pty, layout: Box<Layout>) -> Result<()> {
                             kdl_and_files.clone(),
                         );
 
-                        // Update session save time for plugin query
+                        // 更新插件查询的会话保存时间
                         let timestamp_millis = std::time::SystemTime::now()
                             .duration_since(std::time::UNIX_EPOCH)
                             .unwrap_or_default()
@@ -980,7 +976,7 @@ impl Pty {
                 .and_then(|pane| match pane {
                     PaneId::Plugin(plugin_id) => self.plugin_cwds.get(plugin_id).cloned(),
                     PaneId::Terminal(id) => {
-                        // Try to get CWD from OS, fall back to cached value
+                        // 尝试从 OS 获取 CWD，回退到缓存值
                         self.id_to_child_pid
                             .get(id)
                             .and_then(|&pid| {
@@ -1002,7 +998,7 @@ impl Pty {
         if cwd.is_none() {
             *cwd = match pane_id {
                 PaneId::Terminal(terminal_pane_id) => {
-                    // Try to get CWD from OS, fall back to cached value
+                    // 尝试从 OS 获取 CWD，回退到缓存值
                     self.id_to_child_pid
                         .get(terminal_pane_id)
                         .and_then(|&pid| {
@@ -1022,10 +1018,10 @@ impl Pty {
         terminal_action: Option<TerminalAction>,
         client_or_tab_index: ClientTabIndexOrPaneId,
     ) -> Result<(u32, bool)> {
-        // bool is starts_held
+        // bool 表示 starts_held
         let err_context = || format!("failed to spawn terminal for {:?}", client_or_tab_index);
 
-        // returns the terminal id
+        // 返回终端 id
         let terminal_action = match client_or_tab_index {
             ClientTabIndexOrPaneId::ClientId(client_id)
             | ClientTabIndexOrPaneId::ClientIdNoFocus(client_id) => {
@@ -1061,7 +1057,7 @@ impl Pty {
             };
 
         if hold_on_start {
-            // we don't actually open a terminal in this case, just wait for the user to run it
+            // 在这种情况下我们实际上不打开终端，只是等待用户运行它
             let starts_held = hold_on_start;
             let terminal_id = self
                 .bus
@@ -1078,8 +1074,7 @@ impl Pty {
         let quit_cb = Box::new({
             let senders = self.bus.senders.clone();
             move |pane_id, exit_status, command| {
-                // if this command originated in a plugin, we send the plugin an event letting it
-                // know the command exited and some other useful information
+                // 如果此命令源自插件，我们向插件发送一个事件，让它知道命令已退出以及一些其他有用信息
                 if let PaneId::Terminal(pane_id) = pane_id {
                     if let Some(originating_command_plugin) = originating_command_plugin.as_ref() {
                         let update_event = Event::CommandPaneExited(
@@ -1179,7 +1174,7 @@ impl Pty {
         let (client_id, is_web_client) = client_id_and_is_web_client;
         self.fill_cwd(&mut default_shell, client_id);
 
-        // Match initial_panes commands to empty slots in the layout
+        // 将 initial_panes 命令匹配到布局中的空槽位
         let mut layout = layout;
         if let Some(ref initial_panes_vec) = initial_panes {
             for initial_pane in initial_panes_vec.iter() {
@@ -1199,7 +1194,7 @@ impl Pty {
                         break;
                     }
                 }
-                // Skip CommandOrPlugin::Plugin entries (already handled by plugin thread)
+                // 跳过 CommandOrPlugin::Plugin 条目（已由插件线程处理）
             }
         }
 
@@ -1266,7 +1261,7 @@ impl Pty {
             }
         }
 
-        // Option<RunCommand> should only be Some if the pane starts held
+        // Option<RunCommand> 仅在窗格以挂起状态启动时才应为 Some
         let new_tab_pane_ids: Vec<(u32, Option<RunCommand>)> = new_pane_pids
             .iter()
             .map(|(terminal_id, starts_held, run_command, _)| {
@@ -1288,7 +1283,7 @@ impl Pty {
             })
             .collect();
 
-        // Track the first terminal_id if blocking is requested
+        // 如果请求阻塞，则跟踪第一个 terminal_id
         let first_initial_pane_terminal_id = if block_on_first_terminal && !new_pane_pids.is_empty()
         {
             Some(new_pane_pids[0].0)
@@ -1296,7 +1291,7 @@ impl Pty {
             None
         };
 
-        // Prepare blocking_terminal for ApplyLayout
+        // 为 ApplyLayout 准备 blocking_terminal
         let (direct_completion_tx, blocking_terminal) =
             if let Some(terminal_id) = first_initial_pane_terminal_id {
                 (None, completion_tx.map(|tx| (terminal_id, tx)))
@@ -1330,7 +1325,7 @@ impl Pty {
         terminals_to_start.append(&mut new_floating_panes_pids);
         for (terminal_id, starts_held, run_command, reader_result) in terminals_to_start {
             if starts_held {
-                // we do not run a command or start listening for bytes on held panes
+                // 我们不在挂起的窗格上运行命令或开始侦听字节
                 continue;
             }
             match reader_result {
@@ -1468,7 +1463,7 @@ impl Pty {
             }
         }
 
-        // Option<RunCommand> should only be Some if the pane starts held
+        // Option<RunCommand> 仅在窗格以挂起状态启动时才应为 Some
         let new_tab_pane_ids: Vec<(u32, Option<RunCommand>)> = new_pane_pids
             .iter()
             .map(|(terminal_id, starts_held, run_command, _)| {
@@ -1508,7 +1503,7 @@ impl Pty {
         terminals_to_start.append(&mut new_floating_panes_pids);
         for (terminal_id, starts_held, run_command, reader_result) in terminals_to_start {
             if starts_held {
-                // we do not run a command or start listening for bytes on held panes
+                // 我们不在挂起的窗格上运行命令或开始侦听字节
                 continue;
             }
             match reader_result {
@@ -1655,7 +1650,7 @@ impl Pty {
                 }
                 let cmd = TerminalAction::RunCommand(command.clone());
                 if starts_held {
-                    // we don't actually open a terminal in this case, just wait for the user to run it
+                    // 在这种情况下我们实际上不打开终端，只是等待用户运行它
                     match self
                         .bus
                         .os_input
@@ -1794,7 +1789,7 @@ impl Pty {
                     },
                 }
             },
-            // Investigate moving plugin loading to here.
+            // 研究将插件加载移到此处。
             Some(Run::Plugin(_)) => Ok(None),
         }
     }
@@ -2016,7 +2011,7 @@ impl Pty {
                 .and_then(|pane| match pane {
                     PaneId::Plugin(plugin_id) => self.plugin_cwds.get(plugin_id).cloned(),
                     PaneId::Terminal(id) => {
-                        // Try to get CWD from OS, fall back to cached value
+                        // 尝试从 OS 获取 CWD，回退到缓存值
                         self.id_to_child_pid
                             .get(id)
                             .and_then(|&pid| {
@@ -2289,16 +2284,16 @@ impl Pty {
         match pane_id {
             PaneId::Terminal(terminal_id) => {
                 if let Some(&child_pid) = self.id_to_child_pid.get(&terminal_id) {
-                    // Query OS for current running command
+                    // 向 OS 查询当前正在运行的命令
                     if let Some(os_input) = self.bus.os_input.as_ref() {
-                        // First, try to get the foreground command (e.g., nvim running in bash)
+                        // 首先，尝试获取前台命令（例如，在 bash 中运行的 nvim）
                         let foreground_cmds = os_input.get_foreground_cmds(
                             &[(terminal_id, child_pid)],
                             &self.post_command_discovery_hook,
                         );
                         let cmd_foreground = foreground_cmds.get(&terminal_id);
 
-                        // If no foreground command, fall back to the shell itself
+                        // 如果没有前台命令，回退到 shell 本身
                         let (_cwds, cmds) = os_input.get_cwds(vec![child_pid]);
                         let cmd_sysinfo = cmds.get(&child_pid);
 
@@ -2332,7 +2327,7 @@ impl Pty {
         match pane_id {
             PaneId::Terminal(terminal_id) => {
                 if let Some(&child_pid) = self.id_to_child_pid.get(&terminal_id) {
-                    // Query OS for current working directory
+                    // 向 OS 查询当前工作目录
                     if let Some(os_input) = self.bus.os_input.as_ref() {
                         let (cwds, _cmds) = os_input.get_cwds(vec![child_pid]);
                         if let Some(cwd) = cwds.get(&child_pid) {

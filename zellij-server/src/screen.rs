@@ -1,32 +1,32 @@
-//! Things related to [`Screen`]s.
+//! 与 [`Screen`] 相关的内容。
 //!
-//! # Tab Identification
+//! # 标签页标识
 //!
-//! Tabs have two distinct identifiers:
+//! 标签页有两个不同的标识符：
 //!
-//! - **ID** (`tab.id`): Stable, unique identifier that never changes after creation.
-//!   Used as BTreeMap key and for internal tracking. Monotonically increasing.
+//! - **ID** (`tab.id`)：稳定、唯一的标识符，创建后永不改变。
+//!   用作 BTreeMap 键和内部跟踪。单调递增。
 //!
-//! - **Position** (`tab.position`): Current display order (0-based index in tab bar).
-//!   Changes when tabs are moved or closed. Used for user-facing operations.
+//! - **Position** (`tab.position`)：当前显示顺序（标签栏中从 0 开始的索引）。
+//!   在标签页移动或关闭时更改。用于面向用户的操作。
 //!
-//! # Terminology Convention
+//! # 术语约定
 //!
-//! - **"id"**: Always means stable identifier
-//! - **"position"**: Always means 0-based display order
-//! - **"index"**: Synonym for "position" (used in public/plugin APIs)
+//! - **"id"**：始终表示稳定标识符
+//! - **"position"**：始终表示从 0 开始的显示顺序
+//! - **"index"**："position" 的同义词（用于公共/插件 API）
 //!
-//! Examples:
-//! - `close_tab_by_id(5)` - Closes tab with stable ID 5
-//! - `CloseTabWithIndex(2)` - Closes tab at position 2 (3rd tab visually)
-//! - `get_tab_by_position(0)` - Gets first tab in display order
-//! - `PluginInstruction::NewTab(tab_id, ...)` - Uses ID for async communication
+//! 示例：
+//! - `close_tab_by_id(5)` - 关闭稳定 ID 为 5 的标签页
+//! - `CloseTabWithIndex(2)` - 关闭位置 2 的标签页（视觉上的第 3 个标签页）
+//! - `get_tab_by_position(0)` - 获取显示顺序中的第一个标签页
+//! - `PluginInstruction::NewTab(tab_id, ...)` - 使用 ID 进行异步通信
 //!
-//! # Key Data Structures
+//! # 关键数据结构
 //!
-//! - `tabs: BTreeMap<usize, Tab>`: Keyed by tab.id (stable identifier)
-//! - `active_tab_ids: BTreeMap<ClientId, usize>`: Maps clients to active tab ID
-//! - `tab_history: BTreeMap<ClientId, Vec<usize>>`: History of tab IDs per client
+//! - `tabs: BTreeMap<usize, Tab>`：以 tab.id（稳定标识符）为键
+//! - `active_tab_ids: BTreeMap<ClientId, usize>`：将客户端映射到活动标签页 ID
+//! - `tab_history: BTreeMap<ClientId, Vec<usize>>`：每个客户端的标签页 ID 历史
 
 use std::cell::RefCell;
 use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
@@ -2808,9 +2808,7 @@ impl Screen {
     ) -> u32 {
         // ColorPaletteMode is answered locally — Zellij already knows
         // the host's mode from its own startup query and from
-        // unsolicited DSR 997 updates. Skip the entire forwarding
-        // machinery (no token, no in-flight slot, no host round-trip)
-        // and write the reply straight to the originating pane's pty.
+        // 未经请求的 DSR 997 更新。跳过整个转发机制（没有令牌，没有进行中槽，没有主机往返），直接将回复写入发起窗格的 pty。
         if let crate::host_query::HostQuery::ColorPaletteMode = query {
             self.answer_color_palette_mode_query_locally(pane_id);
             return STARTUP_SENTINEL_TOKEN; // sentinel: no real forward happened
@@ -2823,8 +2821,7 @@ impl Screen {
             return self.enqueue_clipboard_forward(pane_id, query);
         }
         let token = self.next_forward_token;
-        // Skip over the reserved sentinel (0) on wrap; allocate a fresh
-        // u32 for every forward.
+        // 在回绕时跳过保留的哨兵 (0)；为每个转发分配一个新的 u32。
         self.next_forward_token = self.next_forward_token.wrapping_add(1);
         if self.next_forward_token == STARTUP_SENTINEL_TOKEN {
             self.next_forward_token = 1;
@@ -2929,9 +2926,7 @@ impl Screen {
             HostTerminalThemeMode::Light => 2,
         };
         let reply = format!("\u{1b}[?997;{}n", code).into_bytes();
-        // Route via Tab so the reply lands on the pane in the correct
-        // stream position and any PTY input the app emitted while
-        // waiting is replayed.
+        // 通过 Tab 路由，以便回复以正确的流位置到达窗格，并且应用程序在等待期间发出的任何 PTY 输入都会被重放。
         let _ = self.resume_pane_after_forward(pane_id, reply);
     }
 
@@ -2944,12 +2939,7 @@ impl Screen {
         })
     }
 
-    /// Dispatch a forward to the client and mark the slot as in-flight.
-    /// Spawns a one-shot timeout task on the global tokio runtime that
-    /// synthesizes an empty reply for `token` after
-    /// `SERVER_FORWARD_TIMEOUT_MS`. The handler's token-equality guard
-    /// makes the timeout a no-op if a real reply arrived first, so no
-    /// explicit cancellation is needed.
+    /// 将转发分派给客户端并将槽标记为进行中。在全局 tokio 运行时上生成一次性超时任务，在 `SERVER_FORWARD_TIMEOUT_MS` 后为 `token` 合成空回复。处理程序的令牌相等性守卫使超时在真实回复先到达时成为空操作，因此不需要显式取消。
     fn dispatch_forward(
         &mut self,
         token: u32,
@@ -2978,18 +2968,9 @@ impl Screen {
         });
     }
 
-    /// Handle a host-reply observed by the client for token `token`.
-    /// Writes the bytes to the originating pane's pty (if still present)
-    /// and releases the in-flight slot so the next queued forward can
-    /// dispatch.
+    /// 处理客户端为令牌 `token` 观察到的主机回复。将字节写入发起窗格的 pty（如果仍然存在），并释放进行中槽，以便下一个排队的转发可以分派。
     ///
-    /// An empty `reply_bytes` is treated as "nobody answered" — either
-    /// because no client was attached to forward the query, or the
-    /// chosen client's host timed out. In that case we try to answer
-    /// from Zellij's cached view of the host (pixel dims, bg/fg,
-    /// palette) so the pane still gets a well-formed reply instead of
-    /// zero bytes. If the cache has nothing relevant either, the pane
-    /// receives an empty write and the app decides what to do.
+    /// 空的 `reply_bytes` 被视为 "无人回答" — 要么是因为没有客户端连接来转发查询，要么是所选客户端的主机超时。在那种情况下，我们尝试从 Zellij 的主机缓存视图（像素尺寸、背景/前景、调色板）回答，以便窗格仍然得到格式良好的回复而不是零字节。如果缓存也没有相关内容，窗格会收到空写入，由应用程序决定怎么做。
     pub fn handle_forwarded_reply_from_host(
         &mut self,
         token: u32,
@@ -3006,14 +2987,7 @@ impl Screen {
             );
             return Ok(());
         }
-        // Stale-reply guard. Both the real `ForwardedReplyFromHost`
-        // path and the server-side timeout path land here. If a real
-        // reply landed first (releasing the slot AND dispatching the
-        // next queued forward), the late timeout's empty reply for the
-        // already-cleared token must be a no-op — releasing the slot
-        // again would clobber the new in-flight forward. The same
-        // logic also rejects duplicate replies and replies for tokens
-        // belonging to a previously-closed pane.
+        // 过时回复守卫。真实的 `ForwardedReplyFromHost` 路径和服务端超时路径都到达这里。如果真实回复先到达（释放槽并分派下一个排队的转发），则已清除令牌的延迟超时空回复必须是空操作 — 再次释放槽会破坏新的进行中转发。相同的逻辑也拒绝重复回复和属于先前关闭的窗格的令牌的回复。
         if self.forward_in_flight_token != Some(token) {
             log::debug!(
                 "Dropping stale forwarded reply (token={}, in-flight={:?}, len={} bytes)",
@@ -3032,15 +3006,11 @@ impl Screen {
                     } else {
                         reply_bytes
                     };
-                    // Route via Tab so the reply lands on the pane in
-                    // the correct stream position and any PTY input
-                    // the app emitted while waiting is replayed.
+                    // 通过 Tab 路由，以便回复以正确的流位置到达窗格，并且应用程序在等待期间发出的任何 PTY 输入都会被重放。
                     self.resume_pane_after_forward(pane_id, payload)?;
                 },
                 PaneId::Plugin(_) => {
-                    // Plugin panes do not issue whitelisted host queries;
-                    // if we reach here the mapping was populated
-                    // erroneously. Drop the reply.
+                    // 插件窗格不会发出白名单主机查询；如果我们到达这里，映射被错误地填充了。丢弃回复。
                     log::warn!(
                         "Discarding host reply for plugin pane (token={}); plugins do not forward CSI/OSC queries",
                         token
@@ -3048,7 +3018,7 @@ impl Screen {
                 },
             }
         }
-        // Release the slot and dispatch the next queued forward, if any.
+        // 释放槽并分派下一个排队的转发（如果有）。
         self.forward_in_flight_token = None;
         if let Some(next) = self.forward_queue.pop_front() {
             self.dispatch_forward(next.token, next.pane_id, next.query);
@@ -3056,11 +3026,7 @@ impl Screen {
         Ok(())
     }
 
-    /// Deliver a forwarded reply (or cache-fallback synthesis, or a
-    /// locally-answered query payload) to the originating pane via
-    /// the owning Tab. The Tab handler writes the bytes to PTY and
-    /// then re-feeds any PTY input that was buffered while the pane
-    /// was forward-paused, preserving query/reply ordering.
+    /// 通过所属标签页将转发的回复（或缓存回退合成，或本地回答的查询有效负载）交付给发起窗格。Tab 处理程序将字节写入 PTY，然后重新馈送在窗格转发暂停期间缓冲的任何 PTY 输入，保留查询/回复顺序。
     pub fn resume_pane_after_forward(
         &mut self,
         pane_id: PaneId,
@@ -3069,9 +3035,7 @@ impl Screen {
         let terminal_id = match pane_id {
             PaneId::Terminal(id) => id,
             PaneId::Plugin(_) => {
-                // Plugin panes do not forward queries — dropping is
-                // the correct behaviour matching the existing
-                // forwarding path's plugin-pane guard.
+                // 插件窗格不转发查询 — 丢弃是与现有转发路径的插件窗格守卫匹配的正确行为。
                 return Ok(());
             },
         };
@@ -3085,12 +3049,7 @@ impl Screen {
             }
         }
         if !found {
-            // No tab owns the pane — the pane was closed between the
-            // forward dispatch and the reply arrival. The terminal id
-            // is probably defunct; the write goes to the PTY writer
-            // anyway because an empty payload is the canonical "host
-            // declined" reply some apps rely on, and a non-empty
-            // payload may still be deliverable until the pty drains.
+            // 没有标签页拥有此窗格 — 窗格在转发分派和回复到达之间被关闭。终端 ID 可能已失效；写入仍然进入 PTY 写入器，因为空有效负载是某些应用程序依赖的规范 "主机拒绝" 回复，并且非空有效负载在 pty 排空之前可能仍然可以交付。
             let _ = self
                 .bus
                 .senders
@@ -4080,11 +4039,7 @@ impl Screen {
         }
     }
 
-    /// Build a reply for `query` from whatever host state Zellij has
-    /// cached, or an empty `Vec` if nothing relevant is cached. The
-    /// classification happened at intercept time (Grid produces a
-    /// [`HostQuery`]), so this method is pure structural dispatch —
-    /// no re-parsing of bytes.
+    /// 从 Zellij 缓存的任何主机状态为 `query` 构建回复，如果没有缓存相关内容则返回空 `Vec`。分类在拦截时发生（Grid 产生 [`HostQuery`]），因此此方法是纯结构调度 — 无需重新解析字节。
     fn synthesize_cached_reply(&self, query: &crate::host_query::HostQuery) -> Vec<u8> {
         use crate::host_query::HostQuery;
         match query {
@@ -4132,8 +4087,7 @@ impl Screen {
                 }
             },
             HostQuery::ClipboardContent { .. } => query.empty_reply_bytes(),
-            // Should not reach here: ColorPaletteMode short-circuits in
-            // `forward_host_query` before any cache-fallback path runs.
+            // 不应到达这里：ColorPaletteMode 在任何缓存回退路径运行之前在 `forward_host_query` 中短路。
             HostQuery::ColorPaletteMode => match self.effective_host_terminal_theme_mode() {
                 HostTerminalThemeMode::Dark => b"\x1b[?997;1n".to_vec(),
                 HostTerminalThemeMode::Light => b"\x1b[?997;2n".to_vec(),
@@ -4142,11 +4096,9 @@ impl Screen {
     }
 
     pub fn render(&mut self, plugin_render_assets: Option<Vec<PluginRenderAsset>>) -> Result<()> {
-        // here we schedule the RenderToClients background job which debounces renders every 10ms
-        // rather than actually rendering
+        // 这里我们调度 RenderToClients 后台任务，它每 10ms 去抖一次渲染，而不是实际渲染
         //
-        // when this job decides to render, it sends back the ScreenInstruction::RenderToClients
-        // message, triggering our render_to_clients method which does the actual rendering
+        // 当此任务决定渲染时，它发回 ScreenInstruction::RenderToClients 消息，触发我们的 render_to_clients 方法进行实际渲染
 
         self.sync_nested_guest_fullscreen_state();
 
@@ -4165,11 +4117,10 @@ impl Screen {
     }
 
     pub fn render_to_clients(&mut self) -> Result<()> {
-        // this method does the actual rendering and is triggered by a debounced BackgroundJob (see
-        // the render method for more details)
+        // 此方法进行实际渲染，由去抖的 BackgroundJob 触发（更多细节参见 render 方法）
         let err_context = "failed to render screen";
 
-        // Separate rendering for regular clients and watchers
+        // 为常规客户端和观察器分别渲染
         let has_regular_clients = self
             .connected_clients
             .borrow()
@@ -4177,12 +4128,12 @@ impl Screen {
             .any(|id| !self.watcher_clients.contains_key(id));
         let has_watchers = !self.watcher_clients.is_empty(); // No change needed
 
-        // Track whether non-watcher output was dirty for conditional watcher rendering
+        // 跟踪非观察器输出是否脏以进行条件观察器渲染
         let non_watcher_output_was_dirty;
 
         let mut tabs_to_close = vec![];
 
-        // === PHASE 1: Render for regular clients ===
+        // === 阶段 1：为常规客户端渲染 ===
         if has_regular_clients {
             let mut output = Output::new(
                 self.sixel_image_store.clone(),
@@ -4200,7 +4151,7 @@ impl Screen {
 
             for (tab_index, tab) in &mut self.tabs {
                 if tab.has_selectable_tiled_panes() {
-                    // Pass None for normal client rendering
+                    // 为正常客户端渲染传递 None
                     tab.render(&mut output, None).context(err_context)?;
                 } else if !tab.is_pending() {
                     tabs_to_close.push(*tab_index);
@@ -4209,7 +4160,7 @@ impl Screen {
 
             let pane_render_report = output.drain_pane_render_report();
 
-            // Subscriber delivery — gated behind is_empty() for zero overhead
+            // 订阅者交付 — 在 is_empty() 后面门控以实现零开销
             if !self.pane_render_subscribers.is_empty() {
                 self.deliver_to_pane_subscribers_from_report(&pane_render_report);
             }
@@ -4259,7 +4210,7 @@ impl Screen {
                         .send_to_background_jobs(BackgroundJob::FlashTabBell(tab_id));
                 }
             } else {
-                // visual_bell disabled: still detect bell for ANSI BEL forwarding only
+                // visual_bell 已禁用：仍然仅为 ANSI BEL 转发检测响铃
                 for tab in self.tabs.values_mut() {
                     if tab.check_and_consume_bells_without_visual_notification() {
                         has_bell = true;
@@ -4299,19 +4250,19 @@ impl Screen {
                 self.log_and_report_session_state()?;
             }
         } else {
-            // No regular clients, output is not dirty
+            // 没有常规客户端，输出不脏
             non_watcher_output_was_dirty = false;
 
-            // No regular clients but subscribers exist — query panes directly
+            // 没有常规客户端但存在订阅者 — 直接查询窗格
             if !self.pane_render_subscribers.is_empty() {
                 self.deliver_to_pane_subscribers_directly();
             }
         }
 
-        // === PHASE 2: Render for watchers ===
+        // === 阶段 2：为观察器渲染 ===
         if has_watchers {
             if let Some(followed_client_id) = self.followed_client_id {
-                // Create fresh output for watchers
+                // 为观察器创建新输出
                 let mut watcher_output = Output::new(
                     self.sixel_image_store.clone(),
                     self.character_cell_size.clone(),
@@ -4335,10 +4286,10 @@ impl Screen {
                     .get_mut(&focused_tab_index_of_followed_client_id)
                     .as_mut()
                 {
-                    // Only force render if:
-                    // 1. Non-watcher output was dirty, OR
-                    // 2. Any watcher needs a forced render (first render or after resize), OR
-                    // 3. No non-watcher clients are connected
+                    // 仅在以下情况下强制渲染：
+                    // 1. 非观察器输出脏，或
+                    // 2. 任何观察器需要强制渲染（首次渲染或调整大小后），或
+                    // 3. 没有连接非观察器客户端
                     let any_watcher_needs_force_render = self
                         .watcher_clients
                         .values()
@@ -4354,27 +4305,27 @@ impl Screen {
                         .context(err_context)?;
                 }
 
-                // Send the rendered output to all watcher clients
+                // 将渲染的输出发送到所有观察器客户端
                 if watcher_output.is_dirty() {
                     let mut watcher_render_output: HashMap<ClientId, String> = HashMap::new();
 
-                    // For each watcher, clone the output and serialize with size constraints
+                    // 对于每个观察器，克隆输出并使用尺寸约束序列化
                     for (watcher_id, watcher_state) in &self.watcher_clients {
                         let mut watcher_specific_output = watcher_output.clone();
 
-                        // Serialize this watcher's output with size constraints (cropping and padding handled inside)
+                        // 使用尺寸约束序列化此观察器的输出（裁剪和填充在内部处理）
                         let mut serialized_output = watcher_specific_output
                             .serialize_with_size(Some(watcher_state.size()), followed_content_size)
                             .context(err_context)?;
 
-                        // Get the output for the followed client and map it to this watcher
+                        // 获取跟随客户端的输出并将其映射到此观察器
                         if let Some(followed_output) = serialized_output.remove(&followed_client_id)
                         {
                             watcher_render_output.insert(*watcher_id, followed_output);
                         }
                     }
 
-                    // Send to server for delivery to watcher clients
+                    // 发送到服务端以交付给观察器客户端
                     if !watcher_render_output.is_empty() {
                         let _ = self
                             .bus
@@ -4383,7 +4334,7 @@ impl Screen {
                             .context(err_context);
                     }
 
-                    // Clear force render flag for all watchers after successful render
+                    // 成功渲染后清除所有观察器的强制渲染标志
                     for watcher_state in self.watcher_clients.values_mut() {
                         watcher_state.clear_force_render();
                     }
@@ -4399,7 +4350,7 @@ impl Screen {
         Ok(())
     }
 
-    /// Returns a mutable reference to this [`Screen`]'s tabs.
+    /// 返回对此 [`Screen`] 标签页的可变引用。
     pub fn get_tabs_mut(&mut self) -> &mut BTreeMap<usize, Tab> {
         &mut self.tabs
     }
@@ -4408,7 +4359,7 @@ impl Screen {
         &self.tabs
     }
 
-    /// Returns an immutable reference to this [`Screen`]'s active [`Tab`].
+    /// 返回对此 [`Screen`] 活动 [`Tab`] 的不可变引用。
     pub fn get_active_tab(&self, client_id: ClientId) -> Result<&Tab> {
         match self.active_tab_ids.get(&client_id) {
             Some(tab) => self
@@ -4447,8 +4398,8 @@ impl Screen {
         ));
     }
 
-    /// Returns an immutable reference to this [`Screen`]'s previous active [`Tab`].
-    /// Consumes the last entry in tab history.
+    /// 返回对此 [`Screen`] 上一个活动 [`Tab`] 的不可变引用。
+    /// 消耗标签页历史记录中的最后一个条目。
     pub fn get_previous_tab(&mut self, client_id: ClientId) -> Result<Option<&Tab>> {
         Ok(
             match self
@@ -4465,7 +4416,7 @@ impl Screen {
         )
     }
 
-    /// Returns a mutable reference to this [`Screen`]'s active [`Tab`].
+    /// 返回对此 [`Screen`] 活动 [`Tab`] 的可变引用。
     pub fn get_active_tab_mut(&mut self, client_id: ClientId) -> Result<&mut Tab> {
         match self.active_tab_ids.get(&client_id) {
             Some(tab) => self
@@ -4476,7 +4427,7 @@ impl Screen {
         }
     }
 
-    /// Returns a mutable reference to this [`Screen`]'s indexed [`Tab`].
+    /// 返回对此 [`Screen`] 索引 [`Tab`] 的可变引用。
     pub fn get_indexed_tab_mut(&mut self, tab_index: usize) -> Option<&mut Tab> {
         self.get_tabs_mut().get_mut(&tab_index)
     }
@@ -4636,8 +4587,7 @@ impl Screen {
         }
     }
 
-    /// Clear bell notification for the currently focused pane of the given client.
-    /// Also cancels any running flash jobs if applicable.
+    /// 清除给定客户端当前焦点窗格的响铃通知。如果适用，还取消任何正在运行的闪烁任务。
     pub fn clear_bell_for_focused_pane(&mut self, client_id: ClientId) {
         let tab_id_and_pane_id: Option<(usize, PaneId)> =
             self.get_active_tab_mut(client_id).ok().and_then(|tab| {
@@ -4667,7 +4617,7 @@ impl Screen {
         }
     }
 
-    /// Clear bell notification for a specific pane ID in the given client's active tab.
+    /// 清除给定客户端活动标签页中特定窗格 ID 的响铃通知。
     pub fn clear_bell_for_pane_id(&mut self, pane_id: PaneId, client_id: ClientId) {
         let tab_id: Option<usize> = self.get_active_tab_mut(client_id).ok().map(|tab| tab.id);
         if let Some(tab_id) = tab_id {
@@ -4772,7 +4722,7 @@ impl Screen {
         Ok(())
     }
 
-    /// Creates a new [`Tab`] in this [`Screen`]
+    /// 在此 [`Screen`] 中创建一个新的 [`Tab`]
     pub fn new_tab(
         &mut self,
         tab_id: usize,
@@ -4873,8 +4823,7 @@ impl Screen {
         blocking_terminal: Option<(u32, NotificationEnd)>,
     ) -> Result<()> {
         if self.tabs.get(&tab_id).is_none() {
-            // TODO: we should prevent this situation with a UI - eg. cannot close tabs with a
-            // pending state
+            // TODO：我们应该用 UI 防止这种情况 — 例如，不能关闭具有挂起状态的标签页
             log::error!("Tab with index {tab_id} not found. Cannot apply layout!");
             return Ok(());
         }
@@ -4924,7 +4873,7 @@ impl Screen {
         vacated_tab_ids.sort_unstable();
         vacated_tab_ids.dedup();
 
-        // move the relevant clients out of the current tab and place them in the new one
+        // 将相关客户端移出当前标签页并放入新标签页
         let drained_clients = if should_change_client_focus {
             if self.session_is_mirrored {
                 let client_mode_infos_in_source_tab = if let Ok(active_tab) =
@@ -4975,7 +4924,7 @@ impl Screen {
                 .insert(client_id, is_web_client);
         }
 
-        // apply the layout to the new tab
+        // 将布局应用于新标签页
         self.tabs
             .get_mut(&tab_id)
             .context("couldn't find tab with index {tab_id}")
@@ -5002,7 +4951,7 @@ impl Screen {
             .with_context(err_context)?;
 
         if !self.active_tab_ids.contains_key(&client_id) {
-            // this means this is a new client and we need to add it to our state properly
+            // 这意味着这是一个新客户端，我们需要将其正确添加到我们的状态中
             self.add_client(client_id, is_web_client)
                 .with_context(err_context)?;
         }
@@ -5030,7 +4979,7 @@ impl Screen {
             format!("failed to attach client {client_id} to tab with index {tab_index}")
         };
 
-        // Set followed_client_id to the first regular client if not already set
+        // 如果尚未设置，将 followed_client_id 设置为第一个常规客户端
         if self.followed_client_id.is_none() && !self.watcher_clients.contains_key(&client_id) {
             self.followed_client_id = Some(client_id);
         }
@@ -5130,9 +5079,9 @@ impl Screen {
             tab.clear_guest_choice_indicator_for_client_on_all_panes(client_id);
         }
 
-        // If the followed client disconnected, find the next regular client
+        // 如果跟随的客户端断开连接，找到下一个常规客户端
         if Some(client_id) == self.followed_client_id {
-            // Try to find another regular (non-watcher) client
+            // 尝试找到另一个常规（非观察器）客户端
             self.followed_client_id = self
                 .connected_clients
                 .borrow()
@@ -5140,8 +5089,7 @@ impl Screen {
                 .copied()
                 .find(|id| !self.watcher_clients.contains_key(id) && id != &client_id);
 
-            // If no regular client remains but we have watchers, keep the old followed_client_id
-            // for terminal rendering (plugins will use their last state)
+            // 如果没有剩余常规客户端但我们有观察器，保留旧的 followed_client_id 用于终端渲染（插件将使用其最后状态）
             if self.followed_client_id.is_none() && !self.watcher_clients.is_empty() {
                 self.followed_client_id = Some(client_id); // Keep the disconnected client's ID
             }
@@ -5210,13 +5158,13 @@ impl Screen {
     }
 
     pub fn add_watcher_client(&mut self, client_id: ClientId) -> Result<()> {
-        // Initialize with a default size - will be updated when we receive the actual size
+        // 使用默认大小初始化 — 将在收到实际大小时更新
         let default_size = Size { rows: 24, cols: 80 }; // Reasonable default
         self.watcher_clients
             .insert(client_id, WatcherState::new(default_size));
 
-        // Force a full render for the new watcher
-        // This ensures they get complete state, not just delta
+        // 为新观察器强制完整渲染
+        // 这确保他们获得完整状态，而不仅仅是增量
         self.render(None)?;
 
         Ok(())
@@ -5228,13 +5176,13 @@ impl Screen {
 
     pub fn set_followed_client(&mut self, client_id: ClientId) -> Result<()> {
         self.followed_client_id = Some(client_id);
-        // Trigger re-render with new followed client
+        // 使用新的跟随客户端触发重新渲染
         self.render(None)?;
         Ok(())
     }
 
     pub fn set_watcher_size(&mut self, client_id: ClientId, size: Size) {
-        // Update size if this client is a watcher
+        // 如果此客户端是观察器，更新大小
         if let Some(watcher_state) = self.watcher_clients.get_mut(&client_id) {
             watcher_state.set_size(size);
             watcher_state.set_force_render();
@@ -5415,7 +5363,7 @@ impl Screen {
             }
         }
 
-        // Sort by position (display order)
+        // 按位置排序（显示顺序）
         tab_infos.sort_by_key(|t| t.position);
 
         Ok(tab_infos)
@@ -5448,12 +5396,12 @@ impl Screen {
         self.revert_fit_disabled_without_reference_client()
             .with_context(err_context)?;
         self.reconcile_all_single_pane_focus();
-        // generate own session info
+        // 生成自己的会话信息
         let pane_manifest = self.generate_and_report_pane_state()?;
         let tab_infos = self.generate_and_report_tab_state()?;
 
-        // Lazy-load layouts on first call if cache is empty
-        // After that, cache is updated by watcher via UpdateAvailableLayouts instruction
+        // 如果缓存为空，在首次调用时惰性加载布局
+        // 之后，缓存由观察器通过 UpdateAvailableLayouts 指令更新
         if self.cached_layouts.is_empty() {
             #[cfg(not(test))]
             {
@@ -5657,10 +5605,7 @@ impl Screen {
                 .ok()
                 .map(|tab| tab.is_fullscreen_active())
                 .unwrap_or(false);
-            // Defaults must describe what the server has actually applied: a client that never
-            // sent preferences has nothing fullscreened, and participates in the tab min-size
-            // rule. Reporting an unapplied `single_pane` desynchronises the browser, which then
-            // asserts the stale value on its next unrelated preference change.
+            // 默认值必须描述服务端实际应用的内容：从未发送偏好设置的客户端没有全屏任何内容，并参与标签页最小尺寸规则。报告未应用的 `single_pane` 会使浏览器不同步，然后浏览器会在其下一个不相关的偏好更改中断言过时的值。
             let render_prefs = zellij_utils::ipc::MobileRenderPrefsPayload {
                 single_pane: prefs.map(|p| p.single_pane).unwrap_or(false),
                 fit: prefs.map(|p| p.fit).unwrap_or(true),
@@ -5775,7 +5720,7 @@ impl Screen {
                                 active_tab.name = String::new();
                             },
                             "\u{007F}" | "\u{0008}" => {
-                                // delete and backspace keys
+                                // 删除和退格键
                                 active_tab.name.pop();
                             },
                             c => {
@@ -5856,13 +5801,13 @@ impl Screen {
         }
     }
 
-    /// Switches tabs at two positions, swapping their display order.
+    /// 在两个位置切换标签页，交换它们的显示顺序。
     ///
-    /// # Arguments
-    /// * `active_tab_pos` - Current position of active tab (0-based)
-    /// * `other_tab_pos` - Position to swap with (0-based)
+    /// # 参数
+    /// * `active_tab_pos` - 活动标签页的当前位置（从 0 开始）
+    /// * `other_tab_pos` - 要交换的位置（从 0 开始）
     ///
-    /// NOTE: this expects positions rather than IDs (see distinction at top of file)
+    /// 注意：这期望位置而不是 ID（参见文件顶部的区别）
     fn switch_tabs(&mut self, active_tab_pos: usize, other_tab_pos: usize) {
         let Some(active_tab_id) = self
             .tabs
@@ -5896,7 +5841,7 @@ impl Screen {
             return;
         }
 
-        // NOTE: Can `expect` here, because we checked that the keys exist above
+        // 注意：这里可以 `expect`，因为我们在上面检查了键存在
         let mut active_tab = self
             .tabs
             .remove(&active_tab_id)
@@ -6005,7 +5950,7 @@ impl Screen {
             mode_info.session_name = Some(self.session_name.clone());
         }
 
-        // If we leave the Search-related modes, we need to clear all previous searches
+        // 如果我们离开与搜索相关的模式，我们需要清除所有先前的搜索
         let search_related_modes = [InputMode::EnterSearch, InputMode::Search, InputMode::Scroll];
         if search_related_modes.contains(&previous_mode)
             && !search_related_modes.contains(&mode_info.mode)
@@ -6036,7 +5981,7 @@ impl Screen {
             tab.mark_active_pane_for_rerender(client_id);
             tab.update_input_modes()?;
         }
-        // Notify background plugins subscribed to ModeUpdate
+        // 通知订阅了 ModeUpdate 的后台插件
         let mut bg_updates = vec![];
         for ((bg_pid, bg_cid), subs) in &self.background_plugin_subscriptions {
             if subs.contains(&EventType::ModeUpdate) && *bg_cid == client_id {
@@ -6055,16 +6000,12 @@ impl Screen {
         }
         Ok(())
     }
-    // Keep the client's mode in sync with the pane it just focused: entering a scrolled
-    // pane switches to Scroll so its position is navigable, leaving it returns to the
-    // default mode. Only the default<->Scroll pair is touched (Normal by default, Locked
-    // under unlock-first), so a client in another mode (Pane, Tab, Search, ...) is never
-    // pulled out of it. See #638.
+    // 保持客户端的模式与其刚刚聚焦的窗格同步：进入滚动窗格切换到 Scroll 以便其位置可导航，离开它返回到默认模式。仅触及默认<->Scroll 对（默认为 Normal，在 unlock-first 下为 Locked），因此处于另一种模式（Pane、Tab、Search 等）的客户端永远不会被拉出。参见 #638。
     fn sync_scroll_mode_on_focus(&mut self, client_id: ClientId) -> Result<()> {
         if !self.scroll_mode_sync {
             return Ok(());
         }
-        // base_mode is the default config reloads keep current; .mode is the fallback.
+        // base_mode 是默认配置重新加载保持当前值；.mode 是回退。
         let default_mode = self
             .default_mode_info
             .base_mode
@@ -6083,10 +6024,7 @@ impl Screen {
             (InputMode::Scroll, false) => default_mode,
             _ => return Ok(()),
         };
-        // Route through the server like SwitchToMode does, so the client's authoritative
-        // input mode (current_input_modes, used for keybind resolution) is updated and not
-        // just the mode_info used for rendering. A direct change_mode() would desync the
-        // two: the status line would show Scroll while keys still resolved in Normal.
+        // 像 SwitchToMode 那样通过服务端路由，以便客户端的权威输入模式（current_input_modes，用于快捷键绑定解析）被更新，而不仅仅是用于渲染的 mode_info。直接的 change_mode() 会使两者不同步：状态行会显示 Scroll，而键仍然在 Normal 中解析。
         self.bus
             .senders
             .send_to_server(ServerInstruction::ChangeMode(client_id, new_mode, None))
@@ -6135,18 +6073,16 @@ impl Screen {
         }
         Ok(())
     }
-    /// Collect plugin IDs that should receive a broadcast event for a given client.
-    /// Returns plugin IDs from the client's active tab plus background plugins
-    /// subscribed to the given event type.
+    /// 收集应为给定客户端接收广播事件的插件 ID。返回客户端活动标签页的插件 ID 加上订阅了给定事件类型的后台插件。
     fn targeted_plugin_ids(&self, client_id: ClientId, event_type: EventType) -> Vec<PluginId> {
         let mut plugin_ids = Vec::new();
-        // Active-tab plugins
+        // 活动标签页插件
         if let Some(active_tab_id) = self.active_tab_ids.get(&client_id) {
             if let Some(tab) = self.tabs.get(active_tab_id) {
                 plugin_ids.extend(tab.get_plugin_ids());
             }
         }
-        // Background plugins subscribed to this event type
+        // 订阅了此事件类型的后台插件
         for ((bg_pid, bg_cid), subs) in &self.background_plugin_subscriptions {
             if subs.contains(&event_type) && *bg_cid == client_id {
                 if !plugin_ids.contains(bg_pid) {
@@ -6156,7 +6092,7 @@ impl Screen {
         }
         plugin_ids
     }
-    /// Broadcast a ModeUpdate event to active-tab plugins and subscribed background plugins.
+    /// 向活动标签页插件和订阅的后台插件广播 ModeUpdate 事件。
     pub fn broadcast_mode_update(
         &mut self,
         mode_info: ModeInfo,
@@ -6291,7 +6227,7 @@ impl Screen {
         client_id: ClientId,
         completion_tx: &mut Option<NotificationEnd>,
     ) -> Result<bool> {
-        // true => found and focused, false => not
+        // true => 找到并聚焦，false => 未找到
         let err_context = || format!("failed to focus_plugin_pane");
         let mut tab_index_and_plugin_pane_id = None;
         let mut plugin_pane_to_move_to_active_tab = None;
@@ -6320,7 +6256,7 @@ impl Screen {
                     true,
                     Some(client_id),
                 )?;
-            // TODO: also should_be_in_place
+            // TODO：还有 should_be_in_place
             } else {
                 new_active_tab.hide_floating_panes();
                 new_active_tab.add_tiled_pane(
@@ -6330,7 +6266,7 @@ impl Screen {
                     Some(client_id),
                 )?;
             }
-            // Set affected pane ID for CLI client output
+            // 为 CLI 客户端输出设置受影响的窗格 ID
             if let Some(ref mut completion) = completion_tx {
                 completion.set_affected_pane_id(pane_id);
             }
@@ -6346,7 +6282,7 @@ impl Screen {
                     .context("failed to focus plugin pane")?;
                 self.log_and_report_session_state()
                     .with_context(err_context)?;
-                // Set affected pane ID for CLI client output
+                // 为 CLI 客户端输出设置受影响的窗格 ID
                 if let Some(ref mut completion) = completion_tx {
                     completion.set_affected_pane_id(plugin_pane_id);
                 }
@@ -6504,8 +6440,7 @@ impl Screen {
         let mut extracted_panes = vec![];
         for pane_id in pane_ids {
             for tab in all_tabs.values_mut() {
-                // here we pass None instead of the client_id we have because we do not need to
-                // necessarily trigger a relayout for this tab
+                // 这里我们传递 None 而不是我们拥有的 client_id，因为我们不需要必然为此标签页触发重新布局
                 if let Some(pane) = tab.extract_pane(pane_id, true).take() {
                     extracted_panes.push(pane);
                     break;
@@ -6537,8 +6472,7 @@ impl Screen {
             let new_geom = PaneGeom::from(&tab_size);
             pane.set_geom(new_geom);
 
-            // here we pass None instead of the ClientId, because we do not want this pane to be
-            // necessarily focused
+            // 这里我们传递 None 而不是 ClientId，因为我们不希望此窗格必然被聚焦
             tab.add_tiled_pane(pane, pane_id, without_relayout, None)?;
             tiled_panes_layout.ignore_run_instruction(run_instruction.clone());
         }
@@ -6651,8 +6585,7 @@ impl Screen {
                 if tab.position == tab_index {
                     continue;
                 }
-                // here we pass None instead of the client_id we have because we do not need to
-                // necessarily trigger a relayout for this tab
+                // 这里我们传递 None 而不是我们拥有的 client_id，因为我们不需要必然为此标签页触发重新布局
                 let pane_was_floating = tab.pane_id_is_floating(&pane_id);
                 if let Some(pane) = tab.extract_pane(pane_id, true).take() {
                     extracted_panes.push((pane_was_floating, pane));
@@ -6665,7 +6598,7 @@ impl Screen {
             self.go_to_tab(tab_index + 1, client_id)?;
         }
         if extracted_panes.is_empty() {
-            // nothing to do here...
+            // 这里无事可做...
             return Ok(());
         }
         if let Some(new_active_tab) = self.get_indexed_tab_mut(tab_index) {
@@ -6869,14 +6802,12 @@ impl Screen {
         let should_support_arrow_fonts = !simplified_ui;
         self.arrow_fonts = should_support_arrow_fonts;
 
-        // global configuration
+        // 全局配置
         self.style.colors = theme;
         self.default_mode_info.update_theme(theme);
         self.default_mode_info
             .update_rounded_corners(rounded_corners);
-        // `default_mode_info` is the fallback used by `change_mode` for
-        // clients that don't yet have a per-client `mode_info` entry, so its
-        // keybinds and base mode must be kept in sync with reconfigures.
+        // `default_mode_info` 是 `change_mode` 为尚未有每客户端 `mode_info` 条目的客户端使用的回退，因此其快捷键绑定和基本模式必须与重新配置保持同步。
         self.default_mode_info.update_keybinds(new_keybinds.clone());
         self.default_mode_info.update_default_mode(new_default_mode);
         self.default_shell = default_shell.clone().unwrap_or_else(|| get_default_shell());
@@ -6930,14 +6861,14 @@ impl Screen {
             tab.sync_stacked_pane_list_mode();
         }
 
-        // Clear hover state when disabled
+        // 禁用时清除悬停状态
         if !mouse_hover_effects {
             for tab in self.tabs.values_mut() {
                 tab.clear_mouse_hover_state();
             }
         }
 
-        // client specific configuration
+        // 客户端特定配置
         if self.connected_clients_contains(&client_id) {
             let mode_info = self
                 .mode_info
@@ -6954,8 +6885,7 @@ impl Screen {
             }
         }
 
-        // this needs to be done separately at the end because it applies some of the above changes
-        // and propagates them to plugins
+        // 这需要在最后单独完成，因为它应用了上述一些更改并将它们传播到插件
         for tab in self.tabs.values_mut() {
             tab.update_input_modes()?;
         }
@@ -6972,21 +6902,19 @@ impl Screen {
     fn apply_theme_mode(&mut self, mode: HostTerminalThemeMode) -> Result<()> {
         let err_context = || "Failed to update host terminal theme mode".to_string();
 
-        // dedupe
+        // 去重
         if self.host_terminal_theme_mode == Some(mode) {
             return Ok(());
         }
         self.host_terminal_theme_mode = Some(mode);
 
-        // resolve target styling
+        // 解析目标样式
         let resolved = match mode {
             HostTerminalThemeMode::Dark => self.host_theme_dark_styling,
             HostTerminalThemeMode::Light => self.host_theme_light_styling,
         };
 
-        // theme propagation when both keys configured and the resolved
-        // styling exists. (If only one of theme_dark/theme_light is set,
-        // skip auto-switch; the static `theme` stays authoritative.)
+        // 当两个键都配置且解析的样式存在时的主题传播。（如果只设置了 theme_dark/theme_light 中的一个，跳过自动切换；静态 `theme` 保持权威。）
         let auto_switch_enabled =
             self.host_theme_dark_styling.is_some() && self.host_theme_light_styling.is_some();
         if auto_switch_enabled {
@@ -6996,10 +6924,7 @@ impl Screen {
                 for tab in self.tabs.values_mut() {
                     tab.update_theme(theme);
                 }
-                // Iterate every connected client (active_tab_ids is the
-                // canonical "who is connected" map). Iterating
-                // self.mode_info.keys() would skip any client that has
-                // never manually changed mode
+                // 迭代每个已连接的客户端（active_tab_ids 是规范的 "谁已连接" 映射）。迭代 self.mode_info.keys() 会跳过任何从未手动更改模式的客户端
                 let client_ids: Vec<ClientId> = self.active_tab_ids.keys().copied().collect();
                 let default_for_new = self.default_mode_info.clone();
                 for client_id in client_ids {
@@ -7009,14 +6934,7 @@ impl Screen {
                         .or_insert_with(|| default_for_new.clone());
                     mode_info.update_theme(theme);
                     let mode_info_clone = mode_info.clone();
-                    // Push the freshly-themed mode_info into every tab's
-                    // per-client mode_info map. `update_input_modes` below
-                    // reads from THAT map (not Screen's) when fanning out
-                    // ModeUpdate to plugins, so without this step plugins
-                    // receive ModeUpdate carrying the *old* style and the
-                    // status-bar / tab-bar do not repaint. Also mark the
-                    // active pane for rerender so terminal panes refresh
-                    // their borders/title using the new palette.
+                    // 将新主题的 mode_info 推入每个标签页的每客户端 mode_info 映射。下面的 `update_input_modes` 在向插件扇出 ModeUpdate 时从该映射（而不是 Screen 的）读取，因此没有此步骤，插件会收到携带 *旧* 样式的 ModeUpdate，状态栏/标签栏不会重绘。还要标记活动窗格以进行重渲染，以便终端窗格使用新调色板刷新其边框/标题。
                     for tab in self.tabs.values_mut() {
                         tab.change_mode_info(mode_info_clone.clone(), client_id);
                         tab.mark_active_pane_for_rerender(client_id);
@@ -7033,7 +6951,7 @@ impl Screen {
             }
         }
 
-        // fan out the plugin event
+        // 扇出插件事件
         self.bus
             .senders
             .send_to_plugin(PluginInstruction::Update(vec![(
@@ -7043,7 +6961,7 @@ impl Screen {
             )]))
             .with_context(err_context)?;
 
-        // forward DSR to opted-in terminal panes
+        // 将 DSR 转发给选择加入的终端窗格
         let mut pty_writes: Vec<(Vec<u8>, u32)> = vec![];
         for tab in self.tabs.values_mut() {
             for pane_id in tab.get_all_pane_ids() {
@@ -7067,11 +6985,7 @@ impl Screen {
         self.render(None)?;
         Ok(())
     }
-    /// Apply a manual host-terminal theme mode change requested via the CLI or a
-    /// keybinding. Surfaces a clear error to the CLI if the auto-switch gate
-    /// (both `theme_dark` and `theme_light` configured) is not satisfied;
-    /// otherwise delegates to `update_host_terminal_theme_mode`, which dedupes,
-    /// repaints, fans out the plugin event, and forwards DSR to opted-in panes.
+    /// 应用通过 CLI 或快捷键绑定请求的手动主机终端主题模式更改。如果不满足自动切换门控（同时配置 `theme_dark` 和 `theme_light`），向 CLI 显示清晰的错误；否则委托给 `update_host_terminal_theme_mode`，它会去重、重绘、扇出插件事件，并将 DSR 转发给选择加入的窗格。
     pub fn apply_manual_host_terminal_theme_mode(
         &mut self,
         mode: HostTerminalThemeMode,
@@ -7162,7 +7076,7 @@ impl Screen {
         }
     }
     pub fn stack_panes(&mut self, mut pane_ids_to_stack: Vec<PaneId>) -> Option<PaneId> {
-        // if successful, returns the pane id of the last pane in the stack
+        // 如果成功，返回堆栈中最后一个窗格的窗格 id
         if pane_ids_to_stack.is_empty() {
             log::error!("Got an empty list of pane_ids to stack");
             return None;
@@ -7210,8 +7124,7 @@ impl Screen {
 
         for (tab_id, tab) in self.tabs.iter_mut() {
             if tab_id == &root_tab_id {
-                // we do this before we extract panes so that the extraction won't trigger a
-                // relayout according to the next swapped tiled pane
+                // 我们在提取窗格之前这样做，以便提取不会根据下一个交换的平铺窗格触发重新布局
                 tab.set_tiled_panes_damaged();
             }
             for pane_id in &pane_ids_to_stack {
@@ -7316,8 +7229,7 @@ impl Screen {
                         {
                             self.report_key_passthrough_state(client_id, old, new);
                         }
-                        // A mouse focus change (click, click-through, focus-follows-mouse)
-                        // syncs the scroll mode too, same as a keyboard focus move.
+                        // 鼠标焦点更改（点击、点击穿透、焦点跟随鼠标）也会同步滚动模式，与键盘焦点移动相同。
                         let _ = self.sync_scroll_mode_on_focus(client_id);
                     }
                     should_render = true;
@@ -7400,7 +7312,7 @@ impl Screen {
         let active_tab_index =
             first_client_id.and_then(|client_id| self.active_tab_ids.get(&client_id));
 
-        // Filter tabs based on optional tab_index parameter
+        // 根据可选的 tab_index 参数过滤标签页
         let mut tabs_to_process: Vec<_> = self
             .tabs
             .iter()
@@ -10833,7 +10745,7 @@ pub(crate) fn screen_thread_main(
                 });
                 let run_plugin = Run::Plugin(run_plugin_or_alias);
 
-                // Set affected pane ID for CLI client output
+                // 为 CLI 客户端输出设置受影响的窗格 ID
                 if let Some(ref mut completion) = completion_tx {
                     completion.set_affected_pane_id(PaneId::Plugin(plugin_id));
                 }

@@ -106,7 +106,7 @@ fn take_snapshots_and_cursor_coordinates_from_render_events<'a>(
             match server_instruction {
                 ServerInstruction::Render(output) => {
                     if let Some(output) = output {
-                        // note this only takes a snapshot of the first client!
+                        // 注意这只对第一个客户端进行快照！
                         let raw_snapshot = output.get(&1).unwrap();
                         let snapshot =
                             take_snapshot_and_cursor_coordinates(raw_snapshot, &mut grid);
@@ -195,7 +195,7 @@ impl ServerOsApi for FakeInputOutput {
         _width_in_pixels: Option<u16>,
         _height_in_pixels: Option<u16>,
     ) -> Result<()> {
-        // noop
+        // 空操作
         Ok(())
     }
     fn spawn_terminal(
@@ -491,7 +491,7 @@ impl MockScreen {
         let tab_index = self.last_opened_tab_index.map(|l| l + 1).unwrap_or(0);
         let should_change_focus_to_new_tab = true;
         std::thread::sleep(std::time::Duration::from_millis(100)); // give time for the async
-                                                                   // render
+                                                                   // 渲染
         let _ = self.to_screen.send(ScreenInstruction::NewTab(
             None,
             default_shell,
@@ -521,7 +521,7 @@ impl MockScreen {
         std::thread::sleep(std::time::Duration::from_millis(100)); // give time for the async render
         screen_thread
     }
-    // same as the above function, but starts a plugin with a plugin alias
+    // 与上面的函数相同，但使用插件别名启动插件
     pub fn run_with_alias(
         &mut self,
         initial_layout: Option<TiledPaneLayout>,
@@ -652,7 +652,7 @@ impl MockScreen {
         self.last_opened_tab_index = Some(tab_index);
     }
     pub fn new_tab_with_plugins(&mut self, plugin_pane_ids: Vec<u32>) {
-        // Build a layout where each child is a plugin pane
+        // 构建一个布局，其中每个子项都是插件窗格
         let fake_plugin_url = "file:/path/to/fake/plugin";
         let run_plugin = RunPluginOrAlias::from_url(fake_plugin_url, &None, None, None).unwrap();
         let mut tab_layout = TiledPaneLayout::default();
@@ -711,7 +711,7 @@ impl MockScreen {
         }
     }
     pub fn clone_session_metadata(&self) -> SessionMetaData {
-        // hack that only clones the clonable parts of SessionMetaData
+        // 只克隆 SessionMetaData 可克隆部分的技巧
         SessionMetaData {
             senders: self.session_metadata.senders.clone(),
             default_shell: self.session_metadata.default_shell.clone(),
@@ -856,8 +856,7 @@ impl MockScreen {
                                     break;
                                 },
                                 _ => {
-                                    // here the event will be dropped - we do this so that the completion_tx will drop and release the
-                                    // test actions
+                                    // 这里事件将被丢弃 — 我们这样做是为了让 completion_tx 丢弃并释放测试操作
                                 },
                             }
                         }
@@ -1220,14 +1219,14 @@ fn wrapping_move_of_active_tab_to_right() {
 
 #[test]
 fn tab_id_remains_stable_after_switch() {
-    // Test that tab IDs remain stable when switching tabs, only positions change
+    // 测试切换标签页时标签页 ID 保持稳定，只有位置改变
     let mut screen = create_fixed_size_screen();
 
     new_tab(&mut screen, 1, 0);
     new_tab(&mut screen, 2, 1);
     new_tab(&mut screen, 3, 2);
 
-    // Verify initial state: IDs should be 0, 1, 2
+    // 验证初始状态：ID 应为 0, 1, 2
     let initial_tab_ids: Vec<usize> = screen.tabs.keys().copied().collect();
     assert_eq!(
         initial_tab_ids,
@@ -1235,7 +1234,7 @@ fn tab_id_remains_stable_after_switch() {
         "Initial tab IDs should be 0, 1, 2"
     );
 
-    // Verify initial positions match IDs
+    // 验证初始位置与 ID 匹配
     assert_eq!(screen.tabs.get(&0).unwrap().id, 0);
     assert_eq!(screen.tabs.get(&0).unwrap().position, 0);
     assert_eq!(screen.tabs.get(&1).unwrap().id, 1);
@@ -1243,11 +1242,10 @@ fn tab_id_remains_stable_after_switch() {
     assert_eq!(screen.tabs.get(&2).unwrap().id, 2);
     assert_eq!(screen.tabs.get(&2).unwrap().position, 2);
 
-    // Move active tab (position 2, ID 2) to right, which wraps to position 0 and rotates the
-    // others right by one (IDs stay stable, only positions change)
+    // 将活动标签页（位置 2，ID 2）向右移动，这会回绕到位置 0 并将其他标签页向右旋转一个（ID 保持稳定，只有位置改变）
     screen.move_active_tab_to_right(1).expect("TEST");
 
-    // Verify BTreeMap keys (IDs) remain unchanged
+    // 验证 BTreeMap 键（ID）保持不变
     let after_switch_tab_ids: Vec<usize> = screen.tabs.keys().copied().collect();
     assert_eq!(
         after_switch_tab_ids,
@@ -1255,8 +1253,8 @@ fn tab_id_remains_stable_after_switch() {
         "Tab IDs in BTreeMap should remain 0, 1, 2 after switch"
     );
 
-    // Verify IDs remain stable but positions rotate
-    // Tab 0: was at position 0, rotated to position 1
+    // 验证 ID 保持稳定但位置旋转
+    // 标签页 0：曾在位置 0，旋转到位置 1
     assert_eq!(
         screen.tabs.get(&0).unwrap().id,
         0,
@@ -1268,7 +1266,7 @@ fn tab_id_remains_stable_after_switch() {
         "Tab with ID 0 should now be at position 1"
     );
 
-    // Tab 1: was at position 1, rotated to position 2
+    // 标签页 1：曾在位置 1，旋转到位置 2
     assert_eq!(
         screen.tabs.get(&1).unwrap().id,
         1,
@@ -1280,7 +1278,7 @@ fn tab_id_remains_stable_after_switch() {
         "Tab with ID 1 should now be at position 2"
     );
 
-    // Tab 2: was at position 2, rotated over the edge to position 0
+    // 标签页 2：曾在位置 2，越过边缘旋转到位置 0
     assert_eq!(
         screen.tabs.get(&2).unwrap().id,
         2,
@@ -1292,7 +1290,7 @@ fn tab_id_remains_stable_after_switch() {
         "Tab with ID 2 should now be at position 0"
     );
 
-    // Verify that lookup by position works correctly after the rotation
+    // 验证旋转后按位置查找正常工作
     let tab_at_pos_0 = screen.tabs.values().find(|t| t.position == 0).unwrap();
     assert_eq!(tab_at_pos_0.id, 2, "Tab at position 0 should have ID 2");
 
@@ -1689,7 +1687,7 @@ fn character_cell_size_is_not_derived_for_a_client_of_unknown_size() {
 
 #[test]
 fn attach_after_first_tab_closed() {
-    // ensure https://github.com/zellij-org/zellij/issues/1645 is fixed
+    // 确保 https://github.com/zellij-org/zellij/issues/1645 已修复
     let size = Size {
         cols: 121,
         rows: 20,
@@ -2242,13 +2240,13 @@ fn mouse_focus_clears_bell_on_focused_pane() {
     let new_pane_id = PaneId::Terminal(2);
     {
         let active_tab = screen.get_active_tab_mut(client_id).unwrap();
-        // Split horizontally: pane 1 on top, pane 2 on bottom; focus moves to pane 2
+        // 水平分割：窗格 1 在上，窗格 2 在下；焦点移动到窗格 2
         active_tab
             .horizontal_split(new_pane_id, None, client_id, None, None)
             .unwrap();
-        // Move focus back up to pane 1 so pane 2 is unfocused
+        // 将焦点移回窗格 1，使窗格 2 失去焦点
         active_tab.move_focus_up(client_id).unwrap();
-        // Plant a bell on the unfocused pane 2
+        // 在未聚焦的窗格 2 上放置响铃
         active_tab.handle_pty_bytes(2, vec![7u8]).unwrap();
         active_tab.check_and_handle_bell_notifications(false);
         assert!(
@@ -2261,7 +2259,7 @@ fn mouse_focus_clears_bell_on_focused_pane() {
         );
     }
 
-    // Click somewhere in pane 2 (bottom half of the screen)
+    // 在窗格 2 的某个位置点击（屏幕下半部分）
     screen.handle_mouse_event(
         MouseEvent::new_left_press_event(Position::new(15, 60)),
         client_id,
@@ -2525,12 +2523,11 @@ fn break_group_with_mouse() {
     );
 }
 
-// Following are tests for sending CLI actions
-// these tests are only partially relevant to Screen
-// and are included here for two reasons:
-// 1. The best way to "integration test" these is combining the "screen_thread_main" and
-//    "route_action" functions and mocking everything around them
-// 2. These inadvertently also test many parts of Screen that are not tested elsewhere
+// 以下是发送 CLI 操作的测试
+// 这些测试仅与 Screen 部分相关
+// 包含在这里有两个原因：
+// 1. 对这些进行 "集成测试" 的最佳方法是组合 "screen_thread_main" 和 "route_action" 函数并模拟它们周围的一切
+// 2. 这些无意中也测试了 Screen 中未在其他地方测试的许多部分
 
 #[test]
 pub fn send_cli_write_chars_action_to_screen() {
@@ -2617,8 +2614,7 @@ pub fn send_cli_send_keys_action_to_screen() {
         .into_iter()
         .filter(|i| matches!(i, PtyWriteInstruction::Write(..)))
         .collect();
-    // here we assert only the write instructions to make sure they arrived properly and in
-    // sequence to the pane
+    // 这里我们只断言写入指令，以确保它们正确且按顺序到达窗格
     assert_snapshot!(format!("{:#?}", received_write_instructions));
 }
 
@@ -2754,7 +2750,7 @@ pub fn send_cli_focus_next_pane_action() {
     );
     let snapshot_count = snapshots.len();
     for (cursor_coordinates, _snapshot) in snapshots {
-        // here we assert he cursor_coordinates to let us know if we switched the pane focus
+        // 这里我们断言 cursor_coordinates，以便让我们知道是否切换了窗格焦点
         assert_snapshot!(format!("{:?}", cursor_coordinates));
     }
     assert_snapshot!(format!("{}", snapshot_count));
@@ -2787,7 +2783,7 @@ pub fn send_cli_focus_previous_pane_action() {
     );
     let snapshot_count = snapshots.len();
     for (cursor_coordinates, _snapshot) in snapshots {
-        // here we assert he cursor_coordinates to let us know if we switched the pane focus
+        // 这里我们断言 cursor_coordinates，以便让我们知道是否切换了窗格焦点
         assert_snapshot!(format!("{:?}", cursor_coordinates));
     }
     assert_snapshot!(format!("{}", snapshot_count));
@@ -2818,15 +2814,15 @@ pub fn send_cli_focus_last_pane_action() {
         direction: Direction::Right,
     };
     let focus_last_pane_action = CliAction::FocusLastPane;
-    // move focus 1 -> 2 -> 3
+    // 移动焦点 1 -> 2 -> 3
     send_cli_action_to_server(&session_metadata, move_focus_action.clone(), client_id);
     std::thread::sleep(std::time::Duration::from_millis(100)); // give time for the async render
     send_cli_action_to_server(&session_metadata, move_focus_action.clone(), client_id);
     std::thread::sleep(std::time::Duration::from_millis(100)); // give time for the async render
-                                                               // move focus 3 -> 2
+                                                               // 移动焦点 3 -> 2
     send_cli_action_to_server(&session_metadata, focus_last_pane_action.clone(), client_id);
     std::thread::sleep(std::time::Duration::from_millis(100)); // give time for the async render
-                                                               // move focus 2 -> 3
+                                                               // 移动焦点 2 -> 3
     send_cli_action_to_server(&session_metadata, focus_last_pane_action.clone(), client_id);
     std::thread::sleep(std::time::Duration::from_millis(100)); // give time for the async render
     mock_screen.teardown(vec![server_instruction, screen_thread]);
@@ -2836,7 +2832,7 @@ pub fn send_cli_focus_last_pane_action() {
     );
     let snapshot_count = snapshots.len();
     for (cursor_coordinates, _snapshot) in snapshots {
-        // here we assert he cursor_coordinates to let us know if we switched the pane focus
+        // 这里我们断言 cursor_coordinates，以便让我们知道是否切换了窗格焦点
         assert_snapshot!(format!("{:?}", cursor_coordinates));
     }
     assert_snapshot!(format!("{}", snapshot_count));
@@ -2871,7 +2867,7 @@ pub fn send_cli_move_focus_pane_action() {
     );
     let snapshot_count = snapshots.len();
     for (cursor_coordinates, _snapshot) in snapshots {
-        // here we assert he cursor_coordinates to let us know if we switched the pane focus
+        // 这里我们断言 cursor_coordinates，以便让我们知道是否切换了窗格焦点
         assert_snapshot!(format!("{:?}", cursor_coordinates));
     }
     assert_snapshot!(format!("{}", snapshot_count));
@@ -2906,7 +2902,7 @@ pub fn send_cli_move_focus_or_tab_pane_action() {
     );
     let snapshot_count = snapshots.len();
     for (cursor_coordinates, _snapshot) in snapshots {
-        // here we assert he cursor_coordinates to let us know if we switched the pane focus
+        // 这里我们断言 cursor_coordinates，以便让我们知道是否切换了窗格焦点
         assert_snapshot!(format!("{:?}", cursor_coordinates));
     }
     assert_snapshot!(format!("{}", snapshot_count));
@@ -3065,8 +3061,7 @@ pub fn send_cli_scroll_up_action() {
         pane_contents.as_bytes().to_vec(),
     ));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // we send two actions here because only the last line in the pane is empty, so one action
-    // won't show in a render
+    // 我们在这里发送两个操作，因为只有窗格中的最后一行是空的，所以一个操作不会在渲染中显示
     send_cli_action_to_server(&session_metadata, cli_action.clone(), client_id);
     send_cli_action_to_server(&session_metadata, cli_action.clone(), client_id);
     std::thread::sleep(std::time::Duration::from_millis(100));
@@ -3110,13 +3105,13 @@ pub fn send_cli_scroll_down_action() {
         pane_contents.as_bytes().to_vec(),
     ));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // scroll up some
+    // 向上滚动一些
     send_cli_action_to_server(&session_metadata, scroll_up_cli_action.clone(), client_id);
     send_cli_action_to_server(&session_metadata, scroll_up_cli_action.clone(), client_id);
     send_cli_action_to_server(&session_metadata, scroll_up_cli_action.clone(), client_id);
     send_cli_action_to_server(&session_metadata, scroll_up_cli_action.clone(), client_id);
 
-    // scroll down some
+    // 向下滚动一些
     send_cli_action_to_server(&session_metadata, scroll_down_cli_action.clone(), client_id);
     send_cli_action_to_server(&session_metadata, scroll_down_cli_action.clone(), client_id);
     std::thread::sleep(std::time::Duration::from_millis(100));
@@ -3157,13 +3152,13 @@ pub fn send_cli_scroll_to_bottom_action() {
         pane_contents.as_bytes().to_vec(),
     ));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // scroll up some
+    // 向上滚动一些
     send_cli_action_to_server(&session_metadata, scroll_up_cli_action.clone(), client_id);
     send_cli_action_to_server(&session_metadata, scroll_up_cli_action.clone(), client_id);
     send_cli_action_to_server(&session_metadata, scroll_up_cli_action.clone(), client_id);
     send_cli_action_to_server(&session_metadata, scroll_up_cli_action.clone(), client_id);
 
-    // scroll to bottom
+    // 滚动到底部
     send_cli_action_to_server(
         &session_metadata,
         scroll_to_bottom_action.clone(),
@@ -3206,7 +3201,7 @@ pub fn send_cli_scroll_to_top_action() {
         pane_contents.as_bytes().to_vec(),
     ));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // scroll to top
+    // 滚动到顶部
     send_cli_action_to_server(&session_metadata, scroll_to_top_action.clone(), client_id);
     std::thread::sleep(std::time::Duration::from_millis(100));
     mock_screen.teardown(vec![server_instruction, screen_thread]);
@@ -3293,13 +3288,13 @@ pub fn send_cli_page_scroll_down_action() {
     ));
     std::thread::sleep(std::time::Duration::from_millis(100));
 
-    // scroll up some
+    // 向上滚动一些
     std::thread::sleep(std::time::Duration::from_millis(100)); // give time for the async render
     send_cli_action_to_server(&session_metadata, page_scroll_up_action.clone(), client_id);
     std::thread::sleep(std::time::Duration::from_millis(100)); // give time for the async render
     send_cli_action_to_server(&session_metadata, page_scroll_up_action.clone(), client_id);
 
-    // scroll down
+    // 向下滚动
     std::thread::sleep(std::time::Duration::from_millis(100)); // give time for the async render
     send_cli_action_to_server(&session_metadata, page_scroll_down_action, client_id);
     std::thread::sleep(std::time::Duration::from_millis(100));
@@ -3386,7 +3381,7 @@ pub fn send_cli_half_page_scroll_down_action() {
     ));
     std::thread::sleep(std::time::Duration::from_millis(100));
 
-    // scroll up some
+    // 向上滚动一些
     send_cli_action_to_server(
         &session_metadata,
         half_page_scroll_up_action.clone(),
@@ -3400,7 +3395,7 @@ pub fn send_cli_half_page_scroll_down_action() {
     );
     std::thread::sleep(std::time::Duration::from_millis(100)); // give time for the async render
 
-    // scroll down
+    // 向下滚动
     send_cli_action_to_server(&session_metadata, half_page_scroll_down_action, client_id);
     std::thread::sleep(std::time::Duration::from_millis(100));
     mock_screen.teardown(vec![server_instruction, screen_thread]);
@@ -3519,7 +3514,7 @@ pub fn send_cli_toggle_active_tab_sync_action() {
         .into_iter()
         .filter(|i| matches!(i, PtyWriteInstruction::Write(..)))
         .collect();
-    // here we should have 2 Write instructions, one for each pane
+    // 这里我们应该有 2 个 Write 指令，每个窗格一个
     assert_snapshot!(format!("{:?}", received_write_instructions));
 }
 
@@ -3597,8 +3592,7 @@ pub fn web_new_pane_in_tab_action_targets_requested_tab() {
         pty_receiver
     );
 
-    // This is exactly the Action the web control bridge produces for the
-    // browser `NewPaneInTab { tab_id }` payload.
+    // 这正是 Web 控制桥为浏览器 `NewPaneInTab { tab_id }` 有效负载产生的操作。
     let action = Action::NewTiledPane {
         direction: None,
         command: None,
@@ -4001,14 +3995,14 @@ pub fn send_cli_toggle_pane_embed_or_float() {
         server_receiver
     );
     let toggle_pane_embed_or_floating = CliAction::TogglePaneEmbedOrFloating { pane_id: None };
-    // first time to float
+    // 第一次浮动
     send_cli_action_to_server(
         &session_metadata,
         toggle_pane_embed_or_floating.clone(),
         client_id,
     );
     std::thread::sleep(std::time::Duration::from_millis(200));
-    // second time to embed
+    // 第二次嵌入
     send_cli_action_to_server(
         &session_metadata,
         toggle_pane_embed_or_floating.clone(),
@@ -4023,7 +4017,7 @@ pub fn send_cli_toggle_pane_embed_or_float() {
     let _snapshot_count = snapshots.len();
     let last_three_snapshots = snapshots.clone().into_iter().rev().take(3).rev(); // we do this to
                                                                                   // prevent extra
-                                                                                  // renders from
+                                                                                  // 渲染s from
                                                                                   // throwing us
                                                                                   // off
     for (_cursor_coordinates, snapshot) in last_three_snapshots.clone() {
@@ -4053,13 +4047,13 @@ pub fn send_cli_toggle_floating_panes() {
     );
     let toggle_pane_embed_or_floating = CliAction::TogglePaneEmbedOrFloating { pane_id: None };
     let toggle_floating_panes = CliAction::ToggleFloatingPanes { tab_id: None };
-    // float the focused pane
+    // 浮动聚焦的窗格
     send_cli_action_to_server(&session_metadata, toggle_pane_embed_or_floating, client_id);
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // toggle floating panes (will hide the floated pane from the previous action)
+    // 切换浮动窗格（将隐藏上一个操作的浮动窗格）
     send_cli_action_to_server(&session_metadata, toggle_floating_panes.clone(), client_id);
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // toggle floating panes (will show the floated pane)
+    // 切换浮动窗格（将显示浮动窗格）
     send_cli_action_to_server(&session_metadata, toggle_floating_panes.clone(), client_id);
     std::thread::sleep(std::time::Duration::from_millis(100));
     mock_screen.teardown(vec![server_instruction, screen_thread]);
@@ -4206,7 +4200,7 @@ pub fn send_cli_new_tab_action_with_name_and_layout() {
         .unwrap()
         .clone();
     let output = format!("{:#?}", new_tab_instruction);
-    // Normalize Windows path separators for cross-platform snapshot consistency
+    // 规范化 Windows 路径分隔符以实现跨平台快照一致性
     let output = output.replace("\\\\", "/");
     assert_snapshot!(output);
 }
@@ -4429,10 +4423,10 @@ pub fn send_cli_undo_rename_tab() {
         tab_id: None,
     };
     let undo_rename_tab = CliAction::UndoRenameTab { tab_id: None };
-    // first rename the tab
+    // 首先重命名标签页
     send_cli_action_to_server(&session_metadata, rename_tab, client_id);
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // then undo the tab rename to go back to the default name
+    // 然后撤销标签页重命名以返回默认名称
     send_cli_action_to_server(&session_metadata, undo_rename_tab, client_id);
     std::thread::sleep(std::time::Duration::from_millis(100));
     mock_screen.teardown(vec![plugin_thread, screen_thread]);
@@ -4752,9 +4746,7 @@ pub fn screen_can_break_pane_to_a_new_tab() {
         .to_screen
         .send(ScreenInstruction::BreakPane(Default::default(), 1, None));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // we send ApplyLayout, because in prod this is eventually received after the message traverses
-    // through the plugin and pty threads (to open extra stuff we need in the layout, eg. the
-    // default plugins)
+    // 我们发送 ApplyLayout，因为在生产环境中，这最终是在消息遍历插件和 pty 线程后收到的（以打开布局中我们需要的额外内容，例如默认插件）
     let _ = mock_screen.to_screen.send(ScreenInstruction::ApplyLayout(
         TiledPaneLayout::default(),
         vec![], // floating_panes_layout
@@ -4768,12 +4760,12 @@ pub fn screen_can_break_pane_to_a_new_tab() {
         None,
     ));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // move back to make sure the other pane is in the previous tab
+    // 向后移动以确保另一个窗格在上一个标签页中
     let _ = mock_screen
         .to_screen
         .send(ScreenInstruction::MoveFocusLeftOrPreviousTab(1, None));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // move forward to make sure the broken pane is in the previous tab
+    // 向前移动以确保损坏的窗格在上一个标签页中
     let _ = mock_screen
         .to_screen
         .send(ScreenInstruction::MoveFocusRightOrNextTab(1, None));
@@ -4851,9 +4843,7 @@ pub fn screen_can_break_floating_pane_to_a_new_tab() {
         .to_screen
         .send(ScreenInstruction::BreakPane(Default::default(), 1, None));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // we send ApplyLayout, because in prod this is eventually received after the message traverses
-    // through the plugin and pty threads (to open extra stuff we need in the layout, eg. the
-    // default plugins)
+    // 我们发送 ApplyLayout，因为在生产环境中，这最终是在消息遍历插件和 pty 线程后收到的（以打开布局中我们需要的额外内容，例如默认插件）
     floating_panes_layout.get_mut(0).unwrap().already_running = true;
     let _ = mock_screen.to_screen.send(ScreenInstruction::ApplyLayout(
         TiledPaneLayout::default(),
@@ -4868,12 +4858,12 @@ pub fn screen_can_break_floating_pane_to_a_new_tab() {
         None,
     ));
     std::thread::sleep(std::time::Duration::from_millis(200));
-    // move back to make sure the other pane is in the previous tab
+    // 向后移动以确保另一个窗格在上一个标签页中
     let _ = mock_screen
         .to_screen
         .send(ScreenInstruction::MoveFocusLeftOrPreviousTab(1, None));
     std::thread::sleep(std::time::Duration::from_millis(200));
-    // move forward to make sure the broken pane is in the previous tab
+    // 向前移动以确保损坏的窗格在上一个标签页中
     let _ = mock_screen
         .to_screen
         .send(ScreenInstruction::MoveFocusRightOrNextTab(1, None));
@@ -4938,9 +4928,7 @@ pub fn screen_can_break_multiple_stacked_panes_to_a_new_tab() {
             completion_tx: None,
         });
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // we send ApplyLayout, because in prod this is eventually received after the message traverses
-    // through the plugin and pty threads (to open extra stuff we need in the layout, eg. the
-    // default plugins)
+    // 我们发送 ApplyLayout，因为在生产环境中，这最终是在消息遍历插件和 pty 线程后收到的（以打开布局中我们需要的额外内容，例如默认插件）
     let _ = mock_screen.to_screen.send(ScreenInstruction::ApplyLayout(
         TiledPaneLayout::default(),
         vec![],
@@ -4954,12 +4942,12 @@ pub fn screen_can_break_multiple_stacked_panes_to_a_new_tab() {
         None,
     ));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // move back to make sure the other pane is in the previous tab
+    // 向后移动以确保另一个窗格在上一个标签页中
     let _ = mock_screen
         .to_screen
         .send(ScreenInstruction::MoveFocusLeftOrPreviousTab(1, None));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // move forward to make sure the broken panes are in the next tab
+    // 向前移动以确保损坏的窗格在下一个标签页中
     let _ = mock_screen
         .to_screen
         .send(ScreenInstruction::MoveFocusRightOrNextTab(1, None));
@@ -5013,9 +5001,7 @@ pub fn screen_can_break_plugin_pane_to_a_new_tab() {
         .to_screen
         .send(ScreenInstruction::BreakPane(Default::default(), 1, None));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // we send ApplyLayout, because in prod this is eventually received after the message traverses
-    // through the plugin and pty threads (to open extra stuff we need in the layout, eg. the
-    // default plugins)
+    // 我们发送 ApplyLayout，因为在生产环境中，这最终是在消息遍历插件和 pty 线程后收到的（以打开布局中我们需要的额外内容，例如默认插件）
     let _ = mock_screen.to_screen.send(ScreenInstruction::ApplyLayout(
         TiledPaneLayout::default(),
         vec![], // floating_panes_layout
@@ -5029,12 +5015,12 @@ pub fn screen_can_break_plugin_pane_to_a_new_tab() {
         None,
     ));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // move back to make sure the other pane is in the previous tab
+    // 向后移动以确保另一个窗格在上一个标签页中
     let _ = mock_screen
         .to_screen
         .send(ScreenInstruction::MoveFocusLeftOrPreviousTab(1, None));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // move forward to make sure the broken pane is in the previous tab
+    // 向前移动以确保损坏的窗格在上一个标签页中
     let _ = mock_screen
         .to_screen
         .send(ScreenInstruction::MoveFocusRightOrNextTab(1, None));
@@ -5086,9 +5072,7 @@ pub fn screen_can_break_floating_plugin_pane_to_a_new_tab() {
         .to_screen
         .send(ScreenInstruction::BreakPane(Default::default(), 1, None));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // we send ApplyLayout, because in prod this is eventually received after the message traverses
-    // through the plugin and pty threads (to open extra stuff we need in the layout, eg. the
-    // default plugins)
+    // 我们发送 ApplyLayout，因为在生产环境中，这最终是在消息遍历插件和 pty 线程后收到的（以打开布局中我们需要的额外内容，例如默认插件）
     floating_panes_layout.get_mut(0).unwrap().already_running = true;
     let _ = mock_screen.to_screen.send(ScreenInstruction::ApplyLayout(
         TiledPaneLayout::default(),
@@ -5103,12 +5087,12 @@ pub fn screen_can_break_floating_plugin_pane_to_a_new_tab() {
         None,
     ));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // move back to make sure the other pane is in the previous tab
+    // 向后移动以确保另一个窗格在上一个标签页中
     let _ = mock_screen
         .to_screen
         .send(ScreenInstruction::MoveFocusLeftOrPreviousTab(1, None));
     std::thread::sleep(std::time::Duration::from_millis(100));
-    // move forward to make sure the broken pane is in the previous tab
+    // 向前移动以确保损坏的窗格在上一个标签页中
     let _ = mock_screen
         .to_screen
         .send(ScreenInstruction::MoveFocusRightOrNextTab(1, None));
@@ -5338,36 +5322,36 @@ pub fn go_to_tab_by_id_verifies_screen_state() {
     let client_id = 1;
     let mut screen = create_new_screen(size, true, true);
 
-    // Create multiple tabs with known IDs
+    // 创建具有已知 ID 的多个标签页
     new_tab(&mut screen, 1, 0); // ID 0
     new_tab(&mut screen, 2, 1); // ID 1
     new_tab(&mut screen, 3, 2); // ID 2
 
-    // Active tab should be the last one created (ID 2)
+    // 活动标签页应为最后创建的那个（ID 2）
     assert_eq!(screen.get_active_tab(client_id).unwrap().id, 2);
 
-    // Switch to tab with ID 0
+    // 切换到 ID 为 0 的标签页
     if let Some(tab_position) = screen.get_tab_position_by_id(0) {
         screen
             .switch_active_tab(tab_position, None, true, client_id)
             .expect("TEST");
     }
 
-    // Verify active tab is now ID 0
+    // 验证活动标签页现在是 ID 0
     assert_eq!(
         screen.get_active_tab(client_id).unwrap().id,
         0,
         "Active tab should be tab with ID 0"
     );
 
-    // Switch to tab with ID 1
+    // 切换到 ID 为 1 的标签页
     if let Some(tab_position) = screen.get_tab_position_by_id(1) {
         screen
             .switch_active_tab(tab_position, None, true, client_id)
             .expect("TEST");
     }
 
-    // Verify active tab is now ID 1
+    // 验证活动标签页现在是 ID 1
     assert_eq!(
         screen.get_active_tab(client_id).unwrap().id,
         1,
@@ -5385,7 +5369,7 @@ pub fn send_cli_go_to_tab_by_id_action() {
     let mut mock_screen = MockScreen::new(size);
     let session_metadata = mock_screen.clone_session_metadata();
 
-    // Create tabs
+    // 创建标签页
     mock_screen.new_tab(TiledPaneLayout::default());
     mock_screen.new_tab(TiledPaneLayout::default());
 
@@ -5400,7 +5384,7 @@ pub fn send_cli_go_to_tab_by_id_action() {
 
     std::thread::sleep(std::time::Duration::from_millis(100));
 
-    // Send CLI action
+    // 发送 CLI 操作
     let cli_action = CliAction::GoToTabById { id: 1 };
     send_cli_action_to_server(&session_metadata, cli_action, client_id);
 
@@ -5408,7 +5392,7 @@ pub fn send_cli_go_to_tab_by_id_action() {
 
     mock_screen.teardown(vec![server_thread, screen_thread]);
 
-    // Verify that CLI action caused screen updates (Render instructions sent)
+    // 验证 CLI 操作导致了屏幕更新（发送了 Render 指令）
     let render_count = received_server_instructions
         .lock()
         .unwrap()
@@ -5430,7 +5414,7 @@ pub fn rename_tab_by_id_verifies_screen_state() {
     };
     let mut screen = create_new_screen(size, true, true);
 
-    // Create tabs with known IDs
+    // 创建标签页 with known IDs
     new_tab(&mut screen, 1, 0); // ID 0
     new_tab(&mut screen, 2, 1); // ID 1
 
@@ -5481,7 +5465,7 @@ pub fn send_cli_rename_tab_by_id_action() {
 
     std::thread::sleep(std::time::Duration::from_millis(100));
 
-    // Send CLI action
+    // 发送 CLI 操作
     let cli_action = CliAction::RenameTabById {
         id: 1,
         name: "TestName".to_string(),
@@ -5505,7 +5489,7 @@ pub fn close_tab_by_id_verifies_screen_state() {
     };
     let mut screen = create_new_screen(size, true, true);
 
-    // Create multiple tabs with known IDs
+    // 创建具有已知 ID 的多个标签页
     new_tab(&mut screen, 1, 0); // ID 0
     new_tab(&mut screen, 2, 1); // ID 1
     new_tab(&mut screen, 3, 2); // ID 2
@@ -5572,7 +5556,7 @@ pub fn send_cli_close_tab_by_id_action() {
 
     std::thread::sleep(std::time::Duration::from_millis(100));
 
-    // Send CLI action
+    // 发送 CLI 操作
     let cli_action = CliAction::CloseTabById { id: 1 };
     send_cli_action_to_server(&session_metadata, cli_action, client_id);
 
@@ -8315,7 +8299,7 @@ pub fn send_cli_new_tab_action_with_layout_string() {
         .unwrap()
         .clone();
     let output = format!("{:#?}", new_tab_instruction);
-    // Normalize Windows path separators for cross-platform snapshot consistency
+    // 规范化 Windows 路径分隔符以实现跨平台快照一致性
     let output = output.replace("\\\\", "/");
     assert_snapshot!(output);
 }
@@ -8370,7 +8354,7 @@ pub fn send_cli_new_tab_action_with_layout_string_and_name() {
         .unwrap()
         .clone();
     let output = format!("{:#?}", new_tab_instruction);
-    // Normalize Windows path separators for cross-platform snapshot consistency
+    // 规范化 Windows 路径分隔符以实现跨平台快照一致性
     let output = output.replace("\\\\", "/");
     assert_snapshot!(output);
 }

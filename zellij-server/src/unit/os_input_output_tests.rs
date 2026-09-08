@@ -5,7 +5,7 @@ fn make_server() -> ServerOsInputOutput {
     get_server_os_input().expect("failed to create server os input")
 }
 
-// --- Cross-platform command helpers ---
+// --- 跨平台命令辅助函数 ---
 
 #[allow(dead_code)]
 #[cfg(not(windows))]
@@ -74,7 +74,7 @@ fn get_cwd() {
     );
 }
 
-// --- Signal delivery tests ---
+// --- 信号传递测试 ---
 
 #[cfg(not(windows))]
 #[test]
@@ -88,7 +88,7 @@ fn kill_sends_sighup_to_process() {
 
     server.kill(pid).expect("kill should succeed");
 
-    // Give the signal time to be delivered
+    // 给信号时间以被传递
     std::thread::sleep(std::time::Duration::from_millis(100));
 }
 
@@ -155,7 +155,7 @@ fn spawn_and_read_output() {
         .spawn_terminal(action, quit_cb, None)
         .expect("spawn_terminal should succeed");
 
-    // Read output from the spawned terminal
+    // 从生成的终端读取输出
     let mut output = Vec::new();
     let mut buf = [0u8; 4096];
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
@@ -183,7 +183,7 @@ fn spawn_and_read_output() {
                 },
                 Ok(Err(_)) => break,
                 Err(_) => {
-                    // timeout — check if we already have enough
+                    // 超时 — 检查我们是否已经有足够的数据
                     let s = String::from_utf8_lossy(&output);
                     if s.contains(test_message) {
                         break;
@@ -210,8 +210,7 @@ fn tcgetpgrp_returns_foreground_group() {
 
     let server = make_server();
 
-    // `login_tty` in the child makes the spawned command the controlling terminal's
-    // foreground process group, so tcgetpgrp(master) should return its pid
+    // 子进程中的 `login_tty` 使生成的命令成为控制终端的前台进程组，因此 tcgetpgrp(master) 应返回其 pid
     let cmd = RunCommand {
         command: PathBuf::from("sleep"),
         args: vec!["60".to_string()],
@@ -222,7 +221,7 @@ fn tcgetpgrp_returns_foreground_group() {
         .spawn_terminal(TerminalAction::RunCommand(cmd), quit_cb, None)
         .expect("spawn_terminal should succeed");
 
-    // poll (bounded to ~2s) for the child to finish setting up its controlling terminal
+    // 轮询（限制在约 2 秒）子进程完成其控制终端的设置
     let mut fpgid = None;
     for _ in 0..100 {
         fpgid = server.pty_backend.tcgetpgrp(terminal_id);
@@ -248,7 +247,7 @@ fn tcgetpgrp_returns_foreground_group() {
         );
     }
 
-    // An unknown terminal id has no fd and must not panic.
+    // 未知的终端 ID 没有 fd，且不得 panic。
     assert_eq!(server.pty_backend.tcgetpgrp(u32::MAX), None);
 
     if let Some(child_pid) = child_pid {

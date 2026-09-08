@@ -1,4 +1,4 @@
-#[allow(unused_imports)] // some imports used only with web_server_capability feature
+#[allow(unused_imports)] // 某些导入仅在 web_server_capability 特性下使用
 use zellij_utils::consts::{
     session_info_cache_file_name, session_info_folder_for_session, session_layout_cache_file_name,
     VERSION, ZELLIJ_SESSION_INFO_CACHE_DIR, ZELLIJ_SOCK_DIR,
@@ -42,8 +42,8 @@ pub enum BackgroundJob {
     DisplayPaneError(Vec<PaneId>, String),
     AnimatePluginLoading(u32),                            // u32 - plugin_id
     StopPluginLoadingAnimation(u32),                      // u32 - plugin_id
-    ReportSessionInfo(String, SessionInfo),               // String - session name
-    ReportPluginList(BTreeMap<PluginId, RunPlugin>),      // String - session name
+    ReportSessionInfo(String, SessionInfo),               // String - 会话名称
+    ReportPluginList(BTreeMap<PluginId, RunPlugin>),      // String - 会话名称
     ReportLayoutInfo((String, BTreeMap<String, String>)), // BTreeMap<file_name, pane_contents>
     RunCommand(
         PluginId,
@@ -117,7 +117,7 @@ impl From<&BackgroundJob> for BackgroundJobContext {
 }
 
 static LONG_FLASH_DURATION_MS: u64 = 1000;
-static FLASH_DURATION_MS: u64 = 400; // Doherty threshold
+static FLASH_DURATION_MS: u64 = 400; // Doherty 阈值
 static PLUGIN_ANIMATION_OFFSET_DURATION_MD: u64 = 500;
 static SESSION_METADATA_WRITE_INTERVAL_MS: u64 = 1000;
 static UPDATE_AND_REPORT_CWDS_INTERVAL_MS: u64 = 1000;
@@ -139,7 +139,7 @@ pub fn session_scan_state() -> Option<&'static SessionScanState> {
     SESSION_SCAN_STATE.get()
 }
 
-#[allow(unused_variables)] // web_server_base_url used only with web_server_capability feature
+#[allow(unused_variables)] // web_server_base_url 仅在 web_server_capability 特性下使用
 pub(crate) fn background_jobs_main(
     bus: Bus<BackgroundJob>,
     serialization_interval: Option<u64>,
@@ -161,8 +161,7 @@ pub(crate) fn background_jobs_main(
         current_session_plugin_list: current_session_plugin_list.clone(),
     });
     let last_serialization_time = Arc::new(Mutex::new(Instant::now()));
-    let serialization_interval = serialization_interval.map(|s| s * 1000); // convert to
-                                                                           // milliseconds
+    let serialization_interval = serialization_interval.map(|s| s * 1000); // 转换为毫秒
     let last_render_request: Arc<Mutex<Option<Instant>>> = Arc::new(Mutex::new(None));
     let pending_help_text_clear: Arc<Mutex<HashMap<ClientId, Instant>>> =
         Arc::new(Mutex::new(HashMap::new()));
@@ -173,11 +172,11 @@ pub(crate) fn background_jobs_main(
     let mut nested_guest_pings: HashMap<PaneId, Arc<AtomicBool>> = HashMap::new();
 
     let http_client = HttpClient::builder()
-        // TODO: timeout?
+        // TODO: 超时？
         .redirect_policy(RedirectPolicy::Follow)
         .build()
         .ok();
-    // We needn't do anything with the runtime, but it should exist at this point.
+    // 我们不需要对运行时做任何操作，但此时它应该已经存在。
     let runtime = crate::global_async_runtime::get_tokio_runtime();
 
     {
@@ -295,7 +294,7 @@ pub(crate) fn background_jobs_main(
             BackgroundJob::ReportLayoutInfo(session_layout) => {
                 *current_session_layout.lock().unwrap() = session_layout;
 
-                // Update session save time for plugin query
+                // 更新插件查询的会话保存时间
                 let timestamp_millis = std::time::SystemTime::now()
                     .duration_since(std::time::UNIX_EPOCH)
                     .unwrap_or_default()
@@ -452,17 +451,13 @@ pub(crate) fn background_jobs_main(
                 }
             },
             BackgroundJob::RenderToClients => {
-                // last_render_request being Some() represents a render request that is pending
+                // last_render_request 为 Some() 表示有一个待处理的渲染请求
                 // last_render_request is only ever set to Some() if an async task is spawned to
                 // send the actual render instruction
                 //
-                // given this:
-                // - if last_render_request is None and we received this job, we should spawn an
-                // async task to send the render instruction and log the current task time
-                // - if last_render_request is Some(), it means we're currently waiting to render,
-                // so we should log the render request and do nothing, once the async task has
-                // finished running, it will check to see if the render time was updated while it
-                // was running, and if so send this instruction again so the process can start anew
+                // 鉴于此：
+                // - 如果 last_render_request 为 None 且我们收到了此任务，应该生成一个异步任务来发送渲染指令并记录当前任务时间
+                // - 如果 last_render_request 为 Some()，意味着我们当前正在等待渲染，所以应该记录渲染请求并不做任何操作；一旦异步任务运行完毕，它会检查运行期间渲染时间是否被更新，如果是则再次发送此指令以便重新开始该过程
                 let (should_run_task, current_time) = {
                     let mut last_render_request = last_render_request.lock().unwrap();
                     let should_run_task = last_render_request.is_none();
@@ -483,16 +478,13 @@ pub(crate) fn background_jobs_main(
                                 let mut last_render_request = last_render_request.lock().unwrap();
                                 if let Some(last_render_request) = *last_render_request {
                                     if last_render_request > task_start_time {
-                                        // another render request was received while we were
-                                        // sleeping, schedule this job again so that we can also
-                                        // render that request
+                                        // 在休眠期间收到了另一个渲染请求，重新调度此任务以便也能渲染该请求
                                         let _ = senders.send_to_background_jobs(
                                             BackgroundJob::RenderToClients,
                                         );
                                     }
                                 }
-                                // reset the last_render_request so that the task will be spawned
-                                // again once a new request is received
+                                // 重置 last_render_request，以便在收到新请求时再次生成任务
                                 *last_render_request = None;
                             }
                         }
@@ -846,7 +838,7 @@ fn find_resurrectable_sessions(
                 .filter_map(|folder_name| {
                     let session_name = folder_name.file_name()?.to_str()?.to_owned();
                     if session_infos_on_machine.contains_key(&session_name) {
-                        // this is not a dead session...
+                        // 这不是一个已终止的会话...
                         return None;
                     }
                     let layout_file_name = folder_name.join("session-layout.kdl");
@@ -856,8 +848,7 @@ fn find_resurrectable_sessions(
                         Ok(created) => Some(created),
                         Err(e) => {
                             if e.kind() == std::io::ErrorKind::NotFound {
-                                return None; // no layout file, cannot resurrect session, let's not
-                                             // list it
+                                return None; // 没有布局文件，无法恢复会话，不列出它
                             } else {
                                 log::error!(
                                     "Failed to read created stamp of resurrection file: {:?}",

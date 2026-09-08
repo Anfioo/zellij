@@ -81,7 +81,7 @@ use zellij_utils::{
 
 pub type ClientId = u16;
 
-/// Instructions related to server-side application
+/// 与服务端应用程序相关的指令
 #[derive(Debug, Clone)]
 pub enum ServerInstruction {
     FirstClientConnected(
@@ -138,8 +138,7 @@ pub enum ServerInstruction {
     FailedToStartWebServer(String),
     ClearMouseHelpText(ClientId),
     ClearCommandOutputFlash(PaneId),
-    /// Relay a forwarded-query dispatch from Screen to the server main
-    /// loop. The main loop writes `ServerToClientMsg::ForwardQueryToHost`
+    /// 将来自 Screen 的转发查询调度中继到服务端主循环。主循环写入 `ServerToClientMsg::ForwardQueryToHost`
     ForwardQueryToHost(u32, Vec<u8>, bool),
     KeyPassthroughChanged(ClientId, PaneId, PaneId, bool, Option<Direction>, bool),
     EmitNestedSessionFrameToClient(ClientId, Vec<u8>),
@@ -213,9 +212,7 @@ impl ErrorInstruction for ServerInstruction {
 pub(crate) struct SessionConfiguration {
     runtime_config: HashMap<ClientId, Config>, // if present, overrides the saved_config
     saved_config: Config,                      // the config as it is on disk (not guaranteed),
-                                               // when changed, this resets the runtime config to
-                                               // be identical to it and override any previous
-                                               // changes
+                                               // 更改时，这会将运行时配置重置为与其相同，并覆盖任何先前的更改
 }
 
 impl SessionConfiguration {
@@ -262,7 +259,7 @@ impl SessionConfiguration {
         client_id: &ClientId,
         stringified_config: String,
     ) -> (Option<Config>, bool) {
-        // bool is whether the config changed
+        // bool 表示配置是否更改
         let mut full_reconfigured_config = None;
         let mut config_changed = false;
         let current_client_configuration = self.get_client_configuration(client_id);
@@ -340,9 +337,7 @@ pub(crate) struct SessionMetaData {
     pub session_configuration: SessionConfiguration,
     pub key_passthrough_clients: HashMap<ClientId, PaneId>,
     pub web_sharing: WebSharing, // this is a special attribute explicitly set on session
-    // initialization because we don't want it to be overridden by
-    // configuration changes, the only way it can be overwritten is by
-    // explicit plugin action
+    // 初始化，因为我们不希望它被配置更改覆盖，它可以被覆盖的唯一方式是通过显式的插件操作
     screen_thread: Option<thread::JoinHandle<()>>,
     pty_thread: Option<thread::JoinHandle<()>>,
     plugin_thread: Option<thread::JoinHandle<()>>,
@@ -520,7 +515,7 @@ impl SessionMetaData {
                 .unwrap();
         }
 
-        // Detect and notify plugins of configuration changes
+        // 检测配置更改并通知插件
         if config_was_written_to_disk {
             if let Some(new_plugins) = new_plugin_config {
                 self.senders
@@ -556,12 +551,7 @@ impl Drop for SessionMetaData {
     }
 }
 
-/// Remove a client from session state and synthesize empty
-/// `ForwardedReplyFromHost` instructions for any host-query forwards
-/// that had been dispatched to it. Without this, a client that goes
-/// away while holding an in-flight forward leaves `Screen`'s
-/// `forward_in_flight` flag stuck — the flag is only released by
-/// replies, and no reply will ever come.
+/// 从会话状态中移除客户端，并为已分派给它的任何主机查询转发合成空的 `ForwardedReplyFromHost` 指令。如果没有这个，在持有进行中转发时离开的客户端会使 `Screen` 的 `forward_in_flight` 标志卡住 — 该标志仅由回复释放，而永远不会有回复到来。
 fn remove_client_and_flush_forwards(
     client_id: ClientId,
     os_input: &mut Box<dyn ServerOsApi>,
@@ -607,7 +597,7 @@ macro_rules! send_to_client {
     ($client_id:expr, $os_input:expr, $msg:expr, $session_state:expr, $session_data:expr) => {
         let send_to_client_res = $os_input.send_to_client($client_id, $msg);
         if let Err(e) = send_to_client_res {
-            // Try to recover the message
+            // 尝试恢复消息
             let context = match e.downcast_ref::<ZellijError>() {
                 Some(ZellijError::ClientTooSlow { .. }) => {
                     format!(
@@ -619,9 +609,9 @@ macro_rules! send_to_client {
                     format!("failed to route server message to client {}", $client_id)
                 },
             };
-            // Log it so it isn't lost
+            // 记录它以免丢失
             Err::<(), _>(e).context(context).non_fatal();
-            // failed to send to client, remove it
+            // 发送到客户端失败，将其移除
             remove_client!($client_id, $os_input, $session_state, $session_data);
         }
     };
@@ -633,12 +623,7 @@ pub(crate) struct SessionState {
     pipes: HashMap<String, ClientId>,                 // String => pipe_id
     watchers: HashMap<ClientId, bool>, // watcher clients (read-only observers) bool -> is_web_client
     last_active_client: Option<ClientId>, // last client that sent a Key message
-    /// Host-query forward tokens that have been dispatched to a
-    /// specific client and are waiting for a reply. Used to clean up
-    /// when that client disconnects (or when there's no client to
-    /// dispatch to in the first place) — each stuck token gets an
-    /// empty synthetic reply so `Screen`'s `forward_in_flight` slot
-    /// releases and the queued forwards keep moving.
+    /// 已分派给特定客户端并正在等待回复的主机查询转发令牌。用于在该客户端断开连接时（或首先没有客户端可分派时）进行清理 — 每个卡住的令牌都会得到一个空的合成回复，以便 `Screen` 的 `forward_in_flight` 槽释放，排队的转发继续移动。
     forwards_in_flight: HashMap<u32, ClientId>,
 }
 
@@ -674,12 +659,7 @@ impl SessionState {
     pub fn associate_pipe_with_client(&mut self, pipe_id: String, client_id: ClientId) {
         self.pipes.insert(pipe_id, client_id);
     }
-    /// Remove a client and return any host-query tokens that had
-    /// been dispatched to this client and were still awaiting a
-    /// reply. Callers must synthesize an empty reply for each token
-    /// (via `ScreenInstruction::ForwardedReplyFromHost`) so
-    /// `Screen`'s in-flight slot releases and any queued forwards
-    /// can proceed.
+    /// 移除客户端并返回已分派给此客户端且仍在等待回复的任何主机查询令牌。调用者必须为每个令牌合成一个空回复（通过 `ScreenInstruction::ForwardedReplyFromHost`），以便 `Screen` 的进行中槽释放，任何排队的转发都可以继续。
     pub fn remove_client(&mut self, client_id: ClientId) -> Vec<u32> {
         self.clients.remove(&client_id);
         self.pipes.retain(|_p_id, c_id| c_id != &client_id);
@@ -774,10 +754,7 @@ impl SessionState {
     pub fn clear_forward_in_flight(&mut self, token: u32) {
         self.forwards_in_flight.remove(&token);
     }
-    /// Client to route a host-query forward to. Prefers whichever
-    /// client most recently interacted with the session; falls back
-    /// to any currently-connected non-watcher client. Returns `None`
-    /// only when no regular client is connected.
+    /// 要将主机查询转发路由到的客户端。优先选择最近与会话交互的客户端；回退到任何当前连接的非观察器客户端。仅当没有连接常规客户端时返回 `None`。
     pub fn pick_forward_target(&self) -> Option<ClientId> {
         if let Some(candidate) = self.last_active_client {
             if self.clients.contains_key(&candidate) {
@@ -812,9 +789,7 @@ mod session_state_tests {
         let mut s = SessionState::new();
         s.clients.insert(1, None);
         s.clients.insert(2, None);
-        // Client 3 was last active but has since disconnected — not in
-        // `clients` map anymore. Must fall through to any connected
-        // client rather than returning None.
+        // 客户端 3 最后处于活动状态，但此后已断开连接 — 不再在 `clients` 映射中。必须回退到任何已连接的客户端，而不是返回 None。
         s.last_active_client = Some(3);
         let picked = s
             .pick_forward_target()
@@ -833,8 +808,7 @@ mod session_state_tests {
         let mut s = with_client(1);
         s.mark_forward_in_flight(10, 1);
         s.mark_forward_in_flight(11, 1);
-        // A forward dispatched to a *different* client — must not be
-        // returned when we remove client 1.
+        // 分派给*不同*客户端的转发 — 在我们移除客户端 1 时不得返回。
         s.clients.insert(2, None);
         s.mark_forward_in_flight(12, 2);
 
@@ -855,7 +829,7 @@ mod session_state_tests {
         let mut s = with_client(1);
         s.mark_forward_in_flight(42, 1);
         s.clear_forward_in_flight(42);
-        // After clear, removing the client yields no stuck tokens.
+        // 清除后，移除客户端不会产生卡住的令牌。
         assert!(s.remove_client(1).is_empty());
     }
 }
@@ -866,7 +840,7 @@ pub fn start_server(os_input: Box<dyn ServerOsApi>, socket_path: PathBuf) {
     #[cfg(unix)]
     {
         use nix::sys::stat::{umask, Mode};
-        // preserve the current umask: read current value by setting to another mode, and then restoring it
+        // 保留当前 umask：通过设置为另一种模式读取当前值，然后恢复它
         let current_umask = umask(Mode::all());
         umask(current_umask);
         daemonize::Daemonize::new()
@@ -878,11 +852,7 @@ pub fn start_server(os_input: Box<dyn ServerOsApi>, socket_path: PathBuf) {
 
     #[cfg(windows)]
     {
-        // The server is spawned with CREATE_NEW_PROCESS_GROUP, which disables
-        // Ctrl+C handling for the process.  Child processes inherit this
-        // disabled state, so ConPTY children (shells, commands) would silently
-        // ignore CTRL_C_EVENT signals.  Re-enable Ctrl+C here so that
-        // descendants get the normal default handler (terminate on Ctrl+C).
+        // 服务端以 CREATE_NEW_PROCESS_GROUP 生成，这会禁用进程的 Ctrl+C 处理。子进程继承此禁用状态，因此 ConPTY 子进程（shell、命令）会静默忽略 CTRL_C_EVENT 信号。在此处重新启用 Ctrl+C，以便后代获得正常的默认处理程序（在 Ctrl+C 时终止）。
         //
         use windows_sys::Win32::System::Console::SetConsoleCtrlHandler;
         unsafe {
@@ -931,15 +901,14 @@ pub fn start_server_impl(
             move || {
                 drop(std::fs::remove_file(&socket_path));
                 let listener = ipc_bind(&socket_path).unwrap();
-                // set the sticky bit to avoid the socket file being potentially cleaned up
-                // https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html states that for XDG_RUNTIME_DIR:
-                // "To ensure that your files are not removed, they should have their access time timestamp modified at least once every 6 hours of monotonic time or the 'sticky' bit should be set on the file. "
-                // It is not guaranteed that all platforms allow setting the sticky bit on sockets!
+                // 设置 sticky 位以避免 socket 文件被潜在清理
+                // https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html 指出对于 XDG_RUNTIME_DIR：
+                // "为确保您的文件不被删除，它们的访问时间戳应至少每 6 小时单调时间修改一次，或者应在文件上设置 'sticky' 位。"
+                // 不保证所有平台都允许在 socket 上设置 sticky 位！
                 #[cfg(unix)]
                 drop(set_permissions(&socket_path, 0o1700));
 
-                // On Windows, named pipes are half-duplex, so we need a separate
-                // reply pipe for server→client messages.
+                // 在 Windows 上，命名管道是半双工的，因此我们需要一个单独的回复管道用于服务端→客户端消息。
                 #[cfg(windows)]
                 let reply_listener = zellij_utils::consts::ipc_bind_reply(&socket_path).unwrap();
 
@@ -1003,12 +972,11 @@ pub fn start_server_impl(
                     config.to_string(true),
                     &cli_assets.config_file_path,
                 );
-                // if we successfully wrote the config to disk, it means two things:
-                // 1. It did not exist beforehand
-                // 2. The config folder is writeable
+                // 如果我们成功将配置写入磁盘，这意味着两件事：
+                // 1. 它之前不存在
+                // 2. 配置文件夹可写
                 //
-                // If these two are true, we should launch the setup wizard, if even one of them is
-                // false, we should never launch it.
+                // 如果这两者都为真，我们应该启动设置向导，如果其中一个为假，我们永远不应该启动它。
                 let should_launch_setup_wizard = successfully_written_config;
 
                 let runtime_config_options = match &cli_assets.configuration_options {
@@ -1139,8 +1107,7 @@ pub fn start_server_impl(
                     let mut floating_panes =
                         layout.template.map(|t| t.1).clone().unwrap_or_default();
                     if should_launch_setup_wizard {
-                        // we only do this here (and only once) because otherwise it will be
-                        // intrusive
+                        // 我们只在这里这样做（并且只做一次），因为否则会很突兀
                         let setup_wizard = setup_wizard_floating_pane();
                         floating_panes.push(setup_wizard);
                     } else if should_show_release_notes(
@@ -1249,8 +1216,7 @@ pub fn start_server_impl(
                     .send_to_plugin(PluginInstruction::AddClient(client_id))
                     .unwrap();
                 let default_mode = config.options.default_mode.unwrap_or_default();
-                // ModeUpdate broadcast is handled by the screen thread via
-                // change_mode() -> update_input_modes()
+                // ModeUpdate 广播由 screen 线程通过 change_mode() -> update_input_modes() 处理
                 session_data
                     .senders
                     .send_to_screen(ScreenInstruction::ChangeMode(
@@ -1262,16 +1228,16 @@ pub fn start_server_impl(
                     .unwrap();
             },
             ServerInstruction::AttachWatcherClient(client_id, terminal_size, is_web_client) => {
-                // the client_id was inserted into clients upon ipc tunnel initialization
-                // now that it identified itself as a watcher, we need to convert it
+                // client_id 在 ipc 隧道初始化时被插入到 clients 中
+                // 现在它将自己标识为观察器，我们需要转换它
 
-                // Convert to watcher in SessionState (needed for input filtering in route.rs)
+                // 在 SessionState 中转换为观察器（route.rs 中的输入过滤需要）
                 session_state
                     .write()
                     .unwrap()
                     .convert_client_to_watcher(client_id, is_web_client);
 
-                // Also notify Screen to add this as a watcher client (for rendering) with the terminal size
+                // 还通知 Screen 将此添加为观察器客户端（用于渲染）并带有终端尺寸
                 session_data
                     .write()
                     .unwrap()
@@ -1311,7 +1277,7 @@ pub fn start_server_impl(
                         );
                     },
                     None => {
-                        // send to all clients, this pipe might not have been associated yet
+                        // 发送到所有客户端，此管道可能尚未关联
                         let client_ids = session_state.read().unwrap().client_ids();
                         for client_id in client_ids {
                             send_to_client!(
@@ -1343,7 +1309,7 @@ pub fn start_server_impl(
                         );
                     },
                     None => {
-                        // send to all clients, this pipe might not have been associated yet
+                        // 发送到所有客户端，此管道可能尚未关联
                         let client_ids = session_state.read().unwrap().client_ids();
                         for client_id in client_ids {
                             send_to_client!(
@@ -1368,13 +1334,13 @@ pub fn start_server_impl(
                     },
                 );
 
-                // Check if this is a watcher
+                // 检查这是否是观察器
                 let is_watcher = session_state.read().unwrap().is_watcher(&client_id);
                 if is_watcher {
-                    // Remove from SessionState watchers set
+                    // 从 SessionState 观察器集合中移除
                     session_state.write().unwrap().remove_watcher(client_id);
 
-                    // Also notify Screen to remove watcher
+                    // 还通知 Screen 移除观察器
                     if let Some(session_data) = session_data.write().unwrap().as_ref() {
                         let _ = session_data
                             .senders
@@ -1386,7 +1352,7 @@ pub fn start_server_impl(
                     if let Some(session_data) = session_data.write().unwrap().as_mut() {
                         session_data.remove_key_passthrough_client(client_id);
                     }
-                    // Handle regular client removal
+                    // 处理常规客户端移除
                     remove_client!(client_id, os_input, session_state, session_data);
                     drop(completion_tx); // prevent deadlock with route thread
                     session_data
@@ -1414,7 +1380,7 @@ pub fn start_server_impl(
                             .keys()
                             .copied()
                             .collect();
-                        // these are just the pipes
+                        // 这些只是管道
                         for client_id in client_ids_to_cleanup {
                             remove_client!(client_id, os_input, session_state, session_data);
                         }
@@ -1435,13 +1401,13 @@ pub fn start_server_impl(
                 }
             },
             ServerInstruction::RemoveClient(client_id) => {
-                // Check if this is a watcher
+                // 检查这是否是观察器
                 let is_watcher = session_state.read().unwrap().is_watcher(&client_id);
                 if is_watcher {
-                    // Remove from SessionState watchers set
+                    // 从 SessionState 观察器集合中移除
                     session_state.write().unwrap().remove_watcher(client_id);
 
-                    // Also notify Screen to remove watcher
+                    // 还通知 Screen 移除观察器
                     if let Some(session_data) = session_data.write().unwrap().as_ref() {
                         let _ = session_data
                             .senders
@@ -1453,7 +1419,7 @@ pub fn start_server_impl(
                     if let Some(session_data) = session_data.write().unwrap().as_mut() {
                         session_data.remove_key_passthrough_client(client_id);
                     }
-                    // Handle regular client removal
+                    // 处理常规客户端移除
                     remove_client!(client_id, os_input, session_state, session_data);
                     session_data
                         .write()
@@ -1531,9 +1497,7 @@ pub fn start_server_impl(
                     remove_client!(*client_id, os_input, session_state, session_data);
                 }
                 drop(completion_tx); // we do this here explicitly to signal that the clients have
-                                     // already disconnected and to prevent a deadlock below caused
-                                     // by us having to wait for session_data to send cleanup
-                                     // signals to the various threads
+                                     // 已经断开连接，并且为了防止下面因我们必须等待 session_data 向各个线程发送清理信号而导致的死锁
                 for client_id in client_ids {
                     session_data
                         .write()
@@ -1555,8 +1519,8 @@ pub fn start_server_impl(
             },
             ServerInstruction::Render(serialized_output) => {
                 let client_ids = session_state.read().unwrap().client_ids();
-                // If `Some(_)`- unwrap it and forward it to the clients to render.
-                // If `None`- Send an exit instruction. This is the case when a user closes the last Tab/Pane.
+                // 如果是 `Some(_)` — 解包并将其转发给客户端进行渲染。
+                // 如果是 `None` — 发送退出指令。这是用户关闭最后一个标签页/窗格时的情况。
                 if let Some(output) = &serialized_output {
                     for (client_id, client_render_instruction) in output.iter() {
                         send_to_client!(
@@ -1570,7 +1534,7 @@ pub fn start_server_impl(
                         );
                     }
                 } else {
-                    // Session is exiting - disconnect all regular clients
+                    // 会话正在退出 — 断开所有常规客户端
                     for client_id in client_ids {
                         let _ = os_input.send_to_client(
                             client_id,
@@ -1581,7 +1545,7 @@ pub fn start_server_impl(
                         remove_client!(client_id, os_input, session_state, session_data);
                     }
 
-                    // Also disconnect all watchers
+                    // 也断开所有观察器
                     let watcher_ids: Vec<ClientId> = session_state
                         .read()
                         .unwrap()
@@ -1622,7 +1586,7 @@ pub fn start_server_impl(
                 lines_to_log,
                 client_id,
                 _completion_tx, // the action ends here, dropping this will release anything waiting
-                                // for it
+                                // 为此
             ) => {
                 send_to_client!(
                     client_id,
@@ -1638,7 +1602,7 @@ pub fn start_server_impl(
                 lines_to_log,
                 client_id,
                 _completion_tx, // the action ends here, dropping this will release anything waiting
-                                // for it
+                                // 为此
             ) => {
                 send_to_client!(
                     client_id,
@@ -1818,7 +1782,7 @@ pub fn start_server_impl(
                         session_data
                     );
                 } else {
-                    // TODO: test this
+                    // TODO: 测试这个
                     log::error!("Cannot start web server: this instance of Zellij was compiled without web_server_capability");
                 }
             },
@@ -1851,7 +1815,7 @@ pub fn start_server_impl(
                         .and_then(|mut s| s.as_mut().map(|s| s.web_sharing.set_not_sharing()))
                         .unwrap_or(false);
                     if successfully_changed {
-                        // disconnect existing web clients
+                        // 断开现有 Web 客户端
                         let web_client_ids: Vec<ClientId> = session_state
                             .read()
                             .unwrap()
@@ -1895,7 +1859,7 @@ pub fn start_server_impl(
                             .unwrap();
                     }
                 } else {
-                    // TODO: test this
+                    // TODO: 测试这个
                     log::error!("Cannot start web server: this instance of Zellij was compiled without web_server_capability");
                 }
             },
@@ -1940,13 +1904,8 @@ pub fn start_server_impl(
                     .unwrap();
             },
             ServerInstruction::ForwardQueryToHost(token, query_bytes, resolve_async) => {
-                // Pick a regular (non-watcher) client to carry the
-                // forward. Preference is the most recently active
-                // client (whichever last sent input); falls back to
-                // any connected client. When the host terminals of
-                // attached clients differ, the recently-active one
-                // is the best proxy for "what the user is currently
-                // looking at".
+                // 选择一个常规（非观察器）客户端来承载转发。优先选择最近活动的客户端（最后发送输入的那个）；回退到任何已连接的客户端。当附加客户端的主机终端不同时，最近活动的那个是 "用户当前正在看什么" 的最佳代理
+                // 看什么"。
                 let target_client_id = {
                     let mut session = session_state.write().unwrap();
                     let picked = session.pick_forward_target();
@@ -1968,12 +1927,7 @@ pub fn start_server_impl(
                         session_data
                     );
                 } else {
-                    // No client to ask — synthesize an empty reply
-                    // so `Screen`'s in-flight slot releases. Without
-                    // this, a detached session (apps still running)
-                    // accumulates forwards in `forward_queue` with
-                    // no way for them to drain until someone
-                    // reattaches.
+                    // 没有客户端可询问 — 合成一个空回复，以便 `Screen` 的进行中槽释放。如果没有这个，分离的会话（应用程序仍在运行）会在 `forward_queue` 中累积转发，在有人重新附加之前无法排空。
                     log::warn!(
                         "No connected client to forward host query (token={}); returning empty reply",
                         token
@@ -2062,7 +2016,7 @@ pub fn start_server_impl(
         }
     }
 
-    // Drop cached session data before exit.
+    // 退出前删除缓存的会话数据。
     *session_data.write().unwrap() = None;
 
     drop(std::fs::remove_file(&socket_path));
@@ -2107,7 +2061,7 @@ fn init_session(
         channels::unbounded();
     let to_background_jobs = SenderWithContext::new(to_background_jobs);
 
-    // Determine and initialize the data directory
+    // 确定并初始化数据目录
     let data_dir = cli_assets.data_dir.unwrap_or_else(get_default_data_dir);
 
     let serialization_interval = config_options.serialization_interval;
@@ -2165,7 +2119,7 @@ fn init_session(
             let screen_bus = Bus::new(
                 vec![screen_receiver, bounded_screen_receiver],
                 Some(&to_screen), // there are certain occasions (eg. caching) where the screen
-                // needs to send messages to itself
+                // 需要向自己发送消息
                 Some(&to_pty),
                 Some(&to_plugin),
                 Some(&to_server),
@@ -2306,7 +2260,7 @@ fn init_session(
             to_server.clone(),
         );
 
-        // Watch layout directory for changes
+        // 监视布局目录的更改
         if let Some(layout_dir_path) = layout_dir {
             report_changes_in_layout_dir(
                 layout_dir_path,
@@ -2386,9 +2340,8 @@ fn should_show_release_notes(
     }
     if let Some(should_show_release_notes_config) = should_show_release_notes_config {
         if !should_show_release_notes_config {
-            // if we were explicitly told not to show release notes, we don't show them,
-            // otherwise we make sure we only show them if they were not seen AND we know
-            // we are able to write to the cache
+            // 如果我们被明确告知不显示发行说明，我们就不显示它们，
+            // 否则我们确保仅在它们未被看到且我们知道能够写入缓存时才显示它们
             return false;
         }
     }
@@ -2559,7 +2512,7 @@ pub fn get_engine() -> Engine {
     Engine::default()
 }
 
-// TODO: move elsewhere
+// TODO: 移到别处
 fn get_available_layouts(config_options: &Options) -> (Vec<LayoutInfo>, Vec<LayoutWithError>) {
     let layout_dir = config_options
         .layout_dir

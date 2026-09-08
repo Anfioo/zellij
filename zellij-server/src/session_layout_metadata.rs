@@ -107,11 +107,9 @@ impl SessionLayoutMetadata {
         clients_metadata
     }
     pub fn is_dirty(&self) -> bool {
-        // here we check to see if the serialized layout would be different than the base one, and
-        // thus is "dirty". A layout is considered dirty if one of the following is true:
-        // 1. The current number of panes is different than the number of panes in the base layout
-        //    (meaning a pane was opened or closed)
-        // 2. One or more terminal panes are running a command that is not the default shell
+        // 这里我们检查序列化后的布局是否与基础布局不同，因此是 "脏的"。如果以下任一条件为真，则布局被视为脏的：
+        // 1. 当前窗格数量与基础布局中的窗格数量不同（意味着窗格被打开或关闭）
+        // 2. 一个或多个终端窗格正在运行非默认 shell 的命令
         let base_layout_pane_count = self.default_layout.pane_count();
         let current_pane_count = self.pane_count();
         if current_pane_count != base_layout_pane_count {
@@ -253,7 +251,7 @@ impl SessionLayoutMetadata {
     }
     pub fn remove_plugin_from_layout(&mut self, plugin_id_to_remove: u32) {
         for tab in &mut self.tabs {
-            // Filter tiled panes
+            // 过滤平铺窗格
             tab.tiled_panes.retain(|pane| {
                 if let PaneId::Plugin(id) = pane.id {
                     id != plugin_id_to_remove
@@ -262,7 +260,7 @@ impl SessionLayoutMetadata {
                 }
             });
 
-            // Filter floating panes
+            // 过滤浮动窗格
             tab.floating_panes.retain(|pane| {
                 if let PaneId::Plugin(id) = pane.id {
                     id != plugin_id_to_remove
@@ -370,8 +368,8 @@ impl SessionLayoutMetadata {
 
         let is_vim_family = |name: &str| matches!(name, "vim" | "nvim" | "emacs" | "nano" | "kak");
         let is_helix = |name: &str| matches!(name, "hx" | "helix");
-        // Narrow vi/vim lineage used for cross-matching.
-        // These are argument-compatible and commonly aliased to one another.
+        // 用于交叉匹配的狭义 vi/vim 谱系。
+        // 这些参数兼容，通常互为别名。
         let is_vi_vim = |name: &str| matches!(name, "vi" | "vim" | "nvim");
 
         let configured_is_vi_vim = is_vi_vim(&editor_binary_name);
@@ -459,13 +457,13 @@ impl SessionLayoutMetadata {
             .populate_plugin_aliases_in_layout(&plugin_aliases);
     }
     pub fn to_layout_metadata(&self) -> LayoutMetadata {
-        // Get current timestamp for both creation and update time
+        // 获取创建和更新时间的当前时间戳
         let current_time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map(|d| d.as_secs().to_string())
             .unwrap_or_default();
 
-        // Convert all tabs
+        // 转换所有标签页
         let tabs = self.tabs.iter().map(|tab| tab.to_tab_metadata()).collect();
 
         LayoutMetadata {
@@ -506,12 +504,12 @@ impl TabLayoutMetadata {
     fn to_tab_metadata(&self) -> TabMetadata {
         let mut panes = Vec::new();
 
-        // Extract pane metadata from tiled panes
+        // 从平铺窗格中提取窗格元数据
         for pane in &self.tiled_panes {
             panes.push(pane.to_pane_metadata());
         }
 
-        // Extract pane metadata from floating panes
+        // 从浮动窗格中提取窗格元数据
         for pane in &self.floating_panes {
             panes.push(pane.to_pane_metadata());
         }
@@ -591,8 +589,8 @@ impl PaneLayoutMetadata {
         }
     }
     fn to_pane_metadata(&self) -> PaneMetadata {
-        // Try to extract a meaningful name from the pane
-        // Priority: explicit title > command name > file name > plugin location
+        // 尝试从窗格中提取有意义的名称
+        // 优先级：显式标题 > 命令名称 > 文件名 > 插件位置
         let name = self.title.clone().or_else(|| {
             self.run.as_ref().and_then(|run| match run {
                 Run::Command(cmd) => Some(cmd.command.display().to_string()),
@@ -606,7 +604,7 @@ impl PaneLayoutMetadata {
 
         let is_plugin = matches!(self.id, PaneId::Plugin(_));
 
-        // Detect if this is a builtin plugin
+        // 检测这是否是内置插件
         let is_builtin_plugin = self
             .run
             .as_ref()
@@ -783,7 +781,7 @@ mod tests {
         let pane = make_command_pane(1, "grep", vec!["pattern", "file.txt"]);
         let mut meta = session_with_editor("nvim", vec![pane]);
         meta.detect_editor_panes();
-        // Run::Command(grep ...) unchanged
+        // Run::Command(grep ...) 未更改
         match get_first_tiled_run(&meta) {
             Some(Run::Command(rc)) => {
                 assert_eq!(rc.command, PathBuf::from("grep"));
@@ -822,7 +820,7 @@ mod tests {
 
     #[test]
     fn detects_editor_matching_by_binary_name() {
-        // configured as /usr/bin/nvim, running as nvim
+        // 配置为 /usr/bin/nvim，运行为 nvim
         let pane = make_command_pane(1, "nvim", vec!["file.txt"]);
         let mut meta = session_with_editor("/usr/bin/nvim", vec![pane]);
         meta.detect_editor_panes();
@@ -845,7 +843,7 @@ mod tests {
 
     #[test]
     fn detects_vi_when_editor_is_vim() {
-        // configured as vim, pane running vi (common alias)
+        // 配置为 vim，窗格运行为 vi（常见别名）
         let pane = make_command_pane(1, "vi", vec!["file.txt"]);
         let mut meta = session_with_editor("vim", vec![pane]);
         meta.detect_editor_panes();
@@ -857,7 +855,7 @@ mod tests {
 
     #[test]
     fn detects_nvim_when_editor_is_vi() {
-        // configured as vi, pane running nvim
+        // 配置为 vi，窗格运行为 nvim
         let pane = make_command_pane(1, "nvim", vec!["file.txt"]);
         let mut meta = session_with_editor("vi", vec![pane]);
         meta.detect_editor_panes();
@@ -869,7 +867,7 @@ mod tests {
 
     #[test]
     fn does_not_cross_match_vim_with_emacs() {
-        // configured as emacs, pane running vim — NOT cross-matched
+        // 配置为 emacs，窗格运行为 vim — 不交叉匹配
         let pane = make_command_pane(1, "vim", vec!["file.txt"]);
         let mut meta = session_with_editor("emacs", vec![pane]);
         meta.detect_editor_panes();

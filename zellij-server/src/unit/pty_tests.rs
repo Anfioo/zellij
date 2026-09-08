@@ -340,7 +340,7 @@ fn foreground_change_between_two_commands() {
     assert!(events[0].2);
 }
 
-// --- Activity flag gating ---
+// --- 活动标志门控 ---
 
 #[test]
 fn activity_flag_reset_after_poll() {
@@ -388,7 +388,7 @@ fn multiple_terminals_only_active_ones_polled() {
     assert_eq!(events[0].1, PathBuf::from("/active"));
 }
 
-// --- CWD change events ---
+// --- CWD 变更事件 ---
 
 #[test]
 fn cwd_changed_event_emitted_on_change() {
@@ -421,7 +421,7 @@ fn no_cwd_event_when_unchanged() {
     assert!(events.is_empty(), "no event expected when cwd unchanged");
 }
 
-// --- OSC7 CWD notification ---
+// --- OSC7 CWD 通知 ---
 
 #[test]
 fn osc7_emits_cwd_changed() {
