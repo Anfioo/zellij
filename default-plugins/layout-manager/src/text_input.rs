@@ -1,39 +1,39 @@
-// This is a duplicate of the same file in the sequence (and possibly other) plugins
-// Right now there's no good place to put them for shared logic except the zellij-tile-utils crate
-// (which I'd rather eliminate), hence the duplication.
+// 这是 sequence（以及可能其他）插件中同一文件的副本
+// 目前除了 zellij-tile-utils crate 外，没有好的地方放置共享逻辑
+// （我宁愿消除它），因此有重复。
 use zellij_tile::prelude::*;
 
 const MAX_UNDO_STACK_SIZE: usize = 100;
 
-/// Action returned by TextInput after handling a key event
+///TextInput 处理按键事件后返回的操作
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(test, derive(Eq))]
 pub enum InputAction {
-    /// Continue editing
+    ///  继续编辑
     Continue,
-    /// User pressed Enter to submit
+    ///  用户按 Enter 提交
     Submit,
-    /// User pressed Esc to cancel
+    ///  用户按 Esc 取消
     Cancel,
-    /// User pressed Tab to request completion
+    ///  用户按 Tab 请求补全
     Complete,
-    /// Key was not handled by the input
+    ///  输入未处理该按键
     NoAction,
 }
 
-/// A reusable text input component with cursor support and standard editing keybindings
+///  一个可复用的文本输入组件，支持光标和标准编辑快捷键绑定
 #[derive(Debug, Clone)]
 pub struct TextInput {
     buffer: String,
-    cursor_position: usize, // Character position (0-based), NOT byte position
-    undo_stack: Vec<(String, usize)>, // (buffer, cursor) snapshots
+    cursor_position: usize, //  字符位置（从 0 开始），不是字节位置
+    undo_stack: Vec<(String, usize)>, //  (buffer, cursor) 快照
     redo_stack: Vec<(String, usize)>,
-    last_edit_was_insert: bool, // For coalescing consecutive inserts
+    last_edit_was_insert: bool, // 用于合并连续插入
 }
 
 impl TextInput {
-    /// Create a new TextInput with the given initial text
-    /// Cursor is positioned at the end of the text
+    ///使用给定的初始文本创建新的 TextInput
+    ///  光标位于文本末尾
     pub fn new(initial_text: String) -> Self {
         let cursor_position = initial_text.chars().count();
         Self {
@@ -45,39 +45,39 @@ impl TextInput {
         }
     }
 
-    /// Create an empty TextInput
+    ///创建一个空的 TextInput
     pub fn empty() -> Self {
         Self::new(String::new())
     }
 
-    /// Get the current text
+    ///  获取当前文本
     pub fn get_text(&self) -> &str {
         &self.buffer
     }
 
-    /// Get the cursor position (in characters, not bytes)
+    ///  获取光标位置（以字符为单位，不是字节）
     pub fn get_cursor_position(&self) -> usize {
         self.cursor_position
     }
 
-    /// Check if the input is empty
+    ///  检查输入是否为空
     pub fn is_empty(&self) -> bool {
         self.buffer.is_empty()
     }
 
-    /// Get a shorthand for cursor_position
+    ///  获取 cursor_position 的简写
     #[allow(unused)]
     pub fn cursor_position(&self) -> usize {
         self.cursor_position
     }
 
-    /// Get mutable access to the underlying buffer for direct manipulation
+    ///  获取对底层缓冲区的可变访问以进行直接操作
     #[allow(unused)]
     pub fn get_text_mut(&mut self) -> &mut String {
         &mut self.buffer
     }
 
-    /// Set the text and move cursor to the end
+    ///  设置文本并将光标移到末尾
     #[allow(unused)]
     pub fn set_text(&mut self, text: String) {
         self.break_coalescing();
@@ -86,14 +86,14 @@ impl TextInput {
         self.buffer = text;
     }
 
-    /// Set cursor position (clamped to text length)
+    ///  设置光标位置（限制为文本长度）
     #[allow(unused)]
     pub fn set_cursor_position(&mut self, pos: usize) {
         let text_len = self.buffer.chars().count();
         self.cursor_position = pos.min(text_len);
     }
 
-    /// Clear all text and reset cursor
+    ///  清除所有文本并重置光标
     pub fn clear(&mut self) {
         self.break_coalescing();
         self.save_undo_state();
@@ -101,16 +101,16 @@ impl TextInput {
         self.cursor_position = 0;
     }
 
-    /// Insert a character at the current cursor position
+    ///  在当前光标位置插入一个字符
     pub fn insert_char(&mut self, c: char) {
         self.save_undo_state_unless_coalescing();
-        // Convert cursor position (char index) to byte index
+        //  将光标位置（字符索引）转换为字节索引
         let byte_index = self.char_index_to_byte_index(self.cursor_position);
         self.buffer.insert(byte_index, c);
         self.cursor_position += 1;
     }
 
-    /// Delete the character before the cursor (backspace)
+    ///  删除光标前的字符（退格键）
     pub fn backspace(&mut self) {
         if self.cursor_position > 0 {
             self.break_coalescing();
@@ -121,7 +121,7 @@ impl TextInput {
         }
     }
 
-    /// Delete the character at the cursor position (delete key)
+    ///  删除光标位置的字符（删除键）
     pub fn delete(&mut self) {
         let len = self.buffer.chars().count();
         if self.cursor_position < len {
@@ -132,7 +132,7 @@ impl TextInput {
         }
     }
 
-    /// Delete the word before the cursor (Ctrl/Alt + Backspace)
+    ///删除光标前的单词（Ctrl/Alt + 退格键）
     pub fn delete_word_backward(&mut self) {
         if self.cursor_position == 0 {
             return;
@@ -145,13 +145,13 @@ impl TextInput {
         self.move_word_left();
         let new_position = self.cursor_position;
 
-        // Delete from new position to old position
+        //  从新位置删除到旧位置
         let start_byte = self.char_index_to_byte_index(new_position);
         let end_byte = self.char_index_to_byte_index(old_position);
         self.buffer.drain(start_byte..end_byte);
     }
 
-    /// Delete the word after the cursor (Ctrl/Alt + Delete)
+    ///删除光标后的单词（Ctrl/Alt + 删除键）
     pub fn delete_word_forward(&mut self) {
         let chars: Vec<char> = self.buffer.chars().collect();
         let len = chars.len();
@@ -166,23 +166,23 @@ impl TextInput {
         let start_position = self.cursor_position;
         let mut end_position = start_position;
 
-        // Skip the current word
+        //  跳过当前单词
         while end_position < len && !chars[end_position].is_whitespace() {
             end_position += 1;
         }
 
-        // Skip any whitespace after the word
+        //  跳过单词后的任何空白字符
         while end_position < len && chars[end_position].is_whitespace() {
             end_position += 1;
         }
 
-        // Delete from start to end position
+        //  从起始位置删除到结束位置
         let start_byte = self.char_index_to_byte_index(start_position);
         let end_byte = self.char_index_to_byte_index(end_position);
         self.buffer.drain(start_byte..end_byte);
     }
 
-    /// Move cursor one position to the left
+    ///  将光标向左移动一个位置
     pub fn move_left(&mut self) {
         if self.cursor_position > 0 {
             self.break_coalescing();
@@ -190,7 +190,7 @@ impl TextInput {
         }
     }
 
-    /// Move cursor one position to the right
+    ///  将光标向右移动一个位置
     pub fn move_right(&mut self) {
         let len = self.buffer.chars().count();
         if self.cursor_position < len {
@@ -199,19 +199,19 @@ impl TextInput {
         }
     }
 
-    /// Move cursor to the start of the text (Ctrl-A / Home)
+    ///将光标移动到文本开头（Ctrl-A / Home）
     pub fn move_to_start(&mut self) {
         self.break_coalescing();
         self.cursor_position = 0;
     }
 
-    /// Move cursor to the end of the text (Ctrl-E / End)
+    ///将光标移动到文本末尾（Ctrl-E / End）
     pub fn move_to_end(&mut self) {
         self.break_coalescing();
         self.cursor_position = self.buffer.chars().count();
     }
 
-    /// Move cursor to the start of the previous word (Ctrl/Alt + Left)
+    ///将光标移动到上一个单词的开头（Ctrl/Alt + 左方向键）
     pub fn move_word_left(&mut self) {
         if self.cursor_position == 0 {
             return;
@@ -222,12 +222,12 @@ impl TextInput {
         let chars: Vec<char> = self.buffer.chars().collect();
         let mut pos = self.cursor_position;
 
-        // Skip any whitespace immediately to the left
+        // 跳过紧邻左侧的任何空白字符
         while pos > 0 && chars[pos - 1].is_whitespace() {
             pos -= 1;
         }
 
-        // Skip the word characters
+        // 跳过单词字符
         while pos > 0 && !chars[pos - 1].is_whitespace() {
             pos -= 1;
         }
@@ -235,7 +235,7 @@ impl TextInput {
         self.cursor_position = pos;
     }
 
-    /// Move cursor to the start of the next word (Ctrl/Alt + Right)
+    ///将光标移动到下一个单词的开头（Ctrl/Alt + 右方向键）
     pub fn move_word_right(&mut self) {
         let chars: Vec<char> = self.buffer.chars().collect();
         let len = chars.len();
@@ -248,12 +248,12 @@ impl TextInput {
 
         let mut pos = self.cursor_position;
 
-        // Skip the current word
+        //  跳过当前单词
         while pos < len && !chars[pos].is_whitespace() {
             pos += 1;
         }
 
-        // Skip any whitespace
+        // 跳过任何空白字符
         while pos < len && chars[pos].is_whitespace() {
             pos += 1;
         }
@@ -261,10 +261,10 @@ impl TextInput {
         self.cursor_position = pos;
     }
 
-    /// Handle a key event and return the appropriate action
-    /// This is the main entry point for key handling
+    ///  处理按键事件并返回适当的操作
+    ///这是按键处理的主要入口点
     pub fn handle_key(&mut self, key: KeyWithModifier) -> InputAction {
-        // Check for Ctrl modifiers
+        //  检查 Ctrl 修饰键
         if key.has_modifiers(&[KeyModifier::Ctrl]) {
             match key.bare_key {
                 BareKey::Char('a') => {
@@ -276,16 +276,16 @@ impl TextInput {
                     return InputAction::Continue;
                 },
                 BareKey::Char('c') => {
-                    // Ctrl-C clears the prompt
+                    //  Ctrl-C 清除提示
                     return InputAction::Cancel;
                 },
                 BareKey::Char('z') => {
-                    // Ctrl-Z: Undo
+                    // Ctrl-Z：撤销
                     self.undo();
                     return InputAction::Continue;
                 },
                 BareKey::Char('y') => {
-                    // Ctrl-Y: Redo
+                    //  Ctrl-Y：重做
                     self.redo();
                     return InputAction::Continue;
                 },
@@ -309,11 +309,11 @@ impl TextInput {
             }
         }
 
-        // Check for Ctrl+Shift modifiers (alternative redo: Ctrl+Shift+Z)
+        //  检查 Ctrl+Shift 修饰键（替代重做：Ctrl+Shift+Z）
         if key.has_modifiers(&[KeyModifier::Ctrl, KeyModifier::Shift]) {
             match key.bare_key {
                 BareKey::Char('Z') => {
-                    // Ctrl-Shift-Z: Redo (alternative)
+                    //  Ctrl-Shift-Z：重做（替代方式）
                     self.redo();
                     return InputAction::Continue;
                 },
@@ -321,7 +321,7 @@ impl TextInput {
             }
         }
 
-        // Check for Alt modifiers
+        //  检查 Alt 修饰键
         if key.has_modifiers(&[KeyModifier::Alt]) {
             match key.bare_key {
                 BareKey::Left => {
@@ -344,7 +344,7 @@ impl TextInput {
             }
         }
 
-        // Handle bare keys (no modifiers)
+        // 处理裸键（无修饰键）
         match key.bare_key {
             BareKey::Enter => InputAction::Submit,
             BareKey::Esc => InputAction::Cancel,
@@ -381,7 +381,7 @@ impl TextInput {
         }
     }
 
-    /// Helper: Convert character index to byte index
+    ///  辅助：将字符索引转换为字节索引
     fn char_index_to_byte_index(&self, char_index: usize) -> usize {
         self.buffer
             .char_indices()
@@ -390,7 +390,7 @@ impl TextInput {
             .unwrap_or(self.buffer.len())
     }
 
-    /// Save current state to undo stack before making changes
+    ///  在进行更改之前将当前状态保存到撤销栈
     fn save_undo_state(&mut self) {
         if self.undo_stack.len() >= MAX_UNDO_STACK_SIZE {
             self.undo_stack.remove(0);
@@ -400,7 +400,7 @@ impl TextInput {
         self.redo_stack.clear();
     }
 
-    /// Save state only if not coalescing with previous insert
+    ///  仅在不与前一次插入合并时保存状态
     fn save_undo_state_unless_coalescing(&mut self) {
         if !self.last_edit_was_insert {
             self.save_undo_state();
@@ -408,12 +408,12 @@ impl TextInput {
         self.last_edit_was_insert = true;
     }
 
-    /// Mark that a non-insert edit occurred (breaks coalescing)
+    ///  标记发生了非插入编辑（中断合并）
     fn break_coalescing(&mut self) {
         self.last_edit_was_insert = false;
     }
 
-    /// Undo last change
+    ///  撤销上一次更改
     pub fn undo(&mut self) -> bool {
         if let Some((buffer, cursor)) = self.undo_stack.pop() {
             self.redo_stack
@@ -427,7 +427,7 @@ impl TextInput {
         }
     }
 
-    /// Redo last undone change
+    ///  重做上一次撤销的更改
     pub fn redo(&mut self) -> bool {
         if let Some((buffer, cursor)) = self.redo_stack.pop() {
             self.undo_stack
@@ -441,13 +441,13 @@ impl TextInput {
         }
     }
 
-    /// Check if undo is available
+    ///  检查撤销是否可用
     #[allow(unused)]
     pub fn can_undo(&self) -> bool {
         !self.undo_stack.is_empty()
     }
 
-    /// Check if redo is available
+    ///  检查重做是否可用
     #[allow(unused)]
     pub fn can_redo(&self) -> bool {
         !self.redo_stack.is_empty()
@@ -460,7 +460,7 @@ impl TextInput {
     }
 }
 
-// run with:
+// 运行方式：
 // cargo test --lib --target x86_64-unknown-linux-gnu
 //
 #[cfg(test)]
@@ -481,7 +481,7 @@ mod tests {
     #[test]
     fn test_insert_char() {
         let mut input = TextInput::new("helo".to_string());
-        input.cursor_position = 3; // Position after "hel"
+        input.cursor_position = 3; // 在 "hel" 之后的位置
         input.insert_char('l');
         assert_eq!(input.get_text(), "hello");
         assert_eq!(input.get_cursor_position(), 4);
@@ -494,7 +494,7 @@ mod tests {
         assert_eq!(input.get_text(), "hell");
         assert_eq!(input.get_cursor_position(), 4);
 
-        // Backspace at start does nothing
+        //  在开头按退格键不执行任何操作
         input.cursor_position = 0;
         input.backspace();
         assert_eq!(input.get_text(), "hell");
@@ -509,7 +509,7 @@ mod tests {
         assert_eq!(input.get_text(), "ello");
         assert_eq!(input.get_cursor_position(), 0);
 
-        // Delete at end does nothing
+        // 在末尾删除不执行任何操作
         input.move_to_end();
         input.delete();
         assert_eq!(input.get_text(), "ello");
@@ -536,9 +536,9 @@ mod tests {
     #[test]
     fn test_unicode_support() {
         let mut input = TextInput::new("hello 🦀 world".to_string());
-        assert_eq!(input.get_cursor_position(), 13); // 13 characters
+        assert_eq!(input.get_cursor_position(), 13); //  13 个字符
 
-        input.cursor_position = 6; // After "hello "
+        input.cursor_position = 6; //  在 "hello " 之后
         input.insert_char('🐱');
         assert_eq!(input.get_text(), "hello 🐱🦀 world");
     }
@@ -548,21 +548,21 @@ mod tests {
         let mut input = TextInput::new("hello world foo bar".to_string());
         input.cursor_position = 0;
 
-        // Jump from start to "world"
+        // 从开头跳转到 "world"
         input.move_word_right();
-        assert_eq!(input.get_cursor_position(), 6); // After "hello "
+        assert_eq!(input.get_cursor_position(), 6); //  在 "hello " 之后
 
-        // Jump to "foo"
+        // 跳转到 "foo"
         input.move_word_right();
-        assert_eq!(input.get_cursor_position(), 12); // After "world "
+        assert_eq!(input.get_cursor_position(), 12); //  在 "world " 之后
 
-        // Jump to "bar"
+        // 跳转到 "bar"
         input.move_word_right();
-        assert_eq!(input.get_cursor_position(), 16); // After "foo "
+        assert_eq!(input.get_cursor_position(), 16); //  在 "foo " 之后
 
-        // Jump to end
+        // 跳转到末尾
         input.move_word_right();
-        assert_eq!(input.get_cursor_position(), 19); // At end
+        assert_eq!(input.get_cursor_position(), 19); //  在末尾
     }
 
     #[test]
@@ -571,21 +571,21 @@ mod tests {
         input.move_to_end();
         assert_eq!(input.get_cursor_position(), 19);
 
-        // Jump back to "bar"
+        // 跳回到 "bar"
         input.move_word_left();
-        assert_eq!(input.get_cursor_position(), 16); // Start of "bar"
+        assert_eq!(input.get_cursor_position(), 16); // "bar" 的开头
 
-        // Jump back to "foo"
+        // 跳回到 "foo"
         input.move_word_left();
-        assert_eq!(input.get_cursor_position(), 12); // Start of "foo"
+        assert_eq!(input.get_cursor_position(), 12); // "foo" 的开头
 
-        // Jump back to "world"
+        // 跳回到 "world"
         input.move_word_left();
-        assert_eq!(input.get_cursor_position(), 6); // Start of "world"
+        assert_eq!(input.get_cursor_position(), 6); // "world" 的开头
 
-        // Jump back to "hello"
+        // 跳回到 "hello"
         input.move_word_left();
-        assert_eq!(input.get_cursor_position(), 0); // Start of "hello"
+        assert_eq!(input.get_cursor_position(), 0); // "hello" 的开头
     }
 
     #[test]
@@ -593,25 +593,25 @@ mod tests {
         let mut input = TextInput::new("hello   world".to_string());
         input.cursor_position = 0;
 
-        // Jump over multiple spaces
+        // 跳过多个空格
         input.move_word_right();
-        assert_eq!(input.get_cursor_position(), 8); // After "hello   ", at start of "world"
+        assert_eq!(input.get_cursor_position(), 8); //  在 "hello   " 之后，在 "world" 开头
 
-        // Jump back should skip spaces
+        // 向后跳转应跳过空格
         input.move_word_left();
-        assert_eq!(input.get_cursor_position(), 0); // Back to start of "hello"
+        assert_eq!(input.get_cursor_position(), 0); //  回到 "hello" 的开头
     }
 
     #[test]
     fn test_word_jump_boundaries() {
         let mut input = TextInput::new("test".to_string());
 
-        // At start - word left does nothing
+        //  在开头 - 向左移单词不执行任何操作
         input.cursor_position = 0;
         input.move_word_left();
         assert_eq!(input.get_cursor_position(), 0);
 
-        // At end - word right does nothing
+        //  在末尾 - 向右移单词不执行任何操作
         input.move_to_end();
         let end_pos = input.get_cursor_position();
         input.move_word_right();
@@ -622,18 +622,18 @@ mod tests {
     fn test_up_down_arrows() {
         let mut input = TextInput::new("hello world".to_string());
 
-        // Start in the middle
+        // 从中间开始
         input.cursor_position = 5;
         assert_eq!(input.get_cursor_position(), 5);
 
-        // Up arrow should go to start
+        // 上方向键应跳到开头
         input.move_to_start();
         assert_eq!(input.get_cursor_position(), 0);
 
-        // Move back to middle
+        // 移回中间
         input.cursor_position = 5;
 
-        // Down arrow should go to end
+        // 下方向键应跳到末尾
         input.move_to_end();
         assert_eq!(input.get_cursor_position(), 11);
     }
@@ -642,23 +642,23 @@ mod tests {
     fn test_delete_word_backward() {
         let mut input = TextInput::new("hello world foo".to_string());
 
-        // Delete "foo" from end
+        // 从末尾删除 "foo"
         input.move_to_end();
         input.delete_word_backward();
         assert_eq!(input.get_text(), "hello world ");
         assert_eq!(input.get_cursor_position(), 12);
 
-        // Delete "world "
+        // 删除 "world "
         input.delete_word_backward();
         assert_eq!(input.get_text(), "hello ");
         assert_eq!(input.get_cursor_position(), 6);
 
-        // Delete "hello "
+        // 删除 "hello "
         input.delete_word_backward();
         assert_eq!(input.get_text(), "");
         assert_eq!(input.get_cursor_position(), 0);
 
-        // Delete on empty buffer does nothing
+        // 在空缓冲区上删除不执行任何操作
         input.delete_word_backward();
         assert_eq!(input.get_text(), "");
         assert_eq!(input.get_cursor_position(), 0);
@@ -668,34 +668,34 @@ mod tests {
     fn test_delete_word_backward_middle() {
         let mut input = TextInput::new("hello world foo".to_string());
 
-        // Position in middle of "world"
-        input.cursor_position = 8; // After "hello wo"
+        // 在 "world" 中间的位置
+        input.cursor_position = 8; //  在 "hello wo" 之后
         input.delete_word_backward();
         assert_eq!(input.get_text(), "hello rld foo");
-        assert_eq!(input.get_cursor_position(), 6); // After "hello "
+        assert_eq!(input.get_cursor_position(), 6); //  在 "hello " 之后
     }
 
     #[test]
     fn test_delete_word_forward() {
         let mut input = TextInput::new("hello world foo".to_string());
 
-        // Delete "hello " from start
+        // 从开头删除 "hello "
         input.cursor_position = 0;
         input.delete_word_forward();
         assert_eq!(input.get_text(), "world foo");
         assert_eq!(input.get_cursor_position(), 0);
 
-        // Delete "world "
+        // 删除 "world "
         input.delete_word_forward();
         assert_eq!(input.get_text(), "foo");
         assert_eq!(input.get_cursor_position(), 0);
 
-        // Delete "foo"
+        // 删除 "foo"
         input.delete_word_forward();
         assert_eq!(input.get_text(), "");
         assert_eq!(input.get_cursor_position(), 0);
 
-        // Delete on empty buffer does nothing
+        // 在空缓冲区上删除不执行任何操作
         input.delete_word_forward();
         assert_eq!(input.get_text(), "");
         assert_eq!(input.get_cursor_position(), 0);
@@ -705,18 +705,18 @@ mod tests {
     fn test_delete_word_forward_middle() {
         let mut input = TextInput::new("hello world foo".to_string());
 
-        // Position in middle of "world"
-        input.cursor_position = 8; // After "hello wo"
+        // 在 "world" 中间的位置
+        input.cursor_position = 8; //  在 "hello wo" 之后
         input.delete_word_forward();
         assert_eq!(input.get_text(), "hello wofoo");
-        assert_eq!(input.get_cursor_position(), 8); // Same position, text deleted forward
+        assert_eq!(input.get_cursor_position(), 8); // 相同位置，文本被向前删除
     }
 
     #[test]
     fn test_delete_word_with_multiple_spaces() {
         let mut input = TextInput::new("hello   world".to_string());
 
-        // Delete forward includes trailing spaces
+        // 向前删除包括尾随空格
         input.cursor_position = 0;
         input.delete_word_forward();
         assert_eq!(input.get_text(), "world");
@@ -727,7 +727,7 @@ mod tests {
     fn test_undo_redo_basic() {
         let mut input = TextInput::empty();
 
-        // Type "hello"
+        // 输入 "hello"
         input.insert_char('h');
         input.insert_char('e');
         input.insert_char('l');
@@ -735,13 +735,13 @@ mod tests {
         input.insert_char('o');
         assert_eq!(input.get_text(), "hello");
 
-        // Undo should remove all characters (coalesced into one undo entry)
+        // 撤销应移除所有字符（合并为一个撤销条目）
         assert!(input.can_undo());
         assert!(input.undo());
         assert_eq!(input.get_text(), "");
         assert_eq!(input.get_cursor_position(), 0);
 
-        // Redo should restore "hello"
+        // 重做应恢复 "hello"
         assert!(input.can_redo());
         assert!(input.redo());
         assert_eq!(input.get_text(), "hello");
@@ -752,25 +752,25 @@ mod tests {
     fn test_undo_coalescing_breaks_on_cursor_move() {
         let mut input = TextInput::empty();
 
-        // Type "he"
+        // 输入 "he"
         input.insert_char('h');
         input.insert_char('e');
 
-        // Move cursor to start (breaks coalescing)
+        // 将光标移动到开头（中断合并）
         input.move_to_start();
 
-        // Type "llo"
+        // 输入 "llo"
         input.insert_char('l');
         input.insert_char('l');
         input.insert_char('o');
 
         assert_eq!(input.get_text(), "llohe");
 
-        // First undo removes "llo" (second coalesced group)
+        // 第一次撤销移除 "llo"（第二个合并组）
         input.undo();
         assert_eq!(input.get_text(), "he");
 
-        // Second undo removes "he" (first coalesced group)
+        // 第二次撤销移除 "he"（第一个合并组）
         input.undo();
         assert_eq!(input.get_text(), "");
     }
@@ -779,11 +779,11 @@ mod tests {
     fn test_undo_backspace() {
         let mut input = TextInput::new("hello".to_string());
 
-        // Backspace once
+        //  按一次退格键
         input.backspace();
         assert_eq!(input.get_text(), "hell");
 
-        // Undo should restore "hello"
+        // 撤销应恢复 "hello"
         input.undo();
         assert_eq!(input.get_text(), "hello");
         assert_eq!(input.get_cursor_position(), 5);
@@ -794,11 +794,11 @@ mod tests {
         let mut input = TextInput::new("hello".to_string());
         input.cursor_position = 0;
 
-        // Delete first character
+        // 删除第一个字符
         input.delete();
         assert_eq!(input.get_text(), "ello");
 
-        // Undo should restore "hello"
+        // 撤销应恢复 "hello"
         input.undo();
         assert_eq!(input.get_text(), "hello");
         assert_eq!(input.get_cursor_position(), 0);
@@ -808,11 +808,11 @@ mod tests {
     fn test_undo_word_delete() {
         let mut input = TextInput::new("hello world".to_string());
 
-        // Delete "world" backward
+        // 向后删除 "world"
         input.delete_word_backward();
         assert_eq!(input.get_text(), "hello ");
 
-        // Undo should restore "hello world"
+        // 撤销应恢复 "hello world"
         input.undo();
         assert_eq!(input.get_text(), "hello world");
         assert_eq!(input.get_cursor_position(), 11);
@@ -822,11 +822,11 @@ mod tests {
     fn test_undo_clear() {
         let mut input = TextInput::new("hello world".to_string());
 
-        // Clear the buffer
+        //  清除缓冲区
         input.clear();
         assert_eq!(input.get_text(), "");
 
-        // Undo should restore the text
+        // 撤销应恢复文本
         input.undo();
         assert_eq!(input.get_text(), "hello world");
     }
@@ -835,11 +835,11 @@ mod tests {
     fn test_undo_set_text() {
         let mut input = TextInput::new("hello".to_string());
 
-        // Replace with new text
+        // 替换为新文本
         input.set_text("goodbye".to_string());
         assert_eq!(input.get_text(), "goodbye");
 
-        // Undo should restore "hello"
+        // 撤销应恢复 "hello"
         input.undo();
         assert_eq!(input.get_text(), "hello");
     }
@@ -848,19 +848,19 @@ mod tests {
     fn test_redo_clears_on_new_edit() {
         let mut input = TextInput::empty();
 
-        // Type "hello"
+        // 输入 "hello"
         input.insert_char('h');
         input.insert_char('e');
         input.insert_char('l');
         input.insert_char('l');
         input.insert_char('o');
 
-        // Undo
+        // 撤销
         input.undo();
         assert_eq!(input.get_text(), "");
         assert!(input.can_redo());
 
-        // Make a new edit (should clear redo stack)
+        // 进行新编辑（应清除重做栈）
         input.insert_char('x');
         assert!(!input.can_redo());
     }
@@ -869,34 +869,34 @@ mod tests {
     fn test_multiple_undo_redo() {
         let mut input = TextInput::empty();
 
-        // First edit: type "hello"
+        // 第一次编辑：输入 "hello"
         for c in "hello".chars() {
             input.insert_char(c);
         }
 
-        // Break coalescing
+        //  中断合并
         input.move_left();
 
-        // Second edit: type "world"
+        // 第二次编辑：输入 "world"
         for c in "world".chars() {
             input.insert_char(c);
         }
 
         assert_eq!(input.get_text(), "hellworldo");
 
-        // Undo "world"
+        // 撤销 "world"
         input.undo();
         assert_eq!(input.get_text(), "hello");
 
-        // Undo "hello"
+        // 撤销 "hello"
         input.undo();
         assert_eq!(input.get_text(), "");
 
-        // Redo "hello"
+        // 重做 "hello"
         input.redo();
         assert_eq!(input.get_text(), "hello");
 
-        // Redo "world"
+        // 重做 "world"
         input.redo();
         assert_eq!(input.get_text(), "hellworldo");
     }
@@ -905,20 +905,20 @@ mod tests {
     fn test_undo_stack_limit() {
         let mut input = TextInput::empty();
 
-        // Perform 102 separate edits (breaking coalescing each time)
+        // 执行 102 次独立编辑（每次都中断合并）
         for _i in 0..102 {
-            input.backspace(); // Break coalescing
+            input.backspace(); //  中断合并
             input.insert_char('x');
         }
 
-        // Should have at most 100 undo entries
+        // 最多应有 100 个撤销条目
         let mut undo_count = 0;
         while input.undo() {
             undo_count += 1;
         }
 
-        // We should have 100 undo entries (the stack limit)
-        // Plus the final state change from the last coalescing break
+        // 我们应该有 100 个撤销条目（栈限制）
+        // 加上最后一次合并中断的最终状态更改
         assert!(
             undo_count <= 100,
             "Undo count should be at most 100, got {}",
@@ -930,11 +930,11 @@ mod tests {
     fn test_undo_redo_empty_stack() {
         let mut input = TextInput::empty();
 
-        // Undo on empty stack should return false
+        // 在空栈上撤销应返回 false
         assert!(!input.can_undo());
         assert!(!input.undo());
 
-        // Redo on empty stack should return false
+        // 在空栈上重做应返回 false
         assert!(!input.can_redo());
         assert!(!input.redo());
     }
@@ -943,15 +943,15 @@ mod tests {
     fn test_undo_restores_cursor_position() {
         let mut input = TextInput::new("hello world".to_string());
 
-        // Move cursor to position 5 (before "world")
+        // 将光标移动到位置 5（在 "world" 之前）
         input.cursor_position = 5;
 
-        // Insert a space
+        // 插入一个空格
         input.insert_char(' ');
         assert_eq!(input.get_text(), "hello  world");
         assert_eq!(input.get_cursor_position(), 6);
 
-        // Undo should restore both text and cursor position
+        // 撤销应同时恢复文本和光标位置
         input.undo();
         assert_eq!(input.get_text(), "hello world");
         assert_eq!(input.get_cursor_position(), 5);
@@ -961,18 +961,18 @@ mod tests {
     fn test_coalescing_consecutive_inserts() {
         let mut input = TextInput::empty();
 
-        // Type several characters
+        // 输入多个字符
         input.insert_char('a');
         input.insert_char('b');
         input.insert_char('c');
 
         assert_eq!(input.get_text(), "abc");
 
-        // Single undo should remove all three (they were coalesced)
+        // 单次撤销应移除全部三个（它们已合并）
         input.undo();
         assert_eq!(input.get_text(), "");
 
-        // No more undo available
+        // 没有更多可用的撤销
         assert!(!input.can_undo());
     }
 
@@ -980,27 +980,27 @@ mod tests {
     fn test_backspace_breaks_coalescing() {
         let mut input = TextInput::empty();
 
-        // Type "ab"
+        // 输入 "ab"
         input.insert_char('a');
         input.insert_char('b');
 
-        // Backspace
+        //  退格键
         input.backspace();
         assert_eq!(input.get_text(), "a");
 
-        // Type "c"
+        // 输入 "c"
         input.insert_char('c');
         assert_eq!(input.get_text(), "ac");
 
-        // Undo should remove just "c"
+        // 撤销应仅移除 "c"
         input.undo();
         assert_eq!(input.get_text(), "a");
 
-        // Undo should remove backspace operation
+        // 撤销应移除退格操作
         input.undo();
         assert_eq!(input.get_text(), "ab");
 
-        // Undo should remove "ab"
+        //  撤销应移除 "ab"
         input.undo();
         assert_eq!(input.get_text(), "");
     }

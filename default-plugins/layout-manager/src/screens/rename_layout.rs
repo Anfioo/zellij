@@ -70,7 +70,7 @@ impl RenameLayoutScreen {
     }
 
     fn rename_line_text(&self, max_width: Option<usize>) -> (String, usize) {
-        // Returns (text, cursor_position_in_line)
+        //  返回 (text, cursor_position_in_line)
         let prompt = "Rename Layout: ";
         let prompt_len = prompt.chars().count();
 
@@ -118,38 +118,38 @@ impl RenameLayoutScreen {
     }
 
     fn update_cursor_position(&self, base_x: usize, cursor_y: usize, max_width: usize) {
-        // Always show cursor since rename is always in editing mode
+        //  始终显示光标，因为重命名始终处于编辑模式
         let (_, cursor_position_in_line) = self.rename_line_text(Some(max_width));
         show_cursor(Some((base_x + cursor_position_in_line, cursor_y)))
     }
 
     pub fn render(&self, rows: usize, cols: usize) {
-        // Calculate desired width based on rename line and help text
+        //  根据重命名行和帮助文本计算期望宽度
         let desired_ui_width = std::cmp::max(
             self.help_text().0.chars().count(),
             self.rename_line_text(None).0.chars().count(),
         );
 
-        // Leave at least 4 columns margin (2 on each side) to prevent text from reaching screen edge
+        //  至少保留 4 列边距（每侧 2 列）以防止文本到达屏幕边缘
         let max_allowed_width = cols.saturating_sub(4);
         let actual_ui_width = std::cmp::min(desired_ui_width, max_allowed_width);
 
-        // Calculate total height: title(1) + spacing(1) + rename_line(1) + spacing(1) + help(1) = 5
+        //  计算总高度：标题(1) + 间距(1) + 重命名行(1) + 间距(1) + 帮助(1) = 5
         let desired_ui_height = 5;
         let actual_ui_height = std::cmp::min(desired_ui_height, rows);
 
         let base_y = rows.saturating_sub(actual_ui_height) / 2;
         let base_x = cols.saturating_sub(actual_ui_width) / 2;
 
-        // Update cursor BEFORE rendering (critical!)
+        //  在渲染之前更新光标（关键！）
         let rename_line_y = base_y + 2;
         self.update_cursor_position(base_x, rename_line_y, actual_ui_width);
 
-        // Render components
+        //  渲染组件
         self.render_title(base_x, base_y, actual_ui_width);
         self.render_rename_line(base_x, rename_line_y, actual_ui_width);
 
-        // Help text at bottom
+        //  底部的帮助文本
         let help_y = base_y + 4;
         self.render_help_text(base_x, help_y, actual_ui_width);
     }

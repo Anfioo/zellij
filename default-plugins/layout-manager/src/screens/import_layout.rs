@@ -41,7 +41,7 @@ impl ImportLayoutScreen {
     }
 
     pub fn handle_key(&mut self, key: KeyWithModifier) -> KeyResponse {
-        // Special Esc handling based on edit state
+        // 基于编辑状态的特殊 Esc 处理
         if key.bare_key == BareKey::Esc && key.has_no_modifiers() {
             return self.handle_escape_key();
         }
@@ -97,21 +97,21 @@ impl ImportLayoutScreen {
     }
 
     fn attempt_save_layout(&self) -> KeyResponse {
-        // Check if we have a pasted layout
+        //  检查是否有粘贴的布局
         let Some(pasted_text) = &self.pasted_text else {
             return KeyResponse::new_screen(
                 self.create_error_screen("Please paste a layout first"),
             );
         };
 
-        // Check if the layout is valid
+        //  检查布局是否有效
         if self.parse_error.is_some() {
             return KeyResponse::new_screen(
                 self.create_error_screen("Cannot save an invalid layout"),
             );
         }
 
-        // Get the parsed metadata for optimistic update
+        //  获取解析后的元数据以进行乐观更新
         let Some(metadata) = &self.parsed_metadata else {
             return KeyResponse::new_screen(
                 self.create_error_screen("Cannot save layout without metadata"),
@@ -120,7 +120,7 @@ impl ImportLayoutScreen {
 
         let layout_name = self.determine_layout_name();
 
-        // Capture optimistic update BEFORE the API call
+        //  在 API 调用之前捕获乐观更新
         let optimistic = OptimisticUpdate::Add {
             name: layout_name.clone(),
             metadata: metadata.clone(),
@@ -171,7 +171,7 @@ impl ImportLayoutScreen {
     }
 
     fn save_as_line_text(&self, max_width: Option<usize>) -> (String, usize) {
-        // Returns (text, cursor_position_in_line)
+        //  返回 (text, cursor_position_in_line)
         let input_text = self.name_input.get_text();
         let cursor_pos = self.name_input.get_cursor_position();
 
@@ -182,9 +182,9 @@ impl ImportLayoutScreen {
         };
 
         let text_suffix = if self.editing_name {
-            "" // No hint when editing
+            "" // 编辑时无提示
         } else {
-            " (<r> Rename)" // Show rename hint when not editing
+            " (<r> Rename)" // 非编辑时显示重命名提示
         };
 
         let mut text = format!("Save as: {}{}", display_name, text_suffix);
@@ -212,7 +212,7 @@ impl ImportLayoutScreen {
     }
 
     fn help_text(&self) -> (&str, &[&str]) {
-        // Only Enter and Esc - NO <r> here (it's in the save-as line)
+        // 仅 Enter 和 Esc - 这里没有 <r>（它在 save-as 行中）
         ("<Enter> - Save, <Esc> - Back", &["<Enter>", "<Esc>"])
     }
 
@@ -231,7 +231,7 @@ impl ImportLayoutScreen {
     }
 
     pub fn render(&self, rows: usize, cols: usize) {
-        // Only render modal if we have a valid pasted layout
+        // 仅当我们有有效的粘贴布局时才渲染模态框
         if let Some(metadata) = &self.parsed_metadata {
             let display_layout =
                 DisplayLayout::Valid(LayoutInfo::File("imported".to_string(), metadata.clone()));
@@ -245,7 +245,7 @@ impl ImportLayoutScreen {
 
             let actual_ui_width = std::cmp::min(desired_ui_width, cols);
 
-            // Calculate layout detail dimensions
+            //  计算布局详情维度
             let available_cols_for_details = actual_ui_width.saturating_sub(2);
             let desired_details_height =
                 layout_detail.calculate_required_height(available_cols_for_details);
@@ -254,11 +254,11 @@ impl ImportLayoutScreen {
             let base_y = rows.saturating_sub(desired_ui_height) / 2;
             let base_x = cols.saturating_sub(actual_ui_width) / 2;
 
-            // Update cursor BEFORE rendering
+            // 在渲染之前更新光标
             let save_as_line_y = base_y + 2;
             self.update_cursor_position(base_x, save_as_line_y, actual_ui_width);
 
-            // Render components
+            //  渲染组件
             self.render_title(base_x, base_y, actual_ui_width);
             self.render_save_as_line(base_x, save_as_line_y, actual_ui_width);
 
@@ -277,25 +277,25 @@ impl ImportLayoutScreen {
                 available_cols_for_details,
             );
 
-            // Render help text
+            // 渲染帮助文本
             let help_y = details_y + actual_details_height + 1;
             self.render_help_text(base_x, help_y, actual_ui_width);
         } else if let Some(error) = &self.parse_error {
-            // Show error if parse failed
+            // 如果解析失败则显示错误
             Title::new("Import Layout").render(0, 0);
             self.render_parse_error(error, 2);
 
             let help_y = rows.saturating_sub(2);
             self.render_esc_cancel_help(0, help_y);
         } else {
-            // Calculate desired width
+            //  计算期望宽度
             let desired_ui_width = std::cmp::max(
                 self.help_text().0.chars().count(),
                 self.max_description_width(),
             );
 
             let actual_ui_width = std::cmp::min(desired_ui_width, cols);
-            let actual_ui_height = std::cmp::min(6, rows); // 6 - content rows plus padding
+            let actual_ui_height = std::cmp::min(6, rows); //  6 - 内容行加内边距
 
             let base_y = rows.saturating_sub(actual_ui_height) / 2;
             let base_x = cols.saturating_sub(actual_ui_width) / 2;
@@ -314,7 +314,7 @@ impl ImportLayoutScreen {
     }
 
     fn render_parse_error(&self, error: &str, y: usize) {
-        // Render error message using ANSI escape sequences
+        // 使用 ANSI 转义序列渲染错误消息
         for (i, line) in error.lines().enumerate() {
             print!("\u{1b}[{};{}H{}", y + i + 1, 1, line);
         }

@@ -12,7 +12,7 @@ pub fn truncate_with_ellipsis(text: &str, max_width: usize) -> String {
     if max_width <= 3 {
         return text.chars().take(max_width).collect();
     }
-    // Reserve 3 characters for "..."
+    // 为 "..." 预留 3 个字符
     let truncate_at = max_width.saturating_sub(3);
     format!("{}...", text.chars().take(truncate_at).collect::<String>())
 }

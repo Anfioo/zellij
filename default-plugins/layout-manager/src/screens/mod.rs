@@ -10,7 +10,7 @@ pub use layout_list::LayoutListScreen;
 pub use new_layout_from_session::NewLayoutFromCurrentSessionScreen;
 pub use rename_layout::RenameLayoutScreen;
 
-// Re-export error types from errors module for convenience
+// 为方便起见，从 errors 模块重新导出错误类型
 pub use crate::errors::{ErrorDetailScreen, ErrorScreen};
 
 #[derive(Clone)]
@@ -29,7 +29,7 @@ impl Default for Screen {
     }
 }
 
-/// Optimistic state updates to apply before Zellij confirms
+///在 Zellij 确认之前应用的乐观状态更新
 #[derive(Clone, Debug)]
 pub enum OptimisticUpdate {
     Delete(String), // file_name
@@ -43,7 +43,7 @@ pub enum OptimisticUpdate {
     },
 }
 
-/// Response from screen key handlers
+///  来自屏幕按键处理器的响应
 #[derive(Default)]
 pub struct KeyResponse {
     pub should_render: bool,

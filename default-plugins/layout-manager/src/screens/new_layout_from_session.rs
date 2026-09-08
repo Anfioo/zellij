@@ -15,7 +15,7 @@ pub struct NewLayoutFromCurrentSessionScreen {
 
 impl NewLayoutFromCurrentSessionScreen {
     pub fn handle_key(&mut self, key: KeyWithModifier) -> KeyResponse {
-        // Special Esc handling based on edit state
+        // 基于编辑状态的特殊 Esc 处理
         if key.bare_key == BareKey::Esc && key.has_no_modifiers() {
             return self.handle_escape_key();
         }
@@ -137,7 +137,7 @@ impl NewLayoutFromCurrentSessionScreen {
     fn attempt_save_current_session(&self) -> KeyResponse {
         let layout_name = self.determine_layout_name();
 
-        // Capture optimistic update BEFORE the API call
+        //  在 API 调用之前捕获乐观更新
         let optimistic = OptimisticUpdate::Add {
             name: layout_name.clone(),
             metadata: self.current_layout_metadata.clone(),
@@ -192,7 +192,7 @@ impl NewLayoutFromCurrentSessionScreen {
 
         let actual_ui_width = std::cmp::min(desired_ui_width, cols);
 
-        let available_cols_for_details = actual_ui_width.saturating_sub(2); // Account for indentation
+        let available_cols_for_details = actual_ui_width.saturating_sub(2); //  考虑缩进
         let desired_details_height =
             layout_detail.calculate_required_height(available_cols_for_details);
 
@@ -201,8 +201,8 @@ impl NewLayoutFromCurrentSessionScreen {
         let base_x = cols.saturating_sub(actual_ui_width) / 2;
 
         let save_as_line_y = base_y + 5;
-        self.update_cursor_position(base_x, save_as_line_y, actual_ui_width); // NOTE: must be before any render
-                                                                              // happens
+        self.update_cursor_position(base_x, save_as_line_y, actual_ui_width); // 注意：必须在任何渲染之前
+                                                                              // 发生
 
         self.render_title(base_x, base_y, actual_ui_width);
         self.render_description(base_x, base_y + 2, actual_ui_width);
@@ -274,7 +274,7 @@ impl NewLayoutFromCurrentSessionScreen {
         if text.chars().count() > width {
             let truncated_display_name = truncate_with_ellipsis_start(
                 display_name,
-                width.saturating_sub(22), // size of text without the display name
+                width.saturating_sub(22), // 不含显示名称的文本大小
             );
             text = format!("Save as: {} (<r> Rename)", truncated_display_name);
             let truncated_len = truncated_display_name.chars().count();

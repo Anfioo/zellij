@@ -2,7 +2,7 @@ use crate::screens::{KeyResponse, Screen};
 use crate::ui::{truncate_line_with_ansi, wrap_text_to_width, ErrorMessage, MultiLineErrorMessage};
 use zellij_tile::prelude::*;
 
-/// Format a layout parsing error into a detailed error string
+///  将布局解析错误格式化为详细的错误字符串
 pub fn format_kdl_error(error: LayoutParsingError) -> String {
     match error {
         LayoutParsingError::KdlError {
@@ -81,32 +81,32 @@ impl ErrorDetailScreen {
     }
 
     pub fn render(&self, rows: usize, cols: usize) {
-        // Header: show layout name
+        // 表头：显示布局名称
         let header = format!("Error in layout: {}", self.layout_name);
         let header_text = Text::new(&header).error_color_all();
         print_text_with_coordinates(header_text, 1, 0, None, None);
 
-        // Calculate available space for error content
-        let header_height = 2; // Header + gap
+        //  计算错误内容的可用空间
+        let header_height = 2; // 表头 + 间距
         let available_rows = rows.saturating_sub(header_height);
-        let available_cols = cols.saturating_sub(2); // Padding on sides
+        let available_cols = cols.saturating_sub(2); // 两侧内边距
 
-        // Render error lines with middle truncation
+        // 渲染带中间截断的错误行
         let error_lines: Vec<&str> = self.detailed_error.lines().collect();
         let total_lines = error_lines.len();
 
         if total_lines <= available_rows {
-            // All lines fit, show them all
+            //  所有行都适合，全部显示
             for (i, line) in error_lines.iter().enumerate() {
                 let truncated = truncate_line_with_ansi(line, available_cols);
                 print!("\u{1b}[{};{}H{}", header_height + i + 1, 2, truncated);
             }
         } else {
-            // Need to truncate middle - show beginning, indicator, and end
-            let omitted_indicator_lines = 1; // Reserve 1 line for "... X lines omitted ..."
+            //  需要截断中间部分 - 显示开头、指示器和结尾
+            let omitted_indicator_lines = 1; //  为 "... X lines omitted ..." 预留 1 行
             let lines_for_content = available_rows.saturating_sub(omitted_indicator_lines);
 
-            // Split content space: 60% for beginning, 40% for end
+            //  分割内容空间：60% 用于开头，40% 用于结尾
             let beginning_lines = (lines_for_content as f32 * 0.6).ceil() as usize;
             let end_lines = lines_for_content.saturating_sub(beginning_lines);
 
@@ -114,7 +114,7 @@ impl ErrorDetailScreen {
 
             let mut current_row = 0;
 
-            // Render beginning lines
+            //  渲染开头行
             for line in error_lines.iter().take(beginning_lines) {
                 let truncated = truncate_line_with_ansi(line, available_cols);
                 print!(
@@ -126,7 +126,7 @@ impl ErrorDetailScreen {
                 current_row += 1;
             }
 
-            // Render omission indicator
+            //  渲染省略指示器
             let indicator = format!("... {} lines omitted ...", omitted_count);
             let indicator_text = Text::new(&indicator).color_range(0, ..);
             print_text_with_coordinates(
@@ -138,7 +138,7 @@ impl ErrorDetailScreen {
             );
             current_row += 1;
 
-            // Render end lines
+            //  渲染末尾行
             let start_index = total_lines.saturating_sub(end_lines);
             for line in error_lines.iter().skip(start_index) {
                 let truncated = truncate_line_with_ansi(line, available_cols);

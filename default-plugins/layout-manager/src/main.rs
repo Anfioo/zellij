@@ -81,16 +81,16 @@ impl DisplayLayout {
     fn compare_for_display(&self, other: &DisplayLayout) -> std::cmp::Ordering {
         match (self.is_builtin(), other.is_builtin()) {
             (false, false) => {
-                // Sort by update_time (newest first)
+                // 按 update_time 排序（最新的在前）
                 match (self.get_update_time(), other.get_update_time()) {
                     (Some(self_time), Some(other_time)) => {
-                        // Reverse comparison for descending order
+                        // 反转比较以实现降序
                         other_time.cmp(&self_time)
                     },
                     (Some(_), None) => std::cmp::Ordering::Less,
                     (None, Some(_)) => std::cmp::Ordering::Greater,
                     (None, None) => {
-                        // Fallback to alphabetical
+                        // 回退到字母顺序
                         self.name().to_lowercase().cmp(&other.name().to_lowercase())
                     },
                 }
@@ -237,13 +237,13 @@ impl ZellijPlugin for State {
                 }
             },
             Event::AvailableLayoutInfo(available_layouts, layouts_with_errors) => {
-                // Convert valid layouts to DisplayLayout::Valid
+                // 将有效布局转换为 DisplayLayout::Valid
                 let mut display_layouts: Vec<DisplayLayout> = available_layouts
                     .into_iter()
                     .map(DisplayLayout::Valid)
                     .collect();
 
-                // Convert error layouts to DisplayLayout::Error
+                // 将错误布局转换为 DisplayLayout::Error
                 for layout_error in &layouts_with_errors {
                     let stringified_error = format_kdl_error(layout_error.error.clone());
                     let error_message = match &layout_error.error {

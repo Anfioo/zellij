@@ -29,23 +29,23 @@ impl<'a> LayoutDetail<'a> {
             DisplayLayout::Valid(_) => {
                 let (_, metadata_opt) = get_layout_display_info(self.layout);
                 let Some(metadata) = metadata_opt else {
-                    return 1; // No metadata available
+                    return 1; // 无可用元数据
                 };
                 self.calculate_content_lines(metadata, max_cols)
             },
             DisplayLayout::Error { .. } => {
-                3 // Error message + hint line
+                3 // 错误消息 + 提示行
             },
         }
     }
 
     fn calculate_content_lines(&self, metadata: &LayoutMetadata, max_cols: usize) -> usize {
         if !self.should_show_tabs_section(metadata) {
-            // Panes only
+            // 仅窗格
             let panes_lines = self.prepare_panes_content(metadata, max_cols);
             panes_lines.len()
         } else {
-            // Tabs and panes side-by-side
+            // 标签页和窗格并排
             let (left_width, right_width, _) = self.calculate_column_layout(max_cols);
             let tabs_lines = self.prepare_tabs_content(metadata, left_width);
             let panes_lines = self.prepare_panes_content(metadata, right_width);
@@ -120,8 +120,8 @@ impl<'a> LayoutDetail<'a> {
         let wrapped_lines = wrap_text_to_width(error_message, max_cols);
         let available_rows = max_rows.saturating_sub(3);
 
-        let mut current_y = y + 1; // + 1 (and saturating_sub(3) above) to be aligned with the
-                                   // table on the left
+        let mut current_y = y + 1; //  + 1（以及上面的 saturating_sub(3)）以与
+                                   // 左侧的表格对齐
         for line in wrapped_lines.iter().take(available_rows) {
             let text = Text::new(line).error_color_all();
             print_text_with_coordinates(text, x, current_y, None, None);
@@ -129,7 +129,7 @@ impl<'a> LayoutDetail<'a> {
         }
 
         let hint = Text::new("<m> - Show detailed error").color_substring(3, "<m>");
-        print_text_with_coordinates(hint, x, current_y + 1, None, None); // 1 for gap
+        print_text_with_coordinates(hint, x, current_y + 1, None, None); //  1 用于间距
     }
 
     fn render_tabs_and_panes(
@@ -140,7 +140,7 @@ impl<'a> LayoutDetail<'a> {
         max_rows: usize,
         max_cols: usize,
     ) {
-        // let max_rows = max_rows.saturating_sub(1);
+        //  let max_rows = max_rows.saturating_sub(1);
 
         if !self.should_show_tabs_section(metadata) {
             self.render_panes_only(metadata, x, y, max_rows, max_cols);
@@ -209,11 +209,11 @@ impl<'a> LayoutDetail<'a> {
     fn prepare_tabs_content(&self, metadata: &LayoutMetadata, max_width: usize) -> Vec<String> {
         let mut lines = Vec::new();
 
-        // Add title
+        //  添加标题
         let title = "Tabs:";
         lines.push(truncate_with_ellipsis(title, max_width));
 
-        // Add tabs
+        //  添加标签页
         for (i, tab) in metadata.tabs.iter().enumerate() {
             let tab_label = if let Some(name) = &tab.name {
                 name.clone()
@@ -221,7 +221,7 @@ impl<'a> LayoutDetail<'a> {
                 format!("Tab {}", i + 1)
             };
 
-            // Account for "  - " prefix (4 characters)
+            //  考虑 "  - " 前缀（4 个字符）
             let available_width = max_width.saturating_sub(4);
             let truncated_label = truncate_with_ellipsis(&tab_label, available_width);
             lines.push(format!("  - {}", truncated_label));
@@ -235,23 +235,23 @@ impl<'a> LayoutDetail<'a> {
 
         let (named_panes, terminal_count) = self.collect_pane_info(metadata);
 
-        // Early return if nothing to show
+        // 如果没有可显示的内容则提前返回
         if !self.has_panes_to_show(&named_panes, terminal_count) {
             return lines;
         }
 
-        // Add title
+        //  添加标题
         let title = "Panes:";
         lines.push(truncate_with_ellipsis(title, max_width));
 
-        // Add named panes
+        //  添加命名窗格
         for pane_name in &named_panes {
             let available_width = max_width.saturating_sub(4);
             let truncated_name = truncate_with_ellipsis(pane_name, available_width);
             lines.push(format!("  - {}", truncated_name));
         }
 
-        // Add terminal count if any
+        //  如果有的话添加终端计数
         if terminal_count > 0 {
             let text = if named_panes.is_empty() {
                 format!("  {} Terminals", terminal_count)
@@ -329,7 +329,7 @@ impl<'a> LayoutDetail<'a> {
 
         for tab in &metadata.tabs {
             for pane in &tab.panes {
-                // Skip builtin plugin panes
+                // 跳过内置插件窗格
                 if pane.is_builtin_plugin {
                     continue;
                 }

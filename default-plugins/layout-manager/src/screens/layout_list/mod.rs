@@ -138,11 +138,11 @@ impl LayoutListScreen {
         key: KeyWithModifier,
         display_layouts: &[DisplayLayout],
     ) -> KeyResponse {
-        // Search-first mode: Enter opens, Alt+W applies, Tab autocompletes,
-        // arrows navigate, Esc exits to management mode
+        //  搜索优先模式：Enter 打开，Alt+W 应用，Tab 自动补全，
+        //  方向键导航，Esc 退出到管理模式
         match key.bare_key {
             BareKey::Esc if key.has_no_modifiers() => {
-                // Clear text first; only exit to management mode if already empty
+                //  先清除文本；仅在已为空时退出到管理模式
                 if self.search_state.get_filter_input().is_empty() {
                     self.clear_filter();
                 } else {
@@ -152,36 +152,36 @@ impl LayoutListScreen {
                 return KeyResponse::render();
             },
             BareKey::Enter if key.has_no_modifiers() => {
-                // Open the currently selected layout as new tab(s)
+                //  将当前选中的布局作为新标签页打开
                 self.open_selected_layout(display_layouts);
                 return KeyResponse::none();
             },
             BareKey::Char('w') if key.has_modifiers(&[KeyModifier::Alt]) => {
-                // Apply/override the currently selected layout to the session
+                //  将当前选中的布局应用/覆盖到会话
                 self.apply_selected_layout(display_layouts);
                 return KeyResponse::none();
             },
             BareKey::Tab if key.has_no_modifiers() => {
-                // Complete: fill input with selected match name
+                //  补全：用选中的匹配项名称填充输入
                 if self.search_state.fill_input_with_selected_match() {
                     self.update_filter(display_layouts);
                 }
                 return KeyResponse::render();
             },
             BareKey::Up if key.has_no_modifiers() => {
-                // Navigate filtered results while typing
+                //  输入时导航过滤后的结果
                 self.navigate_up(display_layouts);
                 return KeyResponse::render();
             },
             BareKey::Down if key.has_no_modifiers() => {
-                // Navigate filtered results while typing
+                //  输入时导航过滤后的结果
                 self.navigate_down(display_layouts);
                 return KeyResponse::render();
             },
             _ => {},
         }
 
-        // Pass remaining keys to TextInput
+        //  将剩余按键传递给 TextInput
         let action = self.search_state.get_filter_input_mut().handle_key(key);
 
         match action {
@@ -190,7 +190,7 @@ impl LayoutListScreen {
                 KeyResponse::render()
             },
             InputAction::Cancel => {
-                // Ctrl-C - clear text first; only exit to management mode if already empty
+                //  Ctrl-C - 先清除文本；仅在已为空时退出到管理模式
                 if self.search_state.get_filter_input().is_empty() {
                     self.clear_filter();
                 } else {
@@ -200,7 +200,7 @@ impl LayoutListScreen {
                 KeyResponse::render()
             },
             InputAction::Submit => {
-                // Enter handled above
+                // Enter 已在上面处理
                 KeyResponse::none()
             },
             InputAction::Complete => KeyResponse::none(),
@@ -259,7 +259,7 @@ impl LayoutListScreen {
 
     fn navigate_up(&mut self, display_layouts: &[DisplayLayout]) {
         if self.is_searching() {
-            // Navigate in search results
+            // 在搜索结果中导航
             if self.search_state.get_selected_search_index() == 0 {
                 self.search_state.set_selected_search_index(
                     self.search_state
@@ -274,7 +274,7 @@ impl LayoutListScreen {
                     .saturating_sub(1);
                 self.search_state.set_selected_search_index(new_index);
             }
-            // Keep selected_layout_index synchronized with the actual position
+            // 保持 selected_layout_index 与实际位置同步
             self.selected_layout_index = self
                 .search_state
                 .get_search_results()
@@ -282,7 +282,7 @@ impl LayoutListScreen {
                 .map(|r| r.original_index)
                 .unwrap_or(0);
         } else {
-            // Normal navigation
+            // 普通导航
             if self.selected_layout_index == 0 {
                 self.selected_layout_index = display_layouts.len().saturating_sub(1);
             } else {
@@ -294,7 +294,7 @@ impl LayoutListScreen {
 
     fn navigate_down(&mut self, display_layouts: &[DisplayLayout]) {
         if self.is_searching() {
-            // Navigate in search results
+            // 在搜索结果中导航
             if self.search_state.get_selected_search_index() + 1
                 >= self.search_state.get_search_results().len()
             {
@@ -303,7 +303,7 @@ impl LayoutListScreen {
                 let new_index = self.search_state.get_selected_search_index() + 1;
                 self.search_state.set_selected_search_index(new_index);
             }
-            // Keep selected_layout_index synchronized with the actual position
+            // 保持 selected_layout_index 与实际位置同步
             self.selected_layout_index = self
                 .search_state
                 .get_search_results()
@@ -311,7 +311,7 @@ impl LayoutListScreen {
                 .map(|r| r.original_index)
                 .unwrap_or(0);
         } else {
-            // Normal navigation
+            // 普通导航
             if self.selected_layout_index + 1 >= display_layouts.len() {
                 self.selected_layout_index = 0;
             } else {
@@ -337,25 +337,25 @@ impl LayoutListScreen {
     }
 
     fn toggle_retain_options(&mut self) {
-        // Cycle through: Terminals -> Plugins -> Both -> None -> (back to Terminals)
+        // 循环切换：终端 -> 插件 -> 两者 -> 无 ->（回到终端）
         match (self.retain_terminal_panes, self.retain_plugin_panes) {
             (true, false) => {
-                // Terminals -> Plugins
+                // 终端 -> 插件
                 self.retain_terminal_panes = false;
                 self.retain_plugin_panes = true;
             },
             (false, true) => {
-                // Plugins -> Both
+                // 插件 -> 两者
                 self.retain_terminal_panes = true;
                 self.retain_plugin_panes = true;
             },
             (true, true) => {
-                // Both -> None
+                //  两者 -> None
                 self.retain_terminal_panes = false;
                 self.retain_plugin_panes = false;
             },
             (false, false) => {
-                // None -> Terminals
+                // 无 -> 终端
                 self.retain_terminal_panes = true;
                 self.retain_plugin_panes = false;
             },
@@ -363,7 +363,7 @@ impl LayoutListScreen {
     }
 
     fn toggle_target_option(&mut self) {
-        // Toggle between: All Tabs (false) <-> Current (true)
+        // 切换：所有标签页（false）<-> 当前（true）
         self.apply_only_to_active_tab = !self.apply_only_to_active_tab;
     }
 
@@ -408,19 +408,19 @@ impl LayoutListScreen {
 
     pub fn render(&mut self, display_layouts: &[DisplayLayout], rows: usize, cols: usize) {
         show_cursor(None);
-        // Store terminal dimensions for cursor positioning
+        // 存储终端尺寸以用于光标定位
         self.last_rows = rows;
         self.last_cols = cols;
 
         self.update_filter(display_layouts);
 
-        // Calculate base coordinates using the full display_layouts (NOT filtered results)
+        //  使用完整的 display_layouts（不是过滤后的结果）计算基础坐标
         let (total_width, total_height) =
             self.calculate_content_dimensions(rows, cols, display_layouts);
         let (base_x, base_y) =
             self.calculate_base_coordinates(rows, cols, total_width, total_height);
 
-        // In search mode, shift everything down by 1 row
+        // 在搜索模式下，将所有内容向下移动 1 行
         let base_y = if self.search_state.is_typing() || self.search_state.is_active() {
             base_y + 1
         } else {
@@ -459,7 +459,7 @@ impl LayoutListScreen {
             calculate_visible_window(
                 &layouts_to_render,
                 selected_index,
-                content_height.saturating_sub(1), // account for title row
+                content_height.saturating_sub(1), // 考虑标题行
             );
 
         let matched_indices = self
@@ -490,7 +490,7 @@ impl LayoutListScreen {
                     table_width,
                 );
             } else {
-                // Render "No layout selected" message (moved from LayoutDetail)
+                // 渲染 "No layout selected" 消息（从 LayoutDetail 移来）
                 let msg = Text::new("No layout selected").color_all(2);
                 print_text_with_coordinates(msg, detail_x + base_x, table_y, None, None);
             }
@@ -500,7 +500,7 @@ impl LayoutListScreen {
     }
 
     fn calculate_layout(&self, rows: usize, display_layouts: &[DisplayLayout]) -> (usize, usize) {
-        let rows_in_table = display_layouts.len() + 1; // 1 for the title row
+        let rows_in_table = display_layouts.len() + 1; //  1 用于标题行
         let controls_height = self.get_controls_height();
         let filter_row_height = if self.is_searching() { 1 } else { 0 };
         let search_mode_offset = if self.is_searching() { 1 } else { 0 };
@@ -617,7 +617,7 @@ impl LayoutListScreen {
             self.selected_layout_index = display_layouts.len().saturating_sub(1);
         }
 
-        // Refresh filter results if filtering is active
+        // 如果过滤处于活动状态则刷新过滤结果
         if self.search_state.is_active() && !self.search_state.get_filter_input().is_empty() {
             self.update_filter(display_layouts);
         }
@@ -660,7 +660,7 @@ impl LayoutListScreen {
             total_height,
         );
 
-        // In search mode, cursor must account for the extra row offset
+        // 在搜索模式下，光标必须考虑额外的行偏移
         let base_y = if self.search_state.is_typing() || self.search_state.is_active() {
             base_y + 1
         } else {
@@ -670,7 +670,7 @@ impl LayoutListScreen {
         self.search_state
             .update_filter(display_layouts, base_x, base_y);
 
-        // Update selected_layout_index to match the selected search result
+        // 更新 selected_layout_index 以匹配选中的搜索结果
         if let Some(original_index) = self.search_state.get_current_selected_original_index() {
             self.selected_layout_index = original_index;
         }
@@ -687,7 +687,7 @@ fn calculate_visible_window(
     selected_index: usize,
     max_visible: usize,
 ) -> (Vec<DisplayLayout>, usize, usize, usize) {
-    // returns: (index_in_rendered, hidden_items_above, hidden_items_below)
+    // 返回：(index_in_rendered, hidden_items_above, hidden_items_below)
     if layouts.is_empty() || max_visible == 0 {
         return (Vec::new(), 0, 0, 0);
     }

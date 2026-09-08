@@ -93,14 +93,14 @@ impl SearchState {
         let filter_prompt = "Layout:";
         let filter_text = self.filter_input.get_text();
 
-        // Clear results if filter is empty
+        //  如果过滤器为空则清除结果
         if filter_text.is_empty() && !self.typing_filter {
             self.search_results.clear();
             self.selected_search_index = 0;
             return;
         }
 
-        // Perform fuzzy matching
+        //  执行模糊匹配
         let matcher = SkimMatcherV2::default();
 
         let mut results: Vec<SearchResult> = display_layouts
@@ -119,7 +119,7 @@ impl SearchState {
             })
             .collect();
 
-        // Sort by score descending (best matches first)
+        //  按分数降序排序（最佳匹配在前）
         results.sort_by(|a, b| b.score.cmp(&a.score));
         self.search_results = results;
 
@@ -129,12 +129,12 @@ impl SearchState {
             self.filter_active = true;
         }
 
-        // Keep selection in bounds
+        //  保持选择在范围内
         if self.selected_search_index >= self.search_results.len() {
             self.selected_search_index = self.search_results.len().saturating_sub(1);
         }
 
-        // Show cursor when typing
+        //  输入时显示光标
         if self.typing_filter {
             let cursor_pos = self.filter_input.get_cursor_position();
             show_cursor(Some((

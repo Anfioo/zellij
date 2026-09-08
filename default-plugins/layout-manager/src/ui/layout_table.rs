@@ -19,10 +19,10 @@ fn create_table_row(
     };
 
     let name_text = if let Some(indices) = matched_indices {
-        // Create text with highlighted matched characters
+        //  创建带有高亮匹配字符的文本
         let mut text = Text::new(&display_name);
 
-        // Apply base color to entire text
+        //  对整个文本应用基础颜色
         text = if is_error {
             text.error_color_all()
         } else {
@@ -33,7 +33,7 @@ fn create_table_row(
 
         text
     } else {
-        // No matches, use original coloring
+        // 无匹配，使用原始着色
         if is_error {
             Text::new(&display_name).error_color_all()
         } else {
@@ -95,7 +95,7 @@ impl LayoutsTable {
             None => Table::new().add_row(vec![" ", " "]),
         };
 
-        // Calculate the actual width needed for the "last modified" column
+        //  计算 "last modified" 列所需的实际宽度
         let max_last_modified_width = self
             .display_layouts
             .iter()
@@ -273,19 +273,19 @@ impl Controls {
     pub fn calculate_width(&self, max_cols: usize) -> usize {
         let mut width = 0;
 
-        // Line 1: Basic controls
+        // 第 1 行：基本控制
         let (basic_text, _) = self.get_default_controls(max_cols);
         width = width.max(basic_text.chars().count());
 
-        // Line 2: Override and toggle
+        // 第 2 行：覆盖和切换
         let (override_text, _) = self.get_override_text_and_keys(max_cols);
         width = width.max(override_text.chars().count());
 
-        // Line 3 (or 5 if show_more_options): New layout controls
+        // 第 3 行（如果 show_more_options 则为第 5 行）：新布局控制
         let (new_layout_text, _) = self.get_new_layout_text_and_keys(max_cols);
         width = width.max(new_layout_text.chars().count());
 
-        // Lines 4-5: Advanced options (only if show_more_options)
+        // 第 4-5 行：高级选项（仅当 show_more_options 时）
         if self.show_more_options {
             let (retain_text, _) = self.get_retain_text_and_highlight(max_cols);
             width = width.max(retain_text.chars().count());
