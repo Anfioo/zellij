@@ -41,7 +41,7 @@ use crate::ui::pane_boundaries_frame::{FrameParams, PaneFrame};
 
 pub const SELECTION_SCROLL_INTERVAL_MS: u64 = 10;
 
-// Some keys in different formats but are used in the code
+// 以不同格式存在但在代码中使用的部分按键
 const LEFT_ARROW: &[u8] = &[27, 91, 68];
 const RIGHT_ARROW: &[u8] = &[27, 91, 67];
 const UP_ARROW: &[u8] = &[27, 91, 65];
@@ -54,12 +54,12 @@ const ENTER_NEWLINE: &[u8] = &[10];
 const ESC: &[u8] = &[27];
 const ENTER_CARRIAGE_RETURN: &[u8] = &[13];
 const SPACE: &[u8] = &[32];
-const CTRL_C: &[u8] = &[3]; // TODO: check this to be sure it fits all types of CTRL_C (with mac, etc)
+const CTRL_C: &[u8] = &[3]; // TODO: 检查此键位是否适用于所有类型的 CTRL_C（包括 Mac 等）
 const TERMINATING_STRING: &str = "\0";
 const DELETE_KEY: &str = "\u{007F}";
 const BACKSPACE_KEY: &str = "\u{0008}";
 
-/// The ansi encoding of some keys
+/// 某些按键的 ANSI 编码
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum AnsiEncoding {
     Left,
@@ -71,9 +71,9 @@ enum AnsiEncoding {
 }
 
 impl AnsiEncoding {
-    /// Returns the ANSI representation of the entries.
-    /// NOTE: There is an ANSI escape code (27) at the beginning of the string,
-    ///       some editors will not show this
+    /// 返回这些条目的 ANSI 表示。
+    /// 注意：字符串开头有一个 ANSI 转义码（27），
+    ///       部分编辑器不会显示它
     pub fn as_bytes(&self) -> &[u8] {
         match self {
             Self::Left => "OD".as_bytes(),
@@ -93,10 +93,10 @@ impl AnsiEncoding {
 #[derive(PartialEq, Eq, Ord, PartialOrd, Hash, Clone, Copy, Debug)]
 pub enum PaneId {
     Terminal(u32),
-    Plugin(u32), // FIXME: Drop the trait object, make this a wrapper for the struct?
+    Plugin(u32), // FIXME：去掉 trait 对象，把它变成这个结构体的包装器？
 }
 
-// because crate architecture and reasons...
+// 因为 crate 架构等原因……
 impl From<ZellijUtilsPaneId> for PaneId {
     fn from(zellij_utils_pane_id: ZellijUtilsPaneId) -> Self {
         match zellij_utils_pane_id {
@@ -126,8 +126,8 @@ impl std::fmt::Display for PaneId {
 
 type IsFirstRun = bool;
 
-// FIXME: This should hold an os_api handle so that terminal panes can set their own size via FD in
-// their `reflow_lines()` method. Drop a Box<dyn ServerOsApi> in here somewhere.
+// FIXME：这里应持有一个 os_api 句柄，以便终端窗格可以通过其
+// `reflow_lines()` 方法中的 FD 设置自身大小。把 Box<dyn ServerOsApi> 放在这里的某处。
 #[allow(clippy::too_many_arguments)]
 pub struct TerminalPane {
     pub grid: Grid,
@@ -146,35 +146,35 @@ pub struct TerminalPane {
     frame: HashMap<ClientId, PaneFrame>,
     borderless: bool,
     exclude_from_sync: bool,
-    fake_cursor_locations: HashSet<(usize, usize)>, // (x, y) - these hold a record of previous fake cursors which we need to clear on render
+    fake_cursor_locations: HashSet<(usize, usize)>, // (x, y) - 这里记录了需要在渲染时清除的先前虚拟光标位置
     search_term: String,
-    is_held: Option<(Option<i32>, IsFirstRun, RunCommand)>, // a "held" pane means that its command has either exited and the pane is waiting for a
-    // possible user instruction to be re-run, or that the command has not yet been run
-    banner: Option<String>, // a banner to be rendered inside this TerminalPane, used for panes
-    // held on startup and can possibly be used to display some errors
+    is_held: Option<(Option<i32>, IsFirstRun, RunCommand)>, // "挂起"窗格意味着它的命令要么已退出、窗格正在等待可能的
+    // 用户指令以重新运行，要么该命令尚未运行
+    banner: Option<String>, // 一个要在该 TerminalPane 内部渲染的横幅，用于
+    // 启动时被挂起的窗格，也可用于显示某些错误
     pane_frame_color_override: Option<(PaletteColor, Option<String>)>,
     has_bell_notification: bool,
     invoked_with: Option<Run>,
     #[allow(dead_code)]
     arrow_fonts: bool,
     notification_end: Option<NotificationEnd>,
-    /// `true` while a host-terminal forward initiated by this pane is
-    /// outstanding. While set, processing of `pending_pty_input` is
-    /// suspended so that the async host reply lands on the pane's
-    /// stdin in the same stream position the original query occupied.
-    /// Cleared by Tab when the reply (or 500 ms cache-fallback) lands.
+    /// 当该窗格发起的宿主终端转发尚
+    /// 未完成时为 `true`。置位期间，对 `pending_pty_input` 的处理会
+    /// 被挂起，以便异步宿主回复落在窗格
+    /// stdin 上原始查询所占据的同一流位置。
+    /// 当回复（或 500 毫秒缓存回退）到达时由 Tab 清除。
     forward_paused: bool,
     nested_guest: bool,
     guest_modal: HashMap<ClientId, usize>,
     guest_choice_indicators: HashMap<ClientId, GuestChoiceIndicator>,
     guest_session_name: Option<String>,
     guest_modal_shortcuts: GuestModalShortcuts,
-    /// PTY bytes that have not yet been fed to vte. Single source of
-    /// truth: `handle_pty_bytes` always appends here, and processing
-    /// pops one byte at a time and advances the vte parser. Processing
-    /// stops as soon as Grid produces a forward-bound query, leaving
-    /// remaining bytes in the queue to be drained after the host reply
-    /// has been written.
+    /// 尚未喂入 vte 的 PTY 字节。唯一的事实来源：
+    /// `handle_pty_bytes` 总是追加到这里，而处理过程
+    /// 一次弹出一个字节并推进 vte 解析器。处理
+    /// 在 Grid 产生一个转发方向的查询时立即停止，将
+    /// 队列中剩余的字节留待宿主回复
+    /// 写入后再排空。
     pending_pty_input: VecDeque<u8>,
     kitty_interceptor: KittyApcInterceptor,
 }
@@ -199,14 +199,14 @@ impl Pane for TerminalPane {
         self.get_y() + self.content_offset.top
     }
     fn get_content_columns(&self) -> usize {
-        // content columns might differ from the pane's columns if the pane has a frame
-        // in that case they would be 2 less
+        // 如果窗格有边框，内容列数可能与窗格列数不同——
+        // 那种情况下会少 2
         self.get_columns()
             .saturating_sub(self.content_offset.left + self.content_offset.right)
     }
     fn get_content_rows(&self) -> usize {
-        // content rows might differ from the pane's rows if the pane has a frame
-        // in that case they would be 2 less
+        // 如果窗格有边框，内容行数可能与窗格行数不同——
+        // 那种情况下会少 2
         self.get_rows()
             .saturating_sub(self.content_offset.top + self.content_offset.bottom)
     }
@@ -228,8 +228,8 @@ impl Pane for TerminalPane {
     fn handle_pty_bytes(&mut self, bytes: VteBytes) {
         self.set_should_render(true);
         if self.forward_paused {
-            // A host-forward initiated by this pane is outstanding.
-            // Buffer the bytes; Tab drains them on resume.
+            // 由该窗格发起的一次宿主转发尚未完成。
+            // 缓冲这些字节；Tab 在恢复时会排空它们。
             self.pending_pty_input.extend(bytes);
             return;
         }
@@ -247,9 +247,9 @@ impl Pane for TerminalPane {
                 InterceptorResult::Swallow => {
                     if !capture_started {
                         capture_started = true;
-                        // Drain everything before the sequence now, so a pause
-                        // in the middle of this flush can never strand a
-                        // capture that has already left the input buffer.
+                        // 现在先把该序列之前的所有内容排空，这样本次冲刷
+                        // 过程中的暂停绝不会使
+                        // 已离开输入缓冲区的捕获数据滞留。
                         if !forwarded.is_empty() {
                             let consumed = self
                                 .vte_parser
@@ -282,9 +282,9 @@ impl Pane for TerminalPane {
                     }
                     self.grid.handle_kitty_apc(&cmd);
                     if !self.grid.pending_forwarded_queries.is_empty() {
-                        // Grid produced a forward. Stop feeding; queue the
-                        // un-fed remainder so Tab can replay it after the
-                        // reply.
+                        // Grid 产生了一个转发。停止喂入；将
+                        // 尚未喂入的剩余部分排队，以便 Tab 在
+                        // 回复之后重放。
                         self.pending_pty_input.extend(&bytes[index..]);
                         return;
                     }
@@ -306,7 +306,7 @@ impl Pane for TerminalPane {
             }
         }
         if self.get_content_rows() < 1 || self.get_content_columns() < 1 {
-            // do not render cursor if there's no room for it
+            // 若没有空间则不渲染光标
             return None;
         }
         let Offset { top, left, .. } = self.content_offset;
@@ -324,17 +324,17 @@ impl Pane for TerminalPane {
         raw_input_bytes_are_kitty: bool,
         client_id: Option<ClientId>,
     ) -> Option<AdjustedInput> {
-        // there are some cases in which the terminal state means that input sent to it
-        // needs to be adjusted.
-        // here we match against those cases - if need be, we adjust the input and if not
-        // we send back the original input
+        // 在某些情况下，终端的当前状态意味着发送给它的输入
+        // 需要被调整。
+        // 这里我们匹配这些情况——如果需要，我们调整输入；如果不需要
+        // 我们则原样送回输入
 
         self.reset_selection(client_id);
         if !self.grid.bracketed_paste_mode {
-            // Zellij itself operates in bracketed paste mode, so the terminal sends these
-            // instructions (bracketed paste start and bracketed paste end respectively)
-            // when pasting input. We only need to make sure not to send them to terminal
-            // panes who do not work in this mode
+            // Zellij 本身运行在括号粘贴模式下，因此终端在粘贴输入时会发送这些
+            // 指令（分别是括号粘贴开始和括号粘贴结束），
+            // 我们只需要确保不将它们发送给
+            // 不支持此模式的终端窗格
             match raw_input_bytes.as_slice() {
                 BRACKETED_PASTE_BEGIN | BRACKETED_PASTE_END => {
                     return Some(AdjustedInput::WriteBytesToTerminal(vec![]))
@@ -467,8 +467,8 @@ impl Pane for TerminalPane {
         self.grid.should_render = should_render;
     }
     fn render_full_viewport(&mut self) {
-        // this marks the pane for a full re-render, rather than just rendering the
-        // diff as it usually does with the OutputBuffer
+        // 这将标记窗格进行完整重渲染，而不是像通常使用 OutputBuffer 那样只渲染
+        // 差异部分
         self.frame.clear();
         self.grid.render_full_viewport();
     }
@@ -524,7 +524,7 @@ impl Pane for TerminalPane {
         let err_context = || format!("failed to render frame for client {client_id}");
         frame_params.omit_title = frame_params.omit_title
             && !(input_mode == InputMode::RenamePane && frame_params.is_main_client);
-        // TODO: remove the cursor stuff from here
+        // TODO: 从这里移除光标相关代码
         let normal_title = if self.pane_name.is_empty()
             && input_mode == InputMode::RenamePane
             && frame_params.is_main_client
@@ -593,7 +593,7 @@ impl Pane for TerminalPane {
         }
 
         let res = match self.frame.get(&client_id) {
-            // TODO: use and_then or something?
+            // TODO: 改用 and_then 或其他方式？
             Some(last_frame) => {
                 if &frame != last_frame {
                     if !self.borderless {
@@ -634,11 +634,11 @@ impl Pane for TerminalPane {
                 styles.background = Some(cursor_color.into());
                 styles.foreground = Some(text_color.into());
             });
-            // we keep track of these so that we can clear them up later (see render function)
+            // 我们跟踪这些以便稍后清除它们（见 render 函数）
             self.fake_cursor_locations.insert((cursor_y, cursor_x));
             let mut fake_cursor = format!(
-                "\u{1b}[{};{}H\u{1b}[m{}",           // goto row column and clear styles
-                self.get_content_y() + cursor_y + 1, // + 1 because goto is 1 indexed
+                "\u{1b}[{};{}H\u{1b}[m{}",           // 跳转到指定行列并清除样式
+                self.get_content_y() + cursor_y + 1, // + 1 因为 goto 从 1 开始索引
                 self.get_content_x() + cursor_x + 1,
                 &character_under_cursor.styles,
             );
@@ -926,7 +926,7 @@ impl Pane for TerminalPane {
         let cursor_at_the_top = to.line.0 as usize >= self.grid.height && should_scroll;
         let cursor_in_the_middle = to.line.0 >= 0 && (to.line.0 as usize) < self.grid.height;
 
-        // TODO: check how far up/down mouse is relative to pane, to increase scroll lines?
+        // TODO: 检查鼠标相对窗格的上下位置，以增加滚动行数？
         if cursor_at_the_bottom {
             self.grid.scroll_up_one_line();
             self.selection_scrolled_at = time::Instant::now();
@@ -936,8 +936,8 @@ impl Pane for TerminalPane {
             self.selection_scrolled_at = time::Instant::now();
             self.set_should_render(true);
         } else if cursor_in_the_middle {
-            // here we'll only render if the selection was updated, and that'll be handled by the
-            // grid
+            // 这里我们只在选择被更新时才渲染，而这将由
+            // grid 处理
             self.grid.update_selection(to);
         }
     }
@@ -1034,7 +1034,7 @@ impl Pane for TerminalPane {
         self.grid.unfocus_event()
     }
     fn get_line_number(&self) -> Option<usize> {
-        // + 1 because the absolute position in the scrollback is 0 indexed and this should be 1 indexed
+        // + 1 因为滚动缓冲中的绝对位置从 0 索引，而这里应为 1 索引
         Some(self.grid.absolute_position_in_scrollback() + 1)
     }
 
@@ -1058,14 +1058,14 @@ impl Pane for TerminalPane {
     }
     fn search_down(&mut self) {
         if self.search_term.is_empty() {
-            return; // No-op
+            return; // 空操作
         }
         self.grid.search_down();
         self.set_should_render(true);
     }
     fn search_up(&mut self) {
         if self.search_term.is_empty() {
-            return; // No-op
+            return; // 空操作
         }
         self.grid.search_up();
         self.set_should_render(true);
@@ -1095,10 +1095,10 @@ impl Pane for TerminalPane {
             if let Some(exit_status) = exit_status {
                 notification_end.set_exit_status(exit_status);
 
-                // Check if unblock condition is met
+                // 检查是否满足解除阻塞条件
                 if let Some(condition) = notification_end.unblock_condition() {
                     if condition.is_met(exit_status) {
-                        // Condition met - drop the NotificationEnd now to unblock
+                        // 条件满足 - 现在丢弃 NotificationEnd 以解除阻塞
                         drop(self.notification_end.take());
                     }
                 }
@@ -1129,11 +1129,11 @@ impl Pane for TerminalPane {
         text: Option<String>,
         _client_id: Option<ClientId>,
     ) {
-        // TODO: if we have a client_id, we should only highlight the frame for this client
+        // TODO: 如果我们有 client_id，应仅为此客户端高亮边框
         self.pane_frame_color_override = Some((self.style.colors.frame_highlight.emphasis_0, text));
     }
     fn clear_pane_frame_color_override(&mut self, _client_id: Option<ClientId>) {
-        // TODO: if we have a client_id, we should only clear the highlight for this client
+        // TODO: 如果我们有 client_id，应仅清除此客户端的边框高亮
         self.pane_frame_color_override = None;
     }
     fn frame_color_override(&self) -> Option<PaletteColor> {
@@ -1196,9 +1196,9 @@ impl Pane for TerminalPane {
         self.grid.serialize(scrollback_lines_to_serialize)
     }
     fn rerun(&mut self) -> Option<RunCommand> {
-        // if this is a command pane that has exited or is waiting to be rerun, will return its
-        // RunCommand, otherwise it is safe to assume this is not the right sort of pane or that it
-        // is not in the right sort of state
+        // 如果这是一个已退出或等待重新运行的命令窗格，将返回其
+        // RunCommand，否则可以安全地认为这不是合适的窗格类型，或者它
+        // 不处于正确的状态
         self.is_held.take().map(|(_, _, run_command)| {
             self.is_held = None;
             self.grid.reset_terminal_state();
@@ -1211,7 +1211,7 @@ impl Pane for TerminalPane {
         self.style.colors = theme.clone();
         self.grid.update_theme(theme);
         if self.banner.is_some() {
-            // we do this so that the banner will be updated with the new theme colors
+            // 这样做是为了让横幅用新的主题颜色更新
             self.render_first_run_banner();
         }
     }
@@ -1232,10 +1232,10 @@ impl Pane for TerminalPane {
     fn drain_fake_cursors(&mut self) -> Option<HashSet<(usize, usize)>> {
         if !self.fake_cursor_locations.is_empty() {
             for (y, _x) in &self.fake_cursor_locations {
-                // we do this because once these fake_cursor_locations
-                // have been drained, we have to make sure to render the line
-                // they appeared on so that whatever clears their location
-                // won't leave a hole
+                // 我们这样做是因为一旦这些 fake_cursor_locations
+                // 被清空，我们必须确保渲染它们
+                // 出现时所在的行，这样任何清除其位置的操作
+                // 都不会留下空洞
                 self.grid.update_line_for_rendering(*y);
             }
             Some(self.fake_cursor_locations.drain().collect())
@@ -1299,10 +1299,10 @@ impl Pane for TerminalPane {
     fn update_exit_status(&mut self, exit_status: i32) {
         if let Some(notification_end) = self.notification_end.as_mut() {
             notification_end.set_exit_status(exit_status);
-            // Check if unblock condition is met
+            // 检查是否满足解除阻塞条件
             if let Some(condition) = notification_end.unblock_condition() {
                 if condition.is_met(exit_status) {
-                    // Condition met - drop the NotificationEnd now to unblock
+                    // 条件满足 - 现在丢弃 NotificationEnd 以解除阻塞
                     drop(self.notification_end.take());
                 }
             }
@@ -1475,7 +1475,7 @@ impl TerminalPane {
     pub fn cursor_coordinates(&self) -> Option<(usize, usize, bool)> {
         // (x, y, is_visible)
         if self.get_content_rows() < 1 || self.get_content_columns() < 1 {
-            // do not render cursor if there's no room for it
+            // 若没有空间则不渲染光标
             return None;
         }
         self.grid.cursor_coordinates()
@@ -1508,9 +1508,9 @@ impl TerminalPane {
         if raw_input_bytes_are_kitty || key.is_none() {
             Some(AdjustedInput::WriteBytesToTerminal(raw_input_bytes))
         } else {
-            // here what happens is that the host terminal is operating in non "kitty keys" mode, but
-            // this terminal pane *is* operating in "kitty keys" mode - so we need to serialize the "non kitty"
-            // key to a "kitty key"
+            // 这里的情况是：宿主终端运行在非 "kitty keys" 模式下，但
+            // 该终端窗格*确实*运行在 "kitty keys" 模式下——因此我们需要把 "non kitty"
+            // 按键序列化为 "kitty key"
             key.as_ref()
                 .and_then(|k| k.serialize_kitty())
                 .map(|s| AdjustedInput::WriteBytesToTerminal(s.as_bytes().to_vec()))
@@ -1529,7 +1529,7 @@ impl TerminalPane {
                     .map(|k| k.is_key_without_modifier(BareKey::Enter))
                     .unwrap_or(false);
             if key_is_enter {
-                // LNM - carriage return is followed by linefeed
+                // LNM - 回车后跟随换行
                 return Some(AdjustedInput::WriteBytesToTerminal(
                     "\u{0d}\u{0a}".as_bytes().to_vec(),
                 ));
@@ -1593,10 +1593,10 @@ impl TerminalPane {
             }
         }
         if raw_input_bytes_are_kitty {
-            // here what happens is that the host terminal is operating in "kitty keys" mode, but
-            // this terminal pane is not - so we need to serialize the kitty key to "non kitty" if
-            // possible - if not possible (eg. with multiple modifiers), we'll return a None here
-            // and write nothing to the terminal pane
+            // 这里的情况是：宿主终端运行在 "kitty keys" 模式下，但
+            // 该终端窗格不是——因此我们需要将 kitty 按键序列化为 "non kitty"，如果
+            // 做不到（例如带有多个修饰键），我们将在此返回 None
+            // 并且不向终端窗格写入任何内容
             key.as_ref()
                 .and_then(|k| k.serialize_non_kitty())
                 .map(|s| AdjustedInput::WriteBytesToTerminal(s.as_bytes().to_vec()))
@@ -1615,7 +1615,7 @@ impl TerminalPane {
     }
     fn handle_held_drop_to_shell(&mut self) -> Option<AdjustedInput> {
         self.is_held.take().map(|(_, _, run_command)| {
-            // Drop to shell in the same working directory as the command was run
+            // 在命令运行的同一工作目录中进入 shell
             let working_dir = run_command.cwd.clone();
             self.is_held = None;
             self.grid.reset_terminal_state();
