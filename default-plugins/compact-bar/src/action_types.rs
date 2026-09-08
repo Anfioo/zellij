@@ -55,40 +55,40 @@ impl ActionType {
             ActionType::Scroll => "滚动".to_string(),
             ActionType::PageScroll => "整页滚动".to_string(),
             ActionType::HalfPageScroll => "半页滚动".to_string(),
-            ActionType::SessionManager => "Session manager".to_string(),
-            ActionType::PluginManager => "Plugin manager".to_string(),
-            ActionType::Configuration => "Configuration".to_string(),
-            ActionType::About => "About Zellij".to_string(),
+            ActionType::SessionManager => "会话管理器".to_string(),
+            ActionType::PluginManager => "插件管理器".to_string(),
+            ActionType::Configuration => "配置".to_string(),
+            ActionType::About => "关于 Zellij".to_string(),
             ActionType::SwitchToMode(input_mode) if input_mode == &InputMode::RenamePane => {
-                "Rename pane".to_string()
+                "重命名窗格".to_string()
             },
             ActionType::SwitchToMode(input_mode) if input_mode == &InputMode::RenameTab => {
-                "Rename tab".to_string()
+                "重命名标签页".to_string()
             },
             ActionType::SwitchToMode(input_mode) if input_mode == &InputMode::EnterSearch => {
                 "搜索".to_string()
             },
             ActionType::SwitchToMode(input_mode) if input_mode == &InputMode::Locked => {
-                "Lock".to_string()
+                "锁定".to_string()
             },
             ActionType::SwitchToMode(input_mode) if input_mode == &InputMode::Normal => {
-                "Unlock".to_string()
+                "解锁".to_string()
             },
             ActionType::SwitchToMode(input_mode) => format!("{:?}", input_mode),
-            ActionType::TogglePaneEmbedOrFloating => "Float or embed".to_string(),
-            ActionType::NewStackedPane => "New stacked pane".to_string(),
-            ActionType::ToggleFocusFullscreen => "Toggle fullscreen".to_string(),
-            ActionType::ToggleFloatingPanes => "Show/hide floating panes".to_string(),
-            ActionType::CloseFocus => "Close pane".to_string(),
-            ActionType::CloseTab => "Close tab".to_string(),
-            ActionType::ToggleActiveSyncTab => "Sync panes in tab".to_string(),
-            ActionType::ToggleTab => "Circle tab focus".to_string(),
-            ActionType::BreakPane => "Break pane to new tab".to_string(),
-            ActionType::EditScrollback => "Open pane scrollback in editor".to_string(),
-            ActionType::NewTab => "New tab".to_string(),
-            ActionType::Detach => "Detach".to_string(),
-            ActionType::Quit => "Quit".to_string(),
-            ActionType::Other(_) => "Other action".to_string(),
+            ActionType::TogglePaneEmbedOrFloating => "浮动或嵌入".to_string(),
+            ActionType::NewStackedPane => "新建堆叠窗格".to_string(),
+            ActionType::ToggleFocusFullscreen => "切换全屏".to_string(),
+            ActionType::ToggleFloatingPanes => "显示/隐藏浮动窗格".to_string(),
+            ActionType::CloseFocus => "关闭窗格".to_string(),
+            ActionType::CloseTab => "关闭标签页".to_string(),
+            ActionType::ToggleActiveSyncTab => "同步标签页中的窗格".to_string(),
+            ActionType::ToggleTab => "循环切换标签页焦点".to_string(),
+            ActionType::BreakPane => "将窗格移到新标签页".to_string(),
+            ActionType::EditScrollback => "在编辑器中打开窗格回滚缓冲区".to_string(),
+            ActionType::NewTab => "新建标签页".to_string(),
+            ActionType::Detach => "分离".to_string(),
+            ActionType::Quit => "退出".to_string(),
+            ActionType::Other(_) => "其他操作".to_string(),
         }
     }
 
