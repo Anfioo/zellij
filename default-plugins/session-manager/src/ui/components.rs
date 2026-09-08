@@ -181,16 +181,16 @@ impl UnifiedResultsRenderCache {
                         formatted_duration.push_str("<1m");
                     }
 
-                    let full_details = format!("Created {} ago", formatted_duration);
+                    let full_details = format!("{} 前创建", formatted_duration);
                     let full_details_ranges = {
-                        let created_len = "Created ".len();
+                        let created_len = 0;
                         let duration_end = created_len + formatted_duration.len();
                         DetailsColorRanges {
                             ranges: vec![(2, created_len..duration_end)],
                         }
                     };
 
-                    let abbr_details = format!("{} ago", formatted_duration);
+                    let abbr_details = format!("{} 前", formatted_duration);
                     let abbr_details_ranges = {
                         let duration_end = formatted_duration.len();
                         DetailsColorRanges {
@@ -649,21 +649,21 @@ pub fn build_session_ui_line(session_ui_info: &SessionUiInfo, colors: Colors) ->
     ));
     let tab_and_pane_count = UiSpan::UiSpanTelescope(UiSpanTelescope::new(vec![
         StringAndLength::new(
-            format!(" ({tab_count_styled} tabs, {total_pane_count_styled} panes)"),
-            2 + tab_count.width() + 7 + total_pane_count.width() + 7,
+            format!("({tab_count_styled} 标签，{total_pane_count_styled} 窗格)"),
+            1 + tab_count.width() + 7 + total_pane_count.width() + 6,
         ),
         StringAndLength::new(
-            format!(" ({tab_count_styled}, {total_pane_count_styled})"),
+            format!("({tab_count_styled}, {total_pane_count_styled})"),
             2 + tab_count.width() + 2 + total_pane_count.width() + 3,
         ),
     ]));
     let connected_users_count = UiSpan::UiSpanTelescope(UiSpanTelescope::new(vec![
         StringAndLength::new(
-            format!(" [{connected_users_styled} connected users]"),
-            2 + connected_users.width() + 17,
+            format!("[{connected_users_styled} 个已连接用户]"),
+            1 + connected_users.width() + 15,
         ),
         StringAndLength::new(
-            format!(" [{connected_users_styled}]"),
+            format!("[{connected_users_styled}]"),
             2 + connected_users.width() + 1,
         ),
     ]));
@@ -674,10 +674,10 @@ pub fn build_session_ui_line(session_ui_info: &SessionUiInfo, colors: Colors) ->
     if session_ui_info.is_current_session {
         let current_session_indication = UiSpan::UiSpanTelescope(UiSpanTelescope::new(vec![
             StringAndLength::new(
-                colors.current_session_marker(&format!(" <CURRENT SESSION>")),
-                18,
+                colors.current_session_marker(&format!(" <当前会话>")),
+                11,
             ),
-            StringAndLength::new(colors.current_session_marker(&format!(" <CURRENT>")), 10),
+            StringAndLength::new(colors.current_session_marker(&format!(" <当前>")), 7),
             StringAndLength::new(colors.current_session_marker(&format!(" <C>")), 4),
         ]));
         ui_spans.push(current_session_indication);
@@ -702,7 +702,7 @@ pub fn build_tab_ui_line(tab_ui_info: &TabUiInfo, colors: Colors) -> Vec<UiSpan>
     ));
     let connected_users_count_span = UiSpan::UiSpanTelescope(UiSpanTelescope::new(vec![
         StringAndLength::new(
-            format!(" ({pane_count_styled} panes)"),
+            format!("（{pane_count_styled} 窗格）"),
             2 + pane_count.width() + 7,
         ),
         StringAndLength::new(
@@ -740,8 +740,8 @@ pub fn build_pane_ui_line(pane_ui_info: &PaneUiInfo, colors: Colors) -> Vec<UiSp
     if let Some(exit_code) = exit_code {
         let pane_name_span = UiSpan::UiSpanTelescope(UiSpanTelescope::new(vec![
             StringAndLength::new(
-                format!(" (EXIT CODE: {exit_code})"),
-                13 + exit_code.width() + 1,
+                format!("（退出码：{exit_code}）"),
+                10 + exit_code.width() + 2,
             ),
             StringAndLength::new(format!(" ({exit_code})"), 2 + exit_code.width() + 1),
         ]));
@@ -772,7 +772,7 @@ pub fn minimize_lines(
 }
 
 pub fn render_prompt(search_term: &str, colors: Colors, x: usize, y: usize) {
-    let prompt = colors.session_and_folder_entry(&format!("Search:"));
+    let prompt = colors.session_and_folder_entry(&format!("搜索："));
     let search_term = colors.bold(&format!("{}_", search_term));
     println!(
         "\u{1b}[{};{}H\u{1b}[0m{} {}\n",
@@ -790,7 +790,7 @@ pub fn render_single_screen_prompt(
     x: usize,
     y: usize,
 ) {
-    let prompt = colors.session_name_prompt("Session:");
+    let prompt = colors.session_name_prompt("会话：");
     let search_term_display = colors.bold(&format!("{}_", search_term));
     let enter_hint = match enter_action {
         Some(action) => {
@@ -852,12 +852,12 @@ pub fn render_unified_results(
     let has_hidden = has_hidden_above || has_hidden_below;
 
     // 4th column content strings
-    let tab_header_full = "<TAB> Complete";
+    let tab_header_full = "<TAB> 完整";
     let tab_header_short = "<TAB>";
 
     let above_summary_full = if has_hidden_above {
         format!(
-            "[+{} Active] [+{} Exited]",
+            "[+{} 活动] [+{} 已退出]",
             above_active, above_resurrectable
         )
     } else {
@@ -870,7 +870,7 @@ pub fn render_unified_results(
     };
     let below_summary_full = if has_hidden_below {
         format!(
-            "[+{} Active] [+{} Exited]",
+            "[+{} 活动] [+{} 已退出]",
             below_active, below_resurrectable
         )
     } else {
