@@ -9,7 +9,7 @@ pub use super::generated_api::api::{
         ActionName as ProtobufActionName,
         AreFloatingPanesVisiblePayload,
         BareKey as ProtobufBareKey,
-        // New layout-related types
+        // 新的布局相关类型
         CommandOrPlugin as ProtobufCommandOrPlugin,
         DumpScreenPayload,
         EditFilePayload,
@@ -514,7 +514,7 @@ impl TryFrom<ProtobufAction> for Action {
             Some(ProtobufActionName::NewTab) => {
                 match protobuf_action.optional_payload {
                     Some(OptionalPayload::NewTabPayload(payload)) => {
-                        // New behavior: extract all fields from payload
+                        // 新行为：从 payload 中提取所有字段
                         let tiled_layout =
                             payload.tiled_layout.map(|l| l.try_into()).transpose()?;
 
@@ -582,8 +582,8 @@ impl TryFrom<ProtobufAction> for Action {
                         })
                     },
                     None => {
-                        // Backwards compatibility: accept None payload for existing plugins
-                        // Return the same defaults as before
+                        // 向后兼容：为现有插件接受 None payload
+                        // 返回与之前相同的默认值
                         Ok(Action::NewTab {
                             tiled_layout: None,
                             floating_layouts: vec![],
@@ -753,8 +753,8 @@ impl TryFrom<ProtobufAction> for Action {
                     )
                     .map_err(|_| "Malformed LaunchOrFocusPlugin payload")?;
                     let should_float = payload.should_float;
-                    let _move_to_focused_tab = payload.move_to_focused_tab; // not actually used in
-                                                                            // this action
+                    let _move_to_focused_tab = payload.move_to_focused_tab; // 实际上未在
+                                                                            // 此 action 中使用
                     let should_open_in_place = payload.should_open_in_place;
                     let skip_plugin_cache = payload.skip_plugin_cache;
                     Ok(Action::LaunchPlugin {
@@ -1046,7 +1046,7 @@ impl TryFrom<ProtobufAction> for Action {
             },
             Some(ProtobufActionName::KeybindPipe) => match protobuf_action.optional_payload {
                 Some(_) => Err("KeybindPipe should not have a payload"),
-                // TODO: at some point we might want to support a payload here
+                // TODO: 将来我们可能希望在此处支持 payload
                 None => Ok(Action::KeybindPipe {
                     name: None,
                     payload: None,
@@ -1567,7 +1567,7 @@ impl TryFrom<Action> for ProtobufAction {
                 initial_panes,
                 first_pane_unblock_condition,
             } => {
-                // Always send payload (even if all fields are default)
+                // 始终发送 payload（即使所有字段都是默认值）
                 let protobuf_tiled_layout = tiled_layout
                     .as_ref()
                     .map(|l| l.clone().try_into())
@@ -2024,7 +2024,7 @@ impl TryFrom<Action> for ProtobufAction {
                     optional_payload: Some(OptionalPayload::NewInPlacePanePayload(
                         NewInPlacePanePayload {
                             command,
-                            pane_name: None, // pane_name is already embedded in command
+                            pane_name: None, // pane_name 已嵌入在 command 中
                             near_current_pane,
                             pane_id_to_replace,
                             close_replace_pane: close_replaced_pane,
@@ -2430,7 +2430,7 @@ impl TryFrom<KeyWithModifier> for ProtobufKeyWithModifier {
     }
 }
 
-// UnblockCondition conversions
+// UnblockCondition 转换
 impl TryFrom<ProtobufUnblockCondition> for UnblockCondition {
     type Error = &'static str;
     fn try_from(protobuf_uc: ProtobufUnblockCondition) -> Result<Self, &'static str> {
@@ -2463,7 +2463,7 @@ impl TryFrom<i32> for UnblockCondition {
     }
 }
 
-// PaneId conversions
+// PaneId 转换
 impl TryFrom<ProtobufPaneId> for PaneId {
     type Error = &'static str;
     fn try_from(protobuf_pane_id: ProtobufPaneId) -> Result<Self, &'static str> {
@@ -2490,7 +2490,7 @@ impl TryFrom<PaneId> for ProtobufPaneId {
     }
 }
 
-// SplitSize conversions
+// SplitSize 转换
 impl TryFrom<ProtobufSplitSize> for SplitSize {
     type Error = &'static str;
     fn try_from(protobuf_split_size: ProtobufSplitSize) -> Result<Self, &'static str> {
@@ -2543,7 +2543,7 @@ impl TryFrom<PercentOrFixed> for ProtobufSplitSize {
     }
 }
 
-// FloatingPaneCoordinates conversions
+// FloatingPaneCoordinates 转换
 impl TryFrom<ProtobufFloatingPaneCoordinates> for FloatingPaneCoordinates {
     type Error = &'static str;
     fn try_from(protobuf_coords: ProtobufFloatingPaneCoordinates) -> Result<Self, &'static str> {
@@ -2572,7 +2572,7 @@ impl TryFrom<FloatingPaneCoordinates> for ProtobufFloatingPaneCoordinates {
     }
 }
 
-// NewPanePlacement conversions
+// NewPanePlacement 转换
 impl TryFrom<ProtobufNewPanePlacement> for NewPanePlacement {
     type Error = &'static str;
     fn try_from(protobuf_placement: ProtobufNewPanePlacement) -> Result<Self, &'static str> {
@@ -2676,7 +2676,7 @@ impl TryFrom<NewPanePlacement> for ProtobufNewPanePlacement {
     }
 }
 
-// Layout type conversions
+// 布局类型转换
 
 impl TryFrom<ProtobufPercentOrFixed> for PercentOrFixed {
     type Error = &'static str;
@@ -3141,7 +3141,7 @@ impl TryFrom<ProtobufTiledPaneLayout> for TiledPaneLayout {
                 None
             }
         });
-        let run_instructions_to_ignore = vec![]; // Not serialized in protobuf
+        let run_instructions_to_ignore = vec![]; // 未在 protobuf 中序列化
         Ok(TiledPaneLayout {
             children_split_direction,
             name: protobuf.name,

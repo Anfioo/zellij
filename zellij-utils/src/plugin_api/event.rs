@@ -1522,7 +1522,7 @@ impl TryFrom<PaneMetadata> for ProtobufPaneMetadata {
     }
 }
 
-// LayoutWithError conversions
+// LayoutWithError 转换
 impl TryFrom<ProtobufLayoutWithError> for crate::data::LayoutWithError {
     type Error = &'static str;
     fn try_from(protobuf: ProtobufLayoutWithError) -> Result<Self, Self::Error> {
@@ -1543,7 +1543,7 @@ impl TryFrom<crate::data::LayoutWithError> for ProtobufLayoutWithError {
     }
 }
 
-// LayoutParsingError conversions
+// LayoutParsingError 转换
 impl TryFrom<ProtobufLayoutParsingError> for crate::data::LayoutParsingError {
     type Error = &'static str;
     fn try_from(protobuf: ProtobufLayoutParsingError) -> Result<Self, Self::Error> {
@@ -1588,13 +1588,13 @@ impl TryFrom<crate::data::LayoutParsingError> for ProtobufLayoutParsingError {
     }
 }
 
-// KdlError conversions
+// KdlError 转换
 impl TryFrom<ProtobufKdlError> for crate::input::config::KdlError {
     type Error = &'static str;
     fn try_from(protobuf: ProtobufKdlError) -> Result<Self, Self::Error> {
         Ok(crate::input::config::KdlError {
             error_message: protobuf.error_message,
-            src: None, // We don't serialize NamedSource
+            src: None, // 我们不序列化 NamedSource
             offset: protobuf.offset.map(|o| o as usize),
             len: protobuf.len.map(|l| l as usize),
             help_message: protobuf.help_message,
@@ -1607,7 +1607,7 @@ impl TryFrom<crate::input::config::KdlError> for ProtobufKdlError {
     fn try_from(kdl: crate::input::config::KdlError) -> Result<Self, Self::Error> {
         Ok(ProtobufKdlError {
             error_message: kdl.error_message,
-            // src is not serialized
+            // src 未被序列化
             offset: kdl.offset.map(|o| o as u64),
             len: kdl.len.map(|l| l as u64),
             help_message: kdl.help_message,
@@ -2479,7 +2479,7 @@ fn serialize_mode_update_event_with_non_default_values() {
                 brown: PaletteColor::Rgb((222, 221, 220)),
             }
             .into(),
-            // TODO: replace default
+            // TODO: 替换默认值
             rounded_corners: true,
             hide_session_name: false,
         },
@@ -3089,8 +3089,8 @@ fn serialize_session_update_event_with_non_default_values() {
     );
 }
 
-// note: ProtobufPaneId and ProtobufPaneType are not the same as the ones defined in plugin_command.rs
-// this is a duplicate type - we are forced to do this because protobuffs do not support recursive
+// 注意：ProtobufPaneId 和 ProtobufPaneType 与 plugin_command.rs 中定义的不同
+// 这是一个重复类型——由于 protobuf 不支持递归导入，我们不得不这样做
 // imports
 impl TryFrom<ProtobufPaneId> for PaneId {
     type Error = &'static str;
@@ -3103,8 +3103,8 @@ impl TryFrom<ProtobufPaneId> for PaneId {
     }
 }
 
-// note: ProtobufPaneId and ProtobufPaneType are not the same as the ones defined in plugin_command.rs
-// this is a duplicate type - we are forced to do this because protobuffs do not support recursive
+// 注意：ProtobufPaneId 和 ProtobufPaneType 与 plugin_command.rs 中定义的不同
+// 这是一个重复类型——由于 protobuf 不支持递归导入，我们不得不这样做
 // imports
 impl TryFrom<PaneId> for ProtobufPaneId {
     type Error = &'static str;

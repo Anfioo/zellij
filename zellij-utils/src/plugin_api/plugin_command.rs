@@ -2731,7 +2731,7 @@ impl TryFrom<ProtobufPluginCommand> for PluginCommand {
                                     Some(ProtobufHighlightStyleVariant::None(_)) => {
                                         HighlightStyle::None
                                     },
-                                    None => HighlightStyle::Emphasis0, // fallback
+                                    None => HighlightStyle::Emphasis0, // 回退
                                 };
                                 let context = h
                                     .context
@@ -2748,7 +2748,7 @@ impl TryFrom<ProtobufPluginCommand> for PluginCommand {
                                         x if x == ProtobufHighlightLayer::ActionFeedback as i32 => {
                                             HighlightLayer::ActionFeedback
                                         },
-                                        _ => HighlightLayer::Hint, // 0 or unknown => Hint
+                                        _ => HighlightLayer::Hint, // 0 或未知 => Hint
                                     },
                                     context,
                                     on_hover: h.on_hover,
@@ -2872,7 +2872,7 @@ impl TryFrom<PluginCommand> for ProtobufPluginCommand {
                 payload: Some(Payload::OpenTerminalPayload(OpenFilePayload {
                     file_to_open: Some(cwd.try_into()?),
                     floating_pane_coordinates: None,
-                    context: vec![], // will be added in the future
+                    context: vec![], // 将在未来添加
                 })),
             }),
             PluginCommand::OpenTerminalFloating(cwd, floating_pane_coordinates) => {
@@ -2881,7 +2881,7 @@ impl TryFrom<PluginCommand> for ProtobufPluginCommand {
                     payload: Some(Payload::OpenTerminalFloatingPayload(OpenFilePayload {
                         file_to_open: Some(cwd.try_into()?),
                         floating_pane_coordinates: floating_pane_coordinates.map(|f| f.into()),
-                        context: vec![], // will be added in the future
+                        context: vec![], // 将在未来添加
                     })),
                 })
             },
@@ -3256,7 +3256,7 @@ impl TryFrom<PluginCommand> for ProtobufPluginCommand {
                 payload: Some(Payload::OpenTerminalInPlacePayload(OpenFilePayload {
                     file_to_open: Some(cwd.try_into()?),
                     floating_pane_coordinates: None,
-                    context: vec![], // will be added in the future
+                    context: vec![], // 将在未来添加
                 })),
             }),
             PluginCommand::OpenFileInPlace(file_to_open, context) => Ok(ProtobufPluginCommand {
@@ -3874,7 +3874,7 @@ impl TryFrom<PluginCommand> for ProtobufPluginCommand {
             PluginCommand::ChangeHostFolder(new_host_folder) => Ok(ProtobufPluginCommand {
                 name: CommandName::ChangeHostFolder as i32,
                 payload: Some(Payload::ChangeHostFolderPayload(ChangeHostFolderPayload {
-                    new_host_folder: new_host_folder.display().to_string(), // TODO: not accurate?
+                    new_host_folder: new_host_folder.display().to_string(), // TODO: 不准确？
                 })),
             }),
             PluginCommand::SetFloatingPanePinned(pane_id, should_be_pinned) => {
@@ -3976,7 +3976,7 @@ impl TryFrom<PluginCommand> for ProtobufPluginCommand {
                 payload: Some(Payload::OpenTerminalNearPluginPayload(
                     OpenTerminalNearPluginPayload {
                         file_to_open: Some(cwd.try_into()?),
-                        context: vec![], // will be added in the future
+                        context: vec![], // 将在未来添加
                     },
                 )),
             }),
@@ -3987,7 +3987,7 @@ impl TryFrom<PluginCommand> for ProtobufPluginCommand {
                         OpenTerminalFloatingNearPluginPayload {
                             file_to_open: Some(cwd.try_into()?),
                             floating_pane_coordinates: floating_pane_coordinates.map(|f| f.into()),
-                            context: vec![], // will be added in the future
+                            context: vec![], // 将在未来添加
                         },
                     )),
                 })
@@ -3999,7 +3999,7 @@ impl TryFrom<PluginCommand> for ProtobufPluginCommand {
                         OpenTerminalInPlaceOfPluginPayload {
                             file_to_open: Some(cwd.try_into()?),
                             close_plugin_after_replace,
-                            context: vec![], // will be added in the future
+                            context: vec![], // 将在未来添加
                         },
                     )),
                 })
@@ -4559,7 +4559,7 @@ impl TryFrom<PluginCommand> for ProtobufPluginCommand {
     }
 }
 
-// Conversion implementations for tab creation response types
+// 标签页创建响应类型的转换实现
 use crate::data::{
     BreakPanesToNewTabResponse, BreakPanesToTabWithIdResponse, BreakPanesToTabWithIndexResponse,
     FocusOrCreateTabResponse, NewTabResponse, NewTabUnfocusedResponse, NewTabsResponse,
@@ -4754,7 +4754,7 @@ impl From<BreakPanesToTabWithIdResponse> for ProtobufBreakPanesToTabWithIdRespon
     }
 }
 
-// Pane-creating command response conversions
+// 窗格创建命令响应转换
 
 impl TryFrom<ProtobufOpenFileResponse> for OpenFileResponse {
     type Error = &'static str;

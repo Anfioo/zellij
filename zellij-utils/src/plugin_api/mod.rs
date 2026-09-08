@@ -12,12 +12,11 @@ pub mod plugin_ids;
 pub mod plugin_permission;
 pub mod resize;
 pub mod style;
-// NOTE: This code is currently out of order.
-// Refer to [the PR introducing this change][1] to learn more about the reasons.
-// TL;DR: When running `cargo release --dry-run` the build-script in zellij-utils is not executed
-//        for unknown reasons, causing compilation to fail. To make a new release possible in the
-//        meantime, we decided to temporarily include the protobuf plugin API definitions
-//        statically.
+// 注意：此代码目前顺序不正常。
+// 请参考 [引入此更改的 PR][1] 了解更多原因。
+// 简而言之：运行 `cargo release --dry-run` 时，zellij-utils 中的 build-script 由于未知原因
+//        未被执行，导致编译失败。为了在此期间能够发布新版本，我们决定暂时静态包含
+//        protobuf 插件 API 定义。
 //
 // [1]: https://github.com/zellij-org/zellij/pull/2711#issuecomment-1695015818
 //pub mod generated_api {
