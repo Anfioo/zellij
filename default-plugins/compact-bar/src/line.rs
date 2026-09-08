@@ -547,8 +547,8 @@ impl RightSideElementsBuilder {
 
     fn create_nested_hint(&self, hint: &NestedSessionHint, max_len: usize) -> Option<LinePart> {
         let (prefix, keys) = match hint {
-            NestedSessionHint::Ascend(keys) => ("Ascend: ", keys),
-            NestedSessionHint::Descend(keys) => ("Descend: ", keys),
+            NestedSessionHint::Ascend(keys) => ("上升：", keys),
+            NestedSessionHint::Descend(keys) => ("下降：", keys),
             NestedSessionHint::None => return None,
         };
 
@@ -610,7 +610,7 @@ impl RightSideElementsBuilder {
         } else {
             Text::new(key_text).color_all(3).opaque()
         };
-        let ribbon_text = "Tooltip";
+        let ribbon_text = "工具提示";
         let mut ribbon = Text::new(ribbon_text);
 
         if self.dimmed {
