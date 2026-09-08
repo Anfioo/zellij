@@ -1,5 +1,4 @@
-/// This is a simple, small, read buffer that always has the buffer
-/// contents available as a contiguous slice.
+/// 这是一个简单小巧的读取缓冲区，其内容始终以连续切片的形式可用。
 #[derive(Debug)]
 pub struct ReadBuffer {
     storage: Vec<u8>,
@@ -24,22 +23,20 @@ impl ReadBuffer {
         self.storage.len()
     }
 
-    /// Mark `len` bytes as consumed, discarding them and shunting
-    /// the contents of the buffer such that the remainder of the
-    /// bytes are available at the front of the buffer.
+    /// 将 `len` 个字节标记为已消费，丢弃它们并将缓冲区内容前移，
+    /// 使剩余字节位于缓冲区前端。
     pub fn advance(&mut self, len: usize) {
         let remain = self.storage.len() - len;
         self.storage.rotate_left(len);
         self.storage.truncate(remain);
     }
 
-    /// Append the contents of the slice to the read buffer
+    /// 将切片内容追加到读取缓冲区
     pub fn extend_with(&mut self, slice: &[u8]) {
         self.storage.extend_from_slice(slice);
     }
 
-    /// Search for `needle` starting at `offset`.  Returns its offset
-    /// into the buffer if found, else None.
+    /// 从 `offset` 开始搜索 `needle`。找到则返回其在缓冲区中的偏移量，否则返回 None。
     pub fn find_subsequence(&self, offset: usize, needle: &[u8]) -> Option<usize> {
         self.storage[offset..]
             .windows(needle.len())

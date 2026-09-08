@@ -1,5 +1,4 @@
-//! This module provides an InputParser struct to help with parsing
-//! input received from a terminal.
+//! 本模块提供 InputParser 结构体，用于帮助解析从终端接收的输入。
 use crate::vendored::termwiz::keymap::{Found, KeyMap};
 use crate::vendored::termwiz::readbuf::ReadBuffer;
 use bitflags::bitflags;
@@ -112,8 +111,7 @@ bitflags! {
         const MIDDLE = 1<<3;
         const VERT_WHEEL = 1<<4;
         const HORZ_WHEEL = 1<<5;
-        /// if set then the wheel movement was in the positive
-        /// direction, else the negative direction
+        /// 如果设置，则滚轮移动方向为正方向，否则为负方向
         const WHEEL_POSITIVE = 1<<6;
     }
 }
@@ -126,26 +124,22 @@ pub enum InputEvent {
     Key(KeyEvent),
     Mouse(MouseEvent),
     PixelMouse(PixelMouseEvent),
-    /// Detected that the user has resized the terminal
+    /// 检测到用户已调整终端大小
     Resized {
         cols: usize,
         rows: usize,
     },
-    /// For terminals that support Bracketed Paste mode,
-    /// pastes are collected and reported as this variant.
+    /// 对于支持 Bracketed Paste 模式的终端，粘贴内容会被收集并以此变体报告。
     Paste(String),
-    /// The program has woken the input thread.
+    /// 程序已唤醒输入线程。
     Wake,
-    /// An Operating System Command sequence was received.
-    /// Contains the raw payload between \x1b] and the terminator.
+    /// 接收到操作系统命令序列。包含 \x1b] 与终止符之间的原始载荷。
     OperatingSystemCommand(Vec<u8>),
-    /// A CSI-based device control / status report reply emitted by the
-    /// host terminal (not a keyboard event). This variant is only produced
-    /// for a deliberately narrow whitelist of final bytes — `t` (pixel
-    /// dimensions reply), `y` (DECRPM reply), `c` (Primary-DA reply), and
-    /// `n` (DSR reply). The raw field contains the exact byte sequence of
-    /// the original report (including the leading ESC) so it can be
-    /// forwarded verbatim without re-serialization.
+    /// 由宿主终端发出的基于 CSI 的设备控制/状态报告回复（非键盘事件）。
+    /// 此变体仅针对刻意收窄的最终字节白名单产生——`t`（像素尺寸回复）、
+    /// `y`（DECRPM 回复）、`c`（Primary-DA 回复）和 `n`（DSR 回复）。
+    /// raw 字段包含原始报告的确切字节序列（包括前导 ESC），因此可以
+    /// 逐字转发而无需重新序列化。
     DeviceControlReply {
         intermediates: Vec<u8>,
         params: Vec<u8>,
@@ -174,9 +168,9 @@ pub struct PixelMouseEvent {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct KeyEvent {
-    /// Which key was pressed
+    /// 按下了哪个键
     pub key: KeyCode,
-    /// Which modifiers are down
+    /// 按下了哪些修饰键
     pub modifiers: Modifiers,
 }
 
@@ -191,8 +185,7 @@ pub enum KeyboardEncoding {
     Kitty(KittyKeyboardFlags),
 }
 
-/// Specifies terminal modes/configuration that can influence how a KeyCode
-/// is encoded when being sent to and application via the pty.
+/// 指定可能影响 KeyCode 通过 pty 发送给应用程序时编码方式的终端模式/配置。
 #[derive(Debug, Clone, Copy)]
 pub struct KeyCodeEncodeModes {
     pub encoding: KeyboardEncoding,
@@ -201,19 +194,18 @@ pub struct KeyCodeEncodeModes {
     pub modify_other_keys: Option<i64>,
 }
 
-/// Which key is pressed.  Not all of these are probable to appear
-/// on most systems.  A lot of this list is @wez trawling docs and
-/// making an entry for things that might be possible in this first pass.
+/// 按下了哪个键。并非所有这些键都可能在大多数系统上出现。
+/// 此列表的大部分是 @wez 翻阅文档并为首次遍历中可能出现的情况创建条目。
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum KeyCode {
-    /// The decoded unicode character
+    /// 解码后的 unicode 字符
     Char(char),
 
     Hyper,
     Super,
     Meta,
 
-    /// Ctrl-break on windows
+    /// Windows 上的 Ctrl-break
     Cancel,
     Backspace,
     Tab,
@@ -269,7 +261,7 @@ pub enum KeyCode {
     Subtract,
     Decimal,
     Divide,
-    /// F1-F24 are possible
+    /// F1-F24 均有可能
     Function(u8),
     NumLock,
     ScrollLock,
@@ -307,8 +299,8 @@ pub enum KeyCode {
 }
 
 impl KeyCode {
-    /// if SHIFT is held and we have KeyCode::Char('c') we want to normalize
-    /// that keycode to KeyCode::Char('C'); that is what this function does.
+    /// 如果按住 SHIFT 且我们有 KeyCode::Char('c')，我们希望将该键码规范化为
+    /// KeyCode::Char('C')；这就是此函数的作用。
     pub fn normalize_shift_to_upper_case(self, modifiers: Modifiers) -> KeyCode {
         if modifiers.contains(Modifiers::SHIFT) {
             match self {
@@ -320,7 +312,7 @@ impl KeyCode {
         }
     }
 
-    /// Return true if the key represents a modifier key.
+    /// 如果该键表示修饰键，返回 true。
     pub fn is_modifier(self) -> bool {
         matches!(
             self,
@@ -341,7 +333,7 @@ impl KeyCode {
         )
     }
 
-    /// Returns the byte sequence that represents this KeyCode and Modifier combination.
+    /// 返回表示此 KeyCode 与 Modifier 组合的字节序列。
     pub fn encode(
         &self,
         mods: Modifiers,
@@ -349,18 +341,16 @@ impl KeyCode {
         is_down: bool,
     ) -> Result<String> {
         if !is_down {
-            // We only want down events
+            // 我们只想要按下事件
             return Ok(String::new());
         }
-        // We are encoding the key as an xterm-compatible sequence, which does not support
-        // positional modifiers.
+        // 我们将键编码为 xterm 兼容序列，该序列不支持位置修饰键。
         let mods = mods.remove_positional_mods();
 
         use KeyCode::*;
 
         let key = self.normalize_shift_to_upper_case(mods);
-        // Normalize the modifier state for Char's that are uppercase; remove
-        // the SHIFT modifier so that reduce ambiguity below
+        // 对大写 Char 的修饰键状态进行规范化；移除 SHIFT 修饰键以减少下面的歧义
         let mods = match key {
             Char(c)
                 if (c.is_ascii_punctuation() || c.is_ascii_uppercase())
@@ -371,7 +361,7 @@ impl KeyCode {
             _ => mods,
         };
 
-        // Normalize Backspace and Delete
+        // 规范化 Backspace 和 Delete
         let key = match key {
             Char('\x7f') => Delete,
             Char('\x08') => Backspace,
@@ -380,7 +370,7 @@ impl KeyCode {
 
         let mut buf = String::new();
 
-        // TODO: also respect self.application_keypad
+        // TODO: 同时遵循 self.application_keypad
 
         match key {
             Char(c)
@@ -405,11 +395,10 @@ impl KeyCode {
                 buf.push(c);
             },
 
-            // When alt is pressed, send escape first to indicate to the peer that
-            // ALT is pressed.  We do this only for ascii alnum characters because
-            // eg: on macOS generates altgr style glyphs and keeps the ALT key
-            // in the modifier set.  This confuses eg: zsh which then just displays
-            // <fffffffff> as the input, so we want to avoid that.
+            // 按下 alt 时，先发送 escape 以向对端指示按下了 ALT。
+            // 我们仅对 ascii 字母数字字符这样做，因为例如：在 macOS 上会生成
+            // altgr 风格字形并将 ALT 键保留在修饰键集中。这会使例如 zsh 困惑，
+            // 然后仅显示 <fffffffff> 作为输入，因此我们希望避免这种情况。
             Char(c)
                 if (c.is_ascii_alphanumeric() || c.is_ascii_punctuation())
                     && mods.contains(Modifiers::ALT) =>
@@ -419,9 +408,8 @@ impl KeyCode {
             },
 
             Backspace => {
-                // Backspace sends the default VERASE which is confusingly
-                // the DEL ascii codepoint rather than BS.
-                // We only send BS when CTRL is held.
+                // Backspace 发送默认的 VERASE，令人困惑的是它是 DEL ascii 码点
+                // 而非 BS。我们仅在按住 CTRL 时发送 BS。
                 if mods.contains(Modifiers::CTRL) {
                     csi_u_encode(&mut buf, '\x08', mods, &modes)?;
                 } else if mods.contains(Modifiers::SHIFT) {
@@ -508,10 +496,10 @@ impl KeyCode {
                 };
 
                 let csi_or_ss3 = if force_app || modes.application_cursor_keys {
-                    // Use SS3 in application mode
+                    // 在应用程序模式下使用 SS3
                     SS3
                 } else {
-                    // otherwise use regular CSI
+                    // 否则使用常规 CSI
                     CSI
                 };
 
@@ -546,7 +534,7 @@ impl KeyCode {
 
             Function(n) => {
                 if mods.is_empty() && n < 5 {
-                    // F1-F4 are encoded using SS3 if there are no modifiers
+                    // 如果没有修饰键，F1-F4 使用 SS3 编码
                     write!(
                         buf,
                         "{}",
@@ -559,7 +547,7 @@ impl KeyCode {
                         }
                     )?;
                 } else if n < 5 {
-                    // Special case for F1-F4 with modifiers
+                    // 带修饰键的 F1-F4 的特殊情况
                     let code = match n {
                         1 => 'P',
                         2 => 'Q',
@@ -569,7 +557,7 @@ impl KeyCode {
                     };
                     write!(buf, "\x1b[1;{}{code}", 1 + mods.encode_xterm())?;
                 } else {
-                    // Higher numbered F-keys using CSI instead of SS3.
+                    // 编号更高的功能键使用 CSI 而非 SS3。
                     let intro = match n {
                         1 => "\x1b[11",
                         2 => "\x1b[12",
@@ -599,8 +587,8 @@ impl KeyCode {
                     };
                     let encoded_mods = mods.encode_xterm();
                     if encoded_mods == 0 {
-                        // If no modifiers are held, don't send the modifier
-                        // sequence, as the modifier encoding is a CSI-u extension.
+                        // 如果没有按住修饰键，不要发送修饰键序列，
+                        // 因为修饰键编码是 CSI-u 扩展。
                         write!(buf, "{}~", intro)?;
                     } else {
                         write!(buf, "{};{}~", intro, 1 + encoded_mods)?;
@@ -647,7 +635,7 @@ impl KeyCode {
 
             Multiply | Add | Separator | Subtract | Divide => {},
 
-            // Modifier keys pressed on their own don't expand to anything
+            // 单独按下的修饰键不会扩展为任何内容
             Control | LeftControl | RightControl | Alt | LeftAlt | RightAlt | Menu | LeftMenu
             | RightMenu | Super | Hyper | Shift | LeftShift | RightShift | Meta | LeftWindows
             | RightWindows | NumLock | ScrollLock | Cancel | Clear | Pause | CapsLock | Select
@@ -662,9 +650,8 @@ impl KeyCode {
     }
 }
 
-/// characters that when masked for CTRL could be an ascii control character
-/// or could be a key that a user legitimately wants to process in their
-/// terminal application
+/// 当被 CTRL 掩码时可能是 ascii 控制字符，也可能是用户合法希望在其
+/// 终端应用程序中处理的键的字符
 fn is_ambiguous_ascii_ctrl(c: char) -> bool {
     matches!(c, 'i' | 'I' | 'm' | 'M' | '[' | '{' | '@')
 }
@@ -687,7 +674,7 @@ fn csi_u_encode(
     // <https://invisible-island.net/xterm/modified-keys.html>
     match (c, modes.modify_other_keys) {
         ('c' | 'd' | '\x1b' | '\x7f' | '\x08', Some(1)) => {
-            // Exclude well-known keys from modifyOtherKeys mode 1
+            // 从 modifyOtherKeys 模式 1 中排除知名键
         },
         (c, Some(_)) => {
             write!(buf, "\x1b[27;{};{}~", 1 + mods.encode_xterm(), c as u32)?;
@@ -783,22 +770,22 @@ fn decode_mouse_modifiers(p0: i64) -> Modifiers {
     modifiers
 }
 
-/// Try to parse an SGR mouse sequence from the buffer.
-/// Returns Some((InputEvent, bytes_consumed)) on success.
-/// Returns None if the buffer does not contain a complete SGR mouse sequence.
+/// 尝试从缓冲区解析 SGR 鼠标序列。
+/// 成功时返回 Some((InputEvent, bytes_consumed))。
+/// 如果缓冲区不包含完整的 SGR 鼠标序列，返回 None。
 fn parse_sgr_mouse(buf: &[u8]) -> Option<(InputEvent, usize)> {
-    // Must start with \x1b[<
+    // 必须以 \x1b[< 开头
     if buf.len() < 6 || !buf.starts_with(b"\x1b[<") {
         return None;
     }
-    let rest = &buf[3..]; // skip \x1b[<
+    let rest = &buf[3..]; // 跳过 \x1b[<
 
-    // Find the terminating M or m
+    // 查找终止符 M 或 m
     let term_pos = rest.iter().position(|&b| b == b'M' || b == b'm')?;
     let control = rest[term_pos];
     let params_str = std::str::from_utf8(&rest[..term_pos]).ok()?;
 
-    // Parse three semicolon-separated integers
+    // 解析三个以分号分隔的整数
     let mut parts = params_str.splitn(3, ';');
     let p0: i64 = parts.next()?.parse().ok()?;
     let p1: i64 = parts.next()?.parse().ok()?;
@@ -808,7 +795,7 @@ fn parse_sgr_mouse(buf: &[u8]) -> Option<(InputEvent, usize)> {
     let modifiers = decode_mouse_modifiers(p0);
     let mouse_buttons: MouseButtons = button.into();
 
-    let consumed = 3 + term_pos + 1; // \x1b[< + params + M/m
+    let consumed = 3 + term_pos + 1; // \x1b[< + 参数 + M/m
 
     Some((
         InputEvent::Mouse(MouseEvent {
@@ -821,37 +808,30 @@ fn parse_sgr_mouse(buf: &[u8]) -> Option<(InputEvent, usize)> {
     ))
 }
 
-/// Attempt to parse an OSC (Operating System Command) sequence from the buffer.
-/// Returns `Some((InputEvent::OperatingSystemCommand(payload), len))` if a complete
-/// OSC sequence is found, where `payload` is the bytes between `\x1b]` and the
-/// terminator, and `len` is the total number of bytes consumed.
-/// Returns `None` if the buffer does not start with `\x1b]` or the sequence is incomplete.
-/// Attempt to parse a CSI-based host-terminal report (device-attribute
-/// responses, DSR replies, DECRPM, pixel-dims reply, etc.) from the start
-/// of `buf`.
+/// 尝试从缓冲区解析 OSC（操作系统命令）序列。
+/// 如果找到完整的 OSC 序列，返回 `Some((InputEvent::OperatingSystemCommand(payload), len))`，
+/// 其中 `payload` 是 `\x1b]` 与终止符之间的字节，`len` 是消耗的总字节数。
+/// 如果缓冲区不以 `\x1b]` 开头或序列不完整，返回 `None`。
+/// 尝试从 `buf` 开头解析基于 CSI 的宿主终端报告（设备属性响应、
+/// DSR 回复、DECRPM、像素尺寸回复等）。
 ///
-/// Only a narrow whitelist of final bytes is recognised: `t`, `y`, `c`,
-/// `n`. Any other final byte returns `None` so the bytes fall through to
-/// the regular CSI key-mapping machinery.
+/// 仅识别收窄的最终字节白名单：`t`、`y`、`c`、`n`。任何其他最终字节
+/// 返回 `None`，以便字节传递给常规 CSI 键映射机制。
 ///
-/// Returns `Some((event, len))` on a full match, `None` if the bytes do
-/// not look like a whitelisted CSI report (caller should try the next
-/// parser) and reserves returning None with the buffer starting with
-/// `ESC [` for two distinct cases — not currently disambiguated here:
-/// - truly malformed / unsupported sequence, or
-/// - incomplete input; caller handles incompleteness via `maybe_more`.
-/// Return `Some(len)` if `buf` starts with a structurally complete CSI
-/// sequence (`\x1b[ <params>* <intermediates>* <final>` per ECMA-48 §5.4),
-/// regardless of whether the final byte is one we have a use for. Used by
-/// `process_bytes` to advance past CSI sequences the keymap doesn't
-/// recognise — most importantly Kitty keyboard-protocol events
-/// `\x1b[<keycode>;<mods>u`. Without this, the keymap returns
-/// `Found::NeedData` (it sees the bytes as a possible prefix of a longer
-/// registered key) and the parser wedges holding bytes that will never
-/// extend into anything.
+/// 完全匹配时返回 `Some((event, len))`，如果字节看起来不像白名单 CSI 报告
+/// （调用者应尝试下一个解析器）返回 `None`，并保留对以 `ESC [` 开头的缓冲区
+/// 返回 None 的两种不同情况——此处目前不做区分：
+/// - 真正格式错误/不支持的序列，或
+/// - 输入不完整；调用者通过 `maybe_more` 处理不完整性。
+/// 如果 `buf` 以结构上完整的 CSI 序列开头（根据 ECMA-48 §5.4，
+/// `\x1b[ <params>* <intermediates>* <final>`），返回 `Some(len)`，
+/// 无论最终字节是否是我们有用的。`process_bytes` 使用它来跳过键映射不识别的
+/// CSI 序列——最重要的是 Kitty 键盘协议事件 `\x1b[<keycode>;<mods>u`。
+/// 如果没有这个，键映射会返回 `Found::NeedData`（它将字节视为更长的已注册键
+/// 的可能前缀），解析器会卡住，持有永远不会扩展为任何内容的字节。
 ///
-/// Returns `None` if the buffer doesn't start with `\x1b[`, contains a
-/// non-CSI byte, or hasn't yet received its final byte.
+/// 如果缓冲区不以 `\x1b[` 开头、包含非 CSI 字节，或尚未接收到最终字节，
+/// 返回 `None`。
 fn complete_csi_len(buf: &[u8]) -> Option<usize> {
     if buf.get(0) != Some(&0x1b) || buf.get(1) != Some(&b'[') {
         return None;
@@ -861,11 +841,11 @@ fn complete_csi_len(buf: &[u8]) -> Option<usize> {
     while i < max_scan {
         let b = buf[i];
         match b {
-            // Parameters (digits, ;, :, ?, <, =, >) and intermediates (space..'/').
+            // 参数（数字、;、:、?、<、=、>）和中间字节（space..'/'）。
             0x30..=0x3F | 0x20..=0x2F => i += 1,
-            // Any byte in the final-byte range terminates a CSI sequence.
+            // 最终字节范围内的任何字节都会终止 CSI 序列。
             0x40..=0x7E => return Some(i + 1),
-            // Anything else means this isn't a well-formed CSI.
+            // 任何其他内容意味着这不是格式良好的 CSI。
             _ => return None,
         }
     }
@@ -876,30 +856,28 @@ fn parse_csi_report(buf: &[u8]) -> Option<(InputEvent, usize)> {
     if buf.get(0) != Some(&0x1b) || buf.get(1) != Some(&b'[') {
         return None;
     }
-    // Scan forward looking for a final byte in the whitelist, or bail if
-    // we hit something that clearly is not a CSI report (a non-printable
-    // byte other than the known final bytes).
+    // 向前扫描查找白名单中的最终字节，如果遇到明显不是 CSI 报告的内容
+    // （已知最终字节以外的不可打印字节）则放弃。
     let mut i = 2;
     let mut intermediates: Vec<u8> = Vec::new();
     let mut params: Vec<u8> = Vec::new();
-    // Parameters (0x30..=0x3F) come first, then intermediates (0x20..=0x2F),
-    // then a final byte (0x40..=0x7E). We only scan up to a reasonable
-    // length to avoid pathological buffers.
+    // 参数（0x30..=0x3F）在前，然后是中间字节（0x20..=0x2F），
+    // 然后是最终字节（0x40..=0x7E）。我们仅扫描到合理长度以避免病态缓冲区。
     let max_scan = buf.len().min(256);
     while i < max_scan {
         let b = buf[i];
         match b {
-            // Parameters: digits, `;`, `:`, `?`, `<`, `=`, `>`
+            // 参数：数字、`;`、`:`、`?`、`<`、`=`、`>`
             0x30..=0x3F => {
                 params.push(b);
                 i += 1;
             },
-            // Intermediates: space, `!`, `"`, ... `/`
+            // 中间字节：空格、`!`、`"`、... `/`
             0x20..=0x2F => {
                 intermediates.push(b);
                 i += 1;
             },
-            // Final byte (0x40..=0x7E): must be one of the whitelisted bytes.
+            // 最终字节（0x40..=0x7E）：必须是白名单字节之一。
             b't' | b'y' | b'c' | b'n' => {
                 let raw = buf[0..=i].to_vec();
                 return Some((
@@ -913,11 +891,11 @@ fn parse_csi_report(buf: &[u8]) -> Option<(InputEvent, usize)> {
                 ));
             },
             0x40..=0x7E => {
-                // Final byte outside the whitelist — not ours.
+                // 最终字节在白名单之外——不是我们的。
                 return None;
             },
             _ => {
-                // Something unexpected inside the CSI — give up.
+                // CSI 内部出现意外内容——放弃。
                 return None;
             },
         }
@@ -926,7 +904,7 @@ fn parse_csi_report(buf: &[u8]) -> Option<(InputEvent, usize)> {
 }
 
 fn parse_osc(buf: &[u8]) -> Option<(InputEvent, usize)> {
-    // OSC sequences start with ESC ] (0x1b 0x5d)
+    // OSC 序列以 ESC ]（0x1b 0x5d）开头
     if buf.get(0) != Some(&0x1b) || buf.get(1) != Some(&b']') {
         return None;
     }
@@ -934,29 +912,29 @@ fn parse_osc(buf: &[u8]) -> Option<(InputEvent, usize)> {
     while i < buf.len() {
         match buf.get(i) {
             Some(&0x07) => {
-                // BEL terminator
+                // BEL 终止符
                 let payload = buf.get(2..i).unwrap_or_default().to_vec();
                 return Some((InputEvent::OperatingSystemCommand(payload), i + 1));
             },
             Some(&0x1b) => {
-                // Possible ST terminator (ESC \)
+                // 可能的 ST 终止符（ESC \）
                 if buf.get(i + 1) == Some(&b'\\') {
                     let payload = buf.get(2..i).unwrap_or_default().to_vec();
                     return Some((InputEvent::OperatingSystemCommand(payload), i + 2));
                 }
-                // Bare ESC inside OSC — malformed, but don't consume further
+                // OSC 内部的裸 ESC——格式错误，但不继续消耗
                 return None;
             },
             Some(_) => {
                 i += 1;
             },
             None => {
-                // Should not happen since i < buf.len(), but handle gracefully
+                // 由于 i < buf.len()，不应发生，但优雅处理
                 return None;
             },
         }
     }
-    None // incomplete — no terminator found yet
+    None // 不完整——尚未找到终止符
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1264,7 +1242,7 @@ impl InputParser {
             || modifier_combos.iter().chain(meta_modifier_combos.iter());
 
         for alpha in b'A'..=b'Z' {
-            // Ctrl-[A..=Z] are sent as 1..=26
+            // Ctrl-[A..=Z] 以 1..=26 发送
             let ctrl = [alpha & 0x1f];
             map.insert(
                 &ctrl,
@@ -1274,7 +1252,7 @@ impl InputParser {
                 }),
             );
 
-            // ALT A-Z is often sent with a leading ESC
+            // ALT A-Z 通常以前导 ESC 发送
             let alt = [0x1b, alpha];
             map.insert(
                 &alt,
@@ -1287,8 +1265,8 @@ impl InputParser {
 
         for c in 0..=0x7fu8 {
             for (suffix, modifiers) in modifier_combos {
-                // `CSI u` encodings for the ascii range;
-                // see http://www.leonerd.org.uk/hacks/fixterms/
+                // ascii 范围的 `CSI u` 编码；
+                // 参见 http://www.leonerd.org.uk/hacks/fixterms/
                 let key = format!("\x1b[{}{}u", c, suffix);
                 map.insert(
                     key,
@@ -1299,7 +1277,7 @@ impl InputParser {
                 );
 
                 if !suffix.is_empty() {
-                    // xterm modifyOtherKeys sequences
+                    // xterm modifyOtherKeys 序列
                     let key = format!("\x1b[27{};{}~", suffix, c);
                     map.insert(
                         key,
@@ -1318,7 +1296,7 @@ impl InputParser {
             }
         }
 
-        // Common arrow keys
+        // 常见方向键
         for (keycode, dir) in &[
             (KeyCode::UpArrow, b'A'),
             (KeyCode::DownArrow, b'B'),
@@ -1327,7 +1305,7 @@ impl InputParser {
             (KeyCode::Home, b'H'),
             (KeyCode::End, b'F'),
         ] {
-            // Arrow keys in normal mode encoded using CSI
+            // 正常模式下的方向键使用 CSI 编码
             let arrow = [0x1b, b'[', *dir];
             map.insert(
                 &arrow,
@@ -1353,7 +1331,7 @@ impl InputParser {
             (KeyCode::RightArrow, b'c'),
             (KeyCode::LeftArrow, b'd'),
         ] {
-            // rxvt-specific modified arrows.
+            // rxvt 特有的带修饰键方向键。
             for &(seq, mods) in &[
                 ([0x1b, b'[', dir], Modifiers::SHIFT),
                 ([0x1b, b'O', dir], Modifiers::CTRL),
@@ -1374,7 +1352,7 @@ impl InputParser {
             (KeyCode::ApplicationRightArrow, b'C'),
             (KeyCode::ApplicationLeftArrow, b'D'),
         ] {
-            // Arrow keys in application cursor mode encoded using SS3
+            // 应用程序光标模式下的方向键使用 SS3 编码
             let app = [0x1b, b'O', *dir];
             map.insert(
                 &app,
@@ -1395,7 +1373,7 @@ impl InputParser {
             }
         }
 
-        // Function keys 1-4 with no modifiers encoded using SS3
+        // 无修饰键的功能键 1-4 使用 SS3 编码
         for (keycode, c) in &[
             (KeyCode::Function(1), b'P'),
             (KeyCode::Function(2), b'Q'),
@@ -1412,7 +1390,7 @@ impl InputParser {
             );
         }
 
-        // Function keys 1-4 with modifiers
+        // 带修饰键的功能键 1-4
         for (keycode, c) in &[
             (KeyCode::Function(1), b'P'),
             (KeyCode::Function(2), b'Q'),
@@ -1431,18 +1409,18 @@ impl InputParser {
             }
         }
 
-        // Function keys with modifiers encoded using CSI.
+        // 带修饰键的功能键使用 CSI 编码。
         // http://aperiodic.net/phil/archives/Geekery/term-function-keys.html
         for (range, offset) in &[
-            // F1-F5 encoded as 11-15
+            // F1-F5 编码为 11-15
             (1..=5, 10),
-            // F6-F10 encoded as 17-21
+            // F6-F10 编码为 17-21
             (6..=10, 11),
-            // F11-F14 encoded as 23-26
+            // F11-F14 编码为 23-26
             (11..=14, 12),
-            // F15-F16 encoded as 28-29
+            // F15-F16 编码为 28-29
             (15..=16, 13),
-            // F17-F20 encoded as 31-34
+            // F17-F20 编码为 31-34
             (17..=20, 14),
         ] {
             for n in range.clone() {
@@ -1569,16 +1547,15 @@ impl InputParser {
         map
     }
 
-    /// Returns the first char from a str and the length of that char
-    /// in *bytes*.
+    /// 返回 str 中的第一个字符以及该字符的长度（以 *字节* 为单位）。
     fn first_char_and_len(s: &str) -> (char, usize) {
         let mut iter = s.chars();
         let c = iter.next().unwrap();
         (c, c.len_utf8())
     }
 
-    /// This is a horrible function to pull off the first unicode character
-    /// from the sequence of bytes and return it and the remaining slice.
+    /// 这是一个糟糕的函数，用于从字节序列中提取第一个 unicode 字符，
+    /// 并返回它和剩余的切片。
     fn decode_one_char(bytes: &[u8]) -> Option<(char, usize)> {
         let bytes = &bytes[..bytes.len().min(4)];
         match std::str::from_utf8(bytes) {
@@ -1604,8 +1581,8 @@ impl InputParser {
         mut callback: F,
         event: InputEvent,
     ) {
-        // `self.buf` is already advanced past this event, so `self.buf.len()` is
-        // the remainder `parse_with_consumed` diffs into a per-event byte count.
+        // `self.buf` 已经前进过此事件，因此 `self.buf.len()` 是
+        // `parse_with_consumed` 计算每个事件字节数时的剩余量。
         match (self.state, &event) {
             (
                 InputState::Normal,
@@ -1623,8 +1600,7 @@ impl InputParser {
                     ..
                 }),
             ) => {
-                // The prior ESC was not part of an ALT sequence, so emit
-                // it before we start collecting for paste.
+                // 之前的 ESC 不是 ALT 序列的一部分，因此在开始收集粘贴内容之前先发出它。
                 callback(
                     InputEvent::Key(KeyEvent {
                         key: KeyCode::Escape,
@@ -1635,7 +1611,7 @@ impl InputParser {
                 self.state = InputState::Pasting(0);
             },
             (InputState::EscapeMaybeAlt, InputEvent::Key(KeyEvent { key, modifiers })) => {
-                // Treat this as ALT-key
+                // 将此视为 ALT 键
                 let key = *key;
                 let modifiers = *modifiers;
                 self.state = InputState::Normal;
@@ -1648,8 +1624,7 @@ impl InputParser {
                 );
             },
             (InputState::EscapeMaybeAlt, _) => {
-                // The prior ESC was not part of an ALT sequence, so emit
-                // both it and the current event
+                // 之前的 ESC 不是 ALT 序列的一部分，因此同时发出它和当前事件
                 callback(
                     InputEvent::Key(KeyEvent {
                         key: KeyCode::Escape,
@@ -1663,13 +1638,11 @@ impl InputParser {
         }
     }
 
-    /// If a parked ESC is currently held in `EscapeMaybeAlt`, emit it as a
-    /// real `Esc` keystroke and return to `Normal`. Called from
-    /// `process_bytes` before dispatching any structured sequence (SGR
-    /// mouse, OSC, whitelisted CSI host-reply) that the upcoming bytes
-    /// match — those sequences are autonomous host events and cannot be
-    /// ALT-combined with the parked ESC, so the ESC must be flushed
-    /// before the sequence is emitted.
+    /// 如果停放的 ESC 当前保存在 `EscapeMaybeAlt` 中，将其作为真正的
+    /// `Esc` 击键发出并返回 `Normal`。在分派即将到来的字节匹配的任何结构化序列
+    /// （SGR 鼠标、OSC、白名单 CSI 宿主回复）之前，从 `process_bytes` 调用——
+    /// 这些序列是自主的宿主事件，不能与停放的 ESC 进行 ALT 组合，因此必须在
+    /// 发出序列之前刷新 ESC。
     fn flush_parked_esc_if_held<F: FnMut(InputEvent, usize)>(&mut self, callback: &mut F) {
         if self.state == InputState::EscapeMaybeAlt {
             callback(
@@ -1701,17 +1674,14 @@ impl InputParser {
                     }
                 },
                 InputState::EscapeMaybeAlt | InputState::Normal => {
-                    // Structured terminal sequences — SGR mouse, OSC, whitelisted
-                    // CSI host-replies — are autonomous host events and cannot be
-                    // ALT-combined with a leading Esc keystroke. Run these checks
-                    // in *both* Normal and EscapeMaybeAlt: if we're sitting on a
-                    // parked ESC (EscapeMaybeAlt) and the upcoming bytes match one
-                    // of these patterns, the ESC must be a real Esc keystroke, so
-                    // flush it before dispatching the sequence. Otherwise a parked
-                    // ESC immediately followed by `\x1b[<...M` (xterm flushes Esc
-                    // alone, then a mouse motion in the next read) would dispatch
-                    // as a spurious ALT+`[` because the keymap registers `\x1b[`
-                    // as Alt+`[`.
+                    // 结构化终端序列——SGR 鼠标、OSC、白名单 CSI 宿主回复——
+                    // 是自主的宿主事件，不能与前导 Esc 击键进行 ALT 组合。
+                    // 在 Normal 和 EscapeMaybeAlt 中都运行这些检查：如果我们正持有
+                    // 停放的 ESC（EscapeMaybeAlt）且即将到来的字节匹配这些模式之一，
+                    // 则 ESC 必须是真正的 Esc 击键，因此在分派序列之前刷新它。
+                    // 否则，停放的 ESC 紧跟 `\x1b[<...M`（xterm 单独刷新 Esc，
+                    // 然后在下一次读取中产生鼠标移动）会被分派为虚假的 ALT+`[`，
+                    // 因为键映射将 `\x1b[` 注册为 Alt+`[`。
                     if self.buf.as_slice().get(0) == Some(&b'\x1b') {
                         if let Some((event, len)) = parse_sgr_mouse(self.buf.as_slice()) {
                             self.flush_parked_esc_if_held(&mut callback);
@@ -1720,7 +1690,7 @@ impl InputParser {
                             continue;
                         }
 
-                        // OSC sequence check — must come before the incomplete-SGR-mouse early return
+                        // OSC 序列检查——必须在不完整 SGR 鼠标的提前返回之前
                         if let Some((event, len)) = parse_osc(self.buf.as_slice()) {
                             self.flush_parked_esc_if_held(&mut callback);
                             self.buf.advance(len);
@@ -1728,7 +1698,7 @@ impl InputParser {
                             continue;
                         }
 
-                        // Incomplete OSC — buffer and wait for more data
+                        // 不完整 OSC——缓冲并等待更多数据
                         if maybe_more && self.buf.as_slice().starts_with(b"\x1b]") {
                             self.flush_parked_esc_if_held(&mut callback);
                             return;
@@ -1739,11 +1709,9 @@ impl InputParser {
                             return;
                         }
 
-                        // CSI-based host-terminal report (pixel-dims reply,
-                        // DECRPM, DSR, Primary-DA). Must come before the
-                        // regular CSI key-mapping machinery, which would
-                        // otherwise match "\x1b[" as an escape prefix and
-                        // pass the bytes through as keyboard input.
+                        // 基于 CSI 的宿主终端报告（像素尺寸回复、DECRPM、DSR、
+                        // Primary-DA）。必须在常规 CSI 键映射机制之前，否则该机制
+                        // 会将 "\x1b[" 匹配为转义前缀并将字节作为键盘输入传递。
                         if let Some((event, len)) = parse_csi_report(self.buf.as_slice()) {
                             self.flush_parked_esc_if_held(&mut callback);
                             self.buf.advance(len);
@@ -1751,10 +1719,9 @@ impl InputParser {
                             continue;
                         }
 
-                        // Incomplete CSI ?... report (DECRPM, DSR 997, etc.) —
-                        // wait for more data so the report-classification path
-                        // can match the full sequence rather than letting the
-                        // keymap dispatch the leading bytes as separate keys.
+                        // 不完整 CSI ?... 报告（DECRPM、DSR 997 等）——等待更多数据，
+                        // 以便报告分类路径可以匹配完整序列，而不是让键映射将前导字节
+                        // 作为单独的键分派。
                         if maybe_more && self.buf.as_slice().starts_with(b"\x1b[?") {
                             self.flush_parked_esc_if_held(&mut callback);
                             return;
@@ -1765,11 +1732,9 @@ impl InputParser {
                         self.key_map.lookup(self.buf.as_slice(), maybe_more),
                         maybe_more,
                     ) {
-                        // If we got an unambiguous ESC and we have more data to
-                        // follow, then this is likely the Meta version of the
-                        // following keypress.  Buffer up the escape key and
-                        // consume it from the input.  dispatch_callback() will
-                        // emit either the ESC or the ALT modified following key.
+                        // 如果我们得到明确的 ESC 并且有更多数据跟随，那么这很可能是
+                        // 后续按键的 Meta 版本。缓冲 escape 键并从输入中消耗它。
+                        // dispatch_callback() 将发出 ESC 或 ALT 修饰的后续键。
                         (
                             Found::Exact(
                                 len,
@@ -1784,44 +1749,30 @@ impl InputParser {
                             self.buf.advance(len);
                         },
                         (Found::Exact(len, event), _) | (Found::Ambiguous(len, event), false) => {
-                            // Advance before dispatching so `self.buf.len()` inside
-                            // `dispatch_callback` already reflects this key's consumption.
+                            // 在分派之前前进，以便 `dispatch_callback` 内部的
+                            // `self.buf.len()` 已经反映此键的消耗。
                             self.buf.advance(len);
                             self.dispatch_callback(&mut callback, event.clone());
                         },
                         (Found::Ambiguous(_, _), true) | (Found::NeedData, true) => {
-                            // The keymap is signalling "this buffer
-                            // could still grow into a registered key,
-                            // give me more bytes." That verdict is
-                            // wrong when the buffer already holds a
-                            // structurally complete CSI sequence whose
-                            // final byte isn't in the keymap — most
-                            // importantly Kitty keyboard-protocol
-                            // events `\x1b[<keycode>;<mods>u`, which
-                            // never grow into anything the keymap
-                            // knows. Returning here would wedge
-                            // `self.buf` indefinitely, swallowing every
-                            // host reply that arrives behind it (the
-                            // OSC + DA1 bytes for a forwarded
-                            // `OSC 11;?` query among them) and stalling
-                            // host-color forwards until session exit.
+                            // 键映射发出信号"此缓冲区仍可能增长为已注册键，
+                            // 给我更多字节。"当缓冲区已经持有结构上完整的 CSI 序列
+                            // 且其最终字节不在键映射中时，该判断是错误的——最重要的是
+                            // Kitty 键盘协议事件 `\x1b[<keycode>;<mods>u`，它永远不会
+                            // 增长为键映射知道的任何内容。在此处返回会无限期卡住
+                            // `self.buf`，吞掉其后到达的每个宿主回复（其中包括转发的
+                            // `OSC 11;?` 查询的 OSC + DA1 字节），并在会话退出前
+                            // 停滞宿主颜色转发。
                             //
-                            // Both `Ambiguous(_, true)` and
-                            // `NeedData(true)` reach this point in
-                            // practice: for `\x1b[<digits>;<digits>u`
-                            // the trie reports `Ambiguous(1, Escape)`
-                            // (it has ESC alone as a match and ESC[…]
-                            // as longer prefixes), so the fix must
-                            // cover both verdicts.
+                            // `Ambiguous(_, true)` 和 `NeedData(true)` 在实践中都会
+                            // 到达此点：对于 `\x1b[<digits>;<digits>u`，trie 报告
+                            // `Ambiguous(1, Escape)`（它将 ESC 单独作为匹配，将 ESC[…]
+                            // 作为更长前缀），因此修复必须覆盖两种判断。
                             //
-                            // Skip past the unrecognised CSI without
-                            // emitting an event; callers that need
-                            // keyboard dispatch (kitty_parser, the
-                            // separate `input_parser` instance fed the
-                            // residue from `StdinAnsiParser`) see the
-                            // same bytes via `strip_replies`, which
-                            // already treats unwhitelisted-final CSIs
-                            // as `Malformed` and pushes them through.
+                            // 跳过未识别的 CSI 而不发出事件；需要键盘分派的调用者
+                            // （kitty_parser、从 `StdinAnsiParser` 接收残差的单独
+                            // `input_parser` 实例）通过 `strip_replies` 看到相同的字节，
+                            // 该函数已将非白名单最终字节的 CSI 视为 `Malformed` 并推送通过。
                             if let Some(len) = complete_csi_len(self.buf.as_slice()) {
                                 self.buf.advance(len);
                                 continue;
@@ -1829,7 +1780,7 @@ impl InputParser {
                             return;
                         },
                         (Found::None, _) | (Found::NeedData, false) => {
-                            // No pre-defined key, so pull out a unicode character
+                            // 没有预定义的键，因此提取一个 unicode 字符
                             if let Some((c, len)) = Self::decode_one_char(self.buf.as_slice()) {
                                 self.buf.advance(len);
                                 self.dispatch_callback(
@@ -1840,8 +1791,7 @@ impl InputParser {
                                     }),
                                 );
                             } else {
-                                // We need more data to recognize the input, so
-                                // yield the remainder of the slice
+                                // 我们需要更多数据来识别输入，因此让出切片的剩余部分
                                 return;
                             }
                         },
@@ -1851,31 +1801,23 @@ impl InputParser {
         }
     }
 
-    /// Push a sequence of bytes into the parser.
-    /// Each time input is recognized, the provided `callback` will be passed
-    /// the decoded `InputEvent`.
-    /// If not enough data are available to fully decode a sequence, the
-    /// remaining data will be buffered until the next call.
-    /// The `maybe_more` flag controls how ambiguous partial sequences are
-    /// handled. The intent is that `maybe_more` should be set to true if
-    /// you believe that you will be able to provide more data momentarily.
-    /// This will cause the parser to defer judgement on partial prefix
-    /// matches. You should attempt to read and pass the new data in
-    /// immediately afterwards. If you have attempted a read and no data is
-    /// immediately available, you should follow up with a call to parse
-    /// with an empty slice and `maybe_more=false` to allow the partial
-    /// data to be recognized and processed.
+    /// 将字节序列推入解析器。
+    /// 每次识别到输入时，提供的 `callback` 将被传递解码后的 `InputEvent`。
+    /// 如果没有足够的数据来完全解码序列，剩余数据将被缓冲直到下一次调用。
+    /// `maybe_more` 标志控制如何处理歧义的部分序列。其意图是，如果你认为
+    /// 马上能够提供更多数据，应将 `maybe_more` 设置为 true。这将导致解析器
+    /// 推迟对部分前缀匹配的判断。你应尝试读取并在之后立即传入新数据。
+    /// 如果你已尝试读取且立即可用的数据为空，则应随后使用空切片和
+    /// `maybe_more=false` 调用 parse，以允许识别和处理部分数据。
     pub fn parse<F: FnMut(InputEvent)>(&mut self, bytes: &[u8], callback: F, maybe_more: bool) {
-        // rebind (not `mut callback: F`) to keep the upstream signature intact
+        // 重新绑定（而非 `mut callback: F`）以保持上游签名不变
         let mut callback = callback;
         self.parse_with_consumed(bytes, |event, _consumed| callback(event), maybe_more);
     }
 
-    /// Like [`InputParser::parse`], but the callback also receives the number
-    /// of input bytes consumed to produce each event. This allows a caller
-    /// that forwards raw bytes alongside decoded events to attribute to each
-    /// event exactly the bytes that produced it when a single chunk of input
-    /// decodes into multiple events.
+    /// 类似于 [`InputParser::parse`]，但回调还接收产生每个事件所消耗的
+    /// 输入字节数。这使得同时转发原始字节和解码事件的调用者能够在单个输入块
+    /// 解码为多个事件时，将产生该事件的确切字节归因于每个事件。
     pub fn parse_with_consumed<F: FnMut(InputEvent, usize)>(
         &mut self,
         bytes: &[u8],
@@ -1883,8 +1825,8 @@ impl InputParser {
         maybe_more: bool,
     ) {
         self.buf.extend_with(bytes);
-        // `process_bytes` reports the bytes still buffered after each event; the
-        // drop between successive remainders is what that event consumed.
+        // `process_bytes` 报告每个事件后仍缓冲的字节；连续剩余量之间的
+        // 下降量就是该事件消耗的字节数。
         let mut prev_remaining = self.buf.len();
         self.process_bytes(
             |event, remaining| {
@@ -1896,10 +1838,9 @@ impl InputParser {
         );
     }
 
-    /// Number of bytes still held unprocessed in the parser's internal
-    /// buffer. A caller that mirrors this ring separately (e.g. to forward
-    /// raw bytes alongside decoded events) can reconcile its own buffer to
-    /// exactly the same length so the two never drift apart.
+    /// 解析器内部缓冲区中仍未处理的字节数。单独镜像此环形缓冲区的调用者
+    /// （例如，与解码事件同时转发原始字节）可以将自己的缓冲区调整到完全相同的
+    /// 长度，使两者永远不会偏离。
     pub fn buffered_len(&self) -> usize {
         self.buf.len()
     }
@@ -2009,8 +1950,8 @@ mod test {
         );
     }
 
-    /// Parse `bytes` and pair each event with the raw bytes it consumed,
-    /// draining from a copy of the input the same way the client's stdin
+    /// 解析 `bytes` 并将每个事件与其消耗的原始字节配对，
+    /// 以与客户端标准输入相同的方式从输入副本中排出
     /// loop attributes raw bytes to events.
     fn parse_with_raw_bytes(bytes: &[u8], maybe_more: bool) -> Vec<(InputEvent, Vec<u8>)> {
         let mut p = InputParser::new();
