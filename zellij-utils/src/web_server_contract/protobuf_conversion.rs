@@ -8,7 +8,7 @@ use crate::web_server_contract::web_server_contract::{
     VersionResponseMsg, WebServerResponse as ProtoWebServerResponse,
 };
 
-// Convert Rust InstructionForWebServer to protobuf
+// 将 Rust InstructionForWebServer 转换为 protobuf
 impl From<RustInstructionForWebServer> for ProtoInstructionForWebServer {
     fn from(instruction: RustInstructionForWebServer) -> Self {
         let instruction = match instruction {
@@ -26,7 +26,7 @@ impl From<RustInstructionForWebServer> for ProtoInstructionForWebServer {
     }
 }
 
-// Convert protobuf InstructionForWebServer to Rust
+// 将 protobuf InstructionForWebServer 转换为 Rust
 impl TryFrom<ProtoInstructionForWebServer> for RustInstructionForWebServer {
     type Error = anyhow::Error;
 
@@ -43,7 +43,7 @@ impl TryFrom<ProtoInstructionForWebServer> for RustInstructionForWebServer {
     }
 }
 
-// Convert Rust WebServerResponse to protobuf
+// 将 Rust WebServerResponse 转换为 protobuf
 impl From<WebServerResponse> for ProtoWebServerResponse {
     fn from(response: WebServerResponse) -> Self {
         let response = match response {
@@ -62,7 +62,7 @@ impl From<WebServerResponse> for ProtoWebServerResponse {
     }
 }
 
-// Convert protobuf WebServerResponse to Rust
+// 将 protobuf WebServerResponse 转换为 Rust
 impl TryFrom<ProtoWebServerResponse> for WebServerResponse {
     type Error = anyhow::Error;
 
