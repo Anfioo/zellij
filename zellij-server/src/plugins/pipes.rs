@@ -41,7 +41,7 @@ impl PendingPipes {
             );
         }
     }
-    // returns a list of pipes that are no longer pending and should be unblocked
+    // 返回 a 列表 of pipes that are no longer pending and should be unblocked
     pub fn update_pipe_state_change(
         &mut self,
         cli_pipe_name: &str,
@@ -59,7 +59,7 @@ impl PendingPipes {
                 }
             },
             None => {
-                // state somehow corrupted, let's recover...
+                // 状态 somehow corrupted, let's 恢复...
                 pipe_names_to_unblock.push(cli_pipe_name.to_owned());
             },
         }
@@ -68,7 +68,7 @@ impl PendingPipes {
         }
         pipe_names_to_unblock
     }
-    // returns a list of pipes that are no longer pending and should be unblocked
+    // 返回 a 列表 of pipes that are no longer pending and should be unblocked
     pub fn unload_plugin(&mut self, plugin_id: &PluginId) -> Vec<String> {
         let mut pipe_names_to_unblock = vec![];
         for (pipe_name, pending_pipe_info) in self.pipes.iter_mut() {
@@ -103,7 +103,7 @@ impl PendingPipeInfo {
         self.currently_being_processed_by
             .insert((*plugin_id, *client_id));
     }
-    // returns true if this pipe should be unblocked
+    // 返回 true if this pipe should be unblocked
     pub fn update_state_change(
         &mut self,
         pipe_state_change: PipeStateChange,
@@ -125,7 +125,7 @@ impl PendingPipeInfo {
             self.currently_being_processed_by.is_empty() && !self.is_explicitly_blocked;
         pipe_should_be_unblocked
     }
-    // returns true if this pipe should be unblocked
+    // 返回 true if this pipe should be unblocked
     pub fn unload_plugin(&mut self, plugin_id_to_unload: &PluginId) -> bool {
         self.currently_being_processed_by
             .retain(|(plugin_id, _)| plugin_id != plugin_id_to_unload);
@@ -239,14 +239,14 @@ fn apply_pipe_message_to_plugin_inner(
             }
         },
         Err(_e) => {
-            // no-op, this is probably an old plugin that does not have this interface
-            // we don't log this error because if we do the logs will be super crowded
+            // no-op, this is probably an old 插件 that does not have this 接口
+            // we don't 日志 this 错误 because if we do the 日志 will be super crowded
             let pipes_to_block_or_unblock =
                 pipes_to_block_or_unblock(running_plugin, Some(&pipe_message.source));
             let plugin_render_asset = PluginRenderAsset::new(
                 plugin_id,
                 client_id,
-                vec![], // nothing to render
+                vec![], // nothing to 渲染
             )
             .with_pipes(pipes_to_block_or_unblock);
             let _ = senders

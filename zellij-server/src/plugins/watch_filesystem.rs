@@ -90,9 +90,9 @@ pub fn watch_filesystem(
                             .collect()
                     })
                     .collect();
-                // TODO: at some point we might want to add FileMetadata to these, but right now
-                // the API is a bit unstable, so let's not rock the boat too much by adding another
-                // expensive syscall
+                // TODO: 将来我们可能想为这些添加 FileMetadata，但目前
+                // API 还不太稳定，所以我们不要通过添加另一个昂贵的
+                // 系统调引来过于冒险
                 let mut updates = vec![];
                 if !read_paths.is_empty() {
                     updates.push((

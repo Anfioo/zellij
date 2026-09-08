@@ -51,8 +51,8 @@ use zellij_utils::{
     pane_size::Size,
 };
 
-/// On Windows, colons in URL strings (e.g. `zellij:tab-bar`, `file:///...`)
-/// are illegal in path components. Replace them with underscores.
+/// On 窗口, colons in URL strings (e.g. `zellij:标签页-bar`, `文件:///...`)
+/// are illegal in 路径 components. Replace them with underscores.
 #[cfg(windows)]
 fn make_plugin_url_path_safe(url: String) -> String {
     url.replace(':', "_")
@@ -177,12 +177,12 @@ pub struct WasmBridge {
     next_plugin_id: PluginId,
     plugin_ids_waiting_for_permission_request: HashSet<PluginId>,
     cached_events_for_pending_plugins: HashMap<PluginId, Vec<EventOrPipeMessage>>,
-    cached_resizes_for_pending_plugins: HashMap<PluginId, (usize, usize)>, // (rows, columns)
+    cached_resizes_for_pending_plugins: HashMap<PluginId, (usize, usize)>, // (行, 列)
     cached_worker_messages: HashMap<PluginId, Vec<(ClientId, String, String, String)>>, // Vec<clientid,
     // worker_name,
-    // message,
+    // 消息,
     // payload>
-    loading_plugins: HashSet<(PluginId, RunPlugin)>, // tracks loading plugins without handles
+    loading_plugins: HashSet<(PluginId, RunPlugin)>, // 跟踪 加载 插件 without handles
     pending_plugin_reloads: HashSet<RunPlugin>,
     path_to_default_shell: PathBuf,
     watcher: Option<Debouncer<RecommendedWatcher, RecommendedCache>>,
@@ -281,9 +281,9 @@ impl WasmBridge {
 
         let client_id = client_id
             .and_then(|client_id| {
-                // first attempt to use a connected client (because this might be a cli_client that
-                // should not get plugins) and only if none is connected, load a "dummy" plugin for
-                // the cli client
+                // first attempt to use a connected 客户端 (because this might be a cli_client that
+                // should not get 插件) and only if none is connected, 加载 a "dummy" 插件 for
+                // the cli 客户端
                 let connected_clients = self.connected_clients.lock().unwrap();
                 if connected_clients.contains(&client_id) {
                     Some(client_id)
@@ -292,7 +292,7 @@ impl WasmBridge {
                 }
             })
             .or_else(|| {
-                // if no client id was provided, try to use the first connected client
+                // if no 客户端 id was provided, 尝试 to use the first connected 客户端
                 self.connected_clients
                     .lock()
                     .unwrap()
@@ -300,9 +300,9 @@ impl WasmBridge {
                     .next()
                     .copied()
             })
-            .or(client_id) // if we got here, this is likely a cli client with no other clients
-            // connected, or loading a background plugin on app start, we use the provided client id as a dummy to load the
-            // plugin anyway
+            .or(client_id) // if we got here, this is likely a cli 客户端 with no other 客户端
+            // connected, or 加载 a background 插件 on app 启动, we use the provided 客户端 id as a dummy to 加载 the
+            // 插件 anyway
             .with_context(|| {
                 "Plugins must have a client id, none was provided and none are connected"
             })?;
@@ -335,12 +335,12 @@ impl WasmBridge {
                     .insert(plugin_id, (size.rows, size.cols));
                 self.loading_plugins.insert((plugin_id, run.clone()));
 
-                // Clone for threaded contexts
+                // Clone for threaded 上下文
                 let plugin_executor = self.plugin_executor.clone();
                 let senders = self.senders.clone();
                 let zellij_cwd = cwd.unwrap_or_else(|| self.zellij_cwd.clone());
 
-                // Check if we need to download (async I/O required)
+                // 检查 if we need to download (异步 I/O required)
                 let needs_download = matches!(plugin.location, RunPluginLocation::Remote(_));
 
                 let mut loading_context = LoadingContext::new(
@@ -496,27 +496,27 @@ impl WasmBridge {
     pub fn unload_plugin(&mut self, pid: PluginId) -> Result<()> {
         info!("Bye from plugin {}", &pid);
 
-        // Remove from plugin_map on main thread
+        // 移除 from plugin_map on main 线程
         let plugins_to_cleanup: Vec<_> = {
             let mut plugin_map = self.plugin_map.lock().unwrap();
             plugin_map.remove_plugins(pid).into_iter().collect()
         };
 
-        // Schedule cleanup on each plugin's pinned thread
+        // 调度 清理 on each 插件's pinned 线程
         for ((plugin_id, client_id), (running_plugin, subscriptions, workers)) in plugins_to_cleanup
         {
-            // Clear key intercepts if needed (on main thread is OK)
+            // 清空 密钥 intercepts if needed (on main 线程 is OK)
             if running_plugin.lock().unwrap().intercepting_key_presses() {
                 let _ = self
                     .senders
                     .send_to_screen(ScreenInstruction::ClearKeyPressesIntercepts(client_id));
             }
-            // Clear any regex highlights this plugin registered across all panes
+            // 清空 any regex highlights this 插件 registered across all 窗格
             let _ = self
                 .senders
                 .send_to_screen(ScreenInstruction::ClearAllPluginHighlights(plugin_id));
 
-            // Send worker exit messages
+            // Send 工作线程 退出 消息
             for (_worker_name, worker_sender) in workers {
                 drop(worker_sender.send(MessageToWorker::Exit));
             }
@@ -526,7 +526,7 @@ impl WasmBridge {
                 move |senders, _plugin_map, _connected_clients, _plugin_cache, _engine| {
                     let subscriptions_guard = subscriptions.lock().unwrap();
                     let needs_before_close = subscriptions_guard.contains(&EventType::BeforeClose);
-                    drop(subscriptions_guard); // Release lock before calling plugin
+                    drop(subscriptions_guard); // 释放 锁 before calling 插件
 
                     if needs_before_close {
                         let mut rp = running_plugin.lock().unwrap();
@@ -544,7 +544,7 @@ impl WasmBridge {
                             },
                         }
                         let cache_dir = rp.store.data().plugin_own_data_dir.clone();
-                        drop(rp); // Release lock before filesystem operation
+                        drop(rp); // 释放 锁 before filesystem operation
                         if let Err(e) = std::fs::remove_dir_all(&cache_dir) {
                             log::error!("Failed to remove cache dir for plugin: {:?}", e);
                         }
@@ -567,7 +567,7 @@ impl WasmBridge {
             );
         }
 
-        // Main thread cleanup
+        // Main 线程 清理
         self.cached_plugin_map.clear();
         let mut pipes_to_unblock = self.pending_pipes.unload_plugin(&pid);
         for pipe_name in pipes_to_unblock.drain(..) {
@@ -637,7 +637,7 @@ impl WasmBridge {
         plugin_executor.execute_for_plugin(
             plugin_id,
             move |senders, plugin_map, connected_clients, plugin_cache, engine| {
-                let skip_cache = true; // we want to explicitly reload the plugin
+                let skip_cache = true; // we want to explicitly 重新加载 the 插件
                 let mut plugin_map = plugin_map.lock().unwrap();
                 match PluginLoader::new(
                     skip_cache,
@@ -814,22 +814,22 @@ impl WasmBridge {
                     .lock()
                     .unwrap()
                     .next_event_id(AtomicEvent::Resize);
-                // Execute directly on pinned thread (no async I/O needed for resize/render)
+                // Execute directly on pinned 线程 (no 异步 I/O needed for 调整大小/渲染)
                 self.plugin_executor.execute_for_plugin(plugin_id, {
-                    // let senders = self.senders.clone();
+                    // let 发送者 = self.发送者.clone();
                     let running_plugin = running_plugin.clone();
                     let _s = shutdown_sender.clone();
                     move |senders, _plugin_map, _connected_clients, _plugin_cache, _engine| {
                         let mut running_plugin = running_plugin.lock().unwrap();
-                        let _s = _s; // guard to allow the task to complete before cleanup/shutdown
+                        let _s = _s; // 守卫 to allow the 任务 to complete before 清理/shutdown
                         if running_plugin.apply_event_id(AtomicEvent::Resize, event_id) {
                             let old_rows = running_plugin.rows;
                             let old_columns = running_plugin.columns;
                             running_plugin.rows = new_rows;
                             running_plugin.columns = new_columns;
 
-                            // in the below conditional, we check if event_id == 0 so that we'll
-                            // make sure to always render on the first resize event
+                            // in the below conditional, we 检查 if event_id == 0 so that we'll
+                            // make sure to always 渲染 on the first 调整大小 事件
                             if old_rows != new_rows || old_columns != new_columns || event_id == 0 {
                                 let rendered_bytes = running_plugin
                                     .instance
@@ -910,19 +910,19 @@ impl WasmBridge {
             })
             .collect();
 
-        // Execute each plugin update on its respective pinned thread
+        // Execute each 插件 update on its respective pinned 线程
         let plugin_executor = self.plugin_executor.clone();
-        // let senders = self.senders.clone();
+        // let 发送者 = self.发送者.clone();
         for (pid, cid, event) in updates.clone().into_iter() {
             for (plugin_id, client_id, running_plugin, subscriptions) in &plugins_to_update {
                 let subs = subscriptions.lock().unwrap().clone();
-                // FIXME: This is very janky... Maybe I should write my own macro for Event -> EventType?
+                // FIXME: This is very janky... Maybe I should 写入 my own macro for 事件 -> EventType?
                 if let Ok(event_type) = EventType::from_str(&event.to_string()) {
                     if (subs.contains(&event_type)
                         || event_type == EventType::PermissionRequestResult)
                         && Self::message_is_directed_at_plugin(pid, cid, plugin_id, client_id)
                     {
-                        // Execute directly on pinned thread (no async I/O needed for event processing)
+                        // Execute directly on pinned 线程 (no 异步 I/O needed for 事件 processing)
                         plugin_executor.execute_for_plugin(*plugin_id, {
                             let plugin_id = *plugin_id;
                             let client_id = *client_id;
@@ -935,7 +935,7 @@ impl WasmBridge {
                                   _connected_clients,
                                   _plugin_cache,
                                   _engine| {
-                                let _s = _s; // guard to allow the task to complete before cleanup/shutdown
+                                let _s = _s; // 守卫 to allow the 任务 to complete before 清理/shutdown
                                 let mut running_plugin = running_plugin.lock().unwrap();
                                 let mut plugin_render_assets = vec![];
                                 match apply_event_to_plugin(
@@ -973,8 +973,8 @@ impl WasmBridge {
             }
         }
 
-        // loop once more to update the cached events for the pending plugins (probably currently
-        // being loaded, we'll send them these events when they load)
+        // 循环 once more to update the 缓存的 事件 for the pending 插件 (probably currently
+        // being 加载的, we'll send them these 事件 when they 加载)
         for (pid, _cid, event) in updates.drain(..) {
             for (plugin_id, cached_events) in self.cached_events_for_pending_plugins.iter_mut() {
                 if pid.is_none() || pid.as_ref() == Some(plugin_id) {
@@ -1025,7 +1025,7 @@ impl WasmBridge {
             .cloned()
             .collect();
 
-        // Execute directly on pinned thread (no async I/O needed for directory check/change)
+        // Execute directly on pinned 线程 (no 异步 I/O needed for 目录 检查/change)
         self.plugin_executor
             .execute_for_plugin(plugin_id_to_update, {
                 move |senders, _plugin_map, _connected_clients, _plugin_cache, _engine| {
@@ -1130,7 +1130,7 @@ impl WasmBridge {
             })
             .collect();
 
-        // Execute each pipe message on its respective plugin's pinned thread
+        // Execute each pipe 消息 on its respective 插件's pinned 线程
         let plugin_executor = self.plugin_executor.clone();
         for (message_pid, message_cid, pipe_message) in messages.clone().into_iter() {
             for (plugin_id, client_id, running_plugin, _subscriptions) in &plugins_to_update {
@@ -1144,7 +1144,7 @@ impl WasmBridge {
                         self.pending_pipes
                             .mark_being_processed(pipe_id, plugin_id, client_id);
                     }
-                    // Execute directly on pinned thread (no async I/O needed for pipe message processing)
+                    // Execute directly on pinned 线程 (no 异步 I/O needed for pipe 消息 processing)
                     plugin_executor.execute_for_plugin(*plugin_id, {
                         let running_plugin = running_plugin.clone();
                         let pipe_message = pipe_message.clone();
@@ -1155,7 +1155,7 @@ impl WasmBridge {
                         move |senders, _plugin_map, _connected_clients, _plugin_cache, _engine| {
                             let mut running_plugin = running_plugin.lock().unwrap();
                             let mut plugin_render_assets = vec![];
-                            let _s = _s; // guard to allow the task to complete before cleanup/shutdown
+                            let _s = _s; // 守卫 to allow the 任务 to complete before 清理/shutdown
                             match apply_pipe_message_to_plugin(
                                 plugin_id,
                                 client_id,
@@ -1254,7 +1254,7 @@ impl WasmBridge {
             .unwrap()
             .retain(|c| c != &client_id);
 
-        // Remove client from cached pane render report
+        // 移除 客户端 from 缓存的 窗格 渲染 报告
         if let Some(ref mut prev_report) = self.previous_pane_render_report {
             prev_report.all_pane_contents.remove(&client_id);
         }
@@ -1270,7 +1270,7 @@ impl WasmBridge {
         let mut result: HashMap<ClientId, HashMap<zellij_utils::data::PaneId, PaneContents>> =
             HashMap::new();
 
-        // First report - return everything grouped by client
+        // First 报告 - 返回 everything 分组的 by 客户端
         let Some(prev_contents) = previous_contents else {
             for (client_id, panes) in new_contents {
                 result.insert(*client_id, panes.clone());
@@ -1278,7 +1278,7 @@ impl WasmBridge {
             return result;
         };
 
-        // Compare each client's panes
+        // Compare each 客户端's 窗格
         for (client_id, new_panes) in new_contents {
             let mut client_panes: HashMap<zellij_utils::data::PaneId, PaneContents> =
                 HashMap::new();
@@ -1329,7 +1329,7 @@ impl WasmBridge {
         client_id: ClientId,
         events: HashSet<EventType>,
     ) {
-        // Check if this plugin is a background plugin (tab_index == None)
+        // 检查 if this 插件 is a background 插件 (tab_index == None)
         let is_background = {
             let mut plugin_map = self.plugin_map.lock().unwrap();
             plugin_map
@@ -1447,7 +1447,7 @@ impl WasmBridge {
         }
         self.default_shell = default_shell.clone();
         self.layout_dir = layout_dir.clone();
-        // Collect plugins subscribed to InitialKeybinds for post-reconfigure notification
+        // 收集 插件 订阅的 to InitialKeybinds for post-reconfigure 通知
         let plugins_subscribed_to_initial_keybinds: Vec<PluginId> = if keybinds.is_some() {
             self.plugin_map
                 .lock()
@@ -1482,7 +1482,7 @@ impl WasmBridge {
                 }
             });
         }
-        // Send InitialKeybinds to subscribed plugins after reconfiguration
+        // Send InitialKeybinds to 订阅的 插件 after reconfiguration
         if let Some(keybinds) = keybinds.as_ref() {
             let keybinds_payload = keybinds.to_keybinds_vec();
             for plugin_id in plugins_subscribed_to_initial_keybinds {
@@ -1525,7 +1525,7 @@ impl WasmBridge {
                         let _s = shutdown_sender.clone();
                         let events_or_pipe_messages = events_or_pipe_messages.clone();
                         move |senders, _plugin_map, _connected_clients, _plugin_cache, _engine| {
-                            let _s = _s; // guard to allow the task to complete before cleanup/shutdown
+                            let _s = _s; // 守卫 to allow the 任务 to complete before 清理/shutdown
                             for event_or_pipe_message in events_or_pipe_messages {
                                 match event_or_pipe_message {
                                     EventOrPipeMessage::Event(event) => {
@@ -1685,7 +1685,7 @@ impl WasmBridge {
         self.plugin_map.lock().unwrap().all_plugin_ids()
     }
     fn size_of_plugin_id(&self, plugin_id: PluginId) -> Option<(usize, usize)> {
-        // (rows/colums)
+        // (行/colums)
         self.plugin_map
             .lock()
             .unwrap()
@@ -1831,8 +1831,8 @@ impl WasmBridge {
             .or_insert_with(Default::default);
     }
 
-    // gets all running plugins details matching this run_plugin, if none are running, loads one and
-    // returns its details
+    // gets all running 插件 details matching this run_plugin, if none are running, 加载 one and
+    // 返回 its details
     pub fn get_or_load_plugins(
         &mut self,
         run_plugin_or_alias: RunPluginOrAlias,
@@ -1914,7 +1914,7 @@ impl WasmBridge {
     pub fn clear_plugin_map_cache(&mut self) {
         self.cached_plugin_map.clear();
     }
-    // returns the pipe names to unblock
+    // 返回 the pipe names to unblock
     pub fn update_cli_pipe_state(
         &mut self,
         pipe_state_changes: Vec<PluginRenderAsset>,
@@ -1968,16 +1968,16 @@ impl WasmBridge {
         layouts: Vec<LayoutInfo>,
         errors: Vec<LayoutWithError>,
     ) {
-        // Diff with existing layouts
+        // Diff with existing 布局
         if self.available_layouts != layouts || self.available_layout_errors != errors {
-            // Update the stored layouts
+            // Update the 存储的 布局
             self.available_layouts = layouts.clone();
             self.available_layout_errors = errors.clone();
 
-            // Notify all plugins of the change
+            // 通知 all 插件 of the change
             let _ = self.senders.send_to_plugin(PluginInstruction::Update(vec![(
-                None, // Broadcast to all plugins
-                None, // Broadcast to all clients
+                None, // 广播 to all 插件
+                None, // 广播 to all 客户端
                 Event::AvailableLayoutInfo(layouts, errors),
             )]));
         }
@@ -1999,7 +1999,7 @@ impl WasmBridge {
     ) -> Result<()> {
         let err_context = || "failed to detect plugin config changes";
 
-        // Get all running plugins
+        // Get all running 插件
         let running_plugins = self.plugin_map.lock().unwrap().running_plugins();
 
         for (plugin_id, client_id, running_plugin) in running_plugins {
@@ -2008,7 +2008,7 @@ impl WasmBridge {
             let current_config = &plugin_env.plugin.initial_userspace_configuration;
             let plugin_location = &plugin_env.plugin.location;
 
-            // Look up this plugin in the new config by location
+            // Look up this 插件 in the new config by location
             // Note: PluginAliases is HashMap<String, RunPlugin>, so we need to iterate
             let new_config_for_location = new_plugins
                 .aliases
@@ -2017,9 +2017,9 @@ impl WasmBridge {
                 .map(|run_plugin| &run_plugin.configuration);
 
             if let Some(new_config) = new_config_for_location {
-                // Compare configurations - only fire event if changed
+                // Compare configurations - only fire 事件 if changed
                 if current_config != new_config {
-                    drop(running_plugin); // Release lock before sending
+                    drop(running_plugin); // 释放 锁 before sending
 
                     let event = Event::PluginConfigurationChanged(new_config.inner().clone());
                     let updates = vec![(Some(plugin_id), Some(client_id), event)];
@@ -2067,13 +2067,13 @@ fn handle_plugin_loading_failure(
     }
 }
 
-// TODO: move to permissions?
+// TODO: move to 权限?
 fn check_event_permission(
     plugin_env: &PluginEnv,
     event: &Event,
 ) -> (PermissionStatus, Option<PermissionType>) {
     if plugin_env.plugin.is_builtin() {
-        // built-in plugins can do all the things because they're part of the application and
+        // built-in 插件 can do all the things because they're part of the application and
         // there's no use to deny them anything
         return (PermissionStatus::Granted, None);
     }
@@ -2137,10 +2137,10 @@ pub fn apply_event_to_plugin(
                     mode_info.base_mode = Some(running_plugin.store.data().default_mode);
                 }
                 if plugin_subscriptions.contains(&EventType::InitialKeybinds) {
-                    // Plugin caches keybindings via InitialKeybinds — send lightweight ModeUpdate
+                    // 插件 缓存 keybindings via InitialKeybinds — send lightweight ModeUpdate
                     mode_info.keybinds = vec![];
                 } else {
-                    // Legacy plugin — send full keybindings as before
+                    // Legacy 插件 — send full keybindings as before
                     mode_info.keybinds = running_plugin.store.data().keybinds.to_keybinds_vec();
                 }
             }
@@ -2157,8 +2157,8 @@ pub fn apply_event_to_plugin(
                         .with_context(err_context)?;
                     let mut should_render = should_render == 1;
                     if let Event::PermissionRequestResult(..) = event {
-                        // we always render in this case, otherwise the request permission screen stays on
-                        // screen
+                        // we always 渲染 in this case, otherwise the 请求 权限 屏幕 stays on
+                        // 屏幕
                         should_render = true;
                     }
                     if rows > 0 && columns > 0 && should_render {
@@ -2184,8 +2184,8 @@ pub fn apply_event_to_plugin(
                         .with_pipes(pipes_to_block_or_unblock);
                         plugin_render_assets.push(plugin_render_asset);
                     } else {
-                        // This is a bit of a hack to get around the fact that plugins are allowed not to
-                        // render and still unblock CLI pipes
+                        // This is a bit of a hack to get around the fact that 插件 are allowed not to
+                        // 渲染 and still unblock CLI pipes
                         let pipes_to_block_or_unblock =
                             pipes_to_block_or_unblock(running_plugin, None);
                         let plugin_render_asset =

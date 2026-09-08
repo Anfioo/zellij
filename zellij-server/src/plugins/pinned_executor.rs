@@ -9,25 +9,25 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use wasmi::Engine;
 
-/// A dynamic thread pool that pins jobs to specific threads based on plugin_id
-/// Starts with 1 thread and expands when threads are busy, shrinks when plugins unload
+/// A 动态 线程 池 that pins 任务 to 特定 线程 based on plugin_id
+/// 启动 with 1 线程 and expands when 线程 are busy, shrinks when 插件 卸载
 pub struct PinnedExecutor {
-    // Sparse vector - Some(thread) for active threads, None for removed threads
+    // Sparse vector - Some(线程) for 活动 线程, None for 移除的 线程
     execution_threads: Arc<Mutex<Vec<Option<ExecutionThread>>>>,
 
-    // Maps plugin_id -> thread_index (permanent assignment)
+    // Maps plugin_id -> thread_index (永久 assignment)
     plugin_assignments: Arc<Mutex<HashMap<u32, usize>>>,
 
-    // Maps thread_index -> set of plugin_ids assigned to it
+    // Maps thread_index -> set of plugin_ids 分配的 to it
     thread_plugins: Arc<Mutex<HashMap<usize, HashSet<u32>>>>,
 
-    // Next thread index to use when spawning (monotonically increasing)
+    // Next 线程 index to use when spawning (monotonically increasing)
     next_thread_idx: AtomicUsize,
 
-    // Maximum threads allowed
+    // Maximum 线程 allowed
     max_threads: usize,
 
-    // state to send to plugins (to be kept on execution threads)
+    // 状态 to send to 插件 (to be kept on execution 线程)
     senders: ThreadSenders,
     plugin_map: Arc<Mutex<PluginMap>>,
     connected_clients: Arc<Mutex<Vec<ClientId>>>,
@@ -37,7 +37,7 @@ pub struct PinnedExecutor {
 
 struct ExecutionThread {
     sender: Sender<Job>,
-    jobs_in_flight: Arc<AtomicUsize>, // Busy state tracking
+    jobs_in_flight: Arc<AtomicUsize>, // Busy 状态 跟踪
 }
 
 enum Job {
@@ -53,12 +53,12 @@ enum Job {
                 + 'static,
         >,
     ),
-    Shutdown, // Signal to exit the worker loop
+    Shutdown, // Signal to 退出 the 工作线程 循环
 }
 
 impl PinnedExecutor {
-    /// Creates a new pinned executor with the specified maximum number of threads
-    /// Starts with exactly 1 thread
+    /// Creates a new pinned executor with the specified maximum number of 线程
+    /// 启动 with exactly 1 线程
     pub fn new(
         max_threads: usize,
         senders: &ThreadSenders,
@@ -140,12 +140,12 @@ impl PinnedExecutor {
         }
     }
 
-    /// Register a plugin and assign it to a thread
-    /// Called from wasm_bridge when loading a plugin
+    /// Register a 插件 and 分配 it to a 线程
+    /// 调用的 from wasm_bridge when 加载 a 插件
     pub fn register_plugin(&self, plugin_id: u32) -> usize {
         let mut assignments = self.plugin_assignments.lock().unwrap();
 
-        // If already assigned (shouldn't happen, but defensive)
+        // If already 分配的 (shouldn't happen, but defensive)
         if let Some(&thread_idx) = assignments.get(&plugin_id) {
             return thread_idx;
         }
@@ -153,8 +153,8 @@ impl PinnedExecutor {
         let mut thread_plugins = self.thread_plugins.lock().unwrap();
         let threads = self.execution_threads.lock().unwrap();
 
-        // Find a non-busy thread with assigned plugins (prefer reusing threads)
-        let mut best_thread: Option<(usize, usize)> = None; // (index, load)
+        // 查找 a non-busy 线程 with 分配的 插件 (prefer 重用 线程)
+        let mut best_thread: Option<(usize, usize)> = None; // (index, 加载)
 
         for (idx, thread_opt) in threads.iter().enumerate() {
             if let Some(thread) = thread_opt {
@@ -169,18 +169,18 @@ impl PinnedExecutor {
         }
 
         let thread_idx = if let Some((idx, _)) = best_thread {
-            // Found a non-busy thread
+            // 找到的 a non-busy 线程
             idx
         } else {
-            // All threads are busy - need to expand
+            // All 线程 are busy - need to expand
             if threads.len() < self.max_threads {
-                // Spawn a new thread
+                // Spawn a new 线程
                 let new_idx = self.next_thread_idx.fetch_add(1, Ordering::SeqCst);
-                drop(threads); // Release lock before spawning
+                drop(threads); // 释放 锁 before spawning
                 self.add_thread(new_idx);
                 new_idx
             } else {
-                // At max capacity, assign to least-loaded thread
+                // At max capacity, 分配 to least-加载的 线程
                 threads
                     .iter()
                     .enumerate()
@@ -222,7 +222,7 @@ impl PinnedExecutor {
         threads[thread_idx] = Some(new_thread);
     }
 
-    /// Execute job pinned to plugin's assigned thread
+    /// Execute 任务 pinned to 插件's 分配的 线程
     pub fn execute_for_plugin<F>(&self, plugin_id: u32, f: F)
     where
         F: FnOnce(
@@ -234,7 +234,7 @@ impl PinnedExecutor {
             ) + Send
             + 'static,
     {
-        // Look up assigned thread
+        // Look up 分配的 线程
         let thread_idx = {
             let assignments = self.plugin_assignments.lock().unwrap();
             assignments.get(&plugin_id).copied()
@@ -244,7 +244,7 @@ impl PinnedExecutor {
             return;
         };
 
-        // Get thread and mark as busy
+        // Get 线程 and mark as busy
         let threads = self.execution_threads.lock().unwrap();
         let thread = threads[thread_idx].as_ref();
         let Some(thread) = thread else {
@@ -252,20 +252,20 @@ impl PinnedExecutor {
             return;
         };
 
-        // Increment busy counter BEFORE sending work
+        // Increment busy 计数器 BEFORE sending 工作
         thread.jobs_in_flight.fetch_add(1, Ordering::SeqCst);
 
-        // Send work
+        // Send 工作
         let job = Job::Work(Box::new(f));
         if let Err(_) = thread.sender.send(job) {
-            // Thread died unexpectedly - this is a critical error
+            // 线程 died unexpectedly - this is a critical 错误
             thread.jobs_in_flight.fetch_sub(1, Ordering::SeqCst);
             log::error!("Plugin executor thread {} has died", thread_idx);
         }
     }
 
-    /// Load a plugin: register it and execute the load work on its assigned thread
-    /// This combines registration + execution for plugin loading
+    /// 加载 a 插件: register it and execute the 加载 工作 on its 分配的 线程
+    /// This combines registration + execution for 插件 加载
     pub fn execute_plugin_load<F>(&self, plugin_id: u32, f: F)
     where
         F: FnOnce(
@@ -277,16 +277,16 @@ impl PinnedExecutor {
             ) + Send
             + 'static,
     {
-        // Register plugin and assign to a thread
+        // Register 插件 and 分配 to a 线程
         self.register_plugin(plugin_id);
 
-        // Execute the load work on the assigned thread
+        // Execute the 加载 工作 on the 分配的 线程
         self.execute_for_plugin(plugin_id, f);
     }
 
-    /// Unload a plugin: execute cleanup work, then unregister and potentially shrink pool
-    /// This combines cleanup execution + unregistration for plugin unloading
-    /// Requires Arc<Self> so we can clone it into the closure for unregistration
+    /// 卸载 a 插件: execute 清理 工作, then unregister and potentially shrink 池
+    /// This combines 清理 execution + unregistration for 插件 卸载
+    /// Requires ARC<Self> so we can clone it into the 闭包 for unregistration
     pub fn execute_plugin_unload(
         self: &Arc<Self>,
         plugin_id: u32,
@@ -303,17 +303,17 @@ impl PinnedExecutor {
         self.execute_for_plugin(
             plugin_id,
             move |senders, plugin_map, connected_clients, plugin_cache, engine| {
-                // Execute the cleanup work
+                // Execute the 清理 工作
                 f(senders, plugin_map, connected_clients, plugin_cache, engine);
 
-                // Unregister plugin and potentially shrink the pool
+                // Unregister 插件 and potentially shrink the 池
                 executor.unregister_plugin(plugin_id);
             },
         );
     }
 
-    /// Unregister a plugin and potentially shrink the pool
-    /// Called from wasm_bridge after plugin cleanup is complete
+    /// Unregister a 插件 and potentially shrink the 池
+    /// 调用的 from wasm_bridge after 插件 清理 is complete
     pub fn unregister_plugin(&self, plugin_id: u32) {
         let mut assignments = self.plugin_assignments.lock().unwrap();
         let mut thread_plugins = self.thread_plugins.lock().unwrap();
@@ -327,7 +327,7 @@ impl PinnedExecutor {
         drop(assignments);
         drop(thread_plugins);
 
-        // Try to shrink the pool
+        // 尝试 to shrink the 池
         self.try_shrink_pool();
     }
 
@@ -335,11 +335,11 @@ impl PinnedExecutor {
         let mut threads = self.execution_threads.lock().unwrap();
         let thread_plugins = self.thread_plugins.lock().unwrap();
 
-        // Find threads with no assigned plugins (except thread 0, always keep it)
+        // 查找 线程 with no 分配的 插件 (except 线程 0, always keep it)
         let threads_to_remove: Vec<usize> = threads
             .iter()
             .enumerate()
-            .skip(1) // Never remove thread 0
+            .skip(1) // Never 移除 线程 0
             .filter_map(|(idx, thread_opt)| {
                 if thread_opt.is_some() {
                     let has_plugins = thread_plugins
@@ -357,7 +357,7 @@ impl PinnedExecutor {
             })
             .collect();
 
-        // Shutdown and remove idle threads
+        // Shutdown and 移除 idle 线程
         for idx in threads_to_remove {
             if let Some(thread) = threads[idx].take() {
                 let _ = thread.sender.send(Job::Shutdown);
@@ -380,7 +380,7 @@ impl Drop for PinnedExecutor {
     fn drop(&mut self) {
         let mut threads = self.execution_threads.lock().unwrap();
 
-        // Send shutdown to all threads
+        // Send shutdown to all 线程
         for thread_opt in threads.iter_mut() {
             if let Some(thread) = thread_opt {
                 let _ = thread.sender.send(Job::Shutdown);
@@ -398,7 +398,7 @@ mod tests {
     use std::thread;
     use std::time::Duration;
 
-    // Test fixtures
+    // 测试 fixtures
     fn create_test_dependencies() -> (
         ThreadSenders,
         Arc<Mutex<PluginMap>>,
@@ -458,7 +458,7 @@ mod tests {
         ))
     }
 
-    // Helper to create a job that signals completion via channel
+    // Helper to 创建 a 任务 that signals completion via 通道
     fn make_signaling_job(
         tx: Sender<()>,
     ) -> impl FnOnce(
@@ -474,7 +474,7 @@ mod tests {
         }
     }
 
-    // Helper to verify thread assignment by capturing thread name in job
+    // Helper to 验证 线程 assignment by capturing 线程 name in 任务
     fn get_thread_name_for_plugin(executor: &Arc<PinnedExecutor>, plugin_id: u32) -> String {
         let (tx, rx) = channel();
         executor.execute_for_plugin(plugin_id, move |_s, _p, _c, _ca, _e| {
@@ -524,31 +524,31 @@ mod tests {
     fn test_new_thread_spawns_when_all_busy() {
         let executor = create_test_executor(3);
 
-        // Register plugin 1, gets thread 0
+        // Register 插件 1, gets 线程 0
         let thread_idx1 = executor.register_plugin(1);
         assert_eq!(thread_idx1, 0);
 
-        // Make thread 0 busy with a barrier
+        // Make 线程 0 busy with a barrier
         let barrier = Arc::new(Barrier::new(2));
         let barrier_clone = barrier.clone();
         executor.execute_for_plugin(1, move |_s, _p, _c, _ca, _e| {
             barrier_clone.wait();
         });
 
-        // Give the job a moment to start executing and block
+        // Give the 任务 a moment to 启动 executing and block
         thread::sleep(Duration::from_millis(50));
 
-        // Register plugin 2 while thread 0 is busy
+        // Register 插件 2 while 线程 0 is busy
         let thread_idx2 = executor.register_plugin(2);
         assert_eq!(
             thread_idx2, 1,
             "Plugin 2 should get new thread 1 when thread 0 is busy"
         );
 
-        // Verify thread count
+        // 验证 线程 count
         assert_eq!(executor.thread_count(), 2);
 
-        // Release barrier
+        // 释放 barrier
         barrier.wait();
     }
 
@@ -556,10 +556,10 @@ mod tests {
     fn test_respects_max_threads_limit() {
         let executor = create_test_executor(2);
 
-        // Register plugin 1, gets thread 0
+        // Register 插件 1, gets 线程 0
         executor.register_plugin(1);
 
-        // Make thread 0 busy
+        // Make 线程 0 busy
         let barrier1 = Arc::new(Barrier::new(2));
         let barrier1_clone = barrier1.clone();
         executor.execute_for_plugin(1, move |_s, _p, _c, _ca, _e| {
@@ -567,10 +567,10 @@ mod tests {
         });
         thread::sleep(Duration::from_millis(50));
 
-        // Register plugin 2, gets thread 1
+        // Register 插件 2, gets 线程 1
         executor.register_plugin(2);
 
-        // Make thread 1 busy
+        // Make 线程 1 busy
         let barrier2 = Arc::new(Barrier::new(2));
         let barrier2_clone = barrier2.clone();
         executor.execute_for_plugin(2, move |_s, _p, _c, _ca, _e| {
@@ -578,7 +578,7 @@ mod tests {
         });
         thread::sleep(Duration::from_millis(50));
 
-        // Register plugin 3 when all threads busy
+        // Register 插件 3 when all 线程 busy
         let thread_idx3 = executor.register_plugin(3);
         assert!(
             thread_idx3 == 0 || thread_idx3 == 1,
@@ -586,7 +586,7 @@ mod tests {
         );
         assert_eq!(executor.thread_count(), 2, "Should not exceed max_threads");
 
-        // Release barriers
+        // 释放 barriers
         barrier1.wait();
         barrier2.wait();
     }
@@ -606,12 +606,12 @@ mod tests {
     fn test_load_balancing_prefers_least_loaded() {
         let executor = create_test_executor(3);
 
-        // Register plugins 1, 2, 3 to thread 0 (when idle)
+        // Register 插件 1, 2, 3 to 线程 0 (when idle)
         executor.register_plugin(1);
         executor.register_plugin(2);
         executor.register_plugin(3);
 
-        // Make thread 0 busy
+        // Make 线程 0 busy
         let barrier = Arc::new(Barrier::new(2));
         let barrier_clone = barrier.clone();
         executor.execute_for_plugin(1, move |_s, _p, _c, _ca, _e| {
@@ -619,16 +619,16 @@ mod tests {
         });
         thread::sleep(Duration::from_millis(50));
 
-        // Register plugin 4 while thread 0 is busy (spawns thread 1)
+        // Register 插件 4 while 线程 0 is busy (spawns 线程 1)
         let thread_idx4 = executor.register_plugin(4);
         assert_eq!(thread_idx4, 1);
 
-        // Release barrier
+        // 释放 barrier
         barrier.wait();
         thread::sleep(Duration::from_millis(50));
 
-        // Register plugin 5 when both threads idle
-        // Thread 0 has 3 plugins, thread 1 has 1 plugin
+        // Register 插件 5 when both 线程 idle
+        // 线程 0 has 3 插件, 线程 1 has 1 插件
         let thread_idx5 = executor.register_plugin(5);
         assert_eq!(
             thread_idx5, 1,
@@ -640,10 +640,10 @@ mod tests {
     fn test_execute_for_plugin_runs_on_correct_thread() {
         let executor = create_test_executor(3);
 
-        // Register plugin 1 to thread 0
+        // Register 插件 1 to 线程 0
         executor.register_plugin(1);
 
-        // Make thread 0 busy to force plugin 2 to thread 1
+        // Make 线程 0 busy to force 插件 2 to 线程 1
         let barrier = Arc::new(Barrier::new(2));
         let barrier_clone = barrier.clone();
         executor.execute_for_plugin(1, move |_s, _p, _c, _ca, _e| {
@@ -651,14 +651,14 @@ mod tests {
         });
         thread::sleep(Duration::from_millis(50));
 
-        // Register plugin 2 to thread 1
+        // Register 插件 2 to 线程 1
         executor.register_plugin(2);
 
-        // Release barrier
+        // 释放 barrier
         barrier.wait();
         thread::sleep(Duration::from_millis(50));
 
-        // Get thread names for both plugins
+        // Get 线程 names for both 插件
         let thread_name1 = get_thread_name_for_plugin(&executor, 1);
         let thread_name2 = get_thread_name_for_plugin(&executor, 2);
 
@@ -671,10 +671,10 @@ mod tests {
         let executor = create_test_executor(4);
         let (tx, rx) = channel();
 
-        // Execute job for unregistered plugin
+        // Execute 任务 for unregistered 插件
         executor.execute_for_plugin(999, make_signaling_job(tx));
 
-        // Try to receive with timeout - should timeout
+        // 尝试 to receive with 超时 - should 超时
         let result = rx.recv_timeout(Duration::from_millis(100));
         assert!(
             result.is_err(),
@@ -690,7 +690,7 @@ mod tests {
         let order = Arc::new(Mutex::new(Vec::new()));
         let (tx, rx) = channel();
 
-        // Execute 3 jobs for plugin 1
+        // Execute 3 任务 for 插件 1
         for i in 1..=3 {
             let order_clone = order.clone();
             let tx_clone = tx.clone();
@@ -700,7 +700,7 @@ mod tests {
             });
         }
 
-        // Wait for all 3 jobs to complete
+        // Wait for all 3 任务 to complete
         for _ in 0..3 {
             rx.recv_timeout(Duration::from_secs(5))
                 .expect("Job should complete");
@@ -729,10 +729,10 @@ mod tests {
     fn test_concurrent_jobs_on_different_threads() {
         let executor = create_test_executor(3);
 
-        // Register plugin 1 to thread 0
+        // Register 插件 1 to 线程 0
         executor.register_plugin(1);
 
-        // Make thread 0 busy to force plugin 2 to thread 1
+        // Make 线程 0 busy to force 插件 2 to 线程 1
         let barrier = Arc::new(Barrier::new(2));
         let barrier_clone = barrier.clone();
         executor.execute_for_plugin(1, move |_s, _p, _c, _ca, _e| {
@@ -740,15 +740,15 @@ mod tests {
         });
         thread::sleep(Duration::from_millis(50));
 
-        // Register plugin 2 to thread 1
+        // Register 插件 2 to 线程 1
         executor.register_plugin(2);
 
-        // Release barrier
+        // 释放 barrier
         barrier.wait();
         thread::sleep(Duration::from_millis(50));
 
-        // Execute jobs on both threads concurrently
-        let sync_barrier = Arc::new(Barrier::new(3)); // 2 jobs + test thread
+        // Execute 任务 on both 线程 concurrently
+        let sync_barrier = Arc::new(Barrier::new(3)); // 2 任务 + 测试 线程
         let (tx1, rx1) = channel();
         let (tx2, rx2) = channel();
 
@@ -764,7 +764,7 @@ mod tests {
             tx2.send(()).unwrap();
         });
 
-        // Release both jobs simultaneously
+        // 释放 both 任务 simultaneously
         sync_barrier.wait();
 
         // Both should complete
@@ -779,11 +779,11 @@ mod tests {
         let (tx, rx) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx));
 
-        // Wait for load to complete
+        // Wait for 加载 to complete
         rx.recv_timeout(Duration::from_secs(5))
             .expect("Load should complete");
 
-        // Verify plugin is registered
+        // 验证 插件 is registered
         let thread_idx = executor.register_plugin(1);
         assert_eq!(thread_idx, 0, "Plugin should already be registered");
     }
@@ -792,14 +792,14 @@ mod tests {
     fn test_execute_plugin_unload_runs_cleanup_before_unregister() {
         let executor = create_test_executor(4);
 
-        // Load plugin
+        // 加载 插件
         let (tx_load, rx_load) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx_load));
         rx_load
             .recv_timeout(Duration::from_secs(5))
             .expect("Load should complete");
 
-        // Unload plugin with cleanup
+        // 卸载 插件 with 清理
         let counter = Arc::new(AtomicUsize::new(0));
         let counter_clone = counter.clone();
         let (tx_unload, rx_unload) = channel();
@@ -809,18 +809,18 @@ mod tests {
             tx_unload.send(()).unwrap();
         });
 
-        // Wait for unload to complete
+        // Wait for 卸载 to complete
         rx_unload
             .recv_timeout(Duration::from_secs(5))
             .expect("Unload should complete");
 
-        // Verify cleanup ran
+        // 验证 清理 ran
         assert_eq!(counter.load(Ordering::SeqCst), 1, "Cleanup should have run");
 
         // Give unregister a moment to complete
         thread::sleep(Duration::from_millis(100));
 
-        // Plugin should be unregistered - registering again should assign new thread
+        // 插件 should be unregistered - registering again should 分配 new 线程
         let thread_idx = executor.register_plugin(1);
         assert_eq!(thread_idx, 0, "Plugin should be re-registered to thread 0");
     }
@@ -829,14 +829,14 @@ mod tests {
     fn test_unload_sequence_is_correct() {
         let executor = create_test_executor(4);
 
-        // Load plugin
+        // 加载 插件
         let (tx_load, rx_load) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx_load));
         rx_load
             .recv_timeout(Duration::from_secs(5))
             .expect("Load should complete");
 
-        // Unload with sequence tracking
+        // 卸载 with sequence 跟踪
         let sequence = Arc::new(Mutex::new(Vec::new()));
         let sequence_clone = sequence.clone();
         let (tx_unload, rx_unload) = channel();
@@ -846,7 +846,7 @@ mod tests {
             tx_unload.send(()).unwrap();
         });
 
-        // Wait for unload to complete
+        // Wait for 卸载 to complete
         rx_unload
             .recv_timeout(Duration::from_secs(5))
             .expect("Unload should complete");
@@ -859,13 +859,13 @@ mod tests {
     fn test_shrink_removes_idle_threads() {
         let executor = create_test_executor(4);
 
-        // Load plugin 1 to thread 0
+        // 加载 插件 1 to 线程 0
         let (tx1, rx1) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx1));
         rx1.recv_timeout(Duration::from_secs(5))
             .expect("Load should complete");
 
-        // Make thread 0 busy to force plugin 2 to thread 1
+        // Make 线程 0 busy to force 插件 2 to 线程 1
         let barrier = Arc::new(Barrier::new(2));
         let barrier_clone = barrier.clone();
         executor.execute_for_plugin(1, move |_s, _p, _c, _ca, _e| {
@@ -873,20 +873,20 @@ mod tests {
         });
         thread::sleep(Duration::from_millis(50));
 
-        // Load plugin 2 to thread 1
+        // 加载 插件 2 to 线程 1
         let (tx2, rx2) = channel();
         executor.execute_plugin_load(2, make_signaling_job(tx2));
         rx2.recv_timeout(Duration::from_secs(5))
             .expect("Load should complete");
 
-        // Release barrier
+        // 释放 barrier
         barrier.wait();
         thread::sleep(Duration::from_millis(50));
 
         let thread_count_before = executor.thread_count();
         assert!(thread_count_before >= 2, "Should have at least 2 threads");
 
-        // Unload plugin 2
+        // 卸载 插件 2
         let (tx_unload2, rx_unload2) = channel();
         executor.execute_plugin_unload(2, make_signaling_job(tx_unload2));
         rx_unload2
@@ -896,7 +896,7 @@ mod tests {
         // Give shrinking a moment to complete
         thread::sleep(Duration::from_millis(100));
 
-        // Thread count should decrease after unloading
+        // 线程 count should decrease after 卸载
         let thread_count_after = executor.thread_count();
         assert!(
             thread_count_after < thread_count_before,
@@ -909,7 +909,7 @@ mod tests {
     fn test_thread_zero_never_removed() {
         let executor = create_test_executor(4);
 
-        // Load a plugin and then unload it
+        // 加载 a 插件 and then 卸载 it
         let (tx_load, rx_load) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx_load));
         rx_load
@@ -925,7 +925,7 @@ mod tests {
         // Give shrinking a moment
         thread::sleep(Duration::from_millis(100));
 
-        // Thread 0 should remain
+        // 线程 0 should remain
         assert!(
             executor.thread_count() >= 1,
             "Thread 0 should never be removed"
@@ -936,13 +936,13 @@ mod tests {
     fn test_active_threads_not_removed() {
         let executor = create_test_executor(4);
 
-        // Load plugin 1 to thread 0
+        // 加载 插件 1 to 线程 0
         let (tx1, rx1) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx1));
         rx1.recv_timeout(Duration::from_secs(5))
             .expect("Load should complete");
 
-        // Force plugin 2 to thread 1 by making thread 0 busy
+        // Force 插件 2 to 线程 1 by making 线程 0 busy
         let barrier = Arc::new(Barrier::new(2));
         let barrier_clone = barrier.clone();
         executor.execute_for_plugin(1, move |_s, _p, _c, _ca, _e| {
@@ -964,7 +964,7 @@ mod tests {
             "Should have at least 2 threads with 2 plugins"
         );
 
-        // Unload plugin 2
+        // 卸载 插件 2
         let (tx_unload, rx_unload) = channel();
         executor.execute_plugin_unload(2, make_signaling_job(tx_unload));
         rx_unload
@@ -973,7 +973,7 @@ mod tests {
 
         thread::sleep(Duration::from_millis(100));
 
-        // Plugin 1's thread should still work (verify active threads not affected)
+        // 插件 1's 线程 should still 工作 (验证 活动 线程 not affected)
         let (tx_test, rx_test) = channel();
         executor.execute_for_plugin(1, make_signaling_job(tx_test));
         assert!(
@@ -981,7 +981,7 @@ mod tests {
             "Plugin 1's thread should still work"
         );
 
-        // Thread count should decrease after unloading
+        // 线程 count should decrease after 卸载
         let thread_count_after = executor.thread_count();
         assert!(
             thread_count_after < thread_count_with_both,
@@ -994,13 +994,13 @@ mod tests {
     fn test_shrink_does_not_affect_remaining_threads() {
         let executor = create_test_executor(4);
 
-        // Load plugin 1 to thread 0
+        // 加载 插件 1 to 线程 0
         let (tx1, rx1) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx1));
         rx1.recv_timeout(Duration::from_secs(5))
             .expect("Load should complete");
 
-        // Force plugin 2 to thread 1
+        // Force 插件 2 to 线程 1
         let barrier = Arc::new(Barrier::new(2));
         let barrier_clone = barrier.clone();
         executor.execute_for_plugin(1, move |_s, _p, _c, _ca, _e| {
@@ -1016,7 +1016,7 @@ mod tests {
         barrier.wait();
         thread::sleep(Duration::from_millis(50));
 
-        // Unload plugin 2 (shrinks pool)
+        // 卸载 插件 2 (shrinks 池)
         let (tx_unload, rx_unload) = channel();
         executor.execute_plugin_unload(2, make_signaling_job(tx_unload));
         rx_unload
@@ -1025,7 +1025,7 @@ mod tests {
 
         thread::sleep(Duration::from_millis(100));
 
-        // Execute job for plugin 1
+        // Execute 任务 for 插件 1
         let (tx_test, rx_test) = channel();
         executor.execute_for_plugin(1, make_signaling_job(tx_test));
 
@@ -1039,7 +1039,7 @@ mod tests {
     fn test_drop_cleans_up_gracefully() {
         let executor = create_test_executor(4);
 
-        // Load multiple plugins on different threads
+        // 加载 multiple 插件 on different 线程
         let (tx1, rx1) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx1));
         rx1.recv_timeout(Duration::from_secs(5))
@@ -1059,10 +1059,10 @@ mod tests {
 
         barrier.wait();
 
-        // Drop executor
+        // 丢弃 executor
         drop(executor);
 
-        // Test completes without panic
+        // 测试 completes without panic
     }
 
     #[test]
@@ -1076,13 +1076,13 @@ mod tests {
             barrier_clone.wait();
         });
 
-        // Drop executor while job is blocked
+        // 丢弃 executor while 任务 is blocked
         drop(executor);
 
-        // Release barrier (job may or may not complete, but shouldn't panic)
+        // 释放 barrier (任务 may or may not complete, but shouldn't panic)
         barrier.wait();
 
-        // Test completes without panic
+        // 测试 completes without panic
     }
 
     #[test]
@@ -1106,10 +1106,10 @@ mod tests {
     fn test_unregister_nonexistent_plugin() {
         let executor = create_test_executor(4);
 
-        // Unregister non-existent plugin
+        // Unregister non-existent 插件
         executor.unregister_plugin(999);
 
-        // Executor should still work
+        // Executor should still 工作
         let (tx, rx) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx));
         assert!(rx.recv_timeout(Duration::from_secs(5)).is_ok());
@@ -1119,7 +1119,7 @@ mod tests {
     fn test_max_threads_one() {
         let executor = create_test_executor(1);
 
-        // Register multiple plugins
+        // Register multiple 插件
         let thread_idx1 = executor.register_plugin(1);
         let thread_idx2 = executor.register_plugin(2);
         let thread_idx3 = executor.register_plugin(3);
@@ -1134,13 +1134,13 @@ mod tests {
     fn test_rapid_load_unload_cycles() {
         let executor = create_test_executor(4);
 
-        // Load plugin 1
+        // 加载 插件 1
         let (tx1, rx1) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx1));
         rx1.recv_timeout(Duration::from_secs(5))
             .expect("Load should complete");
 
-        // Unload plugin 1
+        // 卸载 插件 1
         let (tx2, rx2) = channel();
         executor.execute_plugin_unload(1, make_signaling_job(tx2));
         rx2.recv_timeout(Duration::from_secs(5))
@@ -1148,13 +1148,13 @@ mod tests {
 
         thread::sleep(Duration::from_millis(100));
 
-        // Load plugin 1 again
+        // 加载 插件 1 again
         let (tx3, rx3) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx3));
         rx3.recv_timeout(Duration::from_secs(5))
             .expect("Second load should complete");
 
-        // Execute job for plugin 1
+        // Execute 任务 for 插件 1
         let (tx4, rx4) = channel();
         executor.execute_for_plugin(1, make_signaling_job(tx4));
         assert!(
@@ -1168,13 +1168,13 @@ mod tests {
         let executor = create_test_executor(4);
         let (tx, rx) = channel();
 
-        // Load 20 plugins
+        // 加载 20 插件
         for i in 1..=20 {
             let tx_clone = tx.clone();
             executor.execute_plugin_load(i, make_signaling_job(tx_clone));
         }
 
-        // Collect 20 completion signals
+        // 收集 20 completion signals
         for _ in 1..=20 {
             rx.recv_timeout(Duration::from_secs(5))
                 .expect("Load should complete");
@@ -1191,19 +1191,19 @@ mod tests {
         let executor = create_test_executor(4);
         let (tx, rx) = channel();
 
-        // Load 5 plugins
+        // 加载 5 插件
         for i in 1..=5 {
             let tx_clone = tx.clone();
             executor.execute_plugin_load(i, make_signaling_job(tx_clone));
         }
 
-        // Wait for all loads
+        // Wait for all 加载
         for _ in 0..5 {
             rx.recv_timeout(Duration::from_secs(5))
                 .expect("Load should complete");
         }
 
-        // Execute 2 jobs per plugin (10 total)
+        // Execute 2 任务 per 插件 (10 total)
         for i in 1..=5 {
             for _ in 0..2 {
                 let tx_clone = tx.clone();
@@ -1211,7 +1211,7 @@ mod tests {
             }
         }
 
-        // Wait for all jobs
+        // Wait for all 任务
         for _ in 0..10 {
             rx.recv_timeout(Duration::from_secs(5))
                 .expect("Job should complete");
@@ -1219,7 +1219,7 @@ mod tests {
 
         let thread_count_before = executor.thread_count();
 
-        // Unload 3 plugins
+        // 卸载 3 插件
         for i in 1..=3 {
             let tx_clone = tx.clone();
             executor.execute_plugin_unload(i, make_signaling_job(tx_clone));
@@ -1233,14 +1233,14 @@ mod tests {
 
         thread::sleep(Duration::from_millis(100));
 
-        // Thread count should decrease or stay the same
+        // 线程 count should decrease or stay the same
         let thread_count_after = executor.thread_count();
         assert!(
             thread_count_after <= thread_count_before,
             "Thread count should decrease after unloads"
         );
 
-        // Execute jobs for remaining plugins
+        // Execute 任务 for remaining 插件
         for i in 4..=5 {
             let tx_clone = tx.clone();
             executor.execute_for_plugin(i, make_signaling_job(tx_clone));
@@ -1251,7 +1251,7 @@ mod tests {
                 .expect("Job should complete");
         }
 
-        // Drop executor
+        // 丢弃 executor
         drop(executor);
     }
 
@@ -1260,7 +1260,7 @@ mod tests {
         let executor = create_test_executor(4);
         let (tx, rx) = channel();
 
-        // Load plugins 1, 2, 3
+        // 加载 插件 1, 2, 3
         for i in 1..=3 {
             let tx_clone = tx.clone();
             executor.execute_plugin_load(i, make_signaling_job(tx_clone));
@@ -1270,7 +1270,7 @@ mod tests {
                 .expect("Load should complete");
         }
 
-        // Execute jobs for each
+        // Execute 任务 for each
         for i in 1..=3 {
             let tx_clone = tx.clone();
             executor.execute_for_plugin(i, make_signaling_job(tx_clone));
@@ -1280,7 +1280,7 @@ mod tests {
                 .expect("Job should complete");
         }
 
-        // Unload plugin 2
+        // 卸载 插件 2
         let tx_clone = tx.clone();
         executor.execute_plugin_unload(2, make_signaling_job(tx_clone));
         rx.recv_timeout(Duration::from_secs(5))
@@ -1288,7 +1288,7 @@ mod tests {
 
         thread::sleep(Duration::from_millis(100));
 
-        // Load plugins 4, 5
+        // 加载 插件 4, 5
         for i in 4..=5 {
             let tx_clone = tx.clone();
             executor.execute_plugin_load(i, make_signaling_job(tx_clone));
@@ -1298,7 +1298,7 @@ mod tests {
                 .expect("Load should complete");
         }
 
-        // Execute jobs for plugins 1, 3, 4, 5
+        // Execute 任务 for 插件 1, 3, 4, 5
         for i in &[1, 3, 4, 5] {
             let tx_clone = tx.clone();
             executor.execute_for_plugin(*i, make_signaling_job(tx_clone));
@@ -1308,7 +1308,7 @@ mod tests {
                 .expect("Job should complete");
         }
 
-        // Unload plugins 1, 3
+        // 卸载 插件 1, 3
         for i in &[1, 3] {
             let tx_clone = tx.clone();
             executor.execute_plugin_unload(*i, make_signaling_job(tx_clone));
@@ -1320,7 +1320,7 @@ mod tests {
 
         thread::sleep(Duration::from_millis(100));
 
-        // Verify thread count reflects active plugins (4 and 5)
+        // 验证 线程 count reflects 活动 插件 (4 and 5)
         assert!(
             executor.thread_count() >= 1,
             "Should have at least thread 0"

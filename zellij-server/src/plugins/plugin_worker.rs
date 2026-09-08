@@ -42,7 +42,7 @@ impl RunningWorker {
 }
 
 pub enum MessageToWorker {
-    Message(String, String), // message, payload
+    Message(String, String), // 消息, payload
     Exit,
 }
 

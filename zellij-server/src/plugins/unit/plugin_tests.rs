@@ -673,8 +673,8 @@ fn create_plugin_thread_with_background_jobs_receiver(
 
 lazy_static! {
     static ref PLUGIN_FIXTURE: String = format!(
-        // to populate this file, make sure to run the build-e2e CI job
-        // (or compile the fixture plugin and copy the resulting .wasm blob to the below location)
+        // to populate this 文件, make sure to run the 构建-e2e CI 任务
+        // (or 编译 the fixture 插件 and 复制 the resulting .WASM blob to the below location)
         "{}/../target/e2e-data/plugins/fixture-plugin-for-tests.wasm",
         std::env::var_os("CARGO_MANIFEST_DIR")
             .unwrap()
@@ -685,12 +685,12 @@ lazy_static! {
 #[test]
 #[ignore]
 pub fn load_new_plugin_from_hd() {
-    // here we load our fixture plugin into the plugin thread, and then send it an update message
-    // expecting tha thte plugin will log the received event and render it later after the update
-    // message (this is what the fixture plugin does)
-    // we then listen on our mock screen receiver to make sure we got a PluginBytes instruction
-    // that contains said render, and assert against it
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
+    // here we 加载 our fixture 插件 into the 插件 线程, and then send it an update 消息
+    // 期望 tha thte 插件 will 日志 the received 事件 and 渲染 it later after the update
+    // 消息 (this is what the fixture 插件 does)
+    // we then 监听 on our 模拟 屏幕 接收者 to make sure we got a PluginBytes instruction
+    // that contains said 渲染, and 断言 against it
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) = create_plugin_thread(None, None);
@@ -743,8 +743,8 @@ pub fn load_new_plugin_from_hd() {
         None,
         Some(client_id),
         Event::InputReceived,
-    )])); // will be cached and sent to the plugin once it's loaded
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    )])); // will be 缓存的 and sent to the 插件 once it's 加载的
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let plugin_bytes_event = received_screen_instructions
         .lock()
@@ -770,12 +770,12 @@ pub fn load_new_plugin_from_hd() {
 #[test]
 #[ignore]
 pub fn load_new_plugin_with_plugin_alias() {
-    // here we load our fixture plugin into the plugin thread, and then send it an update message
-    // expecting tha thte plugin will log the received event and render it later after the update
-    // message (this is what the fixture plugin does)
-    // we then listen on our mock screen receiver to make sure we got a PluginBytes instruction
-    // that contains said render, and assert against it
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
+    // here we 加载 our fixture 插件 into the 插件 线程, and then send it an update 消息
+    // 期望 tha thte 插件 will 日志 the received 事件 and 渲染 it later after the update
+    // 消息 (this is what the fixture 插件 does)
+    // we then 监听 on our 模拟 屏幕 接收者 to make sure we got a PluginBytes instruction
+    // that contains said 渲染, and 断言 against it
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) = create_plugin_thread(None, None);
@@ -828,8 +828,8 @@ pub fn load_new_plugin_with_plugin_alias() {
         None,
         Some(client_id),
         Event::InputReceived,
-    )])); // will be cached and sent to the plugin once it's loaded
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    )])); // will be 缓存的 and sent to the 插件 once it's 加载的
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let plugin_bytes_event = received_screen_instructions
         .lock()
@@ -855,8 +855,8 @@ pub fn load_new_plugin_with_plugin_alias() {
 #[test]
 #[ignore]
 pub fn plugin_workers() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let (plugin_thread_sender, screen_receiver, teardown) = create_plugin_thread(None, None);
     let plugin_should_float = Some(false);
     let plugin_host_folder = PathBuf::from(temp_folder.path());
@@ -905,16 +905,16 @@ pub fn plugin_workers() {
         None,
     ));
     std::thread::sleep(std::time::Duration::from_millis(500));
-    // we send a SystemClipboardFailure to trigger the custom handler in the fixture plugin that
-    // will send a message to the worker and in turn back to the plugin to be rendered, so we know
-    // that this cycle is working
+    // we send a SystemClipboardFailure to trigger the 自定义 处理器 in the fixture 插件 that
+    // will send a 消息 to the 工作线程 and in turn back to the 插件 to be 渲染的, so we know
+    // that this cycle is 工作
     std::thread::sleep(std::time::Duration::from_millis(500));
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
         Event::SystemClipboardFailure,
-    )])); // will be cached and sent to the plugin once it's loaded
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    )])); // will be 缓存的 and sent to the 插件 once it's 加载的
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let plugin_bytes_event = received_screen_instructions
         .lock()
@@ -940,8 +940,8 @@ pub fn plugin_workers() {
 #[test]
 #[ignore]
 pub fn plugin_workers_persist_state() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let (plugin_thread_sender, screen_receiver, teardown) = create_plugin_thread(None, None);
     let plugin_should_float = Some(false);
     let plugin_host_folder = PathBuf::from(temp_folder.path());
@@ -990,13 +990,13 @@ pub fn plugin_workers_persist_state() {
         None,
     ));
     std::thread::sleep(std::time::Duration::from_millis(500));
-    // we send a SystemClipboardFailure to trigger the custom handler in the fixture plugin that
-    // will send a message to the worker and in turn back to the plugin to be rendered, so we know
-    // that this cycle is working
-    // we do this a second time so that the worker will log the first message on its own state and
-    // then send us the "received 2 messages" indication we check for below, letting us know it
-    // managed to persist its own state and act upon it
-    //std::thread::sleep(std::time::Duration::from_millis(500));
+    // we send a SystemClipboardFailure to trigger the 自定义 处理器 in the fixture 插件 that
+    // will send a 消息 to the 工作线程 and in turn back to the 插件 to be 渲染的, so we know
+    // that this cycle is 工作
+    // we do this a second time so that the 工作线程 will 日志 the first 消息 on its own 状态 and
+    // then send us the "received 2 消息" indication we 检查 for below, letting us know it
+    // managed to 持久化 its own 状态 and act upon it
+    //std::线程::sleep(std::time::Duration::from_millis(500));
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -1008,7 +1008,7 @@ pub fn plugin_workers_persist_state() {
         Some(client_id),
         Event::SystemClipboardFailure,
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let plugin_bytes_event = received_screen_instructions
         .lock()
@@ -1034,8 +1034,8 @@ pub fn plugin_workers_persist_state() {
 #[test]
 #[ignore]
 pub fn can_subscribe_to_hd_events() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -1084,14 +1084,14 @@ pub fn can_subscribe_to_hd_events() {
         None,
         None,
     ));
-    // extra long time because we only start the fs watcher on plugin load
+    // extra long time because we only 启动 the fs watcher on 插件 加载
     std::thread::sleep(std::time::Duration::from_millis(5000));
     std::fs::OpenOptions::new()
         .create(true)
         .write(true)
         .open(PathBuf::from(temp_folder.path()).join("test1"))
         .unwrap();
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let plugin_bytes_event = received_screen_instructions
         .lock()
@@ -1117,8 +1117,8 @@ pub fn can_subscribe_to_hd_events() {
 #[test]
 #[ignore]
 pub fn switch_to_mode_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, server_receiver, screen_receiver, teardown) =
@@ -1178,10 +1178,10 @@ pub fn switch_to_mode_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('a'))), // this triggers a SwitchToMode(Tab) command in the fixture
-                                                              // plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('a'))), // this triggers a SwitchToMode(标签页) 命令 in the fixture
+                                                              // 插件
     )]));
-    server_thread.join().unwrap(); // this might take a while if the cache is cold
+    server_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let switch_to_mode_event = received_server_instructions
         .lock()
@@ -1201,8 +1201,8 @@ pub fn switch_to_mode_plugin_command() {
 #[test]
 #[ignore]
 pub fn switch_to_mode_plugin_command_permission_denied() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -1255,10 +1255,10 @@ pub fn switch_to_mode_plugin_command_permission_denied() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('a'))), // this triggers a SwitchToMode(Tab) command in the fixture
-                                                              // plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('a'))), // this triggers a SwitchToMode(标签页) 命令 in the fixture
+                                                              // 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let switch_to_mode_event = received_screen_instructions
         .lock()
@@ -1278,8 +1278,8 @@ pub fn switch_to_mode_plugin_command_permission_denied() {
 #[test]
 #[ignore]
 pub fn new_tabs_with_layout_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -1332,10 +1332,10 @@ pub fn new_tabs_with_layout_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('b'))), // this triggers a new_tabs_with_layout command in the fixture
-                                                              // plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('b'))), // this triggers a new_tabs_with_layout 命令 in the fixture
+                                                              // 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let first_new_tab_event = received_screen_instructions
         .lock()
@@ -1369,8 +1369,8 @@ pub fn new_tabs_with_layout_plugin_command() {
 #[test]
 #[ignore]
 pub fn new_tab_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -1423,10 +1423,10 @@ pub fn new_tab_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('c'))), // this triggers a new_tab command in the fixture
-                                                              // plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('c'))), // this triggers a new_tab 命令 in the fixture
+                                                              // 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -1446,8 +1446,8 @@ pub fn new_tab_plugin_command() {
 #[test]
 #[ignore]
 pub fn go_to_next_tab_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -1500,9 +1500,9 @@ pub fn go_to_next_tab_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('d'))), // this triggers the event in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('d'))), // this triggers the 事件 in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -1522,8 +1522,8 @@ pub fn go_to_next_tab_plugin_command() {
 #[test]
 #[ignore]
 pub fn go_to_previous_tab_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -1576,9 +1576,9 @@ pub fn go_to_previous_tab_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('e'))), // this triggers the event in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('e'))), // this triggers the 事件 in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -1598,8 +1598,8 @@ pub fn go_to_previous_tab_plugin_command() {
 #[test]
 #[ignore]
 pub fn resize_focused_pane_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -1652,9 +1652,9 @@ pub fn resize_focused_pane_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('f'))), // this triggers the event in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('f'))), // this triggers the 事件 in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -1674,8 +1674,8 @@ pub fn resize_focused_pane_plugin_command() {
 #[test]
 #[ignore]
 pub fn resize_focused_pane_with_direction_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -1728,9 +1728,9 @@ pub fn resize_focused_pane_with_direction_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('g'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('g'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -1750,8 +1750,8 @@ pub fn resize_focused_pane_with_direction_plugin_command() {
 #[test]
 #[ignore]
 pub fn focus_next_pane_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -1804,9 +1804,9 @@ pub fn focus_next_pane_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('h'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('h'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -1826,8 +1826,8 @@ pub fn focus_next_pane_plugin_command() {
 #[test]
 #[ignore]
 pub fn focus_previous_pane_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -1880,9 +1880,9 @@ pub fn focus_previous_pane_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('i'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('i'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -1902,8 +1902,8 @@ pub fn focus_previous_pane_plugin_command() {
 #[test]
 #[ignore]
 pub fn focus_last_pane_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -1960,9 +1960,9 @@ pub fn focus_last_pane_plugin_command() {
             KeyWithModifier::new(BareKey::Char('l'))
                 .with_alt_modifier()
                 .with_ctrl_modifier(),
-        ), // this triggers the enent in the fixture plugin
+        ), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -1982,8 +1982,8 @@ pub fn focus_last_pane_plugin_command() {
 #[test]
 #[ignore]
 pub fn move_focus_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -2036,9 +2036,9 @@ pub fn move_focus_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('j'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('j'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -2058,8 +2058,8 @@ pub fn move_focus_plugin_command() {
 #[test]
 #[ignore]
 pub fn move_focus_or_tab_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -2112,9 +2112,9 @@ pub fn move_focus_or_tab_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('k'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('k'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -2134,8 +2134,8 @@ pub fn move_focus_or_tab_plugin_command() {
 #[test]
 #[ignore]
 pub fn edit_scrollback_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -2188,9 +2188,9 @@ pub fn edit_scrollback_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('m'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('m'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -2210,8 +2210,8 @@ pub fn edit_scrollback_plugin_command() {
 #[test]
 #[ignore]
 pub fn write_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -2264,9 +2264,9 @@ pub fn write_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('n'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('n'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -2286,8 +2286,8 @@ pub fn write_plugin_command() {
 #[test]
 #[ignore]
 pub fn write_chars_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -2340,9 +2340,9 @@ pub fn write_chars_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('o'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('o'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -2362,8 +2362,8 @@ pub fn write_chars_plugin_command() {
 #[test]
 #[ignore]
 pub fn toggle_tab_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -2416,9 +2416,9 @@ pub fn toggle_tab_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('p'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('p'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -2438,8 +2438,8 @@ pub fn toggle_tab_plugin_command() {
 #[test]
 #[ignore]
 pub fn move_pane_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -2492,9 +2492,9 @@ pub fn move_pane_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('q'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('q'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -2514,8 +2514,8 @@ pub fn move_pane_plugin_command() {
 #[test]
 #[ignore]
 pub fn move_pane_with_direction_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -2568,9 +2568,9 @@ pub fn move_pane_with_direction_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('r'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('r'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -2590,8 +2590,8 @@ pub fn move_pane_with_direction_plugin_command() {
 #[test]
 #[ignore]
 pub fn clear_screen_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -2645,9 +2645,9 @@ pub fn clear_screen_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('s'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('s'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -2667,8 +2667,8 @@ pub fn clear_screen_plugin_command() {
 #[test]
 #[ignore]
 pub fn scroll_up_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -2722,9 +2722,9 @@ pub fn scroll_up_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('t'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('t'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -2744,8 +2744,8 @@ pub fn scroll_up_plugin_command() {
 #[test]
 #[ignore]
 pub fn scroll_down_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -2798,9 +2798,9 @@ pub fn scroll_down_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('u'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('u'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -2820,8 +2820,8 @@ pub fn scroll_down_plugin_command() {
 #[test]
 #[ignore]
 pub fn scroll_to_top_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -2874,9 +2874,9 @@ pub fn scroll_to_top_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('v'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('v'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -2896,8 +2896,8 @@ pub fn scroll_to_top_plugin_command() {
 #[test]
 #[ignore]
 pub fn scroll_to_bottom_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -2950,9 +2950,9 @@ pub fn scroll_to_bottom_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('w'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('w'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -2972,8 +2972,8 @@ pub fn scroll_to_bottom_plugin_command() {
 #[test]
 #[ignore]
 pub fn page_scroll_up_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -3026,9 +3026,9 @@ pub fn page_scroll_up_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('x'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('x'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -3048,8 +3048,8 @@ pub fn page_scroll_up_plugin_command() {
 #[test]
 #[ignore]
 pub fn page_scroll_down_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -3102,9 +3102,9 @@ pub fn page_scroll_down_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('y'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('y'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -3124,8 +3124,8 @@ pub fn page_scroll_down_plugin_command() {
 #[test]
 #[ignore]
 pub fn toggle_focus_fullscreen_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -3178,9 +3178,9 @@ pub fn toggle_focus_fullscreen_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('z'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('z'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -3200,8 +3200,8 @@ pub fn toggle_focus_fullscreen_plugin_command() {
 #[test]
 #[ignore]
 pub fn toggle_pane_frames_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -3254,9 +3254,9 @@ pub fn toggle_pane_frames_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('1'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('1'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -3276,8 +3276,8 @@ pub fn toggle_pane_frames_plugin_command() {
 #[test]
 #[ignore]
 pub fn toggle_pane_embed_or_eject_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -3330,9 +3330,9 @@ pub fn toggle_pane_embed_or_eject_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('2'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('2'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -3584,8 +3584,8 @@ pub fn toggle_floating_panes_with_tab_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn undo_rename_pane_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -3638,9 +3638,9 @@ pub fn undo_rename_pane_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('3'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('3'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -3660,8 +3660,8 @@ pub fn undo_rename_pane_plugin_command() {
 #[test]
 #[ignore]
 pub fn close_focus_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -3714,9 +3714,9 @@ pub fn close_focus_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('4'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('4'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -3736,8 +3736,8 @@ pub fn close_focus_plugin_command() {
 #[test]
 #[ignore]
 pub fn toggle_active_tab_sync_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -3790,9 +3790,9 @@ pub fn toggle_active_tab_sync_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('5'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('5'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -3812,8 +3812,8 @@ pub fn toggle_active_tab_sync_plugin_command() {
 #[test]
 #[ignore]
 pub fn close_focused_tab_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -3866,9 +3866,9 @@ pub fn close_focused_tab_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('6'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('6'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -3888,8 +3888,8 @@ pub fn close_focused_tab_plugin_command() {
 #[test]
 #[ignore]
 pub fn undo_rename_tab_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -3942,9 +3942,9 @@ pub fn undo_rename_tab_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('7'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('7'))), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -3964,8 +3964,8 @@ pub fn undo_rename_tab_plugin_command() {
 #[test]
 #[ignore]
 pub fn previous_swap_layout_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -4018,9 +4018,9 @@ pub fn previous_swap_layout_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('a')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('a')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -4040,8 +4040,8 @@ pub fn previous_swap_layout_plugin_command() {
 #[test]
 #[ignore]
 pub fn next_swap_layout_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -4094,9 +4094,9 @@ pub fn next_swap_layout_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('b')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('b')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -4116,8 +4116,8 @@ pub fn next_swap_layout_plugin_command() {
 #[test]
 #[ignore]
 pub fn go_to_tab_name_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -4170,9 +4170,9 @@ pub fn go_to_tab_name_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('c')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('c')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -4192,8 +4192,8 @@ pub fn go_to_tab_name_plugin_command() {
 #[test]
 #[ignore]
 pub fn focus_or_create_tab_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -4246,9 +4246,9 @@ pub fn focus_or_create_tab_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('d')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('d')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -4268,8 +4268,8 @@ pub fn focus_or_create_tab_plugin_command() {
 #[test]
 #[ignore]
 pub fn go_to_tab() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -4322,9 +4322,9 @@ pub fn go_to_tab() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('e')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('e')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -4344,8 +4344,8 @@ pub fn go_to_tab() {
 #[test]
 #[ignore]
 pub fn start_or_reload_plugin() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -4398,9 +4398,9 @@ pub fn start_or_reload_plugin() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('f')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('f')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -4420,8 +4420,8 @@ pub fn start_or_reload_plugin() {
 #[test]
 #[ignore]
 pub fn quit_zellij_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, server_receiver, screen_receiver, teardown) =
@@ -4481,9 +4481,9 @@ pub fn quit_zellij_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('8'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('8'))), // this triggers the enent in the fixture 插件
     )]));
-    server_thread.join().unwrap(); // this might take a while if the cache is cold
+    server_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_server_instruction
         .lock()
@@ -4503,8 +4503,8 @@ pub fn quit_zellij_plugin_command() {
 #[test]
 #[ignore]
 pub fn detach_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, server_receiver, screen_receiver, teardown) =
@@ -4564,9 +4564,9 @@ pub fn detach_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('l'))), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('l'))), // this triggers the enent in the fixture 插件
     )]));
-    server_thread.join().unwrap(); // this might take a while if the cache is cold
+    server_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_server_instruction
         .lock()
@@ -4586,8 +4586,8 @@ pub fn detach_plugin_command() {
 #[test]
 #[ignore]
 pub fn open_file_floating_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, pty_receiver, screen_receiver, teardown) =
@@ -4647,9 +4647,9 @@ pub fn open_file_floating_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('h')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('h')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    pty_thread.join().unwrap(); // this might take a while if the cache is cold
+    pty_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_pty_instructions
         .lock()
@@ -4663,8 +4663,8 @@ pub fn open_file_floating_plugin_command() {
             }
         })
         .clone();
-    // we do the replace below to avoid the randomness of the temporary folder in the snapshot
-    // while still testing it
+    // we do the replace below to avoid the randomness of the 临时 folder in the 快照
+    // while still 测试 it
     assert_snapshot!(
         format!("{:#?}", new_tab_event).replace(&format!("{:?}", temp_folder.path()), "\"CWD\"")
     );
@@ -4673,8 +4673,8 @@ pub fn open_file_floating_plugin_command() {
 #[test]
 #[ignore]
 pub fn open_file_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, pty_receiver, screen_receiver, teardown) =
@@ -4734,9 +4734,9 @@ pub fn open_file_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('g')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('g')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    pty_thread.join().unwrap(); // this might take a while if the cache is cold
+    pty_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_pty_instructions
         .lock()
@@ -4750,8 +4750,8 @@ pub fn open_file_plugin_command() {
             }
         })
         .clone();
-    // we do the replace below to avoid the randomness of the temporary folder in the snapshot
-    // while still testing it
+    // we do the replace below to avoid the randomness of the 临时 folder in the 快照
+    // while still 测试 it
     assert_snapshot!(
         format!("{:#?}", new_tab_event).replace(&format!("{:?}", temp_folder.path()), "\"CWD\"")
     );
@@ -4760,8 +4760,8 @@ pub fn open_file_plugin_command() {
 #[test]
 #[ignore]
 pub fn open_file_with_line_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, pty_receiver, screen_receiver, teardown) =
@@ -4822,9 +4822,9 @@ pub fn open_file_with_line_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('i')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('i')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    pty_thread.join().unwrap(); // this might take a while if the cache is cold
+    pty_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_pty_instructions
         .lock()
@@ -4838,8 +4838,8 @@ pub fn open_file_with_line_plugin_command() {
             }
         })
         .clone();
-    // we do the replace below to avoid the randomness of the temporary folder in the snapshot
-    // while still testing it
+    // we do the replace below to avoid the randomness of the 临时 folder in the 快照
+    // while still 测试 it
     assert_snapshot!(
         format!("{:#?}", new_tab_event).replace(&format!("{:?}", temp_folder.path()), "\"CWD\"")
     );
@@ -4848,8 +4848,8 @@ pub fn open_file_with_line_plugin_command() {
 #[test]
 #[ignore]
 pub fn open_file_with_line_floating_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, pty_receiver, screen_receiver, teardown) =
@@ -4909,9 +4909,9 @@ pub fn open_file_with_line_floating_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('j')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('j')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    pty_thread.join().unwrap(); // this might take a while if the cache is cold
+    pty_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_pty_instructions
         .lock()
@@ -4925,8 +4925,8 @@ pub fn open_file_with_line_floating_plugin_command() {
             }
         })
         .clone();
-    // we do the replace below to avoid the randomness of the temporary folder in the snapshot
-    // while still testing it
+    // we do the replace below to avoid the randomness of the 临时 folder in the 快照
+    // while still 测试 it
     assert_snapshot!(
         format!("{:#?}", new_tab_event).replace(&format!("{:?}", temp_folder.path()), "\"CWD\"")
     );
@@ -4935,8 +4935,8 @@ pub fn open_file_with_line_floating_plugin_command() {
 #[test]
 #[ignore]
 pub fn open_terminal_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, pty_receiver, screen_receiver, teardown) =
@@ -4996,9 +4996,9 @@ pub fn open_terminal_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('k')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('k')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    pty_thread.join().unwrap(); // this might take a while if the cache is cold
+    pty_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_pty_instructions
         .lock()
@@ -5018,8 +5018,8 @@ pub fn open_terminal_plugin_command() {
 #[test]
 #[ignore]
 pub fn open_terminal_floating_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, pty_receiver, screen_receiver, teardown) =
@@ -5079,9 +5079,9 @@ pub fn open_terminal_floating_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('l')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('l')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    pty_thread.join().unwrap(); // this might take a while if the cache is cold
+    pty_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_pty_instructions
         .lock()
@@ -5101,8 +5101,8 @@ pub fn open_terminal_floating_plugin_command() {
 #[test]
 #[ignore]
 pub fn open_command_pane_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, pty_receiver, screen_receiver, teardown) =
@@ -5162,9 +5162,9 @@ pub fn open_command_pane_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('m')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('m')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    pty_thread.join().unwrap(); // this might take a while if the cache is cold
+    pty_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_pty_instructions
         .lock()
@@ -5184,8 +5184,8 @@ pub fn open_command_pane_plugin_command() {
 #[test]
 #[ignore]
 pub fn open_command_pane_floating_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, pty_receiver, screen_receiver, teardown) =
@@ -5245,9 +5245,9 @@ pub fn open_command_pane_floating_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('n')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('n')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    pty_thread.join().unwrap(); // this might take a while if the cache is cold
+    pty_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_pty_instructions
         .lock()
@@ -5267,8 +5267,8 @@ pub fn open_command_pane_floating_plugin_command() {
 #[test]
 #[ignore]
 pub fn switch_to_tab_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -5321,9 +5321,9 @@ pub fn switch_to_tab_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('o')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('o')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -5343,8 +5343,8 @@ pub fn switch_to_tab_plugin_command() {
 #[test]
 #[ignore]
 pub fn hide_self_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -5397,9 +5397,9 @@ pub fn hide_self_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('p')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('p')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -5419,8 +5419,8 @@ pub fn hide_self_plugin_command() {
 #[test]
 #[ignore]
 pub fn show_self_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -5472,9 +5472,9 @@ pub fn show_self_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('q')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('q')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -5494,8 +5494,8 @@ pub fn show_self_plugin_command() {
 #[test]
 #[ignore]
 pub fn close_terminal_pane_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -5548,9 +5548,9 @@ pub fn close_terminal_pane_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('r')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('r')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -5570,8 +5570,8 @@ pub fn close_terminal_pane_plugin_command() {
 #[test]
 #[ignore]
 pub fn close_plugin_pane_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -5624,9 +5624,9 @@ pub fn close_plugin_pane_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('s')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('s')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -5646,8 +5646,8 @@ pub fn close_plugin_pane_plugin_command() {
 #[test]
 #[ignore]
 pub fn focus_terminal_pane_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -5700,9 +5700,9 @@ pub fn focus_terminal_pane_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('t')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('t')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -5722,8 +5722,8 @@ pub fn focus_terminal_pane_plugin_command() {
 #[test]
 #[ignore]
 pub fn focus_plugin_pane_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -5776,9 +5776,9 @@ pub fn focus_plugin_pane_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('u')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('u')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -5798,8 +5798,8 @@ pub fn focus_plugin_pane_plugin_command() {
 #[test]
 #[ignore]
 pub fn rename_terminal_pane_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -5852,9 +5852,9 @@ pub fn rename_terminal_pane_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('v')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('v')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -5874,8 +5874,8 @@ pub fn rename_terminal_pane_plugin_command() {
 #[test]
 #[ignore]
 pub fn rename_plugin_pane_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -5928,9 +5928,9 @@ pub fn rename_plugin_pane_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('w')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('w')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -5950,8 +5950,8 @@ pub fn rename_plugin_pane_plugin_command() {
 #[test]
 #[ignore]
 pub fn rename_tab_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -6004,9 +6004,9 @@ pub fn rename_tab_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('x')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('x')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -6026,8 +6026,8 @@ pub fn rename_tab_plugin_command() {
 #[test]
 #[ignore]
 pub fn send_configuration_to_plugins() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -6089,12 +6089,12 @@ pub fn send_configuration_to_plugins() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('z')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('z')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
-    // here we make sure we received a rename_tab event with the title being the stringified
-    // (Debug) configuration we sent to the fixture plugin to make sure it got there properly
+    // here we make sure we received a rename_tab 事件 with the 标题 being the stringified
+    // (调试) 配置 we sent to the fixture 插件 to make sure it got there properly
 
     let go_to_tab_event = received_screen_instructions
         .lock()
@@ -6162,9 +6162,9 @@ pub fn request_plugin_permissions() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('1')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('1')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_screen_instructions
         .lock()
@@ -6205,8 +6205,8 @@ pub fn granted_permission_request_result() {
         rows: 20,
     };
 
-    // here we create a fake screen thread that will send a PermissionStatus::Granted
-    // message for every permission request it gets
+    // here we 创建 a 假 屏幕 线程 that will send a PermissionStatus::Granted
+    // 消息 for every 权限 请求 it gets
     let screen_thread = std::thread::Builder::new()
         .name("fake_screen_thread".to_string())
         .spawn({
@@ -6259,7 +6259,7 @@ pub fn granted_permission_request_result() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('1')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('1')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
     screen_thread.join().unwrap();
     teardown();
@@ -6301,8 +6301,8 @@ pub fn denied_permission_request_result() {
         rows: 20,
     };
 
-    // here we create a fake screen thread that will send a PermissionStatus::Granted
-    // message for every permission request it gets
+    // here we 创建 a 假 屏幕 线程 that will send a PermissionStatus::Granted
+    // 消息 for every 权限 请求 it gets
     let screen_thread = std::thread::Builder::new()
         .name("fake_screen_thread".to_string())
         .spawn({
@@ -6355,7 +6355,7 @@ pub fn denied_permission_request_result() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('1')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('1')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
     screen_thread.join().unwrap();
     teardown();
@@ -6370,8 +6370,8 @@ pub fn denied_permission_request_result() {
 #[test]
 #[ignore]
 pub fn run_command_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, background_jobs_receiver, screen_receiver, teardown) =
@@ -6431,9 +6431,9 @@ pub fn run_command_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('2')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('2')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    background_jobs_thread.join().unwrap(); // this might take a while if the cache is cold
+    background_jobs_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_background_job = received_background_jobs_instructions
         .lock()
@@ -6453,8 +6453,8 @@ pub fn run_command_plugin_command() {
 #[test]
 #[ignore]
 pub fn run_command_with_env_vars_and_cwd_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, background_jobs_receiver, screen_receiver, teardown) =
@@ -6514,9 +6514,9 @@ pub fn run_command_with_env_vars_and_cwd_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('3')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('3')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    background_jobs_thread.join().unwrap(); // this might take a while if the cache is cold
+    background_jobs_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_background_jobs_instructions
         .lock()
@@ -6536,8 +6536,8 @@ pub fn run_command_with_env_vars_and_cwd_plugin_command() {
 #[test]
 #[ignore]
 pub fn web_request_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, background_jobs_receiver, screen_receiver, teardown) =
@@ -6597,9 +6597,9 @@ pub fn web_request_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('4')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('4')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    background_jobs_thread.join().unwrap(); // this might take a while if the cache is cold
+    background_jobs_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_background_jobs_instructions
         .lock()
@@ -6619,8 +6619,8 @@ pub fn web_request_plugin_command() {
 #[test]
 #[ignore]
 pub fn unblock_input_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -6675,7 +6675,7 @@ pub fn unblock_input_plugin_command() {
         pipe_id: "input_pipe_id".to_owned(),
         name: "message_name".to_owned(),
         payload: Some("message_payload".to_owned()),
-        plugin: None, // broadcast
+        plugin: None, // 广播
         args: None,
         configuration: None,
         floating: None,
@@ -6685,7 +6685,7 @@ pub fn unblock_input_plugin_command() {
         skip_cache: false,
         cli_client_id: client_id,
     });
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let plugin_bytes_events = received_screen_instructions
         .lock()
@@ -6706,8 +6706,8 @@ pub fn unblock_input_plugin_command() {
 #[test]
 #[ignore]
 pub fn block_input_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -6756,14 +6756,14 @@ pub fn block_input_plugin_command() {
         None,
         None,
     ));
-    // extra long time because we only start the fs watcher on plugin load
+    // extra long time because we only 启动 the fs watcher on 插件 加载
     std::thread::sleep(std::time::Duration::from_millis(5000));
 
     let _ = plugin_thread_sender.send(PluginInstruction::CliPipe {
         pipe_id: "input_pipe_id".to_owned(),
         name: "message_name_block".to_owned(),
         payload: Some("message_payload".to_owned()),
-        plugin: None, // broadcast
+        plugin: None, // 广播
         args: None,
         configuration: None,
         floating: None,
@@ -6773,7 +6773,7 @@ pub fn block_input_plugin_command() {
         skip_cache: false,
         cli_client_id: client_id,
     });
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let plugin_bytes_events = received_screen_instructions
         .lock()
@@ -6794,8 +6794,8 @@ pub fn block_input_plugin_command() {
 #[test]
 #[ignore]
 pub fn pipe_output_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, server_receiver, screen_receiver, teardown) =
@@ -6857,7 +6857,7 @@ pub fn pipe_output_plugin_command() {
         pipe_id: "input_pipe_id".to_owned(),
         name: "pipe_output".to_owned(),
         payload: Some("message_payload".to_owned()),
-        plugin: None, // broadcast
+        plugin: None, // 广播
         args: None,
         configuration: None,
         floating: None,
@@ -6869,7 +6869,7 @@ pub fn pipe_output_plugin_command() {
     });
     std::thread::sleep(std::time::Duration::from_millis(500));
     teardown();
-    server_thread.join().unwrap(); // this might take a while if the cache is cold
+    server_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     let plugin_bytes_events = received_server_instruction
         .lock()
         .unwrap()
@@ -6889,8 +6889,8 @@ pub fn pipe_output_plugin_command() {
 #[test]
 #[ignore]
 pub fn pipe_message_to_plugin_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -6944,7 +6944,7 @@ pub fn pipe_message_to_plugin_plugin_command() {
         pipe_id: "input_pipe_id".to_owned(),
         name: "pipe_message_to_plugin".to_owned(),
         payload: Some("payload_sent_to_self".to_owned()),
-        plugin: None, // broadcast
+        plugin: None, // 广播
         args: None,
         configuration: None,
         floating: None,
@@ -6956,7 +6956,7 @@ pub fn pipe_message_to_plugin_plugin_command() {
     });
     std::thread::sleep(std::time::Duration::from_millis(500));
     teardown();
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     let plugin_bytes_event = received_screen_instructions
         .lock()
         .unwrap()
@@ -6981,8 +6981,8 @@ pub fn pipe_message_to_plugin_plugin_command() {
 #[test]
 #[ignore]
 pub fn switch_session_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, server_receiver, screen_receiver, teardown) =
@@ -7043,11 +7043,11 @@ pub fn switch_session_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('5')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('5')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
     std::thread::sleep(std::time::Duration::from_millis(500));
     teardown();
-    server_thread.join().unwrap(); // this might take a while if the cache is cold
+    server_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     let switch_session_event = received_server_instruction
         .lock()
         .unwrap()
@@ -7061,8 +7061,8 @@ pub fn switch_session_plugin_command() {
             }
         })
         .clone();
-    // we do the replace below to avoid the randomness of the temporary folder in the snapshot
-    // while still testing it
+    // we do the replace below to avoid the randomness of the 临时 folder in the 快照
+    // while still 测试 it
     assert_snapshot!(format!("{:#?}", switch_session_event)
         .replace(&format!("{:?}", temp_folder.path()), "\"CWD\""));
 }
@@ -7070,8 +7070,8 @@ pub fn switch_session_plugin_command() {
 #[test]
 #[ignore]
 pub fn switch_session_with_layout_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, server_receiver, screen_receiver, teardown) =
@@ -7132,11 +7132,11 @@ pub fn switch_session_with_layout_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('7')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('7')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
     std::thread::sleep(std::time::Duration::from_millis(500));
     teardown();
-    server_thread.join().unwrap(); // this might take a while if the cache is cold
+    server_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     let switch_session_event = received_server_instruction
         .lock()
         .unwrap()
@@ -7150,8 +7150,8 @@ pub fn switch_session_with_layout_plugin_command() {
             }
         })
         .clone();
-    // we do the replace below to avoid the randomness of the temporary folder in the snapshot
-    // while still testing it
+    // we do the replace below to avoid the randomness of the 临时 folder in the 快照
+    // while still 测试 it
     assert_snapshot!(format!("{:#?}", switch_session_event)
         .replace(&format!("{:?}", temp_folder.path()), "\"CWD\""));
 }
@@ -7159,8 +7159,8 @@ pub fn switch_session_with_layout_plugin_command() {
 #[test]
 #[ignore]
 pub fn switch_session_with_layout_and_cwd_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, server_receiver, screen_receiver, teardown) =
@@ -7221,11 +7221,11 @@ pub fn switch_session_with_layout_and_cwd_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('9')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('9')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
     std::thread::sleep(std::time::Duration::from_millis(500));
     teardown();
-    server_thread.join().unwrap(); // this might take a while if the cache is cold
+    server_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     let switch_session_event = received_server_instruction
         .lock()
         .unwrap()
@@ -7245,8 +7245,8 @@ pub fn switch_session_with_layout_and_cwd_plugin_command() {
 #[test]
 #[ignore]
 pub fn disconnect_other_clients_plugins_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, server_receiver, screen_receiver, teardown) =
@@ -7307,11 +7307,11 @@ pub fn disconnect_other_clients_plugins_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('6')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('6')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
     std::thread::sleep(std::time::Duration::from_millis(500));
     teardown();
-    server_thread.join().unwrap(); // this might take a while if the cache is cold
+    server_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     let switch_session_event = received_server_instruction
         .lock()
         .unwrap()
@@ -7331,8 +7331,8 @@ pub fn disconnect_other_clients_plugins_command() {
 #[test]
 #[ignore]
 pub fn reconfigure_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, server_receiver, screen_receiver, teardown) =
@@ -7393,11 +7393,11 @@ pub fn reconfigure_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('0')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('0')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
     std::thread::sleep(std::time::Duration::from_millis(500));
     teardown();
-    server_thread.join().unwrap(); // this might take a while if the cache is cold
+    server_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     let reconfigure_event = received_server_instruction
         .lock()
         .unwrap()
@@ -7417,10 +7417,10 @@ pub fn reconfigure_plugin_command() {
 #[test]
 #[ignore]
 pub fn run_plugin_in_specific_cwd() {
-    // note that this test might sometimes fail when run alone without the rest of the suite due to
+    // note that this 测试 might sometimes fail when run alone without the rest of the suite due to
     // timing issues
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, server_receiver, screen_receiver, teardown) =
@@ -7483,16 +7483,16 @@ pub fn run_plugin_in_specific_cwd() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('8')).with_ctrl_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('8')).with_ctrl_modifier()), // this triggers the enent in the fixture 插件
     )]));
     std::thread::sleep(std::time::Duration::from_millis(500));
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('8'))), // this sends this quit command so tha the test exits cleanly
+        Event::Key(KeyWithModifier::new(BareKey::Char('8'))), // this sends this 退出的 命令 so tha the 测试 退出 cleanly
     )]));
     teardown();
-    server_thread.join().unwrap(); // this might take a while if the cache is cold
+    server_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     assert!(
         std::fs::read_dir(plugin_initial_cwd)
             .unwrap()
@@ -7507,8 +7507,8 @@ pub fn run_plugin_in_specific_cwd() {
 #[test]
 #[ignore]
 pub fn hide_pane_with_id_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -7561,9 +7561,9 @@ pub fn hide_pane_with_id_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('a')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('a')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let suppress_pane_event = received_screen_instructions
         .lock()
@@ -7583,8 +7583,8 @@ pub fn hide_pane_with_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn show_pane_with_id_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -7637,9 +7637,9 @@ pub fn show_pane_with_id_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('b')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('b')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let focus_pane_event = received_screen_instructions
         .lock()
@@ -7659,8 +7659,8 @@ pub fn show_pane_with_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn open_command_pane_background_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, pty_receiver, screen_receiver, teardown) =
@@ -7720,9 +7720,9 @@ pub fn open_command_pane_background_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('c')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('c')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    pty_thread.join().unwrap(); // this might take a while if the cache is cold
+    pty_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let new_tab_event = received_pty_instructions
         .lock()
@@ -7736,8 +7736,8 @@ pub fn open_command_pane_background_plugin_command() {
             }
         })
         .clone();
-    // we do the replace below to avoid the randomness of the temporary folder in the snapshot
-    // while still testing it
+    // we do the replace below to avoid the randomness of the 临时 folder in the 快照
+    // while still 测试 it
     assert_snapshot!(
         format!("{:#?}", new_tab_event).replace(&format!("{:?}", temp_folder.path()), "\"CWD\"")
     );
@@ -7746,8 +7746,8 @@ pub fn open_command_pane_background_plugin_command() {
 #[test]
 #[ignore]
 pub fn rerun_command_pane_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -7800,9 +7800,9 @@ pub fn rerun_command_pane_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('d')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('d')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let rerun_command_pane_event = received_screen_instructions
         .lock()
@@ -7822,8 +7822,8 @@ pub fn rerun_command_pane_plugin_command() {
 #[test]
 #[ignore]
 pub fn resize_pane_with_id_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -7876,9 +7876,9 @@ pub fn resize_pane_with_id_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('e')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('e')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let rerun_command_pane_event = received_screen_instructions
         .lock()
@@ -7898,8 +7898,8 @@ pub fn resize_pane_with_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn edit_scrollback_for_pane_with_id_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -7952,9 +7952,9 @@ pub fn edit_scrollback_for_pane_with_id_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('f')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('f')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let rerun_command_pane_event = received_screen_instructions
         .lock()
@@ -7974,8 +7974,8 @@ pub fn edit_scrollback_for_pane_with_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn write_to_pane_id_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -8028,9 +8028,9 @@ pub fn write_to_pane_id_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('g')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('g')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let rerun_command_pane_event = received_screen_instructions
         .lock()
@@ -8050,8 +8050,8 @@ pub fn write_to_pane_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn write_chars_to_pane_id_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -8104,9 +8104,9 @@ pub fn write_chars_to_pane_id_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('h')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('h')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let rerun_command_pane_event = received_screen_instructions
         .lock()
@@ -8126,8 +8126,8 @@ pub fn write_chars_to_pane_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn move_pane_with_pane_id_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -8180,9 +8180,9 @@ pub fn move_pane_with_pane_id_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('i')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('i')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let screen_instruction = received_screen_instructions
         .lock()
@@ -8202,8 +8202,8 @@ pub fn move_pane_with_pane_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn move_pane_with_pane_id_in_direction_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -8256,9 +8256,9 @@ pub fn move_pane_with_pane_id_in_direction_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('j')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('j')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let screen_instruction = received_screen_instructions
         .lock()
@@ -8278,8 +8278,8 @@ pub fn move_pane_with_pane_id_in_direction_plugin_command() {
 #[test]
 #[ignore]
 pub fn clear_screen_for_pane_id_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -8332,9 +8332,9 @@ pub fn clear_screen_for_pane_id_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('k')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('k')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let screen_instruction = received_screen_instructions
         .lock()
@@ -8354,8 +8354,8 @@ pub fn clear_screen_for_pane_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn scroll_up_in_pane_id_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -8408,9 +8408,9 @@ pub fn scroll_up_in_pane_id_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('l')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('l')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let screen_instruction = received_screen_instructions
         .lock()
@@ -8430,8 +8430,8 @@ pub fn scroll_up_in_pane_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn scroll_down_in_pane_id_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -8484,9 +8484,9 @@ pub fn scroll_down_in_pane_id_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('m')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('m')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let screen_instruction = received_screen_instructions
         .lock()
@@ -8506,8 +8506,8 @@ pub fn scroll_down_in_pane_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn scroll_to_top_in_pane_id_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -8560,9 +8560,9 @@ pub fn scroll_to_top_in_pane_id_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('n')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('n')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let screen_instruction = received_screen_instructions
         .lock()
@@ -8582,8 +8582,8 @@ pub fn scroll_to_top_in_pane_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn scroll_to_bottom_in_pane_id_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -8636,9 +8636,9 @@ pub fn scroll_to_bottom_in_pane_id_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('o')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('o')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let screen_instruction = received_screen_instructions
         .lock()
@@ -8658,8 +8658,8 @@ pub fn scroll_to_bottom_in_pane_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn page_scroll_up_in_pane_id_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -8712,9 +8712,9 @@ pub fn page_scroll_up_in_pane_id_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('p')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('p')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let screen_instruction = received_screen_instructions
         .lock()
@@ -8734,8 +8734,8 @@ pub fn page_scroll_up_in_pane_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn page_scroll_down_in_pane_id_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -8788,9 +8788,9 @@ pub fn page_scroll_down_in_pane_id_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('q')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('q')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let screen_instruction = received_screen_instructions
         .lock()
@@ -8810,8 +8810,8 @@ pub fn page_scroll_down_in_pane_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn toggle_pane_id_fullscreen_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -8864,9 +8864,9 @@ pub fn toggle_pane_id_fullscreen_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('r')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('r')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let screen_instruction = received_screen_instructions
         .lock()
@@ -8886,8 +8886,8 @@ pub fn toggle_pane_id_fullscreen_plugin_command() {
 #[test]
 #[ignore]
 pub fn toggle_pane_embed_or_eject_for_pane_id_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -8940,9 +8940,9 @@ pub fn toggle_pane_embed_or_eject_for_pane_id_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('s')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('s')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let screen_instruction = received_screen_instructions
         .lock()
@@ -8962,8 +8962,8 @@ pub fn toggle_pane_embed_or_eject_for_pane_id_plugin_command() {
 #[test]
 #[ignore]
 pub fn close_tab_with_index_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -9016,9 +9016,9 @@ pub fn close_tab_with_index_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('t')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('t')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let screen_instruction = received_screen_instructions
         .lock()
@@ -9038,8 +9038,8 @@ pub fn close_tab_with_index_plugin_command() {
 #[test]
 #[ignore]
 pub fn break_panes_to_new_tab_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -9092,9 +9092,9 @@ pub fn break_panes_to_new_tab_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('u')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('u')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let screen_instruction = received_screen_instructions
         .lock()
@@ -9114,8 +9114,8 @@ pub fn break_panes_to_new_tab_plugin_command() {
 #[test]
 #[ignore]
 pub fn break_panes_to_tab_with_index_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -9168,9 +9168,9 @@ pub fn break_panes_to_tab_with_index_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('v')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('v')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let screen_instruction = received_screen_instructions
         .lock()
@@ -9190,8 +9190,8 @@ pub fn break_panes_to_tab_with_index_plugin_command() {
 #[test]
 #[ignore]
 pub fn reload_plugin_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -9213,7 +9213,7 @@ pub fn reload_plugin_plugin_command() {
     let received_screen_instructions = Arc::new(Mutex::new(vec![]));
     let screen_thread = grant_permissions_and_log_actions_in_thread_naked_variant!(
         received_screen_instructions,
-        ScreenInstruction::RequestStateUpdateForPlugins, // happens on successful plugin (re)load
+        ScreenInstruction::RequestStateUpdateForPlugins, // happens on successful 插件 (re)加载
         screen_receiver,
         2,
         &PermissionType::ChangeApplicationState,
@@ -9244,9 +9244,9 @@ pub fn reload_plugin_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('w')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('w')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let request_state_update_requests = received_screen_instructions
         .lock()
@@ -9266,8 +9266,8 @@ pub fn reload_plugin_plugin_command() {
 #[test]
 #[ignore]
 pub fn load_new_plugin_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -9289,7 +9289,7 @@ pub fn load_new_plugin_plugin_command() {
     let received_screen_instructions = Arc::new(Mutex::new(vec![]));
     let screen_thread = grant_permissions_and_log_actions_in_thread_naked_variant!(
         received_screen_instructions,
-        ScreenInstruction::RequestStateUpdateForPlugins, // happens on successful plugin (re)load
+        ScreenInstruction::RequestStateUpdateForPlugins, // happens on successful 插件 (re)加载
         screen_receiver,
         2,
         &PermissionType::ChangeApplicationState,
@@ -9320,9 +9320,9 @@ pub fn load_new_plugin_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('x')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('x')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let request_state_update_requests = received_screen_instructions
         .lock()
@@ -9342,8 +9342,8 @@ pub fn load_new_plugin_plugin_command() {
 #[test]
 #[ignore]
 pub fn rebind_keys_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, server_receiver, screen_receiver, teardown) =
@@ -9404,11 +9404,11 @@ pub fn rebind_keys_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('y')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('y')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
     std::thread::sleep(std::time::Duration::from_millis(500));
     teardown();
-    server_thread.join().unwrap(); // this might take a while if the cache is cold
+    server_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     let rebind_event = received_server_instruction
         .lock()
         .unwrap()
@@ -9428,8 +9428,8 @@ pub fn rebind_keys_plugin_command() {
 #[test]
 #[ignore]
 pub fn list_clients_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -9482,9 +9482,9 @@ pub fn list_clients_plugin_command() {
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
-        Event::Key(KeyWithModifier::new(BareKey::Char('z')).with_alt_modifier()), // this triggers the enent in the fixture plugin
+        Event::Key(KeyWithModifier::new(BareKey::Char('z')).with_alt_modifier()), // this triggers the enent in the fixture 插件
     )]));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let list_clients_instruction = received_screen_instructions
         .lock()
@@ -9504,8 +9504,8 @@ pub fn list_clients_plugin_command() {
 #[test]
 #[ignore]
 pub fn before_close_plugin_event() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -9555,12 +9555,12 @@ pub fn before_close_plugin_event() {
         None,
     ));
     std::thread::sleep(std::time::Duration::from_millis(5000));
-    // here we send an unload to plugin id 0 (the first plugin id, presumably this plugin)
-    // so that its BeforeClose Event will be triggered and it will send a
+    // here we send an 卸载 to 插件 id 0 (the first 插件 id, presumably this 插件)
+    // so that its BeforeClose 事件 will be triggered and it will send a
     // HighlightAndUnhighlightPanes
-    // instruction which we can assert below
+    // instruction which we can 断言 below
     let _ = plugin_thread_sender.send(PluginInstruction::Unload(0));
-    screen_thread.join().unwrap(); // this might take a while if the cache is cold
+    screen_thread.join().unwrap(); // this might take a while if the 缓存 is cold
     teardown();
     let sent_instruction = received_screen_instructions
         .lock()
@@ -9580,8 +9580,8 @@ pub fn before_close_plugin_event() {
 #[test]
 #[ignore]
 pub fn show_cursor_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -9660,8 +9660,8 @@ pub fn show_cursor_plugin_command() {
 #[test]
 #[ignore]
 pub fn hide_cursor_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -9741,8 +9741,8 @@ pub fn hide_cursor_plugin_command() {
 #[test]
 #[ignore]
 pub fn copy_to_clipboard_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -9821,8 +9821,8 @@ pub fn copy_to_clipboard_plugin_command() {
 #[test]
 #[ignore]
 pub fn run_action_plugin_command() {
-    let temp_folder = tempdir().unwrap(); // placed explicitly in the test scope because its
-                                          // destructor removes the directory
+    let temp_folder = tempdir().unwrap(); // placed explicitly in the 测试 scope because its
+                                          // 析构函数 removes the 目录
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) =
@@ -10090,7 +10090,7 @@ pub fn copy_to_clipboard_without_permission() {
     let received_screen_instructions = Arc::new(Mutex::new(vec![]));
     let client_id = 1;
 
-    // This test denies the permission and expects no CopyTextToClipboard instruction
+    // This 测试 denies the 权限 and 期望 no CopyTextToClipboard instruction
     let screen_thread = deny_permissions_and_log_actions_in_thread!(
         received_screen_instructions,
         ScreenInstruction::CopyTextToClipboard,
@@ -10162,7 +10162,7 @@ pub fn copy_to_clipboard_without_permission() {
             }
         });
 
-    // Should be None because permission was denied
+    // Should be None because 权限 was denied
     assert_snapshot!(format!("{:#?}", copy_instruction));
 }
 
@@ -10248,7 +10248,7 @@ pub fn run_action_without_permission() {
             }
         });
 
-    // Should be None because permission was denied
+    // Should be None because 权限 was denied
     assert_snapshot!(format!("{:#?}", move_focus_instruction));
 }
 
@@ -10399,7 +10399,7 @@ pub fn dump_layout_success_plugin_command() {
 
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Send Ctrl+Shift+B to trigger dump_layout("default")
+    // Send Ctrl+Shift+B to trigger dump_layout("默认")
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -11192,7 +11192,7 @@ pub fn save_layout_already_exists_plugin_command() {
 
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Send Ctrl+Alt+A to save the layout first time
+    // Send Ctrl+Alt+A to 保存 the 布局 first time
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -11205,7 +11205,7 @@ pub fn save_layout_already_exists_plugin_command() {
 
     std::thread::sleep(std::time::Duration::from_millis(200));
 
-    // Send Ctrl+Alt+B to try saving without overwrite
+    // Send Ctrl+Alt+B to 尝试 保存 without overwrite
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -11296,7 +11296,7 @@ pub fn save_layout_with_overwrite_plugin_command() {
 
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Send Ctrl+Alt+C to save with overwrite=true
+    // Send Ctrl+Alt+C to 保存 with overwrite=true
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -11386,7 +11386,7 @@ pub fn save_layout_invalid_kdl_plugin_command() {
 
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Send Ctrl+Alt+D to save invalid KDL
+    // Send Ctrl+Alt+D to 保存 invalid KDL
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -11476,7 +11476,7 @@ pub fn rename_layout_success_plugin_command() {
 
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Send Ctrl+Alt+A to save layout first
+    // Send Ctrl+Alt+A to 保存 布局 first
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -11489,7 +11489,7 @@ pub fn rename_layout_success_plugin_command() {
 
     std::thread::sleep(std::time::Duration::from_millis(200));
 
-    // Send Ctrl+Alt+E to rename layout
+    // Send Ctrl+Alt+E to rename 布局
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -11580,7 +11580,7 @@ pub fn rename_layout_not_found_plugin_command() {
 
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Send Ctrl+Alt+F to rename nonexistent layout
+    // Send Ctrl+Alt+F to rename nonexistent 布局
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -11670,7 +11670,7 @@ pub fn delete_layout_success_plugin_command() {
 
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Send Ctrl+Alt+A to save layout first
+    // Send Ctrl+Alt+A to 保存 布局 first
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -11683,7 +11683,7 @@ pub fn delete_layout_success_plugin_command() {
 
     std::thread::sleep(std::time::Duration::from_millis(200));
 
-    // Send Ctrl+Alt+E to rename layout
+    // Send Ctrl+Alt+E to rename 布局
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -11696,7 +11696,7 @@ pub fn delete_layout_success_plugin_command() {
 
     std::thread::sleep(std::time::Duration::from_millis(200));
 
-    // Send Ctrl+Alt+G to delete renamed layout
+    // Send Ctrl+Alt+G to 删除 renamed 布局
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -11787,7 +11787,7 @@ pub fn delete_layout_not_found_plugin_command() {
 
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Send Ctrl+Alt+H to delete nonexistent layout
+    // Send Ctrl+Alt+H to 删除 nonexistent 布局
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -11877,7 +11877,7 @@ pub fn save_layout_path_traversal_blocked_plugin_command() {
 
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Send Ctrl+Alt+I to test path traversal blocking
+    // Send Ctrl+Alt+I to 测试 路径 traversal blocking
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -11994,7 +11994,7 @@ pub fn edit_layout_plugin_command() {
     pty_thread.join().unwrap();
     teardown();
 
-    // this is the editor pane for the layout being spawned
+    // this is the editor 窗格 for the 布局 being spawned
     let spawn_terminal_instruction =
         received_pty_instructions
             .lock()
@@ -12192,7 +12192,7 @@ pub fn generate_random_name_permission_denied() {
             None
         });
 
-    // Should be None because permission was denied
+    // Should be None because 权限 was denied
     assert_snapshot!(format!("{:#?}", plugin_bytes_with_name));
 }
 
@@ -12289,7 +12289,7 @@ pub fn save_layout_permission_denied() {
             None
         });
 
-    // Should be None because permission was denied
+    // Should be None because 权限 was denied
     assert_snapshot!(format!("{:#?}", plugin_bytes_with_save));
 }
 
@@ -12416,13 +12416,13 @@ pub fn plugin_receives_config_change_event() {
 #[test]
 #[ignore]
 pub fn plugin_does_not_receive_event_when_config_unchanged() {
-    // Test that plugin does NOT receive event when config hasn't changed
+    // 测试 that 插件 does NOT receive 事件 when config hasn't changed
     let temp_folder = tempdir().unwrap();
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
     let (plugin_thread_sender, screen_receiver, teardown) = create_plugin_thread(None, None);
 
-    // Initial plugin configuration
+    // 初始 插件 配置
     let mut initial_config = BTreeMap::new();
     initial_config.insert("theme".to_owned(), "dark".to_owned());
 
@@ -12447,14 +12447,14 @@ pub fn plugin_does_not_receive_event_when_config_unchanged() {
         received_screen_instructions,
         ScreenInstruction::PluginBytes,
         screen_receiver,
-        2, // Only expect initial load and one update, no config change event
+        2, // Only 期望 初始 加载 and one update, no config change 事件
         &PermissionType::ReadApplicationState,
         cache_path,
         plugin_thread_sender,
         client_id
     );
 
-    // Load plugin
+    // 加载 插件
     let _ = plugin_thread_sender.send(PluginInstruction::AddClient(client_id));
     let _ = plugin_thread_sender.send(PluginInstruction::Load(
         plugin_should_float,
@@ -12476,7 +12476,7 @@ pub fn plugin_does_not_receive_event_when_config_unchanged() {
 
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Send SAME configuration (unchanged)
+    // Send SAME 配置 (unchanged)
     let mut plugin_aliases = PluginAliases::default();
     plugin_aliases.aliases.insert(
         "test_plugin".to_owned(),
@@ -12490,7 +12490,7 @@ pub fn plugin_does_not_receive_event_when_config_unchanged() {
 
     let _ = plugin_thread_sender.send(PluginInstruction::DetectPluginConfigChanges(plugin_aliases));
 
-    // Send an unrelated event to trigger a render
+    // Send an unrelated 事件 to trigger a 渲染
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -12500,7 +12500,7 @@ pub fn plugin_does_not_receive_event_when_config_unchanged() {
     screen_thread.join().unwrap();
     teardown();
 
-    // Verify plugin did NOT receive PluginConfigurationChanged event
+    // 验证 插件 did NOT receive PluginConfigurationChanged 事件
     let plugin_renders = received_screen_instructions
         .lock()
         .unwrap()
@@ -12627,7 +12627,7 @@ pub fn get_session_environment_variables_plugin_command() {
 }
 
 // =====================================================================
-// Plugin Highlight API Integration Tests
+// 插件 Highlight API Integration 测试
 // =====================================================================
 
 use crate::panes::PaneId;
@@ -12685,7 +12685,7 @@ pub fn set_pane_regex_highlights_via_plugin() {
     ));
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Send Super+g key event to trigger set_pane_regex_highlights in the fixture plugin
+    // Send Super+g 密钥 事件 to trigger set_pane_regex_highlights in the fixture 插件
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -12777,7 +12777,7 @@ pub fn clear_pane_highlights_via_plugin() {
     ));
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Send Super+h key event to trigger clear_pane_highlights in the fixture plugin
+    // Send Super+h 密钥 事件 to trigger clear_pane_highlights in the fixture 插件
     let _ = plugin_thread_sender.send(PluginInstruction::Update(vec![(
         None,
         Some(client_id),
@@ -12860,7 +12860,7 @@ pub fn highlight_clicked_event_delivered_to_plugin() {
     ));
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Send a HighlightClicked event directly to the plugin
+    // Send a HighlightClicked 事件 directly to the 插件
     let _ = plugin_thread_sender.send(PluginInstruction::HighlightClicked {
         plugin_id: 0,
         client_id,
@@ -12899,8 +12899,8 @@ pub fn highlight_clicked_event_delivered_to_plugin() {
 #[test]
 #[ignore]
 pub fn mode_update_payload_is_lightweight_for_opted_in_plugins() {
-    // Plugin A subscribes to ModeUpdate only (legacy behavior — receives full keybinds)
-    // Plugin B subscribes to InitialKeybinds + ModeUpdate (receives stripped keybinds)
+    // 插件 A 订阅 to ModeUpdate only (legacy behavior — receives full keybinds)
+    // 插件 B 订阅 to InitialKeybinds + ModeUpdate (receives stripped keybinds)
     let temp_folder = tempdir().unwrap();
     let plugin_host_folder = PathBuf::from(temp_folder.path());
     let cache_path = plugin_host_folder.join("permissions_test.kdl");
@@ -12914,7 +12914,7 @@ pub fn mode_update_payload_is_lightweight_for_opted_in_plugins() {
         rows: 20,
     };
 
-    // Plugin A: subscribes to ModeUpdate only (legacy)
+    // 插件 A: 订阅 to ModeUpdate only (legacy)
     let mut config_a = BTreeMap::new();
     config_a.insert("subscribe_mode_update".to_owned(), "true".to_owned());
     let run_plugin_a = RunPluginOrAlias::RunPlugin(RunPlugin {
@@ -12924,7 +12924,7 @@ pub fn mode_update_payload_is_lightweight_for_opted_in_plugins() {
         ..Default::default()
     });
 
-    // Plugin B: subscribes to InitialKeybinds + ModeUpdate (lightweight)
+    // 插件 B: 订阅 to InitialKeybinds + ModeUpdate (lightweight)
     let mut config_b = BTreeMap::new();
     config_b.insert("subscribe_initial_keybinds".to_owned(), "true".to_owned());
     let run_plugin_b = RunPluginOrAlias::RunPlugin(RunPlugin {
@@ -12935,7 +12935,7 @@ pub fn mode_update_payload_is_lightweight_for_opted_in_plugins() {
     });
 
     let received_screen_instructions = Arc::new(Mutex::new(vec![]));
-    // Spawn a screen thread that grants permissions and collects all instructions until Exit
+    // Spawn a 屏幕 线程 that grants 权限 and collects all instructions until 退出
     let screen_thread = std::thread::Builder::new()
         .name("fake_screen_thread".to_string())
         .spawn({
@@ -12969,7 +12969,7 @@ pub fn mode_update_payload_is_lightweight_for_opted_in_plugins() {
         .unwrap();
 
     let _ = plugin_thread_sender.send(PluginInstruction::AddClient(client_id));
-    // Load plugin A
+    // 加载 插件 A
     let _ = plugin_thread_sender.send(PluginInstruction::Load(
         plugin_should_float,
         false,
@@ -12988,7 +12988,7 @@ pub fn mode_update_payload_is_lightweight_for_opted_in_plugins() {
         None,
     ));
     std::thread::sleep(std::time::Duration::from_millis(500));
-    // Load plugin B
+    // 加载 插件 B
     let _ = plugin_thread_sender.send(PluginInstruction::Load(
         plugin_should_float,
         false,
@@ -13008,8 +13008,8 @@ pub fn mode_update_payload_is_lightweight_for_opted_in_plugins() {
     ));
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Set keybinds on all plugins via Reconfigure so that Plugin A (legacy)
-    // will have non-empty keybinds in its internal state
+    // Set keybinds on all 插件 via Reconfigure so that 插件 A (legacy)
+    // will have non-empty keybinds in its internal 状态
     let mut keybind_map = std::collections::HashMap::new();
     let mut mode_map = std::collections::HashMap::new();
     mode_map.insert(KeyWithModifier::new(BareKey::Char('q')), vec![Action::Quit]);
@@ -13026,8 +13026,8 @@ pub fn mode_update_payload_is_lightweight_for_opted_in_plugins() {
     });
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Send ModeUpdate to all plugins (None = broadcast)
-    // The keybinds field here doesn't matter — apply_event_to_plugin replaces it
+    // Send ModeUpdate to all 插件 (None = 广播)
+    // The keybinds 字段 here doesn't matter — apply_event_to_plugin replaces it
     let mode_info = ModeInfo {
         mode: InputMode::Normal,
         ..Default::default()
@@ -13094,7 +13094,7 @@ pub fn reconfiguration_resends_keybinds_to_opted_in_plugins() {
         rows: 20,
     };
 
-    // Plugin subscribes to InitialKeybinds + ModeUpdate
+    // 插件 订阅 to InitialKeybinds + ModeUpdate
     let mut config = BTreeMap::new();
     config.insert("subscribe_initial_keybinds".to_owned(), "true".to_owned());
     let run_plugin = RunPluginOrAlias::RunPlugin(RunPlugin {
@@ -13105,7 +13105,7 @@ pub fn reconfiguration_resends_keybinds_to_opted_in_plugins() {
     });
 
     let received_screen_instructions = Arc::new(Mutex::new(vec![]));
-    // Spawn a screen thread that grants permissions and collects all instructions until Exit
+    // Spawn a 屏幕 线程 that grants 权限 and collects all instructions until 退出
     let screen_thread = std::thread::Builder::new()
         .name("fake_screen_thread".to_string())
         .spawn({
@@ -13158,7 +13158,7 @@ pub fn reconfiguration_resends_keybinds_to_opted_in_plugins() {
     ));
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    // Build new keybinds for reconfiguration
+    // 构建 new keybinds for reconfiguration
     let mut keybind_map = std::collections::HashMap::new();
     let mut mode_map = std::collections::HashMap::new();
     mode_map.insert(KeyWithModifier::new(BareKey::Char('x')), vec![Action::Quit]);

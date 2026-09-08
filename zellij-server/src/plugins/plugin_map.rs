@@ -22,10 +22,10 @@ use zellij_utils::{
 };
 use zellij_utils::{data::PermissionType, errors::prelude::*};
 
-// the idea here is to provide atomicity when adding/removing plugins from the map (eg. when a new
-// client connects) but to also allow updates/renders not to block each other
+// the idea here is to provide atomicity when adding/removing 插件 from the map (eg. when a new
+// 客户端 connects) but to also allow updates/渲染 not to block each other
 // so when adding/removing from the map - everything is halted, that's life
-// but when cloning the internal RunningPlugin and Subscriptions atomics, we can call methods on
+// but when cloning the internal RunningPlugin and Subscriptions atomics, we can 调用 方法 on
 // them without blocking other instances
 #[derive(Default)]
 pub struct PluginMap {
@@ -336,7 +336,7 @@ impl<T: Write + Send + 'static> std::io::Write for WriteOutputStream<T> {
 }
 
 impl PluginEnv {
-    // Get the name (path) of the containing plugin
+    // Get the name (路径) of the containing 插件
     pub fn name(&self) -> String {
         format!(
             "{} (ID {})",

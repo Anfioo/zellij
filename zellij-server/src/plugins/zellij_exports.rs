@@ -151,7 +151,7 @@ fn translate_plugin_path(env: &PluginEnv, path: PathBuf) -> PathBuf {
     } else if path.is_relative() {
         env.plugin_cwd.join(path)
     } else {
-        // Absolute path not in any plugin special folder — pass through
+        // Absolute 路径 not in any 插件 special folder — pass through
         path
     }
 }
@@ -915,8 +915,8 @@ fn request_permission(env: &PluginEnv, permissions: Vec<PermissionType>) -> Resu
             ));
     }
 
-    // we do this so that messages that have arrived while the user is seeing the permission screen
-    // will be cached and reapplied once the permission is granted
+    // we do this so that 消息 that have arrived while the 用户 is seeing the 权限 屏幕
+    // will be 缓存的 and reapplied once the 权限 is granted
     let _ = env
         .senders
         .send_to_plugin(PluginInstruction::CachePluginEvents {
@@ -998,10 +998,10 @@ fn dump_layout(env: &PluginEnv, layout_name: String) {
 }
 
 fn get_layout_dir(env: &PluginEnv) {
-    // Get layout dir from env or fall back to default
+    // Get 布局 dir from env or fall back to 默认
     let layout_dir = env.layout_dir.clone().or_else(default_layout_dir);
 
-    // Convert PathBuf to String
+    // 转换 PathBuf to String
     let layout_dir_string = layout_dir
         .and_then(|path| path.to_str().map(|s| s.to_string()))
         .unwrap_or_else(|| String::from(""));
@@ -1119,7 +1119,7 @@ fn open_plugin_pane_in_new_tab(
             return;
         },
     };
-    let _ = context; // context is not currently used for plugin panes
+    let _ = context; // 上下文 is not currently used for 插件 窗格
     let initial_panes = Some(vec![CommandOrPlugin::Plugin(run_plugin_or_alias)]);
     let action = Action::NewTab {
         tiled_layout: None,
@@ -1175,7 +1175,7 @@ fn open_plugin_pane_floating(
             return;
         },
     };
-    let _ = context; // context is not currently used for plugin panes
+    let _ = context; // 上下文 is not currently used for 插件 窗格
     let action = Action::NewFloatingPluginPane {
         plugin: run_plugin_or_alias,
         pane_name: None,
@@ -1201,7 +1201,7 @@ fn open_editor_pane_in_new_tab(
     file_to_open: FileToOpen,
     context: BTreeMap<String, String>,
 ) {
-    let _ = context; // context is not currently used for editor panes in new tab
+    let _ = context; // 上下文 is not currently used for editor 窗格 in new 标签页
     let path = translate_plugin_path(env, file_to_open.path);
     let cwd = file_to_open
         .cwd
@@ -1251,10 +1251,10 @@ fn get_focused_pane_info(env: &PluginEnv) {
         )
     };
 
-    // Create oneshot channel for response
+    // 创建 oneshot 通道 for 响应
     let (response_sender, response_receiver) = crossbeam::channel::bounded(1);
 
-    // Send request to screen thread
+    // Send 请求 to 屏幕 线程
     env.senders
         .send_to_screen(ScreenInstruction::GetFocusedPaneInfo {
             client_id: env.client_id,
@@ -1263,7 +1263,7 @@ fn get_focused_pane_info(env: &PluginEnv) {
         .with_context(err_context)
         .non_fatal();
 
-    // Block waiting for response with 100ms timeout
+    // Block waiting for 响应 with 100ms 超时
     let response = match response_receiver.recv_timeout(Duration::from_millis(100)) {
         Ok(response) => response,
         Err(RecvTimeoutError::Timeout) => {
@@ -1285,7 +1285,7 @@ fn get_focused_pane_info(env: &PluginEnv) {
         },
     };
 
-    // Convert to protobuf and write response back to plugin
+    // 转换 to protobuf and 写入 响应 back to 插件
     let protobuf_response = ProtobufGetFocusedPaneInfoResponse::from(response);
     wasi_write_object(env, &protobuf_response.encode_to_vec())
         .with_context(err_context)
@@ -1295,21 +1295,21 @@ fn get_focused_pane_info(env: &PluginEnv) {
 fn parse_layout(env: &PluginEnv, layout_string: String) {
     use std::time::{SystemTime, UNIX_EPOCH};
 
-    // Parse the KDL layout - same parameters as list_available_layouts in layout.rs:1260
+    // 解析 the KDL 布局 - same 参数 as list_available_layouts in 布局.rs:1260
     let parse_result = Layout::from_kdl(
         &layout_string,
-        Some("parse_layout_api".to_string()), // file_name for error reporting
-        None,                                 // no swap layouts
+        Some("parse_layout_api".to_string()), // file_name for 错误 报告
+        None,                                 // no swap 布局
         None,                                 // no cwd
     );
 
     let response = match parse_result {
         Ok(layout) => {
-            // Extract tabs from layout
+            // 提取 标签页 from 布局
             // This logic matches LayoutMetadata::from in data.rs:1762-1772
             let layout_tabs = layout.tabs();
             let tabs = if layout_tabs.is_empty() {
-                // Use default template if no explicit tabs defined
+                // Use 默认 template if no explicit 标签页 defined
                 let (tiled_pane_layout, floating_pane_layout) = layout.new_tab();
                 vec![TabMetadata::from(&(
                     None,
@@ -1324,7 +1324,7 @@ fn parse_layout(env: &PluginEnv, layout_string: String) {
                     .collect()
             };
 
-            // Get current time as Unix epoch timestamp
+            // Get 当前 time as Unix epoch timestamp
             let current_time = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap_or_default()
@@ -1337,14 +1337,14 @@ fn parse_layout(env: &PluginEnv, layout_string: String) {
                 update_time: current_time,
             };
 
-            // Convert LayoutMetadata to protobuf
+            // 转换 LayoutMetadata to protobuf
             match layout_metadata.try_into() {
                 Ok(protobuf_metadata) => ProtobufParseLayoutResponse {
                     result: Some(parse_layout_response::Result::Metadata(protobuf_metadata)),
                 },
                 Err(e) => {
                     log::error!("Failed to convert metadata to protobuf: {}", e);
-                    // Fallback to SyntaxError if conversion fails
+                    // 回退 to SyntaxError if conversion fails
                     let error = LayoutParsingError::SyntaxError;
                     let protobuf_error =
                         error
@@ -1361,8 +1361,8 @@ fn parse_layout(env: &PluginEnv, layout_string: String) {
             }
         },
         Err(config_error) => {
-            // Build LayoutParsingError following list_available_layouts pattern
-            // See zellij-utils/src/input/layout.rs:1238-1245
+            // 构建 LayoutParsingError following list_available_layouts 模式
+            // See zellij-utils/src/输入/布局.rs:1238-1245
             let file_name = "parse_layout_api".to_string();
             let source_code = layout_string;
 
@@ -1375,8 +1375,8 @@ fn parse_layout(env: &PluginEnv, layout_string: String) {
                 _ => LayoutParsingError::SyntaxError,
             };
 
-            // Convert LayoutParsingError to protobuf
-            // TryFrom is implemented in zellij-utils/src/plugin_api/event.rs:1293-1314
+            // 转换 LayoutParsingError to protobuf
+            // TryFrom is implemented in zellij-utils/src/plugin_api/事件.rs:1293-1314
             let protobuf_error = error.try_into().unwrap_or_else(|e| {
                 log::error!("Failed to convert error to protobuf: {}", e);
                 ProtobufLayoutParsingError {
@@ -1428,10 +1428,10 @@ fn open_file(env: &PluginEnv, file_to_open: FileToOpen, context: BTreeMap<String
     };
     let result = apply_action!(action, error_msg, env);
 
-    // Extract pane_id from result and convert to zellij_utils PaneId
+    // 提取 pane_id from result and 转换 to zellij_utils PaneId
     let pane_id: OpenFileResponse = result.and_then(|r| r.affected_pane_id).map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenFileResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_file response"))
@@ -1439,7 +1439,7 @@ fn open_file(env: &PluginEnv, file_to_open: FileToOpen, context: BTreeMap<String
 }
 
 fn run_action(env: &PluginEnv, mut action: Action, context: BTreeMap<String, String>) {
-    // Clone the necessary data to move into the thread
+    // Clone the necessary data to move into the 线程
     action.populate_originating_plugin(OriginatingPlugin::new(
         env.plugin_id,
         env.client_id,
@@ -1453,7 +1453,7 @@ fn run_action(env: &PluginEnv, mut action: Action, context: BTreeMap<String, Str
     let default_mode = env.default_mode.clone();
     let plugin_name = env.name().to_string();
 
-    // Spawn a new thread to execute the action
+    // Spawn a new 线程 to execute the action
     thread::spawn(move || {
         // Execute the action and capture the result
         let pane_id = match route_action(
@@ -1468,7 +1468,7 @@ fn run_action(env: &PluginEnv, mut action: Action, context: BTreeMap<String, Str
             None,
         ) {
             Ok((_should_break, result)) => {
-                // Extract pane_id from ActionCompletionResult
+                // 提取 pane_id from ActionCompletionResult
                 result.and_then(|r| r.affected_pane_id)
             },
             Err(e) => {
@@ -1477,8 +1477,8 @@ fn run_action(env: &PluginEnv, mut action: Action, context: BTreeMap<String, Str
             },
         };
 
-        // After action completes, send ActionComplete event with context
-        // Convert server PaneId to zellij_utils PaneId
+        // After action completes, send ActionComplete 事件 with 上下文
+        // 转换 服务端 PaneId to zellij_utils PaneId
         let pane_id_for_event = pane_id.map(|p| p.into());
         let updates = vec![(
             Some(plugin_id),
@@ -1486,7 +1486,7 @@ fn run_action(env: &PluginEnv, mut action: Action, context: BTreeMap<String, Str
             Event::ActionComplete(action_clone, pane_id_for_event, context),
         )];
 
-        // Send the ActionComplete event back to the plugin
+        // Send the ActionComplete 事件 back to the 插件
         if let Err(e) = senders.send_to_plugin(PluginInstruction::Update(updates)) {
             log::error!("Failed to send ActionComplete event: {:?}", e);
         }
@@ -1524,11 +1524,11 @@ fn open_file_floating(
     };
     let result = apply_action!(action, error_msg, env);
 
-    // Extract pane_id from result and convert to zellij_utils PaneId
+    // 提取 pane_id from result and 转换 to zellij_utils PaneId
     let pane_id: OpenFileFloatingResponse =
         result.and_then(|r| r.affected_pane_id).map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenFileFloatingResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_file_floating response"))
@@ -1566,11 +1566,11 @@ fn open_file_in_place(
     };
     let result = apply_action!(action, error_msg, env);
 
-    // Extract pane_id from result and convert to zellij_utils PaneId
+    // 提取 pane_id from result and 转换 to zellij_utils PaneId
     let pane_id: OpenFileInPlaceResponse =
         result.and_then(|r| r.affected_pane_id).map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenFileInPlaceResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_file_in_place response"))
@@ -1595,7 +1595,7 @@ fn open_file_near_plugin(
     let start_suppressed = false;
     let open_file = TerminalAction::OpenFile(open_file_payload);
 
-    // Create completion channel
+    // 创建 completion 通道
     let (completion_tx, completion_rx) = oneshot::channel();
     let pty_instr = PtyInstruction::SpawnTerminal(
         Some(open_file),
@@ -1612,7 +1612,7 @@ fn open_file_near_plugin(
     let result = wait_for_action_completion(completion_rx, "open_file_near_plugin", false);
     let pane_id: OpenFileNearPluginResponse = result.affected_pane_id.map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenFileNearPluginResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_file_near_plugin response"))
@@ -1638,7 +1638,7 @@ fn open_file_floating_near_plugin(
     let start_suppressed = false;
     let open_file = TerminalAction::OpenFile(open_file_payload);
 
-    // Create completion channel
+    // 创建 completion 通道
     let (completion_tx, completion_rx) = oneshot::channel();
     let pty_instr = PtyInstruction::SpawnTerminal(
         Some(open_file),
@@ -1655,7 +1655,7 @@ fn open_file_floating_near_plugin(
     let result = wait_for_action_completion(completion_rx, "open_file_floating_near_plugin", false);
     let pane_id: OpenFileFloatingNearPluginResponse = result.affected_pane_id.map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenFileFloatingNearPluginResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_file_floating_near_plugin response"))
@@ -1680,7 +1680,7 @@ fn open_file_in_place_of_plugin(
     let title = format!("Editing: {}", open_file_payload.path.display());
     let open_file = TerminalAction::OpenFile(open_file_payload);
 
-    // Create completion channel
+    // 创建 completion 通道
     let (completion_tx, completion_rx) = oneshot::channel();
     let pty_instr = PtyInstruction::SpawnInPlaceTerminal(
         Some(open_file),
@@ -1695,7 +1695,7 @@ fn open_file_in_place_of_plugin(
     let result = wait_for_action_completion(completion_rx, "open_file_in_place_of_plugin", false);
     let pane_id: OpenFileInPlaceOfPluginResponse = result.affected_pane_id.map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenFileInPlaceOfPluginResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_file_in_place_of_plugin response"))
@@ -1728,10 +1728,10 @@ fn open_terminal(env: &PluginEnv, cwd: PathBuf) {
     };
     let result = apply_action!(action, error_msg, env);
 
-    // Extract pane_id from result and convert to zellij_utils PaneId
+    // 提取 pane_id from result and 转换 to zellij_utils PaneId
     let pane_id: OpenTerminalResponse = result.and_then(|r| r.affected_pane_id).map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenTerminalResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_terminal response"))
@@ -1750,7 +1750,7 @@ fn open_terminal_near_plugin(env: &PluginEnv, cwd: PathBuf) {
     let name = None;
     default_shell.change_cwd(cwd);
 
-    // Create completion channel
+    // 创建 completion 通道
     let (completion_tx, completion_rx) = oneshot::channel();
     let _ = env.senders.send_to_pty(PtyInstruction::SpawnTerminal(
         Some(default_shell),
@@ -1769,7 +1769,7 @@ fn open_terminal_near_plugin(env: &PluginEnv, cwd: PathBuf) {
     let result = wait_for_action_completion(completion_rx, "open_terminal_near_plugin", false);
     let pane_id: OpenTerminalNearPluginResponse = result.affected_pane_id.map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenTerminalNearPluginResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_terminal_near_plugin response"))
@@ -1805,11 +1805,11 @@ fn open_terminal_floating(
     };
     let result = apply_action!(action, error_msg, env);
 
-    // Extract pane_id from result and convert to zellij_utils PaneId
+    // 提取 pane_id from result and 转换 to zellij_utils PaneId
     let pane_id: OpenTerminalFloatingResponse =
         result.and_then(|r| r.affected_pane_id).map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenTerminalFloatingResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_terminal_floating response"))
@@ -1832,7 +1832,7 @@ fn open_terminal_floating_near_plugin(
     default_shell.change_cwd(cwd);
     let name = None;
 
-    // Create completion channel
+    // 创建 completion 通道
     let (completion_tx, completion_rx) = oneshot::channel();
     let _ = env.senders.send_to_pty(PtyInstruction::SpawnTerminal(
         Some(default_shell),
@@ -1849,7 +1849,7 @@ fn open_terminal_floating_near_plugin(
         wait_for_action_completion(completion_rx, "open_terminal_floating_near_plugin", false);
     let pane_id: OpenTerminalFloatingNearPluginResponse = result.affected_pane_id.map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenTerminalFloatingNearPluginResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_terminal_floating_near_plugin response"))
@@ -1882,11 +1882,11 @@ fn open_terminal_in_place(env: &PluginEnv, cwd: PathBuf) {
     };
     let result = apply_action!(action, error_msg, env);
 
-    // Extract pane_id from result and convert to zellij_utils PaneId
+    // 提取 pane_id from result and 转换 to zellij_utils PaneId
     let pane_id: OpenTerminalInPlaceResponse =
         result.and_then(|r| r.affected_pane_id).map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenTerminalInPlaceResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_terminal_in_place response"))
@@ -1909,7 +1909,7 @@ fn open_terminal_in_place_of_plugin(
     default_shell.change_cwd(cwd);
     let name = None;
 
-    // Create completion channel
+    // 创建 completion 通道
     let (completion_tx, completion_rx) = oneshot::channel();
     let _ = env
         .senders
@@ -1926,7 +1926,7 @@ fn open_terminal_in_place_of_plugin(
         wait_for_action_completion(completion_rx, "open_terminal_in_place_of_plugin", false);
     let pane_id: OpenTerminalInPlaceOfPluginResponse = result.affected_pane_id.map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenTerminalInPlaceOfPluginResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_terminal_in_place_of_plugin response"))
@@ -1965,7 +1965,7 @@ fn open_command_pane_in_place_of_plugin(
     };
     let run_cmd = TerminalAction::RunCommand(run_command_action.into());
 
-    // Create completion channel
+    // 创建 completion 通道
     let (completion_tx, completion_rx) = oneshot::channel();
     let _ = env
         .senders
@@ -1982,7 +1982,7 @@ fn open_command_pane_in_place_of_plugin(
         wait_for_action_completion(completion_rx, "open_command_pane_in_place_of_plugin", false);
     let pane_id: OpenCommandPaneInPlaceOfPluginResponse = result.affected_pane_id.map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenCommandPaneInPlaceOfPluginResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_command_pane_in_place_of_plugin response"))
@@ -2168,11 +2168,11 @@ fn open_command_pane(
     };
     let result = apply_action!(action, error_msg, env);
 
-    // Extract pane_id from result and convert to zellij_utils PaneId
+    // 提取 pane_id from result and 转换 to zellij_utils PaneId
     let pane_id: OpenCommandPaneResponse =
         result.and_then(|r| r.affected_pane_id).map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenCommandPaneResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_command_pane response"))
@@ -2210,7 +2210,7 @@ fn open_command_pane_near_plugin(
     };
     let run_cmd = TerminalAction::RunCommand(run_command_action.into());
 
-    // Create completion channel
+    // 创建 completion 通道
     let (completion_tx, completion_rx) = oneshot::channel();
     let _ = env.senders.send_to_pty(PtyInstruction::SpawnTerminal(
         Some(run_cmd),
@@ -2229,7 +2229,7 @@ fn open_command_pane_near_plugin(
     let result = wait_for_action_completion(completion_rx, "open_command_pane_near_plugin", false);
     let pane_id: OpenCommandPaneNearPluginResponse = result.affected_pane_id.map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenCommandPaneNearPluginResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_command_pane_near_plugin response"))
@@ -2277,11 +2277,11 @@ fn open_command_pane_floating(
     };
     let result = apply_action!(action, error_msg, env);
 
-    // Extract pane_id from result and convert to zellij_utils PaneId
+    // 提取 pane_id from result and 转换 to zellij_utils PaneId
     let pane_id: OpenCommandPaneFloatingResponse =
         result.and_then(|r| r.affected_pane_id).map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenCommandPaneFloatingResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_command_pane_floating response"))
@@ -2320,7 +2320,7 @@ fn open_command_pane_floating_near_plugin(
     };
     let run_cmd = TerminalAction::RunCommand(run_command_action.into());
 
-    // Create completion channel
+    // 创建 completion 通道
     let (completion_tx, completion_rx) = oneshot::channel();
     let _ = env.senders.send_to_pty(PtyInstruction::SpawnTerminal(
         Some(run_cmd),
@@ -2341,7 +2341,7 @@ fn open_command_pane_floating_near_plugin(
     let pane_id: OpenCommandPaneFloatingNearPluginResponse =
         result.affected_pane_id.map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenCommandPaneFloatingNearPluginResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_command_pane_floating_near_plugin response"))
@@ -2389,11 +2389,11 @@ fn open_command_pane_in_place(
     };
     let result = apply_action!(action, error_msg, env);
 
-    // Extract pane_id from result and convert to zellij_utils PaneId
+    // 提取 pane_id from result and 转换 to zellij_utils PaneId
     let pane_id: OpenCommandPaneInPlaceResponse =
         result.and_then(|r| r.affected_pane_id).map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenCommandPaneInPlaceResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_command_pane_in_place response"))
@@ -2433,7 +2433,7 @@ fn open_command_pane_background(
     };
     let run_cmd = TerminalAction::RunCommand(run_command_action.into());
 
-    // Create completion channel
+    // 创建 completion 通道
     let (completion_tx, completion_rx) = oneshot::channel();
     let _ = env.senders.send_to_pty(PtyInstruction::SpawnTerminal(
         Some(run_cmd),
@@ -2449,7 +2449,7 @@ fn open_command_pane_background(
     let result = wait_for_action_completion(completion_rx, "open_command_pane_background", false);
     let pane_id: OpenCommandPaneBackgroundResponse = result.affected_pane_id.map(|p| p.into());
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufOpenCommandPaneBackgroundResponse::from(pane_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write open_command_pane_background response"))
@@ -2483,12 +2483,12 @@ fn set_timeout(env: &PluginEnv, secs: f64) {
     let update_target = Some(env.plugin_id);
     let client_id = env.client_id;
     let plugin_name = env.name();
-    // Use tokio runtime for async I/O (timer operation)
+    // Use tokio runtime for 异步 I/O (timer operation)
     get_tokio_runtime().spawn(async move {
         let start_time = Instant::now();
         tokio::time::sleep(Duration::from_secs_f64(secs)).await;
-        // FIXME: The way that elapsed time is being calculated here is not exact; it doesn't take into account the
-        // time it takes an event to actually reach the plugin after it's sent to the `wasm` thread.
+        // FIXME: The way that elapsed time is being 计算的 here is not exact; it doesn't take into account the
+        // time it takes an 事件 to actually reach the 插件 after it's sent to the `WASM` 线程.
         let elapsed_time = Instant::now().duration_since(start_time).as_secs_f64();
 
         send_plugin_instructions
@@ -2522,14 +2522,14 @@ fn exec_cmd(env: &PluginEnv, mut command_line: Vec<String>) {
     };
     let command = command_line.remove(0);
 
-    // Bail out if we're forbidden to run command
+    // Bail out if we're forbidden to run 命令
     if !env.plugin._allow_exec_host_cmd {
         warn!("This plugin isn't allow to run command in host side, skip running this command: '{cmd} {args}'.",
         	cmd = command, args = command_line.join(" "));
         return;
     }
 
-    // Here, we don't wait the command to finish
+    // Here, we don't wait the 命令 to finish
     process::Command::new(command)
         .args(command_line)
         .spawn()
@@ -2742,7 +2742,7 @@ fn new_tabs_with_layout_info(env: &PluginEnv, layout_info: LayoutInfo) -> Result
 fn apply_layout(env: &PluginEnv, layout: Layout) {
     let mut tabs_to_open = vec![];
     let tabs = layout.tabs();
-    let cwd = None; // TODO: add this to the plugin API
+    let cwd = None; // TODO: add this to the 插件 API
     if tabs.is_empty() {
         let swap_tiled_layouts = Some(layout.swap_tiled_layouts.clone());
         let swap_floating_layouts = Some(layout.swap_floating_layouts.clone());
@@ -2786,13 +2786,13 @@ fn apply_layout(env: &PluginEnv, layout: Layout) {
         let error_msg = || format!("Failed to create layout tab");
         let result = apply_action!(action, error_msg, env);
 
-        // Collect tab ID from each action
+        // 收集 标签页 ID from each action
         if let Some(tab_id) = result.and_then(|r| r.affected_tab_id) {
             tab_ids.push(tab_id);
         }
     }
 
-    // Write response
+    // 写入 响应
     let response = ProtobufNewTabsResponse::from(tab_ids);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write layout tabs response"))
@@ -2815,10 +2815,10 @@ fn new_tab(env: &PluginEnv, name: Option<String>, cwd: Option<String>) {
     let error_msg = || format!("Failed to open new tab");
     let result = apply_action!(action, error_msg, env);
 
-    // Extract tab_id from result - return None if not present
+    // 提取 tab_id from result - 返回 None if not present
     let tab_id: NewTabResponse = result.and_then(|r| r.affected_tab_id);
 
-    // Write response to plugin
+    // 写入 响应 to 插件
     let response = ProtobufNewTabResponse::from(tab_id);
     wasi_write_object(env, &response.encode_to_vec())
         .with_context(|| format!("failed to write new_tab response"))
@@ -2959,8 +2959,8 @@ fn switch_session(
     // pane_id is (id, is_plugin)
     let err_context = || format!("Failed to switch session");
     if let Some(LayoutInfo::Stringified(stringified_layout)) = layout.as_ref() {
-        // we verify the stringified layout here to fail early rather than when parsing it at the
-        // session-switching phase
+        // we 验证 the stringified 布局 here to fail early rather than when 解析 it at the
+        // 会话-switching phase
         if let Err(e) = Layout::from_kdl(&stringified_layout, None, None, None) {
             return Err(anyhow!("Failed to deserialize layout: {}", e));
         }
@@ -3028,7 +3028,7 @@ fn delete_all_dead_sessions() -> Result<()> {
                 .filter_map(|folder_name| {
                     let session_name = folder_name.file_name()?.to_str()?.to_owned();
                     if live_sessions.contains(&session_name) {
-                        // this is not a dead session...
+                        // this is not a dead 会话...
                         return None;
                     }
                     Some(session_name)
@@ -3270,7 +3270,7 @@ fn focus_or_create_tab(env: &PluginEnv, tab_name: String) {
     };
     let result = apply_action!(action, error_msg, env);
 
-    // Return Some(tab_id) if tab was created or focused, None on error
+    // 返回 Some(tab_id) if 标签页 was 创建的 or 聚焦的, None on 错误
     let tab_id: FocusOrCreateTabResponse = result.and_then(|r| r.affected_tab_id);
 
     let response = ProtobufFocusOrCreateTabResponse::from(tab_id);
@@ -3429,12 +3429,12 @@ fn kill_sessions(session_names: Vec<String>) {
     }
 }
 
-// Wedge timeout: only guards against a peer that neither shuts down nor
-// crashes. Normal kill latency is tens of milliseconds (peer's route loop
-// reads the message, server sends Exit back), so 500 ms is several times the
-// expected worst case while still feeling instant to the user. Applied as a
-// single budget over the whole batch -- per-session kills are issued
-// concurrently so killing many sessions does not multiply the wait.
+// Wedge 超时: only guards against a peer that neither shuts down nor
+// crashes. Normal 杀死 延迟 is tens of milliseconds (peer's route 循环
+// reads the 消息, 服务端 sends 退出 back), so 500 ms is several times the
+// 期望的 worst case while still feeling instant to the 用户. Applied as a
+// single budget over the whole batch -- per-会话 杀死 are issued
+// concurrently so 杀死 many 会话 does not multiply the wait.
 const KILL_WEDGE_TIMEOUT: Duration = Duration::from_millis(500);
 
 fn kill_sessions_and_reply(env: &PluginEnv, session_names: Vec<String>) {
@@ -3504,8 +3504,8 @@ fn delete_dead_session_and_reply(env: &PluginEnv, session_name: String) {
 }
 
 fn delete_all_dead_sessions_and_reply(env: &PluginEnv) {
-    // Same budget as kill-all so the UX of "y to confirm" is consistent: the
-    // host-side fs work for many dead sessions is bounded in wall time.
+    // Same budget as 杀死-all so the UX of "y to confirm" is consistent: the
+    // 主机-side fs 工作 for many dead 会话 is bounded in wall time.
     let runtime = get_tokio_runtime();
     let result: Result<(), String> = runtime.block_on(async {
         let fs_task = tokio::task::spawn_blocking(delete_all_dead_sessions);
@@ -3534,14 +3534,14 @@ fn watch_filesystem(env: &PluginEnv) {
         .map(|sender| sender.send(PluginInstruction::WatchFilesystem));
 }
 
-// note this removes the requesting plugin
+// note this removes the requesting 插件
 fn dump_session_layout(env: &PluginEnv, tab_index: Option<usize>) {
     use crate::plugins::DumpSessionLayoutResponse;
 
-    // Create oneshot channel for response
+    // 创建 oneshot 通道 for 响应
     let (response_sender, response_receiver) = crossbeam::channel::bounded(1);
 
-    // Send request to screen thread
+    // Send 请求 to 屏幕 线程
     let send_result = env
         .senders
         .send_to_screen(ScreenInstruction::DumpLayoutToPlugin {
@@ -3562,7 +3562,7 @@ fn dump_session_layout(env: &PluginEnv, tab_index: Option<usize>) {
         return;
     }
 
-    // Wait for response with 1 second timeout
+    // Wait for 响应 with 1 second 超时
     let response: DumpSessionLayoutResponse =
         match response_receiver.recv_timeout(Duration::from_secs(1)) {
             Ok(resp) => resp,
@@ -3579,7 +3579,7 @@ fn dump_session_layout(env: &PluginEnv, tab_index: Option<usize>) {
             },
         };
 
-    // Convert LayoutMetadata to protobuf
+    // 转换 LayoutMetadata to protobuf
     let protobuf_metadata = response
         .metadata
         .and_then(|metadata| match metadata.try_into() {
@@ -3590,7 +3590,7 @@ fn dump_session_layout(env: &PluginEnv, tab_index: Option<usize>) {
             },
         });
 
-    // Build protobuf response
+    // 构建 protobuf 响应
     let protobuf_response = match response.layout_result {
         Ok(layout_content) => ProtobufDumpSessionLayoutResponse {
             result: Some(dump_session_layout_response::Result::LayoutContent(
@@ -3604,7 +3604,7 @@ fn dump_session_layout(env: &PluginEnv, tab_index: Option<usize>) {
         },
     };
 
-    // Write response back to plugin via WASI pipe
+    // 写入 响应 back to 插件 via WASI pipe
     let _ = wasi_write_object(env, &protobuf_response.encode_to_vec())
         .with_context(|| format!("failed to send session layout to plugin {}", env.name()));
 }
@@ -3770,13 +3770,13 @@ fn get_pane_info(env: &PluginEnv, pane_id: zellij_utils::data::PaneId) {
         )
     };
 
-    // Create channel for response
+    // 创建 通道 for 响应
     let (response_sender, response_receiver) = crossbeam::channel::bounded(1);
 
-    // Convert from plugin PaneId to server PaneId
+    // 转换 from 插件 PaneId to 服务端 PaneId
     let server_pane_id: PaneId = pane_id.into();
 
-    // Send request to screen thread
+    // Send 请求 to 屏幕 线程
     env.senders
         .send_to_screen(ScreenInstruction::GetPaneInfo {
             pane_id: server_pane_id,
@@ -3785,10 +3785,10 @@ fn get_pane_info(env: &PluginEnv, pane_id: zellij_utils::data::PaneId) {
         .with_context(err_context)
         .non_fatal();
 
-    // Block waiting for response with 100ms timeout
+    // Block waiting for 响应 with 100ms 超时
     let pane_info = match response_receiver.recv_timeout(Duration::from_millis(100)) {
         Ok(Some(pane_info)) => {
-            // Convert PaneInfo to ProtobufPaneInfo
+            // 转换 PaneInfo to ProtobufPaneInfo
             match pane_info.try_into() {
                 Ok(protobuf_pane_info) => Some(protobuf_pane_info),
                 Err(e) => {
@@ -3801,7 +3801,7 @@ fn get_pane_info(env: &PluginEnv, pane_id: zellij_utils::data::PaneId) {
                 },
             }
         },
-        Ok(None) => None, // Pane not found
+        Ok(None) => None, // 窗格 not 找到的
         Err(RecvTimeoutError::Timeout) => {
             log::error!(
                 "GetPaneInfo timed out for pane {:?} from plugin {}",
@@ -3835,10 +3835,10 @@ fn get_tab_info(env: &PluginEnv, tab_id: usize) {
         )
     };
 
-    // Create channel for response
+    // 创建 通道 for 响应
     let (response_sender, response_receiver) = crossbeam::channel::bounded(1);
 
-    // Send request to screen thread
+    // Send 请求 to 屏幕 线程
     env.senders
         .send_to_screen(ScreenInstruction::GetTabInfo {
             tab_id,
@@ -3847,10 +3847,10 @@ fn get_tab_info(env: &PluginEnv, tab_id: usize) {
         .with_context(err_context)
         .non_fatal();
 
-    // Block waiting for response with 100ms timeout
+    // Block waiting for 响应 with 100ms 超时
     let tab_info = match response_receiver.recv_timeout(Duration::from_millis(100)) {
         Ok(Some(tab_info)) => {
-            // Convert TabInfo to ProtobufTabInfo
+            // 转换 TabInfo to ProtobufTabInfo
             match tab_info.try_into() {
                 Ok(protobuf_tab_info) => Some(protobuf_tab_info),
                 Err(e) => {
@@ -3863,7 +3863,7 @@ fn get_tab_info(env: &PluginEnv, tab_id: usize) {
                 },
             }
         },
-        Ok(None) => None, // Tab not found
+        Ok(None) => None, // 标签页 not 找到的
         Err(RecvTimeoutError::Timeout) => {
             log::error!(
                 "GetTabInfo timed out for tab {} from plugin {}",
@@ -4087,7 +4087,7 @@ fn enumerate_drives() -> Vec<(PathBuf, Option<zellij_utils::data::FileMetadata>)
 
 #[cfg(windows)]
 fn enumerate_wsl_distributions() -> Vec<(PathBuf, Option<zellij_utils::data::FileMetadata>)> {
-    // read_dir on \\wsl.localhost\ or \\wsl$\ can fail with OS error 64/67
+    // read_dir on \\wsl.localhost\ or \\wsl$\ can fail with OS 错误 64/67
     // even when WSL is running, so enumerate distros via `wsl -l -q` instead.
     let output = match std::process::Command::new("wsl")
         .args(["-l", "-q"])
@@ -4096,7 +4096,7 @@ fn enumerate_wsl_distributions() -> Vec<(PathBuf, Option<zellij_utils::data::Fil
         Ok(o) if o.status.success() => o,
         _ => return vec![],
     };
-    // wsl -l -q outputs UTF-16LE on Windows
+    // wsl -l -q outputs UTF-16LE on 窗口
     let stdout: Vec<u16> = output
         .stdout
         .chunks(2)
@@ -4109,7 +4109,7 @@ fn enumerate_wsl_distributions() -> Vec<(PathBuf, Option<zellij_utils::data::Fil
         if name.is_empty() {
             continue;
         }
-        // Verify the distro is reachable before listing it
+        // 验证 the distro is reachable before listing it
         let unc = format!("\\\\wsl.localhost\\{}", name);
         let metadata = std::fs::metadata(&unc).ok().map(|m| m.into());
         let wsl_path = PathBuf::from(format!("//wsl.localhost/{}/", name));
@@ -4144,10 +4144,10 @@ fn get_pane_scrollback(env: &PluginEnv, pane_id: PaneId, get_full_scrollback: bo
         )
     };
 
-    // Create oneshot channel for response
+    // 创建 oneshot 通道 for 响应
     let (response_sender, response_receiver) = crossbeam::channel::bounded(1);
 
-    // Send request to screen thread
+    // Send 请求 to 屏幕 线程
     env.senders
         .send_to_screen(ScreenInstruction::GetPaneScrollback {
             pane_id,
@@ -4158,7 +4158,7 @@ fn get_pane_scrollback(env: &PluginEnv, pane_id: PaneId, get_full_scrollback: bo
         .with_context(err_context)
         .non_fatal();
 
-    // Block waiting for response with 5 second timeout
+    // Block waiting for 响应 with 5 second 超时
     let response = match response_receiver.recv_timeout(Duration::from_secs(5)) {
         Ok(response) => response,
         Err(RecvTimeoutError::Timeout) => {
@@ -4185,7 +4185,7 @@ fn get_pane_scrollback(env: &PluginEnv, pane_id: PaneId, get_full_scrollback: bo
         },
     };
 
-    // Convert to protobuf and write back to plugin
+    // 转换 to protobuf and 写入 back to 插件
     ProtobufPaneScrollbackResponse::try_from(response)
         .map_err(|e| anyhow!("Failed to serialize pane scrollback response: {}", e))
         .and_then(|serialized| {
@@ -4265,10 +4265,10 @@ fn get_pane_pid(env: &PluginEnv, pane_id: PaneId) {
         )
     };
 
-    // Create oneshot channel for response
+    // 创建 oneshot 通道 for 响应
     let (response_sender, response_receiver) = crossbeam::channel::bounded(1);
 
-    // Send request directly to PTY thread
+    // Send 请求 directly to PTY 线程
     env.senders
         .send_to_pty(PtyInstruction::GetPanePid {
             pane_id,
@@ -4277,7 +4277,7 @@ fn get_pane_pid(env: &PluginEnv, pane_id: PaneId) {
         .with_context(err_context)
         .non_fatal();
 
-    // Block waiting for response with 100ms timeout
+    // Block waiting for 响应 with 100ms 超时
     let response = match response_receiver.recv_timeout(Duration::from_millis(100)) {
         Ok(response) => response,
         Err(RecvTimeoutError::Timeout) => {
@@ -4301,7 +4301,7 @@ fn get_pane_pid(env: &PluginEnv, pane_id: PaneId) {
         },
     };
 
-    // Encode response and write to plugin's stdin
+    // 编码 响应 and 写入 to 插件's 标准输入
     let protobuf_response = ProtobufGetPanePidResponse::from(response);
     let serialized = protobuf_response.encode_to_vec();
     wasi_write_object(env, &serialized)
@@ -4483,7 +4483,7 @@ fn save_layout(env: &PluginEnv, layout_name: String, layout_kdl: String, overwri
         .map(|_| SaveLayoutResponse::Ok(()))
         .unwrap_or_else(SaveLayoutResponse::Err);
 
-    // Serialize and send response back to plugin
+    // 序列化 and send 响应 back to 插件
     let protobuf_response = ProtobufSaveLayoutResponse::from(response);
     let serialized = protobuf_response.encode_to_vec();
     wasi_write_object(env, &serialized)
@@ -4497,14 +4497,14 @@ fn try_save_layout(
     layout_kdl: &str,
     overwrite: bool,
 ) -> Result<(), String> {
-    // Step 1: Sanitize layout name for path traversal and invalid characters
+    // Step 1: Sanitize 布局 name for 路径 traversal and invalid characters
     let safe_name = sanitize_layout_name(layout_name)?;
 
-    // Step 2: Validate the layout by parsing it
+    // Step 2: 验证 the 布局 by 解析 it
     Layout::from_kdl(
         layout_kdl,
         Some(format!("{}.kdl", safe_name)),
-        None, // No swap layouts
+        None, // No swap 布局
         None, // No cwd override
     )
     .map_err(|config_error| format!("Invalid layout KDL: {:?}", config_error))?;
@@ -4516,10 +4516,10 @@ fn try_save_layout(
         .or_else(default_layout_dir)
         .ok_or_else(|| "Layout directory not found".to_string())?;
 
-    // Step 4: Create file path
+    // Step 4: 创建 文件 路径
     let file_path = layout_dir.join(format!("{}.kdl", safe_name));
 
-    // Step 5: Check if file exists when overwrite=false
+    // Step 5: 检查 if 文件 exists when overwrite=false
     if file_path.exists() && !overwrite {
         return Err(format!(
             "Layout file '{}' already exists. Use overwrite flag to replace it.",
@@ -4527,12 +4527,12 @@ fn try_save_layout(
         ));
     }
 
-    // Step 6: Ensure layout directory exists
+    // Step 6: Ensure 布局 目录 exists
     std::fs::create_dir_all(layout_dir)
         .map_err(|e| format!("Failed to create layout directory: {}", e))?;
 
-    // Step 7: Write to disk
-    let mut parsed_layout: KdlDocument = layout_kdl.parse().unwrap(); // unwrap
+    // Step 7: 写入 to disk
+    let mut parsed_layout: KdlDocument = layout_kdl.parse().unwrap(); // 解包
                                                                       // should
                                                                       // be
                                                                       // safe,
@@ -4582,26 +4582,26 @@ fn rename_layout(env: &PluginEnv, old_layout_name: String, new_layout_name: Stri
 }
 
 fn try_delete_layout(env: &PluginEnv, layout_name: &str) -> Result<(), String> {
-    // Sanitize the layout name to prevent directory traversal
+    // Sanitize the 布局 name to prevent 目录 traversal
     let safe_name =
         sanitize_layout_name(layout_name).map_err(|e| format!("Invalid layout name: {}", e))?;
 
-    // Get the layout directory from PluginEnv
+    // Get the 布局 目录 from PluginEnv
     let layout_dir = env
         .layout_dir
         .clone()
         .or_else(default_layout_dir)
         .ok_or_else(|| "Layout directory not found".to_string())?;
 
-    // Construct the full file path
+    // Construct the full 文件 路径
     let file_path = layout_dir.join(format!("{}.kdl", safe_name));
 
-    // Check if the file exists
+    // 检查 if the 文件 exists
     if !file_path.exists() {
         return Err(format!("Layout '{}' not found", safe_name));
     }
 
-    // Delete the file
+    // 删除 the 文件
     std::fs::remove_file(&file_path).map_err(|e| format!("Failed to delete layout file: {}", e))?;
 
     Ok(())
@@ -4612,30 +4612,30 @@ fn try_rename_layout(
     old_layout_name: &str,
     new_layout_name: &str,
 ) -> Result<(), String> {
-    // Step 1: Sanitize both layout names
+    // Step 1: Sanitize both 布局 names
     let safe_old_name = sanitize_layout_name(old_layout_name)
         .map_err(|e| format!("Invalid old layout name: {}", e))?;
 
     let safe_new_name = sanitize_layout_name(new_layout_name)
         .map_err(|e| format!("Invalid new layout name: {}", e))?;
 
-    // Step 2: Get layout directory from PluginEnv
+    // Step 2: Get 布局 目录 from PluginEnv
     let layout_dir = env
         .layout_dir
         .clone()
         .or_else(default_layout_dir)
         .ok_or_else(|| "Layout directory not found".to_string())?;
 
-    // Step 3: Construct file paths
+    // Step 3: Construct 文件 路径
     let old_file_path = layout_dir.join(format!("{}.kdl", safe_old_name));
     let new_file_path = layout_dir.join(format!("{}.kdl", safe_new_name));
 
-    // Step 4: Check if source file exists
+    // Step 4: 检查 if source 文件 exists
     if !old_file_path.exists() {
         return Err(format!("Layout '{}' not found", safe_old_name));
     }
 
-    // Step 5: Check if target file already exists (fail if it does - no overwrite)
+    // Step 5: 检查 if 目标 文件 already exists (fail if it does - no overwrite)
     if new_file_path.exists() {
         return Err(format!(
             "Layout '{}' already exists. Cannot rename '{}' to existing layout name.",
@@ -4643,7 +4643,7 @@ fn try_rename_layout(
         ));
     }
 
-    // Step 6: Rename the file
+    // Step 6: Rename the 文件
     std::fs::rename(&old_file_path, &new_file_path)
         .map_err(|e| format!("Failed to rename layout file: {}", e))?;
 
@@ -4669,28 +4669,28 @@ fn try_edit_layout(
     layout_name: &str,
     context: BTreeMap<String, String>,
 ) -> Result<(), String> {
-    // Sanitize the layout name to prevent directory traversal
+    // Sanitize the 布局 name to prevent 目录 traversal
     let safe_name =
         sanitize_layout_name(layout_name).map_err(|e| format!("Invalid layout name: {}", e))?;
 
-    // Get the layout directory from PluginEnv
+    // Get the 布局 目录 from PluginEnv
     let layout_dir = env
         .layout_dir
         .clone()
         .or_else(default_layout_dir)
         .ok_or_else(|| "Layout directory not found".to_string())?;
 
-    // Construct the full file path
+    // Construct the full 文件 路径
     let file_path = layout_dir.join(format!("{}.kdl", safe_name));
 
-    // Create FileToOpen for the layout file
+    // 创建 FileToOpen for the 布局 文件
     let file_to_open = FileToOpen {
         path: file_path,
         line_number: None,
         cwd: Some(layout_dir.clone()),
     };
 
-    // Create an Action::EditFile
+    // 创建 an Action::EditFile
     let action = Action::EditFile {
         payload: OpenFilePayload::new(
             file_to_open.path,
@@ -4728,25 +4728,25 @@ fn try_edit_layout(
     .map_err(|e| format!("Failed to route edit action: {:?}", e))
 }
 
-/// Sanitize layout name to prevent path traversal and invalid filenames
-/// Returns the sanitized name or an error message
+/// Sanitize 布局 name to prevent 路径 traversal and invalid filenames
+/// 返回 the sanitized name or an 错误 消息
 fn sanitize_layout_name(name: &str) -> Result<String, String> {
-    // Check for empty name
+    // 检查 for empty name
     if name.is_empty() {
         return Err("Layout name cannot be empty".to_string());
     }
 
-    // Check for path separators (prevent directory traversal)
+    // 检查 for 路径 分隔符 (prevent 目录 traversal)
     if name.contains('/') || name.contains('\\') {
         return Err("Layout name cannot contain path separators".to_string());
     }
 
-    // Check for parent directory references
+    // 检查 for parent 目录 引用
     if name.contains("..") {
         return Err("Layout name cannot contain '..'".to_string());
     }
 
-    // Check length (most filesystems have 255 char limit, leave room for .kdl)
+    // 检查 length (most filesystems have 255 char limit, leave room for .kdl)
     if name.len() > 250 {
         return Err("Layout name too long (max 250 characters)".to_string());
     }
@@ -4854,7 +4854,7 @@ fn break_panes_to_new_tab(
         }))
     });
 
-    // Create completion channel to receive tab ID
+    // 创建 completion 通道 to receive 标签页 ID
     let (tx, rx) = tokio::sync::oneshot::channel();
     let completion_tx = Some(NotificationEnd::new(tx));
 
@@ -4885,7 +4885,7 @@ fn break_panes_to_tab_with_index(
     should_change_focus_to_new_tab: bool,
     tab_index: usize,
 ) {
-    // Create completion channel to receive tab ID
+    // 创建 completion 通道 to receive 标签页 ID
     let (tx, rx) = tokio::sync::oneshot::channel();
     let completion_tx = Some(NotificationEnd::new(tx));
 
@@ -4964,7 +4964,7 @@ fn break_panes_to_tab_with_id(
 ) {
     let tab_id = tab_id as usize;
 
-    // Create completion channel to receive tab ID
+    // 创建 completion 通道 to receive 标签页 ID
     let (tx, rx) = tokio::sync::oneshot::channel();
     let completion_tx = Some(NotificationEnd::new(tx));
 
@@ -5331,7 +5331,7 @@ fn override_layout(
     let layout = Layout::from_layout_info(&env.layout_dir, layout_info)
         .map_err(|e| anyhow!("Failed to parse layout: {:?}", e))?;
 
-    // Convert all tabs to Vec<TabLayoutInfo>
+    // 转换 all 标签页 to Vec<TabLayoutInfo>
     let tabs: Vec<TabLayoutInfo> = layout
         .tabs
         .iter()
@@ -5346,7 +5346,7 @@ fn override_layout(
         })
         .collect();
 
-    // If no tabs, create default tab
+    // If no 标签页, 创建 默认 标签页
     let tabs = if tabs.is_empty() {
         let (tiled, floating) = layout.new_tab();
         vec![TabLayoutInfo {
@@ -5371,17 +5371,17 @@ fn override_layout(
     Ok(())
 }
 
-// Custom panic handler for plugins.
+// 自定义 panic 处理器 for 插件.
 //
-// This is called when a panic occurs in a plugin. Since most panics will likely originate in the
-// code trying to deserialize an `Event` upon a plugin state update, we read some panic message,
-// formatted as string from the plugin.
+// This is 调用的 when a panic occurs in a 插件. Since most panics will likely originate in the
+// code 尝试 to 反序列化 an `事件` upon a 插件 状态 update, we 读取 some panic 消息,
+// 格式化的 as string from the 插件.
 fn report_panic(env: &PluginEnv, msg: &str) {
     log::error!("PANIC IN PLUGIN!\n\r{}", msg);
     handle_plugin_crash(env.plugin_id, msg.to_owned(), env.senders.clone());
 }
 
-// Helper Functions ---------------------------------------------------------------------------------------------------
+// Helper 函数 ---------------------------------------------------------------------------------------------------
 
 pub fn wasi_read_string(plugin_env: &PluginEnv) -> Result<String> {
     let err_context = || format!("failed to read string from WASI env");
@@ -5420,13 +5420,13 @@ pub fn wasi_read_bytes(plugin_env: &PluginEnv) -> Result<Vec<u8>> {
         .with_context(|| format!("failed to deserialize object from WASI env"))
 }
 
-// TODO: move to permissions?
+// TODO: move to 权限?
 fn check_command_permission(
     plugin_env: &PluginEnv,
     command: &PluginCommand,
 ) -> (PermissionStatus, Option<PermissionType>) {
     if plugin_env.plugin.is_builtin() {
-        // built-in plugins can do all the things because they're part of the application and
+        // built-in 插件 can do all the things because they're part of the application and
         // there's no use to deny them anything
         return (PermissionStatus::Granted, None);
     }

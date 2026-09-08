@@ -29,8 +29,8 @@ use zellij_utils::{
     input::keybinds::Keybinds, input::plugins::PluginConfig, pane_size::Size,
 };
 
-/// Open a directory as a `File` handle for WASI pre-opening.
-/// On Windows, `FILE_FLAG_BACKUP_SEMANTICS` is required to open directories.
+/// 打开 a 目录 as a `文件` handle for WASI pre-opening.
+/// On 窗口, `FILE_FLAG_BACKUP_SEMANTICS` is required to 打开 目录.
 #[cfg(not(windows))]
 fn open_dir(path: &std::path::Path) -> std::io::Result<std::fs::File> {
     std::fs::File::open(path)
@@ -46,8 +46,8 @@ fn open_dir(path: &std::path::Path) -> std::io::Result<std::fs::File> {
 }
 
 fn create_plugin_fs_entries(plugin_own_data_dir: &PathBuf, plugin_own_cache_dir: &PathBuf) {
-    // Create filesystem entries mounted into WASM.
-    // We create them here to get expressive error messages in case they fail.
+    // 创建 filesystem entries mounted into WASM.
+    // We 创建 them here to get expressive 错误 消息 in case they fail.
     if let Err(e) = fs::create_dir_all(&plugin_own_data_dir) {
         log::error!("Failed to create plugin data dir: {}", e);
     };
@@ -81,8 +81,8 @@ pub struct PluginLoader<'a> {
     engine: Engine,
     plugin_cache: PluginCache,
     plugin_map: &'a mut PluginMap, // we receive a mutable reference rather than the Arc so that it
-    // will be held for the lifetime of this struct and thus loading
-    // plugins for all connected clients will be one transaction
+    // will be 持有的 for the 生命周期 of this 结构体 and thus 加载
+    // 插件 for all connected 客户端 will be one transaction
     connected_clients: Option<Arc<Mutex<Vec<ClientId>>>>,
 }
 
@@ -260,7 +260,7 @@ impl<'a> PluginLoader<'a> {
         let plugin_env = PluginEnv {
             plugin_id: self.plugin_id,
             client_id: self.client_id,
-            plugin: self.plugin_config.clone(), // TODO: change field name in PluginEnv to plugin_config
+            plugin: self.plugin_config.clone(), // TODO: change 字段 name in PluginEnv to plugin_config
             permissions: Arc::new(Mutex::new(None)),
             senders: self.senders.clone(),
             wasi_ctx,
@@ -284,7 +284,7 @@ impl<'a> PluginLoader<'a> {
         };
         let mut store = Store::new(&self.engine, plugin_env);
 
-        // Apply optimized resource limits for memory efficiency
+        // Apply optimized resource limits for 内存 efficiency
         store.limiter(|plugin_env| &mut plugin_env.store_limits);
 
         let mut linker = Linker::new(&self.engine);
@@ -316,10 +316,10 @@ impl<'a> PluginLoader<'a> {
         let connected_clients: Vec<ClientId> =
             connected_clients.lock().unwrap().iter().copied().collect();
         if !connected_clients.is_empty() {
-            self.connected_clients = None; // so we don't have infinite loops
+            self.connected_clients = None; // so we don't have infinite 循环
             for client_id in connected_clients {
                 if client_id == self.client_id {
-                    // don't reload the plugin once more for ourselves
+                    // don't 重新加载 the 插件 once more for ourselves
                     continue;
                 }
                 self.client_id = client_id;
@@ -396,7 +396,7 @@ impl<'a> PluginLoader<'a> {
         };
         let mut store = Store::new(&self.engine, plugin_env);
 
-        // Apply optimized resource limits for memory efficiency
+        // Apply optimized resource limits for 内存 efficiency
         store.limiter(|plugin_env| &mut plugin_env.store_limits);
 
         let mut linker = Linker::new(&self.engine);
@@ -435,10 +435,10 @@ impl<'a> PluginLoader<'a> {
             ("/tmp".to_owned(), tmp_dir.clone()),
         ];
         let dirs = dirs.into_iter().filter(|(_dir_name, dir)| {
-            // note that this does not protect against TOCTOU errors
-            // eg. if one or more of these folders existed at the time of check but was deleted
-            // before we mounted in in the wasi environment, we'll crash
-            // when we move to a new wasi environment, we should address this with locking if
+            // note that this does not protect against TOCTOU 错误
+            // eg. if one or more of these folders existed at the time of 检查 but was 删除的
+            // before we mounted in in the wasi 环境, we'll crash
+            // when we move to a new wasi 环境, we should 地址 this with locking if
             // there's no built-in solution
             dir.try_exists().ok().unwrap_or(false)
         });
@@ -446,7 +446,7 @@ impl<'a> PluginLoader<'a> {
         let mut builder = WasiCtxBuilder::new();
         builder.inherit_env()?;
 
-        // Mount directories using the builder
+        // Mount 目录 using the 构建器
         for (guest_path, host_path) in dirs {
             match open_dir(&host_path) {
                 Ok(dir_file) => {
@@ -461,7 +461,7 @@ impl<'a> PluginLoader<'a> {
 
         let ctx = builder.build();
 
-        // Set up custom stdin/stdout/stderr
+        // Set up 自定义 标准输入/标准输出/标准错误
         ctx.set_stdin(Box::new(ReadPipe::new(VecDequeInputStream(
             stdin_pipe.clone(),
         ))));
@@ -479,10 +479,10 @@ impl<'a> PluginLoader<'a> {
 fn create_optimized_store_limits() -> StoreLimits {
     use wasmi::StoreLimitsBuilder;
     StoreLimitsBuilder::new()
-        .instances(1) // One instance per plugin
-        .memories(4) // Max 4 linear memories per plugin
-        .memory_size(16 * 1024 * 1024) // 16MB per memory maximum
-        .tables(16) // Small table element limit
+        .instances(1) // One instance per 插件
+        .memories(4) // Max 4 linear memories per 插件
+        .memory_size(16 * 1024 * 1024) // 16MB per 内存 maximum
+        .tables(16) // Small 表格 element limit
         .trap_on_grow_failure(true) // Fail fast on resource exhaustion
         .build()
 }

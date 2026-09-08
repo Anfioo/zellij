@@ -60,32 +60,32 @@ pub enum PluginInstruction {
         Option<bool>,   // should float
         bool,           // should be opened in place
         bool,           // close_replaced_pane
-        Option<String>, // pane title
+        Option<String>, // 窗格 标题
         RunPluginOrAlias,
-        Option<usize>,  // tab index
-        Option<PaneId>, // pane id to replace if this is to be opened "in-place"
+        Option<usize>,  // 标签页 index
+        Option<PaneId>, // 窗格 id to replace if this is to be opened "in-place"
         ClientId,
         Size,
         Option<PathBuf>,  // cwd
-        Option<PluginId>, // the focused plugin id if relevant
-        bool,             // skip cache
-        Option<bool>,     // should focus plugin
+        Option<PluginId>, // the 聚焦的 插件 id if relevant
+        bool,             // skip 缓存
+        Option<bool>,     // should 焦点 插件
         Option<FloatingPaneCoordinates>,
         Option<NotificationEnd>, // completion signal
     ),
     LoadBackgroundPlugin(RunPluginOrAlias, ClientId),
-    Update(Vec<(Option<PluginId>, Option<ClientId>, Event)>), // Focused plugin / broadcast, client_id, event data
+    Update(Vec<(Option<PluginId>, Option<ClientId>, Event)>), // 聚焦的 插件 / 广播, client_id, 事件 data
     Unload(PluginId),                                         // plugin_id
     Reload(
         Option<bool>,   // should float
-        Option<String>, // pane title
+        Option<String>, // 窗格 标题
         RunPluginOrAlias,
-        usize, // tab index
+        usize, // 标签页 index
         Size,
         Option<NotificationEnd>,
     ),
     ReloadPluginWithId(u32),
-    Resize(PluginId, usize, usize), // plugin_id, columns, rows
+    Resize(PluginId, usize, usize), // plugin_id, 列, 行
     AddClient(ClientId),
     RemoveClient(ClientId),
     NewTab(
@@ -96,14 +96,14 @@ pub enum PluginInstruction {
         usize,                        // tab_id
         Option<Vec<CommandOrPlugin>>, // initial_panes
         bool,                         // block_on_first_terminal
-        bool,                         // should change focus to new tab
+        bool,                         // should change 焦点 to new 标签页
         (ClientId, bool),             // bool -> is_web_client
         Option<NotificationEnd>,      // completion signal
     ),
     OverrideLayout(
         Option<PathBuf>,        // cwd
         Option<TerminalAction>, // default_shell
-        Vec<TabLayoutInfo>,     // layouts for each tab
+        Vec<TabLayoutInfo>,     // 布局 for each 标签页
         bool,                   // retain_existing_terminal_panes
         bool,                   // retain_existing_plugin_panes
         ClientId,
@@ -117,17 +117,17 @@ pub enum PluginInstruction {
     PostMessagesToPluginWorker(
         PluginId,
         ClientId,
-        String, // worker name
+        String, // 工作线程 name
         Vec<(
-            String, // serialized message name
-            String, // serialized payload
+            String, // 序列化的 消息 name
+            String, // 序列化的 payload
         )>,
     ),
     PostMessageToPlugin(
         PluginId,
         ClientId,
-        String, // serialized message
-        String, // serialized payload
+        String, // 序列化的 消息
+        String, // 序列化的 payload
     ),
     PluginSubscribedToEvents(PluginId, ClientId, HashSet<EventType>),
     PermissionRequestResult(
@@ -196,7 +196,7 @@ pub enum PluginInstruction {
     WatchFilesystem,
     ListClientsToPlugin(SessionLayoutMetadata, PluginId, ClientId),
     ChangePluginHostDir(PathBuf, PluginId, ClientId),
-    WebServerStarted(String), // String -> the base url of the web server
+    WebServerStarted(String), // String -> the base url of the web 服务端
     FailedToStartWebServer(String),
     PaneRenderReport(PaneRenderReport),
     UserInput {
@@ -304,10 +304,10 @@ pub(crate) fn plugin_thread_main(
     default_mode: InputMode,
     default_keybinds: Keybinds,
     background_plugins: HashSet<RunPluginOrAlias>,
-    // the client id that started the session,
-    // we need it here because the thread's own list of connected clients might not yet be updated
-    // on session start when we need to load the background plugins, and so we must have an
-    // explicit client_id that has started the session
+    // the 客户端 id that 启动的 the 会话,
+    // we need it here because the 线程's own 列表 of connected 客户端 might not yet be updated
+    // on 会话 启动 when we need to 加载 the background 插件, and so we must have an
+    // explicit client_id that has 启动的 the 会话
     initiating_client_id: ClientId,
 ) -> Result<()> {
     info!("Wasm main thread starts");
@@ -315,7 +315,7 @@ pub(crate) fn plugin_thread_main(
     let plugin_global_data_dir = plugin_dir.join("data");
     layout.populate_plugin_aliases_in_layout(&plugin_aliases);
 
-    // use this channel to ensure that tasks spawned from this thread terminate before exiting
+    // use this 通道 to ensure that 任务 spawned from this 线程 终止 before 退出
     // https://tokio.rs/tokio/topics/shutdown#waiting-for-things-to-finish-shutting-down
     let (shutdown_send, mut shutdown_receive) = tokio::sync::mpsc::channel::<()>(1);
 
@@ -450,8 +450,8 @@ pub(crate) fn plugin_thread_main(
                                         run_plugin.location
                                     );
                                     // we intentionally do not provide the client_id here because it belongs to
-                                    // the cli who spawned the command and is not an existing client_id
-                                    let skip_cache = true; // when reloading we always skip cache
+                                    // the cli who spawned the 命令 and is not an existing client_id
+                                    let skip_cache = true; // when 重新加载 we always skip 缓存
                                     let start_suppressed = false;
                                     match wasm_bridge.load_plugin(
                                         &Some(run_plugin),
@@ -522,8 +522,8 @@ pub(crate) fn plugin_thread_main(
                 (client_id, is_web_client),
                 completion_tx,
             ) => {
-                // prefer connected clients so as to avoid opening plugins in the background for
-                // CLI clients unless no-one else is connected
+                // prefer connected 客户端 so as to avoid opening 插件 in the background for
+                // CLI 客户端 unless no-one else is connected
                 let client_id = if wasm_bridge.client_is_connected(&client_id) {
                     client_id
                 } else if let Some(first_client_id) = wasm_bridge.get_first_client_id() {
@@ -535,7 +535,7 @@ pub(crate) fn plugin_thread_main(
                 let mut plugin_ids: HashMap<RunPluginOrAlias, Vec<PluginId>> = HashMap::new();
                 tab_layout = tab_layout.or_else(|| Some(layout.new_tab().0));
 
-                // Match initial_panes plugins to empty slots in the layout
+                // 匹配 initial_panes 插件 to empty slots in the 布局
                 if let Some(ref initial_panes_vec) = initial_panes {
                     if let Some(ref mut tiled_layout) = tab_layout {
                         for initial_pane in initial_panes_vec.iter() {
@@ -549,7 +549,7 @@ pub(crate) fn plugin_thread_main(
                                     break;
                                 }
                             }
-                            // Skip CommandOrPlugin::Command entries (handled by pty thread)
+                            // Skip CommandOrPlugin::命令 entries (handled by pty 线程)
                         }
                     }
                 }
@@ -634,7 +634,7 @@ pub(crate) fn plugin_thread_main(
                 client_id,
                 completion_tx,
             ) => {
-                // 1. Prefer connected clients over CLI clients
+                // 1. Prefer connected 客户端 over CLI 客户端
                 let client_id = if wasm_bridge.client_is_connected(&client_id) {
                     client_id
                 } else if let Some(first_client_id) = wasm_bridge.get_first_client_id() {
@@ -643,11 +643,11 @@ pub(crate) fn plugin_thread_main(
                     client_id
                 };
 
-                // 2. Process each tab layout
+                // 2. 进程 each 标签页 布局
                 let mut tab_layouts_with_plugin_ids = Vec::new();
 
                 for mut tab_layout_info in tab_layouts {
-                    // Populate plugin aliases in layouts
+                    // Populate 插件 aliases in 布局
                     tab_layout_info
                         .tiled_layout
                         .populate_plugin_aliases_in_layout(&plugin_aliases);
@@ -657,11 +657,11 @@ pub(crate) fn plugin_thread_main(
                             .map(|r| r.populate_run_plugin_if_needed(&plugin_aliases));
                     });
 
-                    // Extract run instructions from tiled layout
+                    // 提取 run instructions from 平铺 布局
                     let extracted_run_instructions =
                         tab_layout_info.tiled_layout.extract_run_instructions();
 
-                    // Extract run instructions from floating layouts (excluding already_running)
+                    // 提取 run instructions from 浮动 布局 (excluding already_running)
                     let extracted_floating_plugins: Vec<Option<Run>> = tab_layout_info
                         .floating_layouts
                         .iter()
@@ -673,7 +673,7 @@ pub(crate) fn plugin_thread_main(
                     let mut all_run_instructions = extracted_run_instructions;
                     all_run_instructions.extend(extracted_floating_plugins);
 
-                    // Load plugins for all Run::Plugin instructions
+                    // 加载 插件 for all Run::插件 instructions
                     let mut plugin_ids: HashMap<RunPluginOrAlias, Vec<PluginId>> = HashMap::new();
                     let size = Size::default();
 
@@ -704,11 +704,11 @@ pub(crate) fn plugin_thread_main(
                         }
                     }
 
-                    // Pair this tab's layout with its plugin IDs
+                    // Pair this 标签页's 布局 with its 插件 IDs
                     tab_layouts_with_plugin_ids.push((tab_layout_info, plugin_ids));
                 }
 
-                // 3. Send to pty thread with all tab layouts and their plugin IDs
+                // 3. Send to pty 线程 with all 标签页 布局 and their 插件 IDs
                 drop(bus.senders.send_to_pty(PtyInstruction::OverrideLayout(
                     cwd,
                     default_shell,
@@ -853,15 +853,15 @@ pub(crate) fn plugin_thread_main(
                     session_layout_metadata.into(),
                 ) {
                     Ok((layout, _pane_contents)) => {
-                        // send synchronous response
+                        // send synchronous 响应
                         let response = DumpSessionLayoutResponse {
                             layout_result: Ok(layout.clone()),
                             metadata: Some(layout_metadata),
                         };
                         let _ = response_channel.send(response);
 
-                        // send CustomMessage to plugin (backwards compatibility, should get rid of
-                        // this on API version upgrade)
+                        // send CustomMessage to 插件 (backwards compatibility, should get rid of
+                        // this on API 版本 upgrade)
                         let updates = vec![(
                             Some(plugin_id),
                             None,
@@ -947,7 +947,7 @@ pub(crate) fn plugin_thread_main(
                 let floating_pane_coordinates = None; // TODO: do we want to allow this?
                 match plugin {
                     Some(plugin_url) => {
-                        // send to specific plugin(s)
+                        // send to 特定 插件(s)
                         pipe_to_specific_plugins(
                             PipeSource::Cli(pipe_id.clone()),
                             &plugin_url,
@@ -970,7 +970,7 @@ pub(crate) fn plugin_thread_main(
                         );
                     },
                     None => {
-                        // no specific destination, send to all plugins
+                        // no 特定 destination, send to all 插件
                         pipe_to_all_plugins(
                             PipeSource::Cli(pipe_id.clone()),
                             &name,
@@ -1011,7 +1011,7 @@ pub(crate) fn plugin_thread_main(
                 } else {
                     match plugin {
                         Some(plugin_url) => {
-                            // send to specific plugin(s)
+                            // send to 特定 插件(s)
                             pipe_to_specific_plugins(
                                 PipeSource::Keybind,
                                 &plugin_url,
@@ -1034,7 +1034,7 @@ pub(crate) fn plugin_thread_main(
                             );
                         },
                         None => {
-                            // no specific destination, send to all plugins
+                            // no 特定 destination, send to all 插件
                             pipe_to_all_plugins(
                                 PipeSource::Keybind,
                                 &name,
@@ -1081,7 +1081,7 @@ pub(crate) fn plugin_thread_main(
                 let floating_pane_coordinates = message.floating_pane_coordinates;
                 match (message.plugin_url, message.destination_plugin_id) {
                     (Some(plugin_url), None) => {
-                        // send to specific plugin(s)
+                        // send to 特定 插件(s)
                         pipe_to_specific_plugins(
                             PipeSource::Plugin(source_plugin_id),
                             &plugin_url,
@@ -1133,7 +1133,7 @@ pub(crate) fn plugin_thread_main(
                         ));
                     },
                     (None, None) => {
-                        // send to all plugins
+                        // send to all 插件
                         pipe_to_all_plugins(
                             PipeSource::Plugin(source_plugin_id),
                             &message.message_name,
@@ -1166,7 +1166,7 @@ pub(crate) fn plugin_thread_main(
                 wasm_bridge
                     .reconfigure(client_id, keybinds, default_mode, default_shell, layout_dir)
                     .non_fatal();
-                // TODO: notify plugins that this happened so that they can eg. rebind temporary keys that
+                // TODO: 通知 插件 that this happened so that they can eg. rebind 临时 密钥 that
                 // were lost
                 if was_written_to_disk {
                     let updates = vec![(None, None, Event::ConfigWasWrittenToDisk)];
@@ -1229,7 +1229,7 @@ pub(crate) fn plugin_thread_main(
                 terminal_id,
                 cli_client_id,
             } => {
-                // Fire Event::UserAction to all subscribed plugins with InterceptInput permission
+                // Fire 事件::UserAction to all 订阅的 插件 with InterceptInput 权限
                 let updates = vec![(
                     None,
                     None,
@@ -1244,7 +1244,7 @@ pub(crate) fn plugin_thread_main(
                 wasm_bridge.state_update_for_plugin(plugin_id);
             },
             PluginInstruction::UpdateSessionSaveTime(timestamp_millis) => {
-                // Store timestamp in WasmBridge (as Unix epoch for internal use)
+                // 存储 timestamp in WasmBridge (as Unix epoch for internal use)
                 *wasm_bridge.last_session_save_time.lock().unwrap() = Some(timestamp_millis);
             },
             PluginInstruction::GetLastSessionSaveTime { response_channel } => {
@@ -1279,8 +1279,8 @@ pub(crate) fn plugin_thread_main(
     }
     info!("wasm main thread exits");
 
-    // first drop our sender, then call recv.
-    // once all senders are dropped or the timeout is reached, recv will return an error, that we ignore
+    // first 丢弃 our 发送者, then 调用 recv.
+    // once all 发送者 are 丢弃的 or the 超时 is reached, recv will 返回 an 错误, that we ignore
 
     drop(shutdown_send);
     let runtime = crate::global_async_runtime::get_tokio_runtime();
@@ -1311,7 +1311,7 @@ fn populate_session_layout_metadata(
     plugin_aliases: &PluginAliases,
     exclude_plugin_id: Option<u32>,
 ) {
-    // Remove the requesting plugin from the layout to prevent deadlock
+    // 移除 the requesting 插件 from the 布局 to prevent 死锁
     if let Some(plugin_id) = exclude_plugin_id {
         session_layout_metadata.remove_plugin_from_layout(plugin_id);
     }
