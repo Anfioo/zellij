@@ -207,7 +207,7 @@ impl ZellijPlugin for State {
             let mut tabname = t.name.clone();
             if t.active && self.mode_info.mode == InputMode::RenameTab {
                 if tabname.is_empty() {
-                    tabname = String::from("Enter name...");
+                    tabname = String::from("输入名称...");
                 }
                 active_tab_index = t.position;
             } else if t.active {

@@ -482,7 +482,7 @@ fn hint_line_part(
 
 fn scroll_status(scroll: (usize, usize), palette: Styling, dimmed: bool) -> LinePart {
     let (position, length) = scroll;
-    let text = format!("[ SCROLL {}/{} ]", position, length);
+    let text = format!("[ 滚动 {}/{} ]", position, length);
     let text_color = palette.text_unselected.base;
     let bg_color = palette.text_unselected.background;
     let text_style = if dimmed {
