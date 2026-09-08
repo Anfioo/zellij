@@ -4,19 +4,19 @@ use zellij_tile::prelude::*;
 use crate::CoordinatesInLine;
 use std::collections::HashMap;
 
-pub const USAGE_TITLE: &str = "How it works:";
-pub const FIRST_TIME_USAGE_TITLE: &str = "Before logging in for the first time:";
+pub const USAGE_TITLE: &str = "工作原理：";
+pub const FIRST_TIME_USAGE_TITLE: &str = "首次登录前：";
 pub const FIRST_TIME_BULLETIN_1: &str = "- Press <t> to generate a login token";
-pub const BULLETIN_1_FULL: &str = "- Visit base URL to start a new session";
-pub const BULLETIN_1_SHORT: &str = "- Base URL: new session";
-pub const BULLETIN_2_FULL: &str = "- Follow base URL with a session name to attach to or create it";
-pub const BULLETIN_2_SHORT: &str = "- Base URL + session name: attach or create";
+pub const BULLETIN_1_FULL: &str = "- 访问基础 URL 以启动新会话";
+pub const BULLETIN_1_SHORT: &str = "- 基础 URL：新会话";
+pub const BULLETIN_2_FULL: &str = "- 在基础 URL 后加上会话名称以连接或创建会话";
+pub const BULLETIN_2_SHORT: &str = "- 基础 URL + 会话名称：连接或创建";
 pub const BULLETIN_3_FULL: &str =
-    "- By default sessions not started from the web must be explicitly shared";
-pub const BULLETIN_3_SHORT: &str = "- Sessions not started from the web must be explicitly shared";
-pub const BULLETIN_4: &str = "- <t> manage login tokens";
+    "- 默认情况下，非通过 Web 启动的会话必须显式共享";
+pub const BULLETIN_3_SHORT: &str = "- 非通过 Web 启动的会话必须显式共享";
+pub const BULLETIN_4: &str = "- <t> 管理登录令牌";
 
-pub const WEB_SERVER_TITLE: &str = "Web server: ";
+pub const WEB_SERVER_TITLE: &str = "Web 服务器： ";
 pub const WEB_SERVER_RUNNING: &str = "RUNNING ";
 pub const WEB_SERVER_NOT_RUNNING: &str = "NOT RUNNING";
 pub const WEB_SERVER_INCOMPATIBLE_PREFIX: &str = "RUNNING INCOMPATIBLE VERSION ";
@@ -27,13 +27,13 @@ pub const ERROR_PREFIX: &str = "ERROR: ";
 pub const URL_TITLE: &str = "URL: ";
 pub const UNENCRYPTED_MARKER: &str = " [*]";
 
-pub const CURRENT_SESSION_TITLE: &str = "Current session: ";
-pub const SESSION_URL_TITLE: &str = "Session URL: ";
+pub const CURRENT_SESSION_TITLE: &str = "当前会话： ";
+pub const SESSION_URL_TITLE: &str = "会话 URL： ";
 pub const SHARING_STATUS: &str = "SHARING (<SPACE> - Stop Sharing)";
 pub const SHARING_DISABLED: &str = "SHARING IS DISABLED";
 pub const NOT_SHARING: &str = "NOT SHARING";
 pub const PRESS_SPACE_SHARE: &str = "Press <SPACE> to share";
-pub const WEB_SERVER_OFFLINE: &str = "...but web server is offline";
+pub const WEB_SERVER_OFFLINE: &str = "……但 Web 服务器处于离线状态";
 
 pub const COLOR_INDEX_0: usize = 0;
 pub const COLOR_INDEX_1: usize = 1;

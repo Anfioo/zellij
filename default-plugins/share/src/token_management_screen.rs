@@ -102,7 +102,7 @@ impl<'a> TokenManagementScreen<'a> {
         }
 
         const PREFERRED_DATE_WIDTH: usize = 29; // "issued on YYYY-MM-DD HH:MM:SS"
-        const PREFERRED_READ_ONLY_WIDTH: usize = 10; // "read-write"
+        const PREFERRED_READ_ONLY_WIDTH: usize = 10; // "读写"
         const PREFERRED_CONTROLS_WIDTH: usize = 24; // "(<x> revoke, <r> rename)"
 
         let available_width = max_table_width.saturating_sub(COLUMN_SPACING);
@@ -173,7 +173,7 @@ impl<'a> TokenManagementScreen<'a> {
         include_issued_prefix: bool,
     ) -> String {
         let full_text = if include_issued_prefix {
-            format!("issued on {}", created_at)
+            format!("签发于 {}", created_at)
         } else {
             created_at.to_string()
         };
@@ -203,9 +203,9 @@ impl<'a> TokenManagementScreen<'a> {
 
     fn format_read_only(&self, is_read_only: bool, max_width: usize) -> String {
         let full_text = if is_read_only {
-            "read-only"
+            "只读"
         } else {
-            "read-write"
+            "读写"
         };
         let short_text = if is_read_only { "RO" } else { "RW" };
 
@@ -278,7 +278,7 @@ impl<'a> TokenManagementScreen<'a> {
         let max_table_width = self.cols;
         let column_widths = self.calculate_column_widths();
 
-        let title_text = "List of Login Tokens";
+        let title_text = "登录令牌列表";
         let title = Text::new(title_text).color_range(2, ..);
         max_width = std::cmp::max(max_width, title_text.len());
 
@@ -470,7 +470,7 @@ impl<'a> TokenManagementScreen<'a> {
         let controls_text = self.format_controls(column_widths.controls, true);
 
         // 根据实际内容确定控制列的高亮范围
-        let (x_range, r_range) = if controls_text.contains("revoke") {
+        let (x_range, r_range) = if controls_text.contains("撤销") {
             // 完整控制："(<x> revoke, <r> rename)"
             (1..=3, 13..=15)
         } else {

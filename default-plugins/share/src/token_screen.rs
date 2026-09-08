@@ -1,16 +1,16 @@
 use zellij_tile::prelude::*;
 
 // 文本内容常量
-const TOKEN_LABEL_LONG: &str = "New log-in token: ";
-const TOKEN_LABEL_SHORT: &str = "Token: ";
-const EXPLANATION_1_LONG: &str = "Use this token to log-in from the browser.";
-const EXPLANATION_1_SHORT: &str = "Use to log-in from the browser.";
+const TOKEN_LABEL_LONG: &str = "新登录令牌： ";
+const TOKEN_LABEL_SHORT: &str = "令牌： ";
+const EXPLANATION_1_LONG: &str = "使用此令牌从浏览器登录。";
+const EXPLANATION_1_SHORT: &str = "用于从浏览器登录。";
 const EXPLANATION_2_LONG: &str =
-    "Copy this token, because it will not be saved and can't be retrieved.";
-const EXPLANATION_2_SHORT: &str = "It will not be saved and can't be retrieved.";
-const EXPLANATION_3_LONG: &str = "If lost, it can always be revoked and a new one generated.";
-const EXPLANATION_3_SHORT: &str = "It can always be revoked and a regenerated.";
-const ESC_INSTRUCTION: &str = "<Esc> - go back";
+    "请复制此令牌，因为它不会被保存且无法找回。";
+const EXPLANATION_2_SHORT: &str = "它不会被保存且无法找回。";
+const EXPLANATION_3_LONG: &str = "如果丢失，可以随时撤销并生成新的令牌。";
+const EXPLANATION_3_SHORT: &str = "它可以随时撤销并重新生成。";
+const ESC_INSTRUCTION: &str = "<Esc> - 返回";
 
 // 界面布局常量
 const SCREEN_HEIGHT: usize = 7;

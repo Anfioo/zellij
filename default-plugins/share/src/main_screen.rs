@@ -30,13 +30,13 @@ pub struct MainScreen<'a> {
 }
 
 impl<'a> MainScreen<'a> {
-    const TITLE_TEXT: &'static str = "Share Session Locally in the Browser";
+    const TITLE_TEXT: &'static str = "在浏览器中本地共享会话";
     const WARNING_TEXT: &'static str =
-        "[*] Connection unencrypted. Consider using an SSL certificate.";
-    const MORE_INFO_TEXT: &'static str = "More info: ";
+        "[*] 连接未加密。建议使用 SSL 证书。";
+    const MORE_INFO_TEXT: &'static str = "更多信息： ";
     const SSL_URL: &'static str = "https://zellij.dev/documentation/web-client.html#https";
-    const HELP_TEXT_WITH_CLICK: &'static str = "Help: Click or Shift-Click to open in browser";
-    const HELP_TEXT_SHIFT_ONLY: &'static str = "Help: Shift-Click to open in browser";
+    const HELP_TEXT_WITH_CLICK: &'static str = "帮助：点击或 Shift-Click 在浏览器中打开";
+    const HELP_TEXT_SHIFT_ONLY: &'static str = "帮助：Shift-Click 在浏览器中打开";
     pub fn new(
         token_list_is_empty: bool,
         web_server_started: bool,
@@ -276,10 +276,10 @@ impl<'a> MainScreen<'a> {
     fn render_link_help(&self, x: usize, y: usize) {
         let help_text = if self.link_executable.is_some() {
             Text::new(Self::HELP_TEXT_WITH_CLICK)
-                .color_range(3, 6..=10)
-                .color_range(3, 15..=25)
+                .color_range(3, 3..=4)
+                .color_range(3, 7..=17)
         } else {
-            Text::new(Self::HELP_TEXT_SHIFT_ONLY).color_range(3, 6..=16)
+            Text::new(Self::HELP_TEXT_SHIFT_ONLY).color_range(3, 3..=13)
         };
         print_text_with_coordinates(help_text, x, y, None, None);
     }
