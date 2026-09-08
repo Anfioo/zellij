@@ -48,8 +48,8 @@ impl ZellijPlugin for App {
         if self.closing {
             return false;
         }
-        intercept_key_presses(); // we do this here so that all clients (even those connected after
-                                 // load) will have their keys intercepted
+        intercept_key_presses(); // 我们在这里执行此操作，以便所有客户端（即使是在
+                                 // load 之后连接的）的按键都会被拦截
         match event {
             Event::ModeUpdate(mode_info) => self.handle_mode_update(mode_info),
             Event::PaneUpdate(pane_manifest) => self.handle_pane_update(pane_manifest),
