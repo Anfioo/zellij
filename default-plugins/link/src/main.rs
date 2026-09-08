@@ -146,7 +146,7 @@ impl State {
                 MessageToPlugin::new("filepicker")
                     .with_plugin_url("filepicker")
                     .new_plugin_instance_should_have_pane_title(&format!(
-                        "Browse: {}",
+                        "浏览: {}",
                         absolute_path.display()
                     ))
                     .new_plugin_instance_should_be_focused()
@@ -201,7 +201,7 @@ impl State {
                     bold: false,
                     italic: true,
                     underline: true,
-                    tooltip_text: Some("Open".to_string()),
+                    tooltip_text: Some("打开".to_string()),
                 });
             }
         }
