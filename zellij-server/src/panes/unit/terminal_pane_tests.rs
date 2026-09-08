@@ -62,7 +62,7 @@ pub fn scrolling_inside_a_pane() {
         osc8_hyperlinks,
         explicitly_disable_kitty_keyboard_protocol,
         None,
-    ); // 0 is the pane index
+    ); // 0 是窗格索引
     let mut text_to_fill_pane = String::new();
     for i in 0..30 {
         writeln!(&mut text_to_fill_pane, "\rline {}", i + 1).unwrap();
@@ -116,7 +116,7 @@ pub fn sixel_image_inside_terminal_pane() {
         osc8_hyperlinks,
         explicitly_disable_kitty_keyboard_protocol,
         None,
-    ); // 0 is the pane index
+    ); // 0 是窗格索引
     let sixel_image_bytes = "\u{1b}Pq
         #0;2;0;0;0#1;2;100;100;0#2;2;0;100;0
         #1~~@@vv@@~~@@~~$
@@ -130,8 +130,8 @@ pub fn sixel_image_inside_terminal_pane() {
 
 #[test]
 pub fn partial_sixel_image_inside_terminal_pane() {
-    // here we test to make sure we partially render an image that is partially hidden in the
-    // scrollbuffer
+    // 这里我们测试确保部分渲染在回滚缓冲区中部分隐藏的图像
+    // 回滚缓冲区
     let mut fake_win_size = PaneGeom::default();
     fake_win_size.cols.set_inner(121);
     fake_win_size.rows.set_inner(20);
@@ -170,7 +170,7 @@ pub fn partial_sixel_image_inside_terminal_pane() {
         osc8_hyperlinks,
         explicitly_disable_kitty_keyboard_protocol,
         None,
-    ); // 0 is the pane index
+    ); // 0 是窗格索引
     let pane_content = read_fixture("sixel-image-500px.six");
     terminal_pane.handle_pty_bytes(pane_content);
     assert_snapshot!(format!("{:?}", terminal_pane.grid));
@@ -178,8 +178,8 @@ pub fn partial_sixel_image_inside_terminal_pane() {
 
 #[test]
 pub fn overflowing_sixel_image_inside_terminal_pane() {
-    // here we test to make sure we properly render an image that overflows both in the width and
-    // height of the pane
+    // 这里我们测试确保正确渲染在窗格宽度和高度上都溢出的图像
+    // 高度
     let mut fake_win_size = PaneGeom::default();
     fake_win_size.cols.set_inner(50);
     fake_win_size.rows.set_inner(20);
@@ -218,7 +218,7 @@ pub fn overflowing_sixel_image_inside_terminal_pane() {
         osc8_hyperlinks,
         explicitly_disable_kitty_keyboard_protocol,
         None,
-    ); // 0 is the pane index
+    ); // 0 是窗格索引
     let pane_content = read_fixture("sixel-image-500px.six");
     terminal_pane.handle_pty_bytes(pane_content);
     assert_snapshot!(format!("{:?}", terminal_pane.grid));
@@ -265,7 +265,7 @@ pub fn scrolling_through_a_sixel_image() {
         osc8_hyperlinks,
         explicitly_disable_kitty_keyboard_protocol,
         None,
-    ); // 0 is the pane index
+    ); // 0 是窗格索引
     let mut text_to_fill_pane = String::new();
     for i in 0..30 {
         writeln!(&mut text_to_fill_pane, "\rline {}", i + 1).unwrap();
@@ -323,23 +323,23 @@ pub fn multiple_sixel_images_in_pane() {
         osc8_hyperlinks,
         explicitly_disable_kitty_keyboard_protocol,
         None,
-    ); // 0 is the pane index
+    ); // 0 是窗格索引
     let mut text_to_fill_pane = String::new();
     for i in 0..5 {
         writeln!(&mut text_to_fill_pane, "\rline {}", i + 1).unwrap();
     }
     writeln!(&mut text_to_fill_pane, "\r").unwrap();
     let pane_sixel_content = read_fixture("sixel-image-500px.six");
-    terminal_pane.handle_pty_bytes(pane_sixel_content.clone()); // one image above text
+    terminal_pane.handle_pty_bytes(pane_sixel_content.clone()); // 文本上方一张图像
     terminal_pane.handle_pty_bytes(text_to_fill_pane.into_bytes());
-    terminal_pane.handle_pty_bytes(pane_sixel_content); // one image below text
-    terminal_pane.scroll_up(20, fake_client_id); // scroll up to see both images
+    terminal_pane.handle_pty_bytes(pane_sixel_content); // 文本下方一张图像
+    terminal_pane.scroll_up(20, fake_client_id); // 向上滚动以查看两张图像
     assert_snapshot!(format!("{:?}", terminal_pane.grid));
 }
 
 #[test]
 pub fn resizing_pane_with_sixel_images() {
-    // here we test, for example, that sixel images don't wrap with other lines
+    // 这里我们测试，例如，sixel 图像不会与其他行一起换行
     let fake_client_id = 1;
     let mut fake_win_size = PaneGeom::default();
     fake_win_size.cols.set_inner(121);
@@ -379,7 +379,7 @@ pub fn resizing_pane_with_sixel_images() {
         osc8_hyperlinks,
         explicitly_disable_kitty_keyboard_protocol,
         None,
-    ); // 0 is the pane index
+    ); // 0 是窗格索引
     let mut text_to_fill_pane = String::new();
     for i in 0..5 {
         writeln!(&mut text_to_fill_pane, "\rline {}", i + 1).unwrap();
@@ -393,7 +393,7 @@ pub fn resizing_pane_with_sixel_images() {
     new_win_size.cols.set_inner(100);
     new_win_size.rows.set_inner(20);
     terminal_pane.set_geom(new_win_size);
-    terminal_pane.scroll_up(20, fake_client_id); // scroll up to see both images
+    terminal_pane.scroll_up(20, fake_client_id); // 向上滚动以查看两张图像
     assert_snapshot!(format!("{:?}", terminal_pane.grid));
 }
 
@@ -438,7 +438,7 @@ pub fn changing_character_cell_size_with_sixel_images() {
         osc8_hyperlinks,
         explicitly_disable_kitty_keyboard_protocol,
         None,
-    ); // 0 is the pane index
+    ); // 0 是窗格索引
     let mut text_to_fill_pane = String::new();
     for i in 0..5 {
         writeln!(&mut text_to_fill_pane, "\rline {}", i + 1).unwrap();
@@ -448,8 +448,8 @@ pub fn changing_character_cell_size_with_sixel_images() {
     terminal_pane.handle_pty_bytes(pane_sixel_content.clone());
     terminal_pane.handle_pty_bytes(text_to_fill_pane.into_bytes());
     terminal_pane.handle_pty_bytes(pane_sixel_content);
-    // here the new_win_size is the same as the old one, we just update the character_cell_size
-    // which will be picked up upon resize (which is why we're doing set_geom below)
+    // 这里 new_win_size 与旧的相同，我们只是更新 character_cell_size
+    // 它将在调整大小时被拾取（这就是我们在下面执行 set_geom 的原因）
     let mut new_win_size = PaneGeom::default();
     new_win_size.cols.set_inner(121);
     new_win_size.rows.set_inner(20);
@@ -458,7 +458,7 @@ pub fn changing_character_cell_size_with_sixel_images() {
         height: 18,
     });
     terminal_pane.set_geom(new_win_size);
-    terminal_pane.scroll_up(10, fake_client_id); // scroll up to see both images
+    terminal_pane.scroll_up(10, fake_client_id); // 向上滚动以查看两张图像
     assert_snapshot!(format!("{:?}", terminal_pane.grid));
 }
 
@@ -502,7 +502,7 @@ pub fn keep_working_after_corrupted_sixel_image() {
         osc8_hyperlinks,
         explicitly_disable_kitty_keyboard_protocol,
         None,
-    ); // 0 is the pane index
+    ); // 0 是窗格索引
 
     let sixel_image_bytes = "\u{1b}PI AM CORRUPTED BWAHAHAq
         #0;2;0;0;0#1;2;100;100;0#2;2;0;100;0
@@ -564,11 +564,11 @@ pub fn pane_with_frame_position_is_on_frame() {
         osc8_hyperlinks,
         explicitly_disable_kitty_keyboard_protocol,
         None,
-    ); // 0 is the pane index
+    ); // 0 是窗格索引
 
     terminal_pane.set_content_offset(Offset::frame(1));
 
-    // row above pane: no border
+    // 窗格上方行：无边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(9, 9)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(9, 10)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(9, 11)));
@@ -577,7 +577,7 @@ pub fn pane_with_frame_position_is_on_frame() {
     assert!(!terminal_pane.position_is_on_frame(&Position::new(9, 130)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(9, 131)));
 
-    // first row:  border for 10 <= col <= 130
+    // 第一行：10 <= col <= 130 有边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(10, 9)));
     assert!(terminal_pane.position_is_on_frame(&Position::new(10, 10)));
     assert!(terminal_pane.position_is_on_frame(&Position::new(10, 11)));
@@ -586,7 +586,7 @@ pub fn pane_with_frame_position_is_on_frame() {
     assert!(terminal_pane.position_is_on_frame(&Position::new(10, 130)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(10, 131)));
 
-    // second row: border only at col=10,130
+    // 第二行：仅在 col=10,130 有边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(11, 9)));
     assert!(terminal_pane.position_is_on_frame(&Position::new(11, 10)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(11, 11)));
@@ -594,7 +594,7 @@ pub fn pane_with_frame_position_is_on_frame() {
     assert!(terminal_pane.position_is_on_frame(&Position::new(11, 130)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(11, 131)));
 
-    // row in the middle: border only at col=10,130
+    // 中间行：仅在 col=10,130 有边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(15, 9)));
     assert!(terminal_pane.position_is_on_frame(&Position::new(15, 10)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(15, 11)));
@@ -602,7 +602,7 @@ pub fn pane_with_frame_position_is_on_frame() {
     assert!(terminal_pane.position_is_on_frame(&Position::new(15, 130)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(15, 131)));
 
-    // last row: border for 10 <= col <= 130
+    // 最后一行：10 <= col <= 130 有边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(29, 9)));
     assert!(terminal_pane.position_is_on_frame(&Position::new(29, 10)));
     assert!(terminal_pane.position_is_on_frame(&Position::new(29, 11)));
@@ -610,7 +610,7 @@ pub fn pane_with_frame_position_is_on_frame() {
     assert!(terminal_pane.position_is_on_frame(&Position::new(29, 130)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(29, 131)));
 
-    // row below pane: no border
+    // 窗格下方行：无边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(30, 10)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(30, 11)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(30, 70)));
@@ -662,11 +662,11 @@ pub fn pane_with_bottom_and_right_borders_position_is_on_frame() {
         osc8_hyperlinks,
         explicitly_disable_kitty_keyboard_protocol,
         None,
-    ); // 0 is the pane index
+    ); // 0 是窗格索引
 
     terminal_pane.set_content_offset(Offset::shift(1, 1));
 
-    // row above pane: no border
+    // 窗格上方行：无边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(9, 9)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(9, 10)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(9, 11)));
@@ -675,7 +675,7 @@ pub fn pane_with_bottom_and_right_borders_position_is_on_frame() {
     assert!(!terminal_pane.position_is_on_frame(&Position::new(9, 130)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(9, 131)));
 
-    // first row: border only at col=130
+    // 第一行：仅在 col=130 有边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(10, 9)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(10, 10)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(10, 11)));
@@ -684,7 +684,7 @@ pub fn pane_with_bottom_and_right_borders_position_is_on_frame() {
     assert!(terminal_pane.position_is_on_frame(&Position::new(10, 130)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(10, 131)));
 
-    // second row: border only at col=130
+    // 第二行：仅在 col=130 有边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(11, 9)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(11, 10)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(11, 11)));
@@ -692,7 +692,7 @@ pub fn pane_with_bottom_and_right_borders_position_is_on_frame() {
     assert!(terminal_pane.position_is_on_frame(&Position::new(11, 130)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(11, 131)));
 
-    // row in the middle: border only at col=130
+    // 中间行：仅在 col=130 有边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(15, 9)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(15, 10)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(15, 11)));
@@ -700,7 +700,7 @@ pub fn pane_with_bottom_and_right_borders_position_is_on_frame() {
     assert!(terminal_pane.position_is_on_frame(&Position::new(15, 130)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(15, 131)));
 
-    // last row: border for 10 <= col <= 130
+    // 最后一行：10 <= col <= 130 有边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(29, 9)));
     assert!(terminal_pane.position_is_on_frame(&Position::new(29, 10)));
     assert!(terminal_pane.position_is_on_frame(&Position::new(29, 11)));
@@ -708,7 +708,7 @@ pub fn pane_with_bottom_and_right_borders_position_is_on_frame() {
     assert!(terminal_pane.position_is_on_frame(&Position::new(29, 130)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(29, 131)));
 
-    // row below pane: no border
+    // 窗格下方行：无边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(30, 10)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(30, 11)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(30, 70)));
@@ -834,11 +834,11 @@ pub fn frameless_pane_position_is_on_frame() {
         osc8_hyperlinks,
         explicitly_disable_kitty_keyboard_protocol,
         None,
-    ); // 0 is the pane index
+    ); // 0 是窗格索引
 
     terminal_pane.set_content_offset(Offset::default());
 
-    // row above pane: no border
+    // 窗格上方行：无边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(9, 9)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(9, 10)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(9, 11)));
@@ -847,7 +847,7 @@ pub fn frameless_pane_position_is_on_frame() {
     assert!(!terminal_pane.position_is_on_frame(&Position::new(9, 130)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(9, 131)));
 
-    // first row: no border
+    // 第一行：无边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(10, 9)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(10, 10)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(10, 11)));
@@ -856,7 +856,7 @@ pub fn frameless_pane_position_is_on_frame() {
     assert!(!terminal_pane.position_is_on_frame(&Position::new(10, 130)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(10, 131)));
 
-    // second row: no border
+    // 第二行：无边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(11, 9)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(11, 10)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(11, 11)));
@@ -864,7 +864,7 @@ pub fn frameless_pane_position_is_on_frame() {
     assert!(!terminal_pane.position_is_on_frame(&Position::new(11, 130)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(11, 131)));
 
-    // random row in the middle: no border
+    // 中间随机行：无边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(15, 9)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(15, 10)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(15, 11)));
@@ -872,7 +872,7 @@ pub fn frameless_pane_position_is_on_frame() {
     assert!(!terminal_pane.position_is_on_frame(&Position::new(15, 130)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(15, 131)));
 
-    // last row: no border
+    // 最后一行：无边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(29, 9)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(29, 10)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(29, 11)));
@@ -880,7 +880,7 @@ pub fn frameless_pane_position_is_on_frame() {
     assert!(!terminal_pane.position_is_on_frame(&Position::new(29, 130)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(29, 131)));
 
-    // row below pane: no border
+    // 窗格下方行：无边框
     assert!(!terminal_pane.position_is_on_frame(&Position::new(30, 10)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(30, 11)));
     assert!(!terminal_pane.position_is_on_frame(&Position::new(30, 70)));

@@ -1599,7 +1599,7 @@ fn copy_selected_text_from_viewport() {
     vte_parser.advance(&mut grid, &content);
 
     grid.start_selection(&Position::new(23, 6));
-    // check for widechar, 📦 occupies columns 34, 35, and gets selected even if only the first column is selected
+    // 检查宽字符，📦 占据第 34、35 列，即使只选中第一列也会被选中
     grid.end_selection(&Position::new(25, 35));
     let text = grid.get_selected_text();
     assert_eq!(
@@ -1678,7 +1678,7 @@ fn copy_selected_text_from_lines_above() {
     vte_parser.advance(&mut grid, &content);
 
     grid.start_selection(&Position::new(-2, 10));
-    // check for widechar, 📦 occupies columns 34, 35, and gets selected even if only the first column is selected
+    // 检查宽字符，📦 占据第 34、35 列，即使只选中第一列也会被选中
     grid.end_selection(&Position::new(2, 8));
     let text = grid.get_selected_text();
     assert_eq!(
@@ -1720,7 +1720,7 @@ fn copy_selected_text_from_lines_below() {
     grid.move_viewport_up(40);
 
     grid.start_selection(&Position::new(63, 6));
-    // check for widechar, 📦 occupies columns 34, 35, and gets selected even if only the first column is selected
+    // 检查宽字符，📦 占据第 34、35 列，即使只选中第一列也会被选中
     grid.end_selection(&Position::new(65, 35));
     let text = grid.get_selected_text();
     assert_eq!(
@@ -1730,8 +1730,8 @@ fn copy_selected_text_from_lines_below() {
 }
 
 /*
- * These tests below are general compatibility tests for non-trivial scenarios running in the terminal.
- * They use fake TTY input replicated from these scenarios.
+ * 以下测试是针对终端中运行的非平凡场景的通用兼容性测试。
+ * 它们使用从这些场景复制的伪 TTY 输入。
  *
  */
 
@@ -1801,11 +1801,11 @@ fn fish_tab_completion_options() {
 
 #[test]
 pub fn fish_select_tab_completion_options() {
-    // the difference between this and the previous test is that here we press <TAB>
-    // twice, meaning the selection moves between the options and the command line
-    // changes.
-    // this is not clearly seen in the snapshot because it does not include styles,
-    // but we can see the command line change and the cursor staying in place
+    // 此测试与上一个测试的区别在于，这里我们按了 <TAB>
+    // 两次，这意味着选择在选项之间移动，命令行也随之
+    // 变化。
+    // 这在快照中不太明显，因为快照不包含样式，
+    // 但我们可以看到命令行变化且光标保持在原位
     // terminal_emulator_color_codes,
     let mut vte_parser = vte::Parser::new();
     let sixel_image_store = Rc::new(RefCell::new(SixelImageStore::default()));
@@ -1839,16 +1839,16 @@ pub fn fish_select_tab_completion_options() {
 
 #[test]
 pub fn vim_scroll_region_down() {
-    // here we test a case where vim defines the scroll region as lesser than the screen row count
-    // and then scrolls down
-    // the region is defined here by vim as 1-26 (there are 28 rows)
-    // then the cursor is moved to line 26 and a new line is added
-    // what should happen is that the first line in the scroll region (1) is deleted
+    // 这里我们测试 vim 将滚动区域定义为小于屏幕行数的情况
+    // 然后向下滚动
+    // 这里 vim 将区域定义为 1-26（共 28 行）
+    // 然后光标移动到第 26 行并添加新行
+    // 应该发生的是滚动区域中的第一行（1）被删除
     // terminal_emulator_color_codes,
-    // and an empty line is inserted in the last scroll region line (26)
-    // this tests also has other steps afterwards that fills the line with the next line in the
+    // 并在滚动区域的最后一行（26）插入空行
+    // 此测试之后还有其他步骤，用下一行填充该行
     // sixel_image_store,
-    // file
+    // 文件
     let mut vte_parser = vte::Parser::new();
     let sixel_image_store = Rc::new(RefCell::new(SixelImageStore::default()));
     let terminal_emulator_color_codes = Rc::new(RefCell::new(HashMap::new()));
@@ -1881,13 +1881,13 @@ pub fn vim_scroll_region_down() {
 
 #[test]
 pub fn vim_ctrl_d() {
-    // in vim ctrl-d moves down half a page
-    // in this case, it sends the terminal the csi 'M' directive, which tells it to delete X (13 in
-    // this case) lines inside the scroll region and push the other lines up
-    // what happens here is that 13 lines are deleted and instead 13 empty lines are added at the
-    // end of the scroll region
+    // 在 vim 中 ctrl-d 向下移动半页
+    // 在这种情况下，它向终端发送 csi 'M' 指令，告诉它在滚动区域内删除 X（本例中为 13）
+    // 行并将其他行上推
+    // 这里发生的是删除了 13 行，取而代之的是在滚动区域末尾添加了 13 个空行
+    // 滚动区域末尾
     // terminal_emulator_color_codes,
-    // vim makes sure to fill these empty lines with the rest of the file
+    // vim 确保用文件的其余部分填充这些空行
     let mut vte_parser = vte::Parser::new();
     let sixel_image_store = Rc::new(RefCell::new(SixelImageStore::default()));
     let terminal_emulator_color_codes = Rc::new(RefCell::new(HashMap::new()));
@@ -1920,11 +1920,11 @@ pub fn vim_ctrl_d() {
 
 #[test]
 pub fn vim_ctrl_u() {
-    // in vim ctrl-u moves up half a page
-    // in this case, it sends the terminal the csi 'L' directive, which tells it to insert X (13 in
-    // this case) lines at the cursor, pushing away (deleting) the last line in the scroll region
-    // this causes the effect of scrolling up X lines (vim replaces the lines with the ones in the
-    // file above the current content)
+    // 在 vim 中 ctrl-u 向上移动半页
+    // 在这种情况下，它向终端发送 csi 'L' 指令，告诉它在光标处插入 X（本例中为 13）
+    // 行，推开（删除）滚动区域中的最后一行
+    // 这会产生向上滚动 X 行的效果（vim 用当前内容上方
+    // 文件中的行替换这些行）
     // terminal_emulator_color_codes,
     let mut vte_parser = vte::Parser::new();
     let sixel_image_store = Rc::new(RefCell::new(SixelImageStore::default()));
@@ -2054,16 +2054,16 @@ pub fn htop_right_scrolling() {
 
 #[test]
 pub fn vim_overwrite() {
-    // this tests the vim overwrite message
-    // to recreate:
-    // * open a file in vim
-    // * open the same file in another window
-    // * change the file in the other window and save
+    // 此测试测试 vim 覆盖消息
+    // 复现步骤：
+    // * 在 vim 中打开一个文件
+    // * 在另一个窗口中打开同一个文件
+    // * 在另一个窗口中修改文件并保存
     // terminal_emulator_color_codes,
-    // * change the file in the original vim window and save
-    // * confirm you would like to change the file by pressing 'y' and then ENTER
+    // * 在原始 vim 窗口中修改文件并保存
+    // * 按 'y' 然后按 ENTER 确认你想要修改文件
     // sixel_image_store,
-    // * if everything looks fine, this test passed :)
+    // * 如果一切正常，此测试通过 :)
     let mut vte_parser = vte::Parser::new();
     let sixel_image_store = Rc::new(RefCell::new(SixelImageStore::default()));
     let terminal_emulator_color_codes = Rc::new(RefCell::new(HashMap::new()));
@@ -2096,8 +2096,8 @@ pub fn vim_overwrite() {
 
 #[test]
 pub fn clear_scroll_region() {
-    // this is actually a test of 1049h/l (alternative buffer)
-    // @imsnif - the name is a monument to the time I didn't fully understand this mechanism :)
+    // 这实际上是对 1049h/l（备用缓冲区）的测试
+    // @imsnif - 这个名字是为了纪念我当时没有完全理解这个机制的时光 :)
     let mut vte_parser = vte::Parser::new();
     let sixel_image_store = Rc::new(RefCell::new(SixelImageStore::default()));
     let terminal_emulator_color_codes = Rc::new(RefCell::new(HashMap::new()));
@@ -2226,8 +2226,8 @@ pub fn bash_cursor_linewrap() {
 
 #[test]
 pub fn fish_paste_multiline() {
-    // here we paste a multiline command in fish shell, making sure we support it
-    // going up and changing the colors of our line-wrapped pasted text
+    // 这里我们在 fish shell 中粘贴多行命令，确保我们支持它
+    // 向上移动并更改我们换行粘贴文本的颜色
     let mut vte_parser = vte::Parser::new();
     let sixel_image_store = Rc::new(RefCell::new(SixelImageStore::default()));
     let terminal_emulator_color_codes = Rc::new(RefCell::new(HashMap::new()));
@@ -2292,8 +2292,8 @@ pub fn git_log() {
 
 #[test]
 pub fn git_diff_scrollup() {
-    // this tests makes sure that when we have a git diff that exceeds the screen size
-    // we are able to scroll up
+    // 此测试确保当我们有一个超出屏幕大小的 git diff 时
+    // 我们能够向上滚动
     let mut vte_parser = vte::Parser::new();
     let sixel_image_store = Rc::new(RefCell::new(SixelImageStore::default()));
     let terminal_emulator_color_codes = Rc::new(RefCell::new(HashMap::new()));
@@ -2390,13 +2390,13 @@ pub fn top_and_quit() {
 
 #[test]
 pub fn exa_plus_omf_theme() {
-    // this tests that we handle a tab delimited table properly
-    // without overriding the previous content
-    // this is a potential bug because the \t character is a goto
-    // if we forwarded it as is to the terminal, we would be skipping
-    // over existing on-screen content without deleting it, so we must
+    // 此测试确保我们正确处理制表符分隔的表格
+    // 而不覆盖之前的内容
+    // 这是一个潜在的 bug，因为 \t 字符是一个跳转
+    // 如果我们将其原样转发给终端，我们将会跳过
+    // 屏幕上已有的内容而不删除它，所以我们必须
     // terminal_emulator_color_codes,
-    // convert it to spaces
+    // 将其转换为空格
     let mut vte_parser = vte::Parser::new();
     let sixel_image_store = Rc::new(RefCell::new(SixelImageStore::default()));
     let terminal_emulator_color_codes = Rc::new(RefCell::new(HashMap::new()));
@@ -2674,14 +2674,14 @@ fn saved_cursor_across_resize() {
 \rLine 3 >fill to 20_<
 \rL\u{1b}[sine 4 >fill to 20_<";
     parse(content, &mut grid);
-    // Move real cursor position up three lines
+    // 将真实光标位置上移三行
     let content = "\u{1b}[3A";
     parse(content, &mut grid);
-    // Truncate top of terminal, resetting cursor (but not saved cursor)
+    // 截断终端顶部，重置光标（但不重置保存的光标）
     grid.change_size(3, 20);
-    // Wrap, resetting cursor again (but not saved cursor)
+    // 换行，再次重置光标（但不重置保存的光标）
     grid.change_size(3, 10);
-    // Restore saved cursor position and write ZZZ
+    // 恢复保存的光标位置并写入 ZZZ
     let content = "\u{1b}[uZZZ";
     parse(content, &mut grid);
     assert_snapshot!(format!("{:?}", grid));
@@ -2719,10 +2719,10 @@ fn saved_cursor_across_resize_longline() {
     let content = "
 \rLine 1 >fill \u{1b}[sto 20_<";
     parse(content, &mut grid);
-    // Wrap each line precisely halfway
+    // 每行精确换行到一半
     grid.change_size(4, 10);
-    // Write 'YY' at the end (ends up on a new wrapped line), restore to the saved cursor
-    // and overwrite 'to' with 'ZZ'
+    // 在末尾写入 'YY'（最终出现在新的换行行上），恢复到保存的光标
+    // 并用 'ZZ' 覆盖 'to'
     let content = "YY\u{1b}[uZZ";
     parse(content, &mut grid);
     assert_snapshot!(format!("{:?}", grid));
@@ -2758,12 +2758,12 @@ fn saved_cursor_across_resize_rewrap() {
         vte_parser.advance(&mut *grid, &Vec::from(s));
     };
     let content = "
-\r12345678123456781234567\u{1b}[s812345678"; // 4*8 chars
+\r12345678123456781234567\u{1b}[s812345678"; // 4*8 个字符
     parse(content, &mut grid);
-    // Wrap each line precisely halfway, then rewrap to halve them again
+    // 每行精确换行到一半，然后再次换行将它们减半
     grid.change_size(4, 16);
     grid.change_size(4, 8);
-    // Write 'Z' at the end of line 3
+    // 在第 3 行末尾写入 'Z'
     let content = "\u{1b}[uZ";
     parse(content, &mut grid);
     assert_snapshot!(format!("{:?}", grid));
@@ -2835,11 +2835,11 @@ pub fn insert_wide_characters_in_existing_line() {
 
 #[test]
 pub fn full_screen_scroll_region_and_scroll_up() {
-    // this test is a regression test for a bug
-    // where the scroll region would be set to the
-    // full viewport and then scrolling up would cause
-    // lines to get deleted from the viewport rather
-    // than moving to "lines_above"
+    // 此测试是针对一个 bug 的回归测试
+    // 该 bug 中滚动区域会被设置为
+    // 完整视口，然后向上滚动会导致
+    // 行从视口中被删除，而不是
+    // 移动到 "lines_above"
     // terminal_emulator_color_codes,
     let mut vte_parser = vte::Parser::new();
     let sixel_image_store = Rc::new(RefCell::new(SixelImageStore::default()));
@@ -2935,7 +2935,7 @@ pub fn alternate_screen_change_size() {
     let fixture_name = "alternate_screen_change_size";
     let content = read_fixture(fixture_name);
     vte_parser.advance(&mut grid, &content);
-    // no scrollback in alternate screen
+    // 备用屏幕中没有回滚缓冲区
     assert_eq!(grid.scrollback_position_and_length(), (0, 0));
     grid.change_size(10, 10);
     assert_snapshot!(format!("{:?}", grid));
@@ -2976,10 +2976,10 @@ pub fn fzf_fullscreen() {
 
 #[test]
 pub fn replace_multiple_wide_characters_under_cursor() {
-    // this test makes sure that if we replace a wide character with a non-wide character, it
-    // properly pads the excess width in the proper place (either before the replaced non-wide
-    // character if the cursor was "in the middle" of the wide character, or after the character if
-    // it was "in the beginning" of the wide character)
+    // 此测试确保如果我们用非宽字符替换宽字符，它会
+    // 在正确的位置正确填充多余的宽度（如果光标在宽字符的"中间"，则在被替换的非宽
+    // 字符之前填充；如果光标在宽字符的"开头"，则在字符
+    // 之后填充）
     let mut vte_parser = vte::Parser::new();
     let sixel_image_store = Rc::new(RefCell::new(SixelImageStore::default()));
     let terminal_emulator_color_codes = Rc::new(RefCell::new(HashMap::new()));
@@ -3012,10 +3012,10 @@ pub fn replace_multiple_wide_characters_under_cursor() {
 
 #[test]
 pub fn replace_non_wide_characters_with_wide_characters() {
-    // this test makes sure that if we replace a wide character with a non-wide character, it
-    // properly pads the excess width in the proper place (either before the replaced non-wide
-    // character if the cursor was "in the middle" of the wide character, or after the character if
-    // it was "in the beginning" of the wide character)
+    // 此测试确保如果我们用非宽字符替换宽字符，它会
+    // 在正确的位置正确填充多余的宽度（如果光标在宽字符的"中间"，则在被替换的非宽
+    // 字符之前填充；如果光标在宽字符的"开头"，则在字符
+    // 之后填充）
     let mut vte_parser = vte::Parser::new();
     let sixel_image_store = Rc::new(RefCell::new(SixelImageStore::default()));
     let terminal_emulator_color_codes = Rc::new(RefCell::new(HashMap::new()));
@@ -3172,8 +3172,8 @@ fn terminal_pixel_size_reports() {
     let fixture_name = "terminal_pixel_size_reports";
     let content = read_fixture(fixture_name);
     vte_parser.advance(&mut grid, &content);
-    // CSI 14t and CSI 16t are forwarded to the host; Zellij no longer
-    // synthesises local replies from character_cell_size for these.
+    // CSI 14t 和 CSI 16t 被转发给主机；Zellij 不再
+    // 为这些指令从 character_cell_size 生成本地回复。
     assert!(grid.pending_messages_to_pty.is_empty());
     use crate::host_query::HostQuery;
     assert_eq!(
@@ -3201,7 +3201,7 @@ fn terminal_pixel_size_reports_in_unsupported_terminals() {
         Rc::new(RefCell::new(Palette::default())),
         terminal_emulator_color_codes,
         Rc::new(RefCell::new(LinkHandler::new())),
-        Rc::new(RefCell::new(None)), // in an unsupported terminal, we don't have this info
+        Rc::new(RefCell::new(None)), // 在不支持的终端中，我们没有此信息
         sixel_image_store,
         Rc::new(RefCell::new(KittyImageStore::default())),
         Style::default(),
@@ -3214,9 +3214,9 @@ fn terminal_pixel_size_reports_in_unsupported_terminals() {
     let fixture_name = "terminal_pixel_size_reports";
     let content = read_fixture(fixture_name);
     vte_parser.advance(&mut grid, &content);
-    // Forwarding is independent of character_cell_size availability —
-    // the host terminal is authoritative for these queries regardless
-    // of what Zellij knows locally.
+    // 转发与 character_cell_size 是否可用无关 ——
+    // 无论 Zellij 本地知道什么，主机终端对这些查询都是权威的
+    // 。
     assert!(grid.pending_messages_to_pty.is_empty());
     use crate::host_query::HostQuery;
     assert_eq!(
@@ -3292,10 +3292,10 @@ pub fn sixel_images_are_reaped_when_scrolled_off() {
     let pane_content = read_fixture("sixel-image-500px.six");
     vte_parser.advance(&mut grid, &pane_content);
     for _ in 0..10_051 {
-        // scrollbuffer limit + viewport height
+        // 回滚缓冲区限制 + 视口高度
         grid.add_canonical_line();
     }
-    let _ = grid.read_changes(0, 0); // we do this because this is where the images are reaped
+    let _ = grid.read_changes(0, 0); // 我们这样做是因为这里是回收图像的地方
     assert_eq!(
         sixel_image_store.borrow().image_count(),
         0,
@@ -3336,7 +3336,7 @@ pub fn sixel_images_are_reaped_when_resetting() {
     let pane_content = read_fixture("sixel-image-500px.six");
     vte_parser.advance(&mut grid, &pane_content);
     grid.reset_terminal_state();
-    let _ = grid.read_changes(0, 0); // we do this because this is where the images are reaped
+    let _ = grid.read_changes(0, 0); // 我们这样做是因为这里是回收图像的地方
     assert_eq!(
         sixel_image_store.borrow().image_count(),
         0,
@@ -3380,11 +3380,11 @@ pub fn sixel_image_in_alternate_buffer() {
 
     let pane_content = read_fixture("sixel-image-500px.six");
     vte_parser.advance(&mut grid, &pane_content);
-    assert_snapshot!(format!("{:?}", grid)); // should include the image
+    assert_snapshot!(format!("{:?}", grid)); // 应包含图像
                                              //
     let move_away_from_alternate_screen = "\u{1b}[?1049l";
     vte_parser.advance(&mut grid, move_away_from_alternate_screen.as_bytes());
-    assert_snapshot!(format!("{:?}", grid)); // should note include the image
+    assert_snapshot!(format!("{:?}", grid)); // 应不包含图像
     assert_eq!(
         sixel_image_store.borrow().image_count(),
         0,
@@ -3423,37 +3423,37 @@ pub fn sixel_with_image_scrolling_decsdm() {
         explicitly_disable_kitty_keyboard_protocol,
     );
 
-    // enter DECSDM
+    // 进入 DECSDM
     let move_to_decsdm = "\u{1b}[?80h";
     vte_parser.advance(&mut grid, move_to_decsdm.as_bytes());
 
-    // write some text
+    // 写入一些文本
     let mut text_to_fill_pane = String::new();
     for i in 0..10 {
         writeln!(&mut text_to_fill_pane, "\rline {}", i + 1).unwrap();
     }
     vte_parser.advance(&mut grid, text_to_fill_pane.as_bytes());
 
-    // render a sixel image (will appear on the top left and partially cover the text)
+    // 渲染一个 sixel 图像（将出现在左上角并部分覆盖文本）
     let pane_content = read_fixture("sixel-image-100px.six");
     vte_parser.advance(&mut grid, &pane_content);
-    // image should be on the top left corner of the grid
+    // 图像应位于网格的左上角
     assert_snapshot!(format!("{:?}", grid));
 
-    // leave DECSDM
+    // 离开 DECSDM
     let move_away_from_decsdm = "\u{1b}[?80l";
     vte_parser.advance(&mut grid, move_away_from_decsdm.as_bytes());
 
-    // Go down to the beginning of the next line
+    // 向下移动到下一行的开头
     let mut go_down_once = String::new();
     writeln!(&mut go_down_once, "\n\r").unwrap();
     vte_parser.advance(&mut grid, go_down_once.as_bytes());
 
-    // render another sixel image, should appear under the cursor
+    // 渲染另一个 sixel 图像，应出现在光标下方
     let pane_content = read_fixture("sixel-image-100px.six");
     vte_parser.advance(&mut grid, &pane_content);
 
-    // image should appear in cursor position
+    // 图像应出现在光标位置
     assert_snapshot!(format!("{:?}", grid));
 }
 
@@ -3485,9 +3485,9 @@ pub fn osc_4_background_query() {
     );
     let content = "\u{1b}]10;?\u{1b}\\";
     vte_parser.advance(&mut grid, content.as_bytes());
-    // Post-refactor: OSC 10;? is forwarded to the host, not answered
-    // from Zellij's cached palette. pending_messages_to_pty must stay
-    // empty.
+    // 重构后：OSC 10;? 被转发给主机，而不是由本地应答
+    // 从 Zellij 的缓存调色板中应答。pending_messages_to_pty 必须保持
+    // 为空。
     assert!(grid.pending_messages_to_pty.is_empty());
     let forwarded_string: String = grid
         .pending_forwarded_queries
@@ -3564,7 +3564,7 @@ pub fn osc_4_color_query() {
     );
     let content = "\u{1b}]4;222;?\u{1b}\\";
     vte_parser.advance(&mut grid, content.as_bytes());
-    // OSC 4;N;? is forwarded to the host for the real palette value.
+    // OSC 4;N;? 被转发给主机以获取真实的调色板值。
     assert!(grid.pending_messages_to_pty.is_empty());
     let forwarded_string: String = grid
         .pending_forwarded_queries
@@ -3974,14 +3974,14 @@ fn text_ui_component_with_coordinates() {
 
 #[test]
 fn cannot_escape_scroll_region() {
-    // this tests a fix for a bug where it would be possible to set the scroll region bounds beyond
-    // the pane height, which would then allow a goto instruction beyond the scroll region to scape
-    // the pane bounds and render content on other panes
+    // 此测试测试一个 bug 的修复，该 bug 允许将滚动区域边界设置为超出
+    // 窗格高度，从而允许超出滚动区域的 goto 指令逃逸
+    // 窗格边界并在其他窗格上渲染内容
     //
-    // what we do here is set the scroll region beyond the terminal bounds (`<ESC>[1;42r` - whereas
-    // the terminal is just 41 lines high), and then issue a goto instruction to line 42, one line
-    // beyond the pane and scroll region bounds (`<ESC>[42;1H`) and then print text `Hi there!`.
-    // This should be printed on the last line (zero indexed 40) of the terminal and not beyond it.
+    // 我们在这里做的是将滚动区域设置为超出终端边界（`<ESC>[1;42r` —— 而
+    // 终端只有 41 行高），然后发出 goto 指令到第 42 行，即超出
+    // 窗格和滚动区域边界一行（`<ESC>[42;1H`），然后打印文本 `Hi there!`。
+    // 这应该打印在终端的最后一行（零索引 40）上，而不是超出它。
     let mut vte_parser = vte::Parser::new();
     let sixel_image_store = Rc::new(RefCell::new(SixelImageStore::default()));
     let terminal_emulator_color_codes = Rc::new(RefCell::new(HashMap::new()));
@@ -4044,14 +4044,14 @@ fn preserve_background_color_on_resize() {
         vte_parser.advance(&mut *grid, &Vec::from(s));
     };
 
-    // Write text with red background that extends to end of line
-    // ESC[41m = red background
-    // ESC[K = clear to end of line (fills with current background)
-    // ESC[0m = reset
+    // 写入延伸到行尾的红色背景文本
+    // ESC[41m = 红色背景
+    // ESC[K = 清除到行尾（用当前背景填充）
+    // ESC[0m = 重置
     let content = "test\x1b[41m\x1b[K\x1b[0m";
     parse(content, &mut grid);
 
-    // Check that characters after "test" have red background before resize
+    // 检查调整大小前 "test" 之后的字符是否有红色背景
     let first_row = &grid.viewport[0];
     let background_char_count_before = first_row
         .columns
@@ -4064,14 +4064,14 @@ fn preserve_background_color_on_resize() {
         "Should have characters with background color before resize"
     );
 
-    // Also check that plain trailing spaces are properly trimmed (regression test)
+    // 同时检查普通尾随空格是否被正确修剪（回归测试）
     let content2 = "\r\n\rplain text with spaces    ";
     parse(content2, &mut grid);
 
-    // Resize the grid
+    // 调整网格大小
     grid.change_size(10, 30);
 
-    // Check that the background color is preserved after resize
+    // 检查调整大小后背景色是否保留
     let first_row = &grid.viewport[0];
     let background_char_count_after = first_row
         .columns
@@ -4084,8 +4084,8 @@ fn preserve_background_color_on_resize() {
         "Background colored characters should be preserved after resize"
     );
 
-    // Verify that the second line doesn't have excessive trailing spaces
-    // (it should be trimmed since they're plain spaces without background color)
+    // 验证第二行没有过多的尾随空格
+    //（因为它们是没有背景色的普通空格，所以应该被修剪）
     let second_row = &grid.viewport[1];
     let trailing_spaces = second_row
         .columns
@@ -4093,7 +4093,7 @@ fn preserve_background_color_on_resize() {
         .rev()
         .take_while(|c| c.character == EMPTY_TERMINAL_CHARACTER.character)
         .count();
-    // All trailing plain spaces should be completely removed
+    // 所有尾随普通空格应被完全移除
     assert_eq!(
         trailing_spaces, 0,
         "Plain trailing spaces should be completely trimmed, but found {} trailing spaces",
@@ -4623,18 +4623,18 @@ fn osc_11_set_and_query_pane_default_bg() {
         false,
     );
 
-    // Set background via OSC 11
+    // 通过 OSC 11 设置背景
     let set_bg = b"\x1b]11;#001a3a\x07";
     vte_parser.advance(&mut grid, set_bg);
 
     assert_eq!(grid.pane_default_bg, Some((0, 26, 58)));
 
-    // Query background via OSC 11 — because a pane-scoped override is
-    // in place, the query is short-circuited: apps inside the pane
-    // must see what Zellij is actually rendering, not the host
-    // terminal's bg. The reply uses xterm's canonical
-    // `rgb:RRRR/GGGG/BBBB` form with each 8-bit channel widened by
-    // repetition (0x00 → 0x0000, 0x1a → 0x1a1a, 0x3a → 0x3a3a).
+    // 通过 OSC 11 查询背景 —— 因为窗格级覆盖已生效，
+    // 查询被短路：窗格内的应用必须看到 Zellij 实际渲染的内容，
+    // 而不是主机终端的背景。回复使用 xterm 的规范
+    // `rgb:RRRR/GGGG/BBBB` 形式，每个 8 位通道通过
+    // 重复扩展（0x00 → 0x0000，0x1a → 0x1a1a，0x3a → 0x3a3a）。
+    // 重复扩展（0x00 → 0x0000，0x1a → 0x1a1a，0x3a → 0x3a3a）。
     let query_bg = b"\x1b]11;?\x07";
     vte_parser.advance(&mut grid, query_bg);
 
@@ -4669,15 +4669,15 @@ fn osc_10_set_and_query_pane_default_fg() {
         false,
     );
 
-    // Set foreground via OSC 10
+    // 通过 OSC 10 设置前景
     let set_fg = b"\x1b]10;#00e000\x07";
     vte_parser.advance(&mut grid, set_fg);
 
     assert_eq!(grid.pane_default_fg, Some((0, 224, 0)));
 
-    // Query foreground via OSC 10 — pane-scoped override is in place,
-    // so the query is answered locally (see OSC 11 equivalent test for
-    // the short-circuit rationale).
+    // 通过 OSC 10 查询前景 —— 窗格级覆盖已生效，
+    // 因此查询由本地应答（有关短路的原理，请参阅 OSC 11 等效测试）。
+    //
     let query_fg = b"\x1b]10;?\x07";
     vte_parser.advance(&mut grid, query_fg);
 
@@ -4712,7 +4712,7 @@ fn osc_110_111_reset_pane_default_colors() {
         false,
     );
 
-    // Set both fg and bg
+    // 同时设置前景和背景
     let set_fg = b"\x1b]10;#00e000\x07";
     vte_parser.advance(&mut grid, set_fg);
     let set_bg = b"\x1b]11;#001a3a\x07";
@@ -4721,13 +4721,13 @@ fn osc_110_111_reset_pane_default_colors() {
     assert_eq!(grid.pane_default_fg, Some((0, 224, 0)));
     assert_eq!(grid.pane_default_bg, Some((0, 26, 58)));
 
-    // Reset foreground via OSC 110
+    // 通过 OSC 110 重置前景
     let reset_fg = b"\x1b]110\x07";
     vte_parser.advance(&mut grid, reset_fg);
     assert_eq!(grid.pane_default_fg, None);
     assert_eq!(grid.pane_default_bg, Some((0, 26, 58)));
 
-    // Reset background via OSC 111
+    // 通过 OSC 111 重置背景
     let reset_bg = b"\x1b]111\x07";
     vte_parser.advance(&mut grid, reset_bg);
     assert_eq!(grid.pane_default_fg, None);
@@ -4758,13 +4758,13 @@ fn osc_11_set_bg_produces_ansi_in_render_output() {
         false,
     );
 
-    // Set background via OSC 11
+    // 通过 OSC 11 设置背景
     let set_bg = b"\x1b]11;#001a3a\x07";
     vte_parser.advance(&mut grid, set_bg);
 
     assert_eq!(grid.pane_default_bg, Some((0, 26, 58)));
 
-    // Render the grid and check that the pane defaults are stamped on chunks
+    // 渲染网格并检查窗格默认值是否印在块上
     let style = Style::default();
     let render_result = grid.render(0, 0, &style).unwrap();
     assert!(render_result.is_some(), "Expected render output");
@@ -4772,7 +4772,7 @@ fn osc_11_set_bg_produces_ansi_in_render_output() {
     let (chunks, _, _, _) = render_result.unwrap();
     assert!(!chunks.is_empty(), "Expected at least one character chunk");
 
-    // All chunks should carry the pane default bg
+    // 所有块都应携带窗格默认背景
     for chunk in &chunks {
         assert_eq!(
             chunk.pane_default_bg,
@@ -4783,7 +4783,7 @@ fn osc_11_set_bg_produces_ansi_in_render_output() {
 }
 
 // =====================================================================
-// Plugin Highlight Engine Tests
+// 插件高亮引擎测试
 // =====================================================================
 
 use crate::panes::grid::MouseTracking;
@@ -4847,7 +4847,7 @@ fn set_plugin_regex_highlights_no_match() {
     )];
     grid.set_plugin_regex_highlights(1, highlights, &Style::default());
 
-    // No position in the viewport should match
+    // 视口中没有位置应匹配
     for col in 0..15 {
         assert!(grid.plugin_highlight_at(&Position::new(0, col)).is_none());
     }
@@ -4947,10 +4947,10 @@ fn invalid_regex_does_not_crash() {
         HighlightLayer::Hint,
     )];
     grid.set_plugin_regex_highlights(1, highlights, &Style::default());
-    // Invalid regex should be skipped
+    // 无效的正则表达式应被跳过
     let slot = grid.plugin_highlights.get(&1);
     match slot {
-        None => {}, // acceptable
+        None => {}, // 可接受
         Some(entries) => assert_eq!(entries.len(), 0),
     }
 }
@@ -4973,7 +4973,7 @@ fn plugin_highlight_at_returns_match() {
     }];
     grid.set_plugin_regex_highlights(1, highlights, &Style::default());
 
-    // "foo" starts at column 6 in "hello foo bar"
+    // "foo" 在 "hello foo bar" 中从第 6 列开始
     let result = grid.plugin_highlight_at(&Position::new(0, 6));
     assert!(result.is_some());
     let (plugin_id, pattern, matched_string, ctx) = result.unwrap();
@@ -4996,14 +4996,14 @@ fn plugin_highlight_at_returns_none_on_miss() {
     )];
     grid.set_plugin_regex_highlights(1, highlights, &Style::default());
 
-    // Position 0 is in "hello", not "foo"
+    // 位置 0 在 "hello" 中，不是 "foo"
     let result = grid.plugin_highlight_at(&Position::new(0, 0));
     assert!(result.is_none());
 }
 
 #[test]
 fn plugin_highlight_at_wrapped_line() {
-    // Create a narrow grid (10 cols) so that a long string wraps
+    // 创建一个窄网格（10 列），以便长字符串换行
     let sixel_image_store = Rc::new(RefCell::new(SixelImageStore::default()));
     let terminal_emulator_color_codes = Rc::new(RefCell::new(HashMap::new()));
     let mut grid = Grid::new(
@@ -5022,12 +5022,12 @@ fn plugin_highlight_at_wrapped_line() {
         true,
         false,
     );
-    // Feed a long string that wraps: "abcdefghij" fills row 0, "klmnopqrst" fills row 1
+    // 输入一个换行的长字符串："abcdefghij" 填满第 0 行，"klmnopqrst" 填满第 1 行
     let content = "abcdefghijklmnopqrst";
     let mut vte_parser = vte::Parser::new();
     vte_parser.advance(&mut grid, content.as_bytes());
 
-    // Set a highlight for "jklm" which spans the wrap boundary
+    // 为跨越换行边界的 "jklm" 设置高亮
     let highlights = vec![create_highlight(
         "jklm",
         false,
@@ -5038,8 +5038,8 @@ fn plugin_highlight_at_wrapped_line() {
     )];
     grid.set_plugin_regex_highlights(1, highlights, &Style::default());
 
-    // "jklm" spans row 0 col 9 through row 1 col 3
-    // Position in the wrapped portion (row 1, col 1 = 'k')
+    // "jklm" 跨越第 0 行第 9 列到第 1 行第 3 列
+    // 换行部分中的位置（第 1 行，第 1 列 = 'k'）
     let result = grid.plugin_highlight_at(&Position::new(1, 1));
     assert!(result.is_some());
     let (plugin_id, _pattern, matched_string, _ctx) = result.unwrap();
@@ -5060,12 +5060,12 @@ fn hover_position_triggers_on_hover_highlight() {
     )];
     grid.set_plugin_regex_highlights(1, highlights, &Style::default());
 
-    // Set hover position inside "link_text" (starts at col 6)
+    // 在 "link_text" 内设置悬停位置（从第 6 列开始）
     grid.set_hover_position(Some(Position::new(0, 8)));
     assert!(grid.hover_position.is_some());
     assert_eq!(grid.hover_position.unwrap(), Position::new(0, 8));
 
-    // The on_hover entry should exist in plugin_highlights
+    // on_hover 条目应存在于 plugin_highlights 中
     let entries = grid.plugin_highlights.get(&1).unwrap();
     assert_eq!(entries.len(), 1);
     assert!(entries[0].1.on_hover);
@@ -5084,19 +5084,19 @@ fn hover_suppressed_when_mouse_tracking_on() {
     )];
     grid.set_plugin_regex_highlights(1, highlights, &Style::default());
 
-    // Enable mouse tracking — the render path should skip hover highlights
+    // 启用鼠标跟踪 —— 渲染路径应跳过悬停高亮
     grid.mouse_tracking = MouseTracking::Normal;
     grid.set_hover_position(Some(Position::new(0, 8)));
 
-    // The hover position is set regardless (the guard is in the render path),
-    // but we verify that mouse_tracking is non-Off
+    // 无论如何都会设置悬停位置（守卫在渲染路径中），
+    // 但我们验证 mouse_tracking 不是 Off
     assert!(grid.hover_position.is_some());
     assert_ne!(grid.mouse_tracking, MouseTracking::Off);
 }
 
 #[test]
 fn wide_char_display_column_mapping() {
-    // CJK characters: "你好" = 2 chars, each 2 display cols wide, so "world" starts at display col 4
+    // CJK 字符："你好" = 2 个字符，每个 2 显示列宽，所以 "world" 从显示列 4 开始
     let mut grid = create_grid_with_content("你好world\n");
     let highlights = vec![create_highlight(
         "world",
@@ -5108,14 +5108,14 @@ fn wide_char_display_column_mapping() {
     )];
     grid.set_plugin_regex_highlights(1, highlights, &Style::default());
 
-    // "你好" occupies display cols 0-3, "world" starts at display col 4
+    // "你好" 占据显示列 0-3，"world" 从显示列 4 开始
     let result = grid.plugin_highlight_at(&Position::new(0, 4));
     assert!(result.is_some());
     let (plugin_id, _pattern, matched_string, _ctx) = result.unwrap();
     assert_eq!(plugin_id, 1);
     assert_eq!(matched_string, "world");
 
-    // Position 2 should be inside "你好", not "world"
+    // 位置 2 应在 "你好" 内，不是 "world"
     let result_miss = grid.plugin_highlight_at(&Position::new(0, 2));
     assert!(result_miss.is_none());
 }
@@ -5126,13 +5126,13 @@ fn highlight_style_variants_resolve_colors() {
 
     let style = Style::default();
 
-    // HighlightStyle::None returns (None, None)
+    // HighlightStyle::None 返回 (None, None)
     let (fg, bg): (Option<AnsiCode>, Option<AnsiCode>) =
         resolve_highlight_colors(&HighlightStyle::None, &style);
     assert!(fg.is_none());
     assert!(bg.is_none());
 
-    // HighlightStyle::CustomRgb with fg only
+    // 仅带 fg 的 HighlightStyle::CustomRgb
     let (fg, bg): (Option<AnsiCode>, Option<AnsiCode>) = resolve_highlight_colors(
         &HighlightStyle::CustomRgb {
             fg: Some((255, 0, 0)),
@@ -5143,7 +5143,7 @@ fn highlight_style_variants_resolve_colors() {
     assert_eq!(fg, Some(AnsiCode::RgbCode((255, 0, 0))));
     assert!(bg.is_none());
 
-    // HighlightStyle::CustomIndex with bg only
+    // 仅带 bg 的 HighlightStyle::CustomIndex
     let (fg, bg): (Option<AnsiCode>, Option<AnsiCode>) = resolve_highlight_colors(
         &HighlightStyle::CustomIndex {
             fg: None,
@@ -5154,7 +5154,7 @@ fn highlight_style_variants_resolve_colors() {
     assert!(fg.is_none());
     assert_eq!(bg, Some(AnsiCode::ColorIndex(42)));
 
-    // HighlightStyle::Emphasis0 should return a foreground color from the palette
+    // HighlightStyle::Emphasis0 应从调色板返回前景色
     let (fg, bg): (Option<AnsiCode>, Option<AnsiCode>) =
         resolve_highlight_colors(&HighlightStyle::Emphasis0, &style);
     assert!(fg.is_some());
@@ -5249,7 +5249,7 @@ fn pane_contents_no_scrollback_when_flag_false() {
 }
 
 // =====================================================================
-// pane_contents_with_ansi Tests
+// pane_contents_with_ansi 测试
 // =====================================================================
 
 fn create_grid_with_colored_scrollback() -> Grid {
@@ -5358,7 +5358,7 @@ fn pane_contents_with_ansi_and_without_have_same_text() {
         ansi.viewport.len(),
         "Both should have the same number of viewport lines"
     );
-    // Strip ANSI codes from the ansi version and compare plain text content
+    // 从 ansi 版本中剥离 ANSI 代码并比较纯文本内容
     let ansi_escape = regex::Regex::new(r"\x1b\[[0-9;]*m").unwrap();
     for (plain_line, ansi_line) in plain.viewport.iter().zip(ansi.viewport.iter()) {
         let stripped = ansi_escape.replace_all(ansi_line, "").to_string();
@@ -5370,7 +5370,7 @@ fn pane_contents_with_ansi_and_without_have_same_text() {
 }
 
 // =====================================================================
-// Highlight Layer Priority Tests
+// 高亮层优先级测试
 // =====================================================================
 
 #[test]
@@ -5401,7 +5401,7 @@ fn higher_layer_wins_plugin_highlight_at() {
     grid.set_plugin_regex_highlights(1, h1, &Style::default());
     grid.set_plugin_regex_highlights(2, h2, &Style::default());
 
-    // "foo" starts at column 6
+    // "foo" 从第 6 列开始
     let result = grid.plugin_highlight_at(&Position::new(0, 6));
     assert!(result.is_some());
     let (plugin_id, _, _, _) = result.unwrap();
@@ -5471,12 +5471,12 @@ fn lower_layer_wins_when_higher_layer_absent() {
     grid.set_plugin_regex_highlights(1, h1, &Style::default());
     grid.set_plugin_regex_highlights(2, h2, &Style::default());
 
-    // "foo" at col 0 — only Hint layer matches here
+    // 第 0 列的 "foo" —— 这里只有 Hint 层匹配
     let result_foo = grid.plugin_highlight_at(&Position::new(0, 0));
     assert!(result_foo.is_some());
     assert_eq!(result_foo.unwrap().0, 1);
 
-    // "bar" at col 4 — only ActionFeedback layer matches here
+    // 第 4 列的 "bar" —— 这里只有 ActionFeedback 层匹配
     let result_bar = grid.plugin_highlight_at(&Position::new(0, 4));
     assert!(result_bar.is_some());
     assert_eq!(result_bar.unwrap().0, 2);
@@ -5510,7 +5510,7 @@ fn tooltip_from_higher_layer_wins() {
     grid.set_plugin_regex_highlights(1, h1, &Style::default());
     grid.set_plugin_regex_highlights(2, h2, &Style::default());
 
-    // Set hover position inside "foo" (starts at col 6)
+    // 在 "foo" 内设置悬停位置（从第 6 列开始）
     grid.set_hover_position(Some(Position::new(0, 6)));
     assert_eq!(
         grid.cached_hover_tooltip,
@@ -5634,8 +5634,8 @@ fn feed_bytes(grid: &mut Grid, bytes: &[u8]) {
     vte_parser.advance(grid, bytes);
 }
 
-// All tests below use a 10-row, 40-col grid with scroll region 1;8
-// (0-based: rows 0-7), leaving rows 8-9 outside the region.
+// 以下所有测试使用 10 行 40 列的网格，滚动区域为 1;8
+//（0 基：行 0-7），行 8-9 在区域之外。
 const PARTIAL_SR: &[u8] = b"\x1b[1;8r";
 const FILL_8_LINES: &[u8] = b"AAA\r\nBBB\r\nCCC\r\nDDD\r\nEEE\r\nFFF\r\nGGG\r\nHHH";
 
@@ -5695,7 +5695,7 @@ fn partial_scroll_region_csi_m_mid_region_does_not_transfer() {
     let mut content: Vec<u8> = Vec::new();
     content.extend_from_slice(PARTIAL_SR);
     content.extend_from_slice(FILL_8_LINES);
-    // Cursor to row 3, delete 2 lines
+    // 光标到第 3 行，删除 2 行
     content.extend_from_slice(b"\x1b[4;1H\x1b[2M");
 
     let grid = create_grid_with_size_and_raw(10, 40, &content);
@@ -5730,7 +5730,7 @@ fn partial_scroll_region_does_not_transfer_on_alternate_screen() {
 fn partial_scroll_region_nonzero_top_does_not_transfer() {
     let mut content: Vec<u8> = Vec::new();
     content.extend_from_slice(b"AAA\r\nBBB\r\nCCC\r\nDDD\r\nEEE\r\nFFF");
-    // Scroll region rows 3-6 (1-based), so top is row 2, not 0
+    // 滚动区域为行 3-6（1 基），所以顶部是行 2，不是行 0
     content.extend_from_slice(b"\x1b[3;6r");
     content.extend_from_slice(b"\x1b[2S");
 
@@ -5802,7 +5802,7 @@ fn partial_scroll_region_all_three_mechanisms_transfer_in_order() {
     let mut content: Vec<u8> = Vec::new();
     content.extend_from_slice(PARTIAL_SR);
     content.extend_from_slice(FILL_8_LINES);
-    // Newline scrolls AAA off, CSI S scrolls BBB off, CSI M scrolls CCC off
+    // 换行将 AAA 滚出，CSI S 将 BBB 滚出，CSI M 将 CCC 滚出
     content.extend_from_slice(b"\r\nIII");
     content.extend_from_slice(b"\x1b[1S");
     content.extend_from_slice(b"\x1b[1;1H\x1b[1M");
@@ -5814,17 +5814,17 @@ fn partial_scroll_region_all_three_mechanisms_transfer_in_order() {
 
 #[test]
 fn wrap_at_bottom_of_partial_scroll_region_transfers_to_scrollback() {
-    // A long line that soft-wraps while the cursor is on the scroll region's
-    // bottom row must scroll the region, exactly like a newline there would
+    // 当光标在滚动区域的底行时，一个软换行的长行
+    // 必须滚动区域，就像那里有换行一样
     let mut content: Vec<u8> = Vec::new();
     content.extend_from_slice(PARTIAL_SR);
     content.extend_from_slice(FILL_8_LINES);
     content.extend_from_slice(b"\r\n");
-    content.extend_from_slice(&[b'I'; 90]); // 90 cols on a 40-col grid: wraps twice
+    content.extend_from_slice(&[b'I'; 90]); // 40 列网格上的 90 列：换行两次
 
     let grid = create_grid_with_size_and_raw(10, 40, &content);
 
-    // the newline scrolls AAA off, the two wraps scroll BBB and CCC off
+    // 换行将 AAA 滚出，两次换行将 BBB 和 CCC 滚出
     assert_eq!(scrollback_texts(&grid), vec!["AAA", "BBB", "CCC"]);
     let vp = viewport_texts(&grid);
     assert_eq!(vp[0], "DDD");
@@ -5833,7 +5833,7 @@ fn wrap_at_bottom_of_partial_scroll_region_transfers_to_scrollback() {
     assert_eq!(vp[6], "I".repeat(40));
     assert_eq!(vp[7], "I".repeat(10));
     assert_eq!(vp.len(), 8, "rows below the region must be untouched");
-    // the continuation rows are wrapped rows, so resize re-wraps them correctly
+    // 续行是换行行，所以调整大小会正确地重新换行它们
     assert!(grid.viewport[5].is_canonical);
     assert!(!grid.viewport[6].is_canonical);
     assert!(!grid.viewport[7].is_canonical);
@@ -5841,8 +5841,8 @@ fn wrap_at_bottom_of_partial_scroll_region_transfers_to_scrollback() {
 
 #[test]
 fn wrap_at_bottom_of_partial_scroll_region_keeps_cursor_inside_region() {
-    // Before the fix, the cursor would escape below the region's bottom margin
-    // on wrap, and no subsequent line could ever scroll into scrollback again
+    // 修复前，光标会逃逸到区域底部边距之下
+    // 在换行时，之后没有任何行能再滚动到回滚缓冲区中
     let mut content: Vec<u8> = Vec::new();
     content.extend_from_slice(PARTIAL_SR);
     content.extend_from_slice(FILL_8_LINES);
@@ -5851,7 +5851,7 @@ fn wrap_at_bottom_of_partial_scroll_region_keeps_cursor_inside_region() {
 
     let grid = create_grid_with_size_and_raw(10, 40, &content);
 
-    // region is rows 0-7; after two wraps the cursor must still be on row 7
+    // 区域为行 0-7；两次换行后光标必须仍在第 7 行
     assert_eq!(
         grid.cursor_coordinates().map(|(x, y, _)| (x, y)),
         Some((10, 7))
@@ -5862,14 +5862,14 @@ fn wrap_at_bottom_of_partial_scroll_region_keeps_cursor_inside_region() {
 fn wrap_at_bottom_of_nonzero_top_scroll_region_does_not_transfer() {
     let mut content: Vec<u8> = Vec::new();
     content.extend_from_slice(b"AAA\r\nBBB\r\nCCC\r\nDDD\r\nEEE\r\nFFF");
-    // Scroll region rows 3-6 (1-based), so top is row 2, not 0
+    // 滚动区域为行 3-6（1 基），所以顶部是行 2，不是行 0
     content.extend_from_slice(b"\x1b[3;6r");
     content.extend_from_slice(b"\x1b[6;1H");
-    content.extend_from_slice(&[b'X'; 50]); // wraps once at the region's bottom
+    content.extend_from_slice(&[b'X'; 50]); // 在区域底部换行一次
 
     let grid = create_grid_with_size_and_raw(10, 40, &content);
 
-    // regions not anchored at the top do not preserve scrolled-off lines
+    // 未锚定在顶部的区域不保留被滚出的行
     assert_eq!(grid.lines_above.len(), 0);
     let vp = viewport_texts(&grid);
     assert_eq!(vp[0], "AAA", "rows above the region must be untouched");
@@ -5899,8 +5899,8 @@ fn wrap_at_bottom_of_partial_scroll_region_does_not_transfer_on_alternate_screen
 
 #[test]
 fn wrap_at_bottom_of_explicit_full_screen_scroll_region_keeps_wrap_flag() {
-    // CSI 1;10r on a 10-row grid covers the whole screen; wrap behavior must
-    // be identical to having no region set at all (scroll + wrapped row)
+    // 10 行网格上的 CSI 1;10r 覆盖整个屏幕；换行行为必须
+    // 与完全没有设置区域相同（滚动 + 换行行）
     let mut content: Vec<u8> = Vec::new();
     content.extend_from_slice(b"\x1b[1;10r");
     for i in 1..=10u8 {
@@ -5912,11 +5912,11 @@ fn wrap_at_bottom_of_explicit_full_screen_scroll_region_keeps_wrap_flag() {
         content.push(b'0' + i % 10);
     }
     content.extend_from_slice(b"\r\n");
-    content.extend_from_slice(&[b'I'; 90]); // wraps twice on a 40-col grid
+    content.extend_from_slice(&[b'I'; 90]); // 在 40 列网格上换行两次
 
     let grid = create_grid_with_size_and_raw(10, 40, &content);
 
-    // the newline and the two wraps each scrolled one line into scrollback
+    // 换行和两次换行各将一行滚动到回滚缓冲区中
     assert_eq!(
         scrollback_texts(&grid),
         vec!["EARLY-01", "EARLY-02", "EARLY-03"]
@@ -5939,14 +5939,14 @@ fn wrap_at_bottom_of_explicit_full_screen_scroll_region_keeps_wrap_flag() {
 
 #[test]
 fn wrap_at_bottom_of_nonzero_top_scroll_region_keeps_hyperlink_tracking() {
-    // A plain-text URL that wraps at the bottom of a region not anchored at
-    // the top: the auto-linkifier's tracked positions must follow the rows
-    // as the region scrolls, or the URL loses its clickable anchors
+    // 一个在未锚定在顶部的区域底部换行的纯文本 URL
+    // ：自动链接器跟踪的位置必须跟随行
+    // 随着区域滚动，否则 URL 将失去其可点击锚点
     let mut content: Vec<u8> = Vec::new();
     content.extend_from_slice(b"AAA\r\nBBB\r\nCCC\r\nDDD\r\nEEE\r\nFFF");
     content.extend_from_slice(b"\x1b[3;6r\x1b[6;1H");
     content.extend_from_slice(b"https://example.com/");
-    content.extend_from_slice(&[b'a'; 30]); // 50 chars: wraps at the region bottom
+    content.extend_from_slice(&[b'a'; 30]); // 50 个字符：在区域底部换行
     content.extend_from_slice(b" ");
 
     let grid = create_grid_with_size_and_raw(10, 40, &content);
@@ -5967,18 +5967,18 @@ fn wrap_at_bottom_of_nonzero_top_scroll_region_keeps_hyperlink_tracking() {
         })
         .collect();
 
-    // rows 0-3: AAA, BBB, DDD, EEE (CCC scrolled off and discarded) - no anchors;
-    // row 4 holds the URL's first 40 columns, row 5 the wrapped remainder
+    // 行 0-3：AAA、BBB、DDD、EEE（CCC 被滚出并丢弃）- 无锚点；
+    // 第 4 行包含 URL 的前 40 列，第 5 行包含换行的剩余部分
     assert_eq!(start_anchors_per_row, vec![0, 0, 0, 0, 40, 10]);
 }
 
 #[test]
 fn scroll_region_newline_sets_bg_color_on_new_row() {
-    // Set bg color, set scroll region 1-5, fill 5 lines, then newline to scroll
+    // 设置背景色，设置滚动区域 1-5，填充 5 行，然后换行滚动
     let content = b"\x1b[48;2;26;26;26m\x1b[1;5r\
         AAA\r\nBBB\r\nCCC\r\nDDD\r\nEEE\r\nFFF";
     let grid = create_grid_with_size_and_raw(10, 40, content);
-    // The new row at the bottom of the scroll region (row index 4) should have bg_color
+    // 滚动区域底部的新行（行索引 4）应具有 bg_color
     let new_row = &grid.viewport[4];
     assert_eq!(
         new_row.bg_color,
@@ -5989,14 +5989,14 @@ fn scroll_region_newline_sets_bg_color_on_new_row() {
 
 #[test]
 fn scroll_region_newline_bg_color_used_for_trailing_padding() {
-    // Set bg, scroll region 1-5, fill lines, scroll, then write short text on new row
+    // 设置背景，滚动区域 1-5，填充行，滚动，然后在新行上写短文本
     let content = b"\x1b[48;2;26;26;26m\x1b[1;5rAAA\r\nBBB\r\nCCC\r\nDDD\r\nEEE\r\nhi";
     let mut grid = create_grid_with_size_and_raw(10, 40, content);
-    // read_changes returns character chunks with padding applied
+    // read_changes 返回应用了填充的字符块
     let (chunks, _, _) = grid.read_changes(0, 0);
-    // Find the chunk for row 4 (the scroll-created row with "hi")
+    // 找到第 4 行的块（滚动创建的带有 "hi" 的行）
     let row_4_chunk = chunks.iter().find(|c| c.y == 4).expect("row 4 chunk");
-    // The trailing padding character (last column) should have the row's bg_color
+    // 尾随填充字符（最后一列）应具有该行的 bg_color
     let pad_char = &row_4_chunk.terminal_characters[39];
     assert_eq!(
         pad_char.styles.background,
@@ -6007,13 +6007,13 @@ fn scroll_region_newline_bg_color_used_for_trailing_padding() {
 
 #[test]
 fn scroll_region_newline_bg_color_used_for_cursor_forward_gaps() {
-    // Set bg, scroll region 1-5, fill lines, scroll, then cursor-forward and write
-    // This simulates vim's [12C behavior on a scroll-created row
+    // 设置背景，滚动区域 1-5，填充行，滚动，然后光标前进并写入
+    // 这模拟了 vim 在滚动创建的行上的 [12C 行为
     let content = b"\x1b[48;2;26;26;26m\x1b[1;5rAAA\r\nBBB\r\nCCC\r\nDDD\r\nEEE\
         \r\n\x1b[0m\x1b[10Cx";
     let grid = create_grid_with_size_and_raw(10, 40, content);
     let new_row = &grid.viewport[4];
-    // Position 5 (within the gap created by cursor forward) should have the bg_color
+    // 位置 5（在光标前进创建的间隙内）应具有 bg_color
     let gap_char = &new_row.columns[5];
     assert_eq!(
         gap_char.styles.background,
@@ -6024,12 +6024,12 @@ fn scroll_region_newline_bg_color_used_for_cursor_forward_gaps() {
 
 #[test]
 fn scroll_region_bg_color_does_not_override_explicit_background() {
-    // Set bg, scroll region 1-5, fill lines, scroll, then write with different bg
+    // 设置背景，滚动区域 1-5，填充行，滚动，然后用不同的背景写入
     let content = b"\x1b[48;2;26;26;26m\x1b[1;5rAAA\r\nBBB\r\nCCC\r\nDDD\r\nEEE\
         \r\n\x1b[48;2;255;0;0mRED";
     let grid = create_grid_with_size_and_raw(10, 40, content);
     let new_row = &grid.viewport[4];
-    // The 'R' character should have the explicitly set red background, not the row bg
+    // 'R' 字符应具有显式设置的红色背景，而不是行背景
     let r_char = &new_row.columns[0];
     assert_eq!(
         r_char.styles.background,
@@ -6040,11 +6040,11 @@ fn scroll_region_bg_color_does_not_override_explicit_background() {
 
 #[test]
 fn full_scroll_region_newline_sets_bg_color_on_new_row() {
-    // Full scroll region (entire viewport), set bg, fill, then scroll
+    // 完整滚动区域（整个视口），设置背景，填充，然后滚动
     let content = b"\x1b[48;2;26;26;26m\x1b[1;10r\
         L1\r\nL2\r\nL3\r\nL4\r\nL5\r\nL6\r\nL7\r\nL8\r\nL9\r\nL10\r\nL11";
     let grid = create_grid_with_size_and_raw(10, 40, content);
-    // The new row at the bottom (row 9) should have bg_color
+    // 底部的新行（第 9 行）应具有 bg_color
     let new_row = &grid.viewport[9];
     assert_eq!(
         new_row.bg_color,
@@ -6055,7 +6055,7 @@ fn full_scroll_region_newline_sets_bg_color_on_new_row() {
 
 #[test]
 fn row_without_scroll_has_no_bg_color() {
-    // Normal content without scroll should not set bg_color on rows
+    // 没有滚动的普通内容不应在行上设置 bg_color
     let content = b"\x1b[48;2;26;26;26mHello";
     let grid = create_grid_with_size_and_raw(10, 40, content);
     let row = &grid.viewport[0];
@@ -6089,9 +6089,9 @@ fn new_grid_for_forwarding_test() -> Grid {
 
 #[test]
 fn csi_14t_forwards_to_host_not_local() {
-    // CSI 14t used to synthesize a local "\x1b[4;H;Wt" reply; after the
-    // refactor it must be forwarded to the host instead so apps observe
-    // the terminal's real window pixel dimensions.
+    // CSI 14t 过去会生成本地 "\x1b[4;H;Wt" 回复；重构后
+    // 它必须改为转发给主机，以便应用观察到
+    // 终端真实的窗口像素尺寸。
     let mut parser = vte::Parser::new();
     let mut grid = new_grid_for_forwarding_test();
     parser.advance(&mut grid, b"\x1b[14t");
@@ -6122,8 +6122,8 @@ fn csi_16t_forwards_to_host_not_local() {
 
 #[test]
 fn csi_18t_still_answered_locally() {
-    // 18 reports Zellij's own text-area size in cells — Zellij is
-    // authoritative for this, do NOT forward.
+    // 18 以单元格为单位报告 Zellij 自己的文本区域大小 —— Zellij 是
+    // 此信息的权威来源，请勿转发。
     let mut parser = vte::Parser::new();
     let mut grid = new_grid_for_forwarding_test();
     parser.advance(&mut grid, b"\x1b[18t");
@@ -6133,8 +6133,8 @@ fn csi_18t_still_answered_locally() {
 
 #[test]
 fn osc_11_set_stays_local() {
-    // OSC 11;<rgb> (set pane default bg) must stay local — Zellij needs
-    // to track it for its own rendering.
+    // OSC 11;<rgb>（设置窗格默认背景）必须保持本地 —— Zellij 需要
+    // 为自己的渲染跟踪它。
     let mut parser = vte::Parser::new();
     let mut grid = new_grid_for_forwarding_test();
     parser.advance(&mut grid, b"\x1b]11;rgb:ffff/ffff/ffff\x07");
@@ -6148,8 +6148,8 @@ fn osc_11_set_stays_local() {
 
 #[test]
 fn osc_11_query_without_override_forwards_to_host() {
-    // When no pane-local override is in place the query must still be
-    // forwarded — the host's actual bg is what the app asked for.
+    // 当没有窗格本地覆盖生效时，查询仍必须
+    // 被转发 —— 主机的实际背景就是应用所要求的。
     let mut parser = vte::Parser::new();
     let mut grid = new_grid_for_forwarding_test();
     assert!(grid.pane_default_bg.is_none());
@@ -6181,11 +6181,11 @@ fn osc_10_query_without_override_forwards_to_host() {
 
 #[test]
 fn set_pane_default_colors_short_circuits_osc_queries() {
-    // The CLI path (`zellij action set-pane-color`) lands on
-    // `Grid::set_pane_default_colors`. A later OSC 10/11 query must
-    // read that override, not be forwarded — the entire point of the
-    // CLI override is that apps see the color Zellij is painting, not
-    // the underlying host's.
+    // CLI 路径（`zellij action set-pane-color`）落在
+    // `Grid::set_pane_default_colors` 上。后续的 OSC 10/11 查询必须
+    // 读取该覆盖，而不是被转发 —— CLI 覆盖的全部意义在于
+    // 应用看到 Zellij 正在绘制的颜色，而不是底层主机的颜色。
+    //
     let mut parser = vte::Parser::new();
     let mut grid = new_grid_for_forwarding_test();
     grid.set_pane_default_colors(Some("#ff8040".to_string()), Some("#102030".to_string()));
@@ -6206,9 +6206,9 @@ fn set_pane_default_colors_short_circuits_osc_queries() {
 
 #[test]
 fn osc_11_override_short_circuits_only_the_overridden_channel() {
-    // Setting only the bg must not short-circuit fg queries — each
-    // channel's override is independent. If only `pane_default_bg` is
-    // populated, an OSC 10 query (fg) still goes to the host.
+    // 仅设置背景不能短路前景查询 —— 每个通道的覆盖是独立的。
+    // 如果只有 `pane_default_bg` 被填充，OSC 10 查询（前景）仍然发送到主机。
+    //
     let mut parser = vte::Parser::new();
     let mut grid = new_grid_for_forwarding_test();
     parser.advance(&mut grid, b"\x1b]11;rgb:1010/2020/3030\x07");
@@ -6225,10 +6225,10 @@ fn osc_11_override_short_circuits_only_the_overridden_channel() {
 
 #[test]
 fn csi_2026_dollar_p_stays_local() {
-    // DECRQM mode 2026 (synchronised output) is emulated by Zellij
-    // itself — never forwarded. The response is the DECRPM form
-    // `\x1b[?2026;2$y` (2 = "reset but recognised"; Zellij brackets its
-    // own frames, so individual panes are treated as "not enabled").
+    // DECRQM 模式 2026（同步输出）由 Zellij 自己模拟 —— 从不转发。
+    // 响应是 DECRPM 形式 `\x1b[?2026;2$y`（2 = "已重置但已识别"；
+    // Zellij 用括号括起自己的帧，所以单个窗格被视为"未启用"）。
+    //
     let mut parser = vte::Parser::new();
     let mut grid = new_grid_for_forwarding_test();
     parser.advance(&mut grid, b"\x1b[?2026$p");
@@ -6245,9 +6245,9 @@ fn csi_2026_dollar_p_stays_local() {
 
 #[test]
 fn csi_2031_dollar_p_when_disabled_replies_reset() {
-    // DECRQM mode 2031 (Application Theme Reporting) is per-pane state
-    // tracked locally by Zellij. With no prior `CSI ? 2031 h`, the mode
-    // is reset, so the DECRPM reply must report value=2.
+    // DECRQM 模式 2031（应用主题报告）是由 Zellij 本地跟踪的
+    // 每窗格状态。在没有先前的 `CSI ? 2031 h` 的情况下，模式
+    // 被重置，因此 DECRPM 回复必须报告 value=2。
     let mut parser = vte::Parser::new();
     let mut grid = new_grid_for_forwarding_test();
     parser.advance(&mut grid, b"\x1b[?2031$p");
@@ -6264,8 +6264,8 @@ fn csi_2031_dollar_p_when_disabled_replies_reset() {
 
 #[test]
 fn csi_2031_dollar_p_when_enabled_replies_set() {
-    // After `CSI ? 2031 h` enables theme-change notifications on this
-    // pane, a DECRQM probe must report value=1 (set).
+    // 在 `CSI ? 2031 h` 在此窗格上启用主题更改通知后，
+    // DECRQM 探测必须报告 value=1（已设置）。
     let mut parser = vte::Parser::new();
     let mut grid = new_grid_for_forwarding_test();
     parser.advance(&mut grid, b"\x1b[?2031h\x1b[?2031$p");
@@ -6282,10 +6282,10 @@ fn csi_2031_dollar_p_when_enabled_replies_set() {
 
 #[test]
 fn csi_22t_and_23t_stay_local() {
-    // CSI 22t / 23t manipulate the pane's title stack — Zellij owns
-    // that state, so forwarding would route an app's push/pop to the
-    // host's unrelated title stack instead of the visible pane title.
-    // They produce no reply; both queues must stay empty after each.
+    // CSI 22t / 23t 操作窗格的标题栈 —— Zellij 拥有该状态，
+    // 因此转发会将应用的 push/pop 路由到主机不相关的标题栈，
+    // 而不是可见的窗格标题。它们不产生回复；每次操作后两个队列必须保持为空。
+    //
     let mut parser = vte::Parser::new();
     let mut grid = new_grid_for_forwarding_test();
     grid.set_title("hello".to_string());
@@ -6300,7 +6300,7 @@ fn csi_22t_and_23t_stay_local() {
         "22t produces no reply"
     );
 
-    // The push actually landed on Zellij's per-pane stack: restore it.
+    // push 实际上落在了 Zellij 的每窗格栈上：恢复它。
     grid.set_title("different".to_string());
     parser.advance(&mut grid, b"\x1b[23;0t");
     assert!(
@@ -6320,8 +6320,8 @@ fn csi_22t_and_23t_stay_local() {
 
 #[test]
 fn osc_4_set_stays_local() {
-    // OSC 4;<index>;<rgb> writes to Zellij's in-memory palette; only
-    // the query form (`OSC 4;N;?`) ever forwards to the host.
+    // OSC 4;<index>;<rgb> 写入 Zellij 的内存调色板；只有
+    // 查询形式（`OSC 4;N;?`）才会转发给主机。
     let mut parser = vte::Parser::new();
     let mut grid = new_grid_for_forwarding_test();
     parser.advance(&mut grid, b"\x1b]4;5;rgb:ffff/0000/0000\x07");
@@ -6411,8 +6411,8 @@ fn csi_996n_pushes_color_palette_mode_query_to_forwarded_queries() {
 fn csi_5n_status_query_still_handled_locally() {
     let mut parser = vte::Parser::new();
     let mut grid = new_grid_for_forwarding_test();
-    // Plain DSR 5 (no `?` intermediate) is not the new theme query and
-    // must continue to receive its `\e[0n` "all good" reply locally.
+    // 普通 DSR 5（没有 `?` 中间符）不是新的主题查询，
+    // 必须继续在本地接收其 `\e[0n` "一切正常" 回复。
     parser.advance(&mut grid, b"\x1b[5n");
     assert!(
         grid.pending_forwarded_queries.is_empty(),
@@ -8772,7 +8772,7 @@ fn sixel_dcs_is_not_confused_with_xtgettcap() {
 #[test]
 fn ech_over_wide_character_preserves_background_on_padding_cell() {
     use crate::panes::terminal_character::NamedColor;
-    // Use a wide character to exercise replacement of a wide cell.
+    // 使用宽字符来测试宽单元格的替换。
     assert_eq!(crate::panes::TerminalCharacter::new('Ａ').width(), 2);
 
     let content = "\x1b[44mＡ\x1b[1;1H\x1b[1X".as_bytes();
