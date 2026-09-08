@@ -130,7 +130,7 @@ impl Page {
                     })),
                 ]));
         page.with_paragraph(vec![ComponentLine::new(vec![
-            ActiveComponent::new(TextOrCustomRender::Text(Text::new("Full Changelog: "))),
+            ActiveComponent::new(TextOrCustomRender::Text(Text::new("完整更新日志："))),
             ActiveComponent::new(TextOrCustomRender::Text(changelog_link_unselected(
                 zellij_version.clone(),
             )))
@@ -335,7 +335,7 @@ impl Page {
                 let mode_name = bind.mode_name();
                 let bind_text = if bind.returns_to_base_mode {
                     format!(
-                        "{} mode + {} - {}, returns to {}",
+                        "{} 模式 + {} - {}，返回到 {}",
                         mode_name,
                         bind.key_text(),
                         bind.description,
@@ -343,7 +343,7 @@ impl Page {
                     )
                 } else {
                     format!(
-                        "{} mode + {} - {}",
+                        "{} 模式 + {} - {}",
                         mode_name,
                         bind.key_text(),
                         bind.description
@@ -364,7 +364,7 @@ impl Page {
             .map(|(bind, currently_bound_to)| {
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
                     Text::new(format!(
-                        "{} is currently bound to {} and will be overwritten",
+                        "{} 当前绑定到 {}，将被覆盖",
                         bind.key_text(),
                         currently_bound_to
                     ))
@@ -376,13 +376,13 @@ impl Page {
         let status = keybinding_state.borrow().status().clone();
         let mut page = Page::new()
             .with_kind(PageKind::UpdateKeybindings)
-            .with_title(Text::new("Update Keybindings").color_range(0, ..))
+            .with_title(Text::new("更新按键绑定").color_range(0, ..))
             .with_paragraph(vec![ComponentLine::new(feature_sentence(
                 &keybinding_state,
                 &main_screen_builder,
             ))])
             .with_bulletin_list(
-                BulletinList::new(Text::new("New keybindings:").color_range(2, ..))
+                BulletinList::new(Text::new("新按键绑定：").color_range(2, ..))
                     .with_items(keybind_items),
             );
         if !conflicting_binds.is_empty() {
@@ -392,7 +392,7 @@ impl Page {
             ApplyStatus::NotApplied => page
                 .with_paragraph(vec![ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(Text::new(
-                        "Add these keybindings to your configuration file? (",
+                        "将这些按键绑定添加到配置文件？（",
                     ))),
                     ActiveComponent::new(TextOrCustomRender::Text(confirm_text()))
                         .with_hover(TextOrCustomRender::CustomRender(
@@ -420,7 +420,7 @@ impl Page {
                     ActiveComponent::new(TextOrCustomRender::Text(Text::new(")"))),
                 ])])
                 .with_help(Box::new(|_hovering_over_link, _menu_item_is_selected| {
-                    Text::new("Help: <y> - Add Keybindings, <n> - Cancel, <ESC> - Go back")
+                    Text::new("帮助：<y> - 添加按键绑定，<n> - 取消，<ESC> - 返回")
                         .color_substring(1, "<y>")
                         .color_substring(1, "<n>")
                         .color_substring(1, "<ESC>")
@@ -576,17 +576,17 @@ impl Page {
 
 fn keybinding_status_text(status: &ApplyStatus) -> Text {
     match status {
-        ApplyStatus::Applying => Text::new("Adding keybindings...").color_range(2, ..),
+        ApplyStatus::Applying => Text::new("正在添加按键绑定...").color_range(2, ..),
         ApplyStatus::Applied => {
-            Text::new("Keybindings added and saved to your config file.").color_range(2, ..)
+            Text::new("按键绑定已添加并保存到配置文件。").color_range(2, ..)
         },
         ApplyStatus::Failed(Some(config_file)) => Text::new(format!(
-            "Keybindings added to this session, but {} could not be written.",
+            "按键绑定已添加到当前会话，但无法写入 {}。",
             config_file
         ))
         .color_range(3, ..),
         ApplyStatus::Failed(None) => Text::new(
-            "Keybindings added to this session, but the config file could not be written.",
+            "按键绑定已添加到当前会话，但无法写入配置文件。",
         )
         .color_range(3, ..),
         ApplyStatus::NotApplied => Text::new(""),
@@ -604,8 +604,8 @@ fn missing_binds_note(
     match status {
         ApplyStatus::NotApplied if has_missing_binds => Some(vec![ComponentLine::new(vec![
             ActiveComponent::new(TextOrCustomRender::Text(
-                Text::new("Note: these keybindings are not in your config file. Add them? (")
-                    .color_substring(2, "Note:"),
+                Text::new("注意：这些按键绑定不在你的配置文件中。是否添加？（")
+                    .color_substring(2, "注意："),
             )),
             ActiveComponent::new(TextOrCustomRender::Text(confirm_text()))
                 .with_hover(TextOrCustomRender::CustomRender(
@@ -703,7 +703,7 @@ fn bind_lines(
                     let mode_name = format!("{:?}", bind.mode).to_uppercase();
                     ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
                         Text::new(format!(
-                            "{}{} mode + {} - {}",
+                            "{}{} 模式 + {} - {}",
                             indent,
                             mode_name,
                             bind.key_text(),
@@ -733,7 +733,7 @@ fn merged_bind_line(
     let mode_name = first_bind.mode_name();
     let key_texts: Vec<String> = binds.iter().map(|bind| bind.key_text()).collect();
     let mut text = Text::new(format!(
-        "{} mode + {} - {}",
+        "{} 模式 + {} - {}",
         mode_name,
         key_texts.join(" / "),
         description
@@ -796,14 +796,14 @@ fn feature_sentence(
 ) -> Vec<ActiveComponent> {
     let features = keybinding_state.borrow().features_to_add();
     let mut sentence = vec![ActiveComponent::new(TextOrCustomRender::Text(Text::new(
-        "This version includes new keybindings for ",
+        "此版本包含以下新的按键绑定：",
     )))];
     for (feature_index, feature) in features.iter().enumerate() {
         if feature_index > 0 {
             let separator = if feature_index == features.len().saturating_sub(1) {
-                " and "
+                " 和 "
             } else {
-                ", "
+                "、"
             };
             sentence.push(ActiveComponent::new(TextOrCustomRender::Text(Text::new(
                 separator,
@@ -1110,7 +1110,7 @@ impl Page {
 
 fn render_error(error: &str, y: usize) {
     print_text_with_coordinates(
-        Text::new(format!("ERROR: {}", error)).color_range(3, ..),
+        Text::new(format!("错误：{}", error)).color_range(3, ..),
         0,
         y,
         None,
@@ -1174,13 +1174,13 @@ fn web_client_link_selected_len() -> usize {
 
 // Text components
 fn whats_new_title() -> Text {
-    Text::new("What's new?")
+    Text::new("有什么新功能？")
 }
 
 fn main_screen_title(version: String, is_release_notes: bool) -> Text {
     if is_release_notes {
-        let title_text = format!("Hi there, welcome to Zellij {}!", &version);
-        Text::new(title_text).color_range(2, 21..=27 + version.chars().count())
+        let title_text = format!("你好，欢迎使用 Zellij {}！", &version);
+        Text::new(title_text).color_range(2, 7..=13 + version.chars().count())
     } else {
         let title_text = format!("Zellij {}", &version);
         Text::new(title_text).color_range(2, ..)
@@ -1195,16 +1195,16 @@ fn main_screen_help_text(
     if hovering_over_link {
         return link_hover_help();
     }
-    let mut help_text = String::from("Help: <↓↑> - Navigate");
+    let mut help_text = String::from("帮助：<↓↑> - 导航");
     if menu_item_is_selected {
-        help_text.push_str(", <ENTER> - Learn More");
+        help_text.push_str("，<ENTER> - 了解更多");
     }
     if has_missing_binds {
-        help_text.push_str(", <u> - Update Keybindings");
+        help_text.push_str("，<u> - 更新按键绑定");
     }
-    help_text.push_str(", <ESC> - Dismiss");
+    help_text.push_str("，<ESC> - 关闭");
     if !menu_item_is_selected {
-        help_text.push_str(", <?> - Usage Tips");
+        help_text.push_str("，<?> - 使用技巧");
     }
     color_help_keys(help_text)
 }
@@ -1217,14 +1217,14 @@ fn release_notes_main_help(
     if hovering_over_link {
         return link_hover_help();
     }
-    let mut help_text = String::from("Help: <↓↑> - Navigate");
+    let mut help_text = String::from("帮助：<↓↑> - 导航");
     if menu_item_is_selected {
-        help_text.push_str(", <ENTER> - Learn More");
+        help_text.push_str("，<ENTER> - 了解更多");
     }
     if has_missing_binds {
-        help_text.push_str(", <u> - Update Keybindings");
+        help_text.push_str("，<u> - 更新按键绑定");
     }
-    help_text.push_str(", <ESC> - Dismiss");
+    help_text.push_str("，<ESC> - 关闭");
     color_help_keys(help_text)
 }
 
@@ -1232,33 +1232,33 @@ fn color_help_keys(help_text: String) -> Text {
     Text::new(help_text)
         .color_substring(1, "<↓↑>")
         .color_substring(1, "<ENTER>")
-        .color_substring(2, "Update Keybindings")
+        .color_substring(2, "更新按键绑定")
         .color_substring(1, "<u>")
         .color_substring(1, "<ESC>")
         .color_substring(1, "<?>")
 }
 
 fn link_hover_help() -> Text {
-    Text::new("Help: Click or Shift-Click to open in browser")
-        .color_range(3, 6..=10)
-        .color_range(3, 15..=25)
+    Text::new("帮助：点击或 Shift-点击 在浏览器中打开")
+        .color_range(3, 3..=4)
+        .color_range(3, 7..=14)
 }
 
 fn esc_go_back_plus_link_hover(hovering_over_link: bool, _menu_item_is_selected: bool) -> Text {
     if hovering_over_link {
-        let help_text = format!("Help: Click or Shift-Click to open in browser");
+        let help_text = format!("帮助：点击或 Shift-点击 在浏览器中打开");
         Text::new(help_text)
-            .color_range(3, 6..=10)
-            .color_range(3, 15..=25)
+            .color_range(3, 3..=4)
+            .color_range(3, 7..=14)
     } else {
-        let help_text = format!("Help: <ESC> - Go back");
-        Text::new(help_text).color_range(1, 6..=10)
+        let help_text = format!("帮助：<ESC> - 返回");
+        Text::new(help_text).color_range(1, 3..=7)
     }
 }
 
 fn esc_to_go_back_help() -> Text {
-    let help_text = format!("Help: <ESC> - Go back");
-    Text::new(help_text).color_range(1, 6..=10)
+    let help_text = format!("帮助：<ESC> - 返回");
+    Text::new(help_text).color_range(1, 3..=7)
 }
 
 fn main_menu_item(item_name: &str) -> Text {
@@ -1266,7 +1266,7 @@ fn main_menu_item(item_name: &str) -> Text {
 }
 
 fn support_the_developer_text() -> Text {
-    let support_text = format!("Please support the Zellij developer <3: ");
+    let support_text = format!("请支持 Zellij 开发者 <3：");
     Text::new(support_text).color_range(3, ..)
 }
 

@@ -13,9 +13,9 @@ pub enum Feature {
 impl Feature {
     pub fn label(&self) -> &'static str {
         match self {
-            Feature::NestedSessions => "nested sessions",
-            Feature::PaneFocus => "pane focus",
-            Feature::ScrollByCommand => "scrolling by command",
+            Feature::NestedSessions => "嵌套会话",
+            Feature::PaneFocus => "窗格焦点",
+            Feature::ScrollByCommand => "按命令滚动",
         }
     }
 }
@@ -204,7 +204,7 @@ pub fn expected_binds() -> Vec<ExpectedBind> {
             mode: InputMode::Session,
             key: KeyWithModifier::new(BareKey::Char(']')),
             action: Action::FocusHostSession,
-            description: "Focus the host (outer) session",
+            description: "聚焦宿主（外层）会话",
             returns_to_base_mode: true,
         },
         ExpectedBind {
@@ -212,7 +212,7 @@ pub fn expected_binds() -> Vec<ExpectedBind> {
             mode: InputMode::Session,
             key: KeyWithModifier::new(BareKey::Char('[')),
             action: Action::FocusGuestSession,
-            description: "Focus the guest (inner) session",
+            description: "聚焦客户（内层）会话",
             returns_to_base_mode: true,
         },
         ExpectedBind {
@@ -220,7 +220,7 @@ pub fn expected_binds() -> Vec<ExpectedBind> {
             mode: InputMode::Session,
             key: KeyWithModifier::new(BareKey::Char('f')),
             action: Action::ToggleHostFullscreen,
-            description: "Toggle host session fullscreen",
+            description: "切换宿主会话全屏",
             returns_to_base_mode: true,
         },
         ExpectedBind {
@@ -228,7 +228,7 @@ pub fn expected_binds() -> Vec<ExpectedBind> {
             mode: InputMode::Pane,
             key: KeyWithModifier::new(BareKey::Char(';')),
             action: Action::FocusLastPane,
-            description: "Focus the last focused pane",
+            description: "聚焦上一个窗格",
             returns_to_base_mode: false,
         },
         ExpectedBind {
@@ -236,7 +236,7 @@ pub fn expected_binds() -> Vec<ExpectedBind> {
             mode: InputMode::Scroll,
             key: KeyWithModifier::new(BareKey::Char('[')),
             action: Action::ScrollToPreviousPrompt,
-            description: "Scroll to the previous command",
+            description: "滚动到上一条命令",
             returns_to_base_mode: false,
         },
         ExpectedBind {
@@ -244,7 +244,7 @@ pub fn expected_binds() -> Vec<ExpectedBind> {
             mode: InputMode::Scroll,
             key: KeyWithModifier::new(BareKey::Char(']')),
             action: Action::ScrollToNextPrompt,
-            description: "Scroll to the next command",
+            description: "滚动到下一条命令",
             returns_to_base_mode: false,
         },
         ExpectedBind {
@@ -252,7 +252,7 @@ pub fn expected_binds() -> Vec<ExpectedBind> {
             mode: InputMode::Scroll,
             key: KeyWithModifier::new(BareKey::Char('m')),
             action: Action::SelectCommandAtScrollPosition,
-            description: "Select the command at the scroll position",
+            description: "选中滚动位置处的命令",
             returns_to_base_mode: false,
         },
         ExpectedBind {
@@ -260,7 +260,7 @@ pub fn expected_binds() -> Vec<ExpectedBind> {
             mode: InputMode::Scroll,
             key: KeyWithModifier::new(BareKey::Char('c')),
             action: Action::CopyLastCommandOutput,
-            description: "Copy the output of the last command",
+            description: "复制上一条命令的输出",
             returns_to_base_mode: true,
         },
     ]

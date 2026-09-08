@@ -117,9 +117,9 @@ impl ZellijPlugin for App {
                 } else if self.waiting_for_config_to_be_written {
                     let error = match file_path {
                         Some(file_path) => {
-                            format!("Failed to write config to disk at: {}", file_path)
+                            format!("无法将配置写入磁盘：{}", file_path)
                         },
-                        None => format!("Failed to write config to disk."),
+                        None => format!("无法将配置写入磁盘。"),
                     };
                     eprintln!("{}", error);
                     self.error = Some(error);
@@ -287,10 +287,10 @@ impl App {
             if self.is_release_notes {
                 rename_plugin_pane(
                     own_plugin_id,
-                    format!("Release Notes {}", self.zellij_version.borrow()),
+                    format!("发布说明 {}", self.zellij_version.borrow()),
                 );
             } else {
-                rename_plugin_pane(own_plugin_id, "About Zellij");
+                rename_plugin_pane(own_plugin_id, "关于 Zellij");
             }
         }
     }
@@ -400,17 +400,17 @@ impl App {
             .with_title(Text::new(format!("{}", error)).color_range(3, ..))
             .with_paragraph(vec![
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("Unable to permanently dismiss tips."),
+                    Text::new("无法永久关闭使用提示。"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("You can do so manually by adding the following to your config:"),
+                    Text::new("你可以手动在配置文件中添加以下内容来关闭："),
                 ))]),
             ])
             .with_paragraph(vec![ComponentLine::new(vec![ActiveComponent::new(
                 TextOrCustomRender::Text(Text::new("show_startup_tips false").color_range(0, ..)),
             )])])
             .with_help(Box::new(|_hovering_over_link, _menu_item_is_selected| {
-                Text::new("<ESC> - dismiss").color_range(1, ..=4)
+                Text::new("<ESC> - 关闭").color_range(1, ..=4)
             }));
         error_page.render(rows, cols, &None)
     }

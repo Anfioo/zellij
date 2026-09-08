@@ -815,7 +815,7 @@ fn theme_list_selected_len() -> usize {
 }
 
 fn support_the_developer_text() -> Text {
-    let support_text = format!("Please support the Zellij developer <3: ");
+    let support_text = format!("请支持 Zellij 开发者 <3：");
     Text::new(support_text).color_range(3, ..)
 }
 
@@ -836,17 +836,17 @@ fn screencasts_link_selected_len() -> Box<dyn Fn() -> usize> {
 
 fn tips_help_text(hovering_over_link: bool) -> Text {
     if hovering_over_link {
-        let help_text = format!("Help: Click or Shift-Click to open in browser");
+        let help_text = format!("帮助：点击或 Shift-点击 在浏览器中打开");
         Text::new(help_text)
-            .color_range(3, 6..=10)
-            .color_range(3, 15..=25)
+            .color_range(3, 3..=4)
+            .color_range(3, 7..=14)
     } else {
         let help_text = format!(
-            "Help: <ESC> - Dismiss, <↓↑> - Browse tips, <Ctrl c> - Don't show tips on startup"
+            "帮助：<ESC> - 关闭，<↓↑> - 浏览技巧，<Ctrl c> - 启动时不显示技巧"
         );
         Text::new(help_text)
-            .color_range(1, 6..=10)
-            .color_range(1, 23..=26)
-            .color_range(1, 43..=50)
+            .color_range(1, 3..=7)
+            .color_range(1, 15..=18)
+            .color_range(1, 28..=35)
     }
 }
