@@ -87,7 +87,7 @@ impl NewLayoutFromCurrentSessionScreen {
 
     fn update_layout_from_session(&mut self) -> Option<Screen> {
         let Ok(focused_pane_info) = get_focused_pane_info() else {
-            eprintln!("Cannot retrieve focused tab info");
+            eprintln!("无法获取聚焦标签页的信息");
             return None;
         };
         let focused_tab_index = focused_pane_info.0;
@@ -99,11 +99,11 @@ impl NewLayoutFromCurrentSessionScreen {
                     None
                 },
                 Ok((_, None)) => Some(Screen::Error(super::ErrorScreen {
-                    message: "Failed to retrieve session layout metadata".to_string(),
+                    message: "无法获取会话布局元数据".to_string(),
                     return_to_screen: Box::new(Screen::LayoutList(Default::default())),
                 })),
                 Err(error_msg) => Some(Screen::Error(super::ErrorScreen {
-                    message: format!("Failed to dump session layout: {}", error_msg),
+                    message: format!("无法导出会话布局：{}", error_msg),
                     return_to_screen: Box::new(Default::default()),
                 })),
             }
@@ -115,11 +115,11 @@ impl NewLayoutFromCurrentSessionScreen {
                     None
                 },
                 Ok((_, None)) => Some(Screen::Error(super::ErrorScreen {
-                    message: "Failed to retrieve session layout metadata".to_string(),
+                    message: "无法获取会话布局元数据".to_string(),
                     return_to_screen: Box::new(Screen::LayoutList(Default::default())),
                 })),
                 Err(error_msg) => Some(Screen::Error(super::ErrorScreen {
-                    message: format!("Failed to dump session layout: {}", error_msg),
+                    message: format!("无法导出会话布局：{}", error_msg),
                     return_to_screen: Box::new(Default::default()),
                 })),
             }
@@ -168,10 +168,10 @@ impl NewLayoutFromCurrentSessionScreen {
 
     fn save_session_layout(&self, layout_name: &str) -> Result<(), String> {
         save_layout(layout_name.to_owned(), self.session_layout.clone(), false)
-            .map_err(|err| format!("Failed to save layout '{}': {}", layout_name, err))?;
+            .map_err(|err| format!("保存布局 '{}' 失败：{}", layout_name, err))?;
 
         eprintln!(
-            "Successfully saved current session as layout: {}",
+            "成功将当前会话保存为布局：{}",
             layout_name
         );
         Ok(())
@@ -179,7 +179,7 @@ impl NewLayoutFromCurrentSessionScreen {
 
     pub fn render(&self, rows: usize, cols: usize) {
         let display_layout = DisplayLayout::Valid(LayoutInfo::File(
-            "current".to_string(),
+            "当前".to_string(),
             self.current_layout_metadata.clone(),
         ));
 
@@ -229,20 +229,20 @@ impl NewLayoutFromCurrentSessionScreen {
     }
 
     fn render_title(&self, x: usize, y: usize, width: usize) {
-        let title = Text::new("Save Layout of Current Session").color_all(2);
+        let title = Text::new("保存当前会话的布局").color_all(2);
         print_text_with_coordinates(title, x, y, Some(width), None);
     }
 
     fn description_text_full(&self) -> (&str, &str) {
         (
-            "This layout was created from the current session.",
-            "Save it to recreate the session later or share it with others.",
+            "此布局由当前会话创建。",
+            "保存它以便以后重建会话或与他人分享。",
         )
     }
     fn description_text_short(&self) -> (&str, &str) {
         (
-            "Layout from current session.",
-            "Save it to recreate or share the later.",
+            "来自当前会话的布局。",
+            "保存它以便以后重建或分享。",
         )
     }
     fn render_description(&self, x: usize, y: usize, width: usize) {
@@ -308,8 +308,8 @@ impl NewLayoutFromCurrentSessionScreen {
         };
         let colored = Text::new(text)
             .color_substring(3, "<Tab>")
-            .color_substring(0, "[All Tabs]")
-            .color_substring(0, "[All]")
+            .color_substring(0, "[所有标签页]")
+            .color_substring(0, "[全部]")
             .color_substring(0, "[Current Tab Only]")
             .color_substring(0, "[Current Tab]");
 

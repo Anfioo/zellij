@@ -75,7 +75,7 @@ impl<'a> LayoutDetail<'a> {
     }
 
     fn render_no_metadata(&self, x: usize, y: usize) {
-        let msg = Text::new("No metadata available").color_all(1);
+        let msg = Text::new("没有可用的元数据").color_all(1);
         print_text_with_coordinates(msg, x, y + 1, None, None);
     }
     fn render_built_in_indication(
@@ -90,7 +90,7 @@ impl<'a> LayoutDetail<'a> {
             return;
         }
 
-        let full_text = format!("{} is a built-in layout. Create your own layouts to automate or share workspace setup.", name);
+        let full_text = format!("{} 是内置布局。创建你自己的布局来自动化或共享工作区设置。", name);
         let wrapped_lines = wrap_text_to_width(&full_text, max_cols);
 
         let mut current_y = y;
@@ -210,7 +210,7 @@ impl<'a> LayoutDetail<'a> {
         let mut lines = Vec::new();
 
         //  添加标题
-        let title = "Tabs:";
+        let title = "标签页：";
         lines.push(truncate_with_ellipsis(title, max_width));
 
         //  添加标签页
@@ -241,7 +241,7 @@ impl<'a> LayoutDetail<'a> {
         }
 
         //  添加标题
-        let title = "Panes:";
+        let title = "窗格：";
         lines.push(truncate_with_ellipsis(title, max_width));
 
         //  添加命名窗格
@@ -254,9 +254,9 @@ impl<'a> LayoutDetail<'a> {
         //  如果有的话添加终端计数
         if terminal_count > 0 {
             let text = if named_panes.is_empty() {
-                format!("  {} Terminals", terminal_count)
+                format!("  {} 个终端", terminal_count)
             } else {
-                format!("  +{} Terminals", terminal_count)
+                format!("  +{} 个终端", terminal_count)
             };
             let truncated_text = truncate_with_ellipsis(&text, max_width);
             lines.push(truncated_text);

@@ -43,7 +43,7 @@ impl RenameLayoutScreen {
         if name_input_text.is_empty() {
             show_cursor(None);
             return KeyResponse::new_screen(
-                self.create_error_screen("Layout name cannot be empty"),
+                self.create_error_screen("布局名称不能为空"),
             );
         }
 
@@ -71,7 +71,7 @@ impl RenameLayoutScreen {
 
     fn rename_line_text(&self, max_width: Option<usize>) -> (String, usize) {
         //  返回 (text, cursor_position_in_line)
-        let prompt = "Rename Layout: ";
+        let prompt = "重命名布局： ";
         let prompt_len = prompt.chars().count();
 
         let input_text = self.name_input.get_text();
@@ -113,7 +113,7 @@ impl RenameLayoutScreen {
     }
 
     fn render_title(&self, x: usize, y: usize, width: usize) {
-        let title = Text::new("Rename Layout").color_all(2);
+        let title = Text::new("重命名布局").color_all(2);
         print_text_with_coordinates(title, x, y, Some(width), None);
     }
 

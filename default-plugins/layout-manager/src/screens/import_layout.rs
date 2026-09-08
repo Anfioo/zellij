@@ -100,21 +100,21 @@ impl ImportLayoutScreen {
         //  检查是否有粘贴的布局
         let Some(pasted_text) = &self.pasted_text else {
             return KeyResponse::new_screen(
-                self.create_error_screen("Please paste a layout first"),
+                self.create_error_screen("请先粘贴布局"),
             );
         };
 
         //  检查布局是否有效
         if self.parse_error.is_some() {
             return KeyResponse::new_screen(
-                self.create_error_screen("Cannot save an invalid layout"),
+                self.create_error_screen("无法保存无效布局"),
             );
         }
 
         //  获取解析后的元数据以进行乐观更新
         let Some(metadata) = &self.parsed_metadata else {
             return KeyResponse::new_screen(
-                self.create_error_screen("Cannot save layout without metadata"),
+                self.create_error_screen("无法保存没有元数据的布局"),
             );
         };
 
@@ -151,14 +151,14 @@ impl ImportLayoutScreen {
 
     fn save_layout(&self, layout_name: &str, layout_content: &str) -> Result<(), String> {
         save_layout(layout_name.to_owned(), layout_content.to_owned(), false)
-            .map_err(|err| format!("Failed to save layout '{}': {}", layout_name, err))?;
+            .map_err(|err| format!("保存布局 '{}' 失败：{}", layout_name, err))?;
 
         eprintln!("Successfully imported layout: {}", layout_name);
         Ok(())
     }
 
     fn description_text(&self) -> &str {
-        "Paste your layout here."
+        "在此粘贴你的布局。"
     }
 
     fn max_description_width(&self) -> usize {
@@ -187,7 +187,7 @@ impl ImportLayoutScreen {
             " (<r> Rename)" // 非编辑时显示重命名提示
         };
 
-        let mut text = format!("Save as: {}{}", display_name, text_suffix);
+        let mut text = format!("保存为：{}{}", display_name, text_suffix);
         let mut cursor_position_in_line = 9 + cursor_pos;
 
         if let Some(max_width) = max_width {
@@ -196,7 +196,7 @@ impl ImportLayoutScreen {
                     display_name,
                     max_width.saturating_sub(9 + text_suffix.chars().count()),
                 );
-                text = format!("Save as: {}{}", truncated_display_name, text_suffix);
+                text = format!("保存为：{}{}", truncated_display_name, text_suffix);
                 let truncated_len = truncated_display_name.chars().count();
                 cursor_position_in_line = 9 + cursor_pos.min(truncated_len);
             }
@@ -226,7 +226,7 @@ impl ImportLayoutScreen {
     }
 
     fn render_title(&self, x: usize, y: usize, width: usize) {
-        let title = Text::new("Import Layout").color_all(2);
+        let title = Text::new("导入布局").color_all(2);
         print_text_with_coordinates(title, x, y, Some(width), None);
     }
 
@@ -234,7 +234,7 @@ impl ImportLayoutScreen {
         // 仅当我们有有效的粘贴布局时才渲染模态框
         if let Some(metadata) = &self.parsed_metadata {
             let display_layout =
-                DisplayLayout::Valid(LayoutInfo::File("imported".to_string(), metadata.clone()));
+                DisplayLayout::Valid(LayoutInfo::File("已导入".to_string(), metadata.clone()));
 
             let layout_detail = LayoutDetail::new(&display_layout);
 
@@ -282,7 +282,7 @@ impl ImportLayoutScreen {
             self.render_help_text(base_x, help_y, actual_ui_width);
         } else if let Some(error) = &self.parse_error {
             // 如果解析失败则显示错误
-            Title::new("Import Layout").render(0, 0);
+            Title::new("导入布局").render(0, 0);
             self.render_parse_error(error, 2);
 
             let help_y = rows.saturating_sub(2);
@@ -300,7 +300,7 @@ impl ImportLayoutScreen {
             let base_y = rows.saturating_sub(actual_ui_height) / 2;
             let base_x = cols.saturating_sub(actual_ui_width) / 2;
 
-            Title::new("Import Layout").render(base_x, base_y);
+            Title::new("导入布局").render(base_x, base_y);
             self.render_description(base_x, base_y + 2, cols);
 
             let help_y = base_y + 4;

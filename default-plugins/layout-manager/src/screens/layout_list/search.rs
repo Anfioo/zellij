@@ -90,7 +90,7 @@ impl SearchState {
         base_x: usize,
         base_y: usize,
     ) {
-        let filter_prompt = "Layout:";
+        let filter_prompt = "布局：";
         let filter_text = self.filter_input.get_text();
 
         //  如果过滤器为空则清除结果
@@ -165,15 +165,15 @@ impl SearchState {
         let filter_text_str = self.filter_input.get_text();
         let filter_text = if self.typing_filter {
             let mut filter_line =
-                Text::new(format!("Layout: {}", filter_text_str)).color_substring(2, "Layout:");
+                Text::new(format!("布局：{}", filter_text_str)).color_substring(2, "布局：");
             if !filter_text_str.is_empty() {
                 filter_line = filter_line.color_last_substring(3, filter_text_str)
             }
             filter_line
         } else {
-            Text::new(format!("Layout: {} (<Esc> - clear)", filter_text_str))
+            Text::new(format!("布局：{}（<Esc> - 清除）", filter_text_str))
                 .color_substring(3, "<Esc>")
-                .color_substring(2, "Layout:")
+                .color_substring(2, "布局：")
         };
         print_text_with_coordinates(filter_text, base_x, base_y, None, None);
     }

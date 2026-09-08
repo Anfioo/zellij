@@ -236,9 +236,9 @@ impl Controls {
 
     fn get_override_text_and_keys(&self, max_cols: usize) -> (String, &[&str]) {
         let toggle_word = if self.show_more_options {
-            "less"
+            "更少"
         } else {
-            "more"
+            "更多"
         };
         let long_text = format!(
             "- <Alt+w> Override Session Layout, <?> {} options",
@@ -327,7 +327,7 @@ impl Controls {
 
     fn render_new_layout_controls(&self, x: usize, y: usize, max_cols: usize) {
         let (text, keys) = self.get_new_layout_text_and_keys(max_cols);
-        let new_layout_line = color_control_text(text, keys).color_substring(2, "New Layout:");
+        let new_layout_line = color_control_text(text, keys).color_substring(2, "新建布局：");
         print_text_with_coordinates(new_layout_line, x, y, None, None);
     }
 
@@ -350,33 +350,33 @@ impl Controls {
     }
 
     fn get_retain_text_and_highlight(&self, max_cols: usize) -> (&str, &str) {
-        let long_text = "  <t> Retain:  Terminals  |  Plugins  |  Both  |  None ";
-        let short_text = "  <t> Retain:  Term | Pl | Both | None ";
+        let long_text = "  <t> 保留：终端 | 插件 | 两者 | 无 ";
+        let short_text = "  <t> 保留：终 | 插 | 两者 | 无 ";
         if max_cols >= long_text.chars().count() {
             match (self.retain_terminal_panes, self.retain_plugin_panes) {
                 (true, false) => (
-                    "  <t> Retain: [Terminals] |  Plugins  |  Both  |  None",
-                    "[Terminals]",
+                    "  <t> 保留：[终端] | 插件 | 两者 | 无",
+                    "[终端]",
                 ),
                 (false, true) => (
-                    "  <t> Retain:  Terminals  | [Plugins] |  Both  |  None",
-                    "[Plugins]",
+                    "  <t> 保留：终端 | [插件] | 两者 | 无",
+                    "[插件]",
                 ),
                 (true, true) => (
-                    "  <t> Retain:  Terminals  |  Plugins  | [Both] |  None",
-                    "[Both]",
+                    "  <t> 保留：终端 | 插件 | [两者] | 无",
+                    "[两者]",
                 ),
                 (false, false) => (
-                    "  <t> Retain:  Terminals  |  Plugins  |  Both  | [None]",
-                    "[None]",
+                    "  <t> 保留：终端 | 插件 | 两者 | [无]",
+                    "[无]",
                 ),
             }
         } else if max_cols >= short_text.chars().count() {
             match (self.retain_terminal_panes, self.retain_plugin_panes) {
-                (true, false) => ("  <t> Retain: [Term]| Pl | Both | None", "[Term]"),
-                (false, true) => ("  <t> Retain:  Term |[Pl]| Both | None", "[Pl]"),
-                (true, true) => ("  <t> Retain:  Term | Pl |[Both]| None", "[Both]"),
-                (false, false) => ("  <t> Retain:  Term | Pl | Both |[None]", "[None]"),
+                (true, false) => ("  <t> 保留：[终端] | 插件 | 两者 | 无", "[终端]"),
+                (false, true) => ("  <t> 保留：终端 |[插件]| 两者 | 无", "[插件]"),
+                (true, true) => ("  <t> 保留：终端 | 插件 |[两者]| 无", "[两者]"),
+                (false, false) => ("  <t> 保留：终端 | 插件 | 两者 |[无]", "[无]"),
             }
         } else {
             match (self.retain_terminal_panes, self.retain_plugin_panes) {
@@ -397,20 +397,20 @@ impl Controls {
 
     fn get_target_text_and_highlight(&self, max_cols: usize) -> (&str, &str) {
         if self.apply_only_to_active_tab {
-            let long_text = "  <a> Target:  All Tabs   | [Current]";
-            let short_text = "  <a> Target:  All |[Current]";
+            let long_text = "  <a> 目标：全部标签页 | [当前]";
+            let short_text = "  <a> 目标：全部 |[当前]";
             if max_cols >= long_text.chars().count() {
-                (long_text, "[Current]")
+                (long_text, "[当前]")
             } else {
-                (short_text, "[Current]")
+                (short_text, "[当前]")
             }
         } else {
-            let long_text = "  <a> Target: [All Tabs]  |  Current ";
-            let short_text = "  <a> Target: [All]| Current ";
+            let long_text = "  <a> 目标：[全部标签页] | 当前 ";
+            let short_text = "  <a> 目标：[全部]| 当前 ";
             if max_cols >= long_text.chars().count() {
-                (long_text, "[All Tabs]")
+                (long_text, "[所有标签页]")
             } else {
-                (short_text, "[All]")
+                (short_text, "[全部]")
             }
         }
     }
@@ -441,13 +441,13 @@ impl<'a> ErrorMessage<'a> {
     }
 
     pub fn render(&self, x: usize, y: usize) {
-        let title = Text::new("Error").error_color_all();
+        let title = Text::new("错误").error_color_all();
         print_text_with_coordinates(title, x, y, None, None);
 
         let message = Text::new(self.message).error_color_all();
         print_text_with_coordinates(message, x, y + 2, None, None);
 
-        let help = Text::new("Press any key to continue");
+        let help = Text::new("按任意键继续");
         print_text_with_coordinates(help, x, y + 4, None, None);
     }
 }

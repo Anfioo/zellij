@@ -232,11 +232,11 @@ impl LayoutListScreen {
                 })
             },
             Ok((_, None)) => Screen::Error(super::ErrorScreen {
-                message: "Failed to retrieve session layout metadata".to_string(),
+                message: "无法获取会话布局元数据".to_string(),
                 return_to_screen: Box::new(Screen::LayoutList(self.clone())),
             }),
             Err(error_msg) => Screen::Error(super::ErrorScreen {
-                message: format!("Failed to dump session layout: {}", error_msg),
+                message: format!("无法导出会话布局：{}", error_msg),
                 return_to_screen: Box::new(Screen::LayoutList(self.clone())),
             }),
         }
@@ -490,8 +490,8 @@ impl LayoutListScreen {
                     table_width,
                 );
             } else {
-                // 渲染 "No layout selected" 消息（从 LayoutDetail 移来）
-                let msg = Text::new("No layout selected").color_all(2);
+                // 渲染 "未选择布局" 消息（从 LayoutDetail 移来）
+                let msg = Text::new("未选择布局").color_all(2);
                 print_text_with_coordinates(msg, detail_x + base_x, table_y, None, None);
             }
         }

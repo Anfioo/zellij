@@ -10,7 +10,7 @@ impl MultiLineErrorMessage {
     }
 
     pub fn render(&self, x: usize, y: usize, max_rows: usize) {
-        let title = Text::new("Error").error_color_all();
+        let title = Text::new("错误").error_color_all();
         print_text_with_coordinates(title, x, y, None, None);
 
         let mut current_y = y + 2;
@@ -20,7 +20,7 @@ impl MultiLineErrorMessage {
             current_y += 1;
         }
 
-        let help = Text::new("Press any key to continue");
+        let help = Text::new("按任意键继续");
         print_text_with_coordinates(help, x, current_y + 2, None, None);
     }
 }
