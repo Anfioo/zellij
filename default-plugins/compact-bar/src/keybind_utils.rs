@@ -6,7 +6,7 @@ use zellij_tile::prelude::*;
 pub struct KeybindProcessor;
 
 impl KeybindProcessor {
-    /// Find predetermined actions based on predicates while maintaining order
+    ///  在保持顺序的同时，根据谓词查找预定操作
     pub fn find_predetermined_actions<F>(
         mode_info: &ModeInfo,
         mode: InputMode,
@@ -19,16 +19,16 @@ impl KeybindProcessor {
         let keybinds = mode_info.get_keybinds_for_mode(mode);
         let mut processed_action_types = HashSet::new();
 
-        // Iterate through predicates in order to maintain the desired sequence
+        //  按顺序遍历谓词以保持期望的序列
         for predicate in predicates {
-            // Find the first matching action for this predicate
+            //  为此谓词查找第一个匹配的操作
             let mut found_match = false;
             for (_key, actions) in &keybinds {
                 if let Some(first_action) = actions.first() {
                     if predicate(first_action) {
                         let action_type = ActionType::from_action(first_action);
 
-                        // Skip if we've already processed this action type
+                        //  如果已处理过此操作类型则跳过
                         if processed_action_types.contains(&action_type) {
                             found_match = true;
                             break;
@@ -36,7 +36,7 @@ impl KeybindProcessor {
 
                         let mut matching_keys = Vec::new();
 
-                        // Find all keys that match this action type (including different directions)
+                        //  查找匹配此操作类型的所有按键（包括不同方向）
                         for (inner_key, inner_actions) in &keybinds {
                             if let Some(inner_first_action) = inner_actions.first() {
                                 if ActionType::from_action(inner_first_action) == action_type {
@@ -49,7 +49,7 @@ impl KeybindProcessor {
                             let description = action_type.description();
                             let should_add_brackets_to_keys = mode != InputMode::Normal;
 
-                            // Check if this is switching to normal mode
+                            //  检查是否正在切换到锁定模式
                             let is_switching_to_locked = matches!(
                                 first_action,
                                 Action::SwitchToMode {
@@ -72,7 +72,7 @@ impl KeybindProcessor {
                 }
             }
 
-            // If we found a match for this predicate, we've processed it
+            //  如果为此谓词找到了匹配项，则已处理完毕
             if found_match {
                 continue;
             }
@@ -81,7 +81,7 @@ impl KeybindProcessor {
         result
     }
 
-    /// Group keys into sets and separate different key types with '|'
+    ///  将按键分组为集合，并用 '|' 分隔不同的按键类型
     fn group_key_sets(
         keys: &[String],
         should_add_brackets_to_keys: bool,
@@ -91,7 +91,7 @@ impl KeybindProcessor {
             return String::new();
         }
 
-        // Filter out Esc and Enter keys when switching to normal mode, but only if other keys exist
+        //  切换到普通模式时过滤掉 Esc 和 Enter 键，但仅当存在其他按键时
         let filtered_keys: Vec<String> = if is_switching_to_locked {
             let non_esc_enter_keys: Vec<String> = keys
                 .iter()
@@ -100,10 +100,10 @@ impl KeybindProcessor {
                 .collect();
 
             if non_esc_enter_keys.is_empty() {
-                // If no other keys exist, keep the original keys
+                //  如果不存在其他按键，保留原始按键
                 keys.to_vec()
             } else {
-                // Use filtered keys (without Esc/Enter)
+                //  使用过滤后的按键（不含 Esc/Enter）
                 non_esc_enter_keys
             }
         } else {
@@ -118,7 +118,7 @@ impl KeybindProcessor {
             };
         }
 
-        // Group keys by type
+        //  按类型对按键分组
         let mut arrow_keys = Vec::new();
         let mut hjkl_lower = Vec::new();
         let mut hjkl_upper = Vec::new();
@@ -160,7 +160,7 @@ impl KeybindProcessor {
 
         let mut groups = Vec::new();
 
-        // Add hjkl group if present (prioritize hjkl over arrows)
+        //  如果存在 hjkl 组则添加（优先 hjkl 而非方向键）
         if !hjkl_lower.is_empty() {
             Self::sort_hjkl(&mut hjkl_lower);
             groups.push(Self::format_key_group(
@@ -170,7 +170,7 @@ impl KeybindProcessor {
             ));
         }
 
-        // Add HJKL group if present
+        //  如果存在 HJKL 组则添加
         if !hjkl_upper.is_empty() {
             Self::sort_hjkl_upper(&mut hjkl_upper);
             groups.push(Self::format_key_group(
@@ -180,7 +180,7 @@ impl KeybindProcessor {
             ));
         }
 
-        // Add arrow keys group if present
+        //  如果存在方向键组则添加
         if !arrow_keys.is_empty() {
             Self::sort_arrows(&mut arrow_keys);
             groups.push(Self::format_key_group(
@@ -217,7 +217,7 @@ impl KeybindProcessor {
             ));
         }
 
-        // Add other keys with / separator
+        //  用 / 分隔符添加其他按键
         if !other_keys.is_empty() {
             groups.push(other_keys.join("/"));
         }
@@ -270,7 +270,7 @@ impl KeybindProcessor {
             let pos_b = order.iter().position(|&x| &x == b).unwrap_or(usize::MAX);
             pos_a.cmp(&pos_b)
         });
-        // Remove "=" if both "+" and "=" are present
+        //  如果同时存在 "+" 和 "=" 则移除 "="
         if keys.contains(&"+") && keys.contains(&"=") {
             keys.retain(|k| k != &"=");
         }
@@ -300,7 +300,7 @@ impl KeybindProcessor {
         }
     }
 
-    /// Get predetermined actions for a specific mode
+    ///  获取特定模式的预定操作
     pub fn get_predetermined_actions(
         mode_info: &ModeInfo,
         mode: InputMode,

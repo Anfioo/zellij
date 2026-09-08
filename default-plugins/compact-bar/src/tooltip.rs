@@ -25,8 +25,8 @@ impl<'a> TooltipRenderer<'a> {
                 let ribbon_total_width = ribbon_content_width + 4;
                 let total_element_width = text_width + ribbon_total_width + 1;
 
-                // Check if this element would exceed the available columns and render an ellipses
-                // if it does
+                //  检查此元素是否会超出可用列数，如果超出则渲染省略号
+                //  如果超出
                 if base_x + x + total_element_width > cols {
                     let remaining_space = cols.saturating_sub(base_x + x);
                     let ellipsis = Text::new("...").opaque();
@@ -65,7 +65,7 @@ impl<'a> TooltipRenderer<'a> {
             },
             _ => {
                 let (_, tooltip_rows, tooltip_cols) = self.other_mode_tooltip(current_mode);
-                (tooltip_rows + 1, tooltip_cols) // + 1 for the invisible table title
+                (tooltip_rows + 1, tooltip_cols) //  + 1 用于不可见的表格标题
             },
         }
     }
@@ -110,7 +110,7 @@ impl<'a> TooltipRenderer<'a> {
         let actions_vec: Vec<_> = actions.into_iter().collect();
 
         let mut table = Table::new().add_row(vec![" ".to_owned(); 2]);
-        let mut row_count = 1; // Start with header row
+        let mut row_count = 1; //  从表头行开始
 
         if actions_vec.is_empty() {
             let tooltip_text = match self.mode_info.mode {
@@ -139,7 +139,7 @@ impl<'a> TooltipRenderer<'a> {
                 row_count += 1;
             }
 
-            let total_width = key_width + action_width + 1; // +1 for separator
+            let total_width = key_width + action_width + 1; //  +1 用于分隔符
             (table, row_count, total_width)
         }
     }

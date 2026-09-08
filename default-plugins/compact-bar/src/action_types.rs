@@ -35,7 +35,7 @@ pub enum ActionType {
     Detach,
     Quit,
     NewStackedPane,
-    Other(String), // Fallback for unhandled actions
+    Other(String), //  未处理操作的回退
 }
 
 impl ActionType {

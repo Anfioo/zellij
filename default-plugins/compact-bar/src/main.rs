@@ -34,27 +34,27 @@ pub struct LinePart {
 
 #[derive(Default)]
 struct State {
-    // Tab state
+    //  标签页状态
     tabs: Vec<TabInfo>,
     active_tab_idx: usize,
 
-    // Display state
+    //  显示状态
     mode_info: ModeInfo,
     tab_line: Vec<LinePart>,
     breadcrumb_range: Option<(usize, usize)>,
     display_area_rows: usize,
     display_area_cols: usize,
 
-    // Clipboard state
+    //  剪贴板状态
     text_copy_destination: Option<CopyDestination>,
     display_system_clipboard_failure: bool,
 
-    // Plugin configuration
+    //  插件配置
     config: BTreeMap<String, String>,
     own_plugin_id: Option<u32>,
     toggle_tooltip_key: Option<String>,
 
-    // Tooltip state
+    //  提示状态
     is_tooltip: bool,
     tooltip_is_active: bool,
     persist: bool,
@@ -62,7 +62,7 @@ struct State {
     own_tab_index: Option<usize>,
     own_client_id: u16,
 
-    // Keybinding cache
+    //  快捷键绑定缓存
     cached_keybinds: KeybindsVec,
 }
 
@@ -125,9 +125,9 @@ impl ZellijPlugin for State {
         } else if message.name == MSG_TOGGLE_TOOLTIP
             && message.is_private
             && self.toggle_tooltip_key.is_some()
-            // only launch once per plugin instance
+            //  每个插件实例仅启动一次
             && self.own_tab_index == Some(self.active_tab_idx.saturating_sub(1))
-            // only launch once per client of plugin instance
+            //  每个插件实例的每个客户端仅启动一次
             && Some(format!("{}", self.own_client_id)) == message.payload
         {
             self.toggle_persisted_tooltip(self.mode_info.mode);
@@ -203,7 +203,7 @@ impl State {
             .unwrap_or(default)
     }
 
-    // Event handlers
+    //  事件处理器
     fn handle_mode_update(&mut self, mode_info: ModeInfo) -> bool {
         let should_render = self.mode_info != mode_info;
         let old_mode = self.mode_info.mode;
@@ -247,7 +247,7 @@ impl State {
         self.update_display_area(&tabs);
 
         if let Some(active_tab_index) = tabs.iter().position(|t| t.active) {
-            let active_tab_idx = active_tab_index + 1; // Convert to 1-based indexing
+            let active_tab_idx = active_tab_index + 1; //  转换为从 1 开始的索引
             let should_render = self.active_tab_idx != active_tab_idx || self.tabs != tabs;
 
             if self.is_tooltip && self.active_tab_idx != active_tab_idx {
@@ -341,7 +341,7 @@ impl State {
         }
     }
 
-    // Helper methods
+    //  辅助方法
     fn update_display_area(&mut self, tabs: &[TabInfo]) {
         for tab in tabs {
             if tab.active {
@@ -409,7 +409,7 @@ impl State {
         )
     }
 
-    // Tooltip operations
+    //  提示操作
     fn toggle_persisted_tooltip(&self, new_mode: InputMode) {
         #[allow(unused_variables)]
         let message = self
@@ -454,7 +454,7 @@ impl State {
         if let Some(plugin_id) = self.own_plugin_id {
             break_panes_to_tab_with_index(
                 &[PaneId::Plugin(plugin_id)],
-                new_tab_index.saturating_sub(1), // Convert to 0-based indexing
+                new_tab_index.saturating_sub(1), //  转换为从 0 开始的索引
                 false,
             );
         }
@@ -465,8 +465,8 @@ impl State {
         let (tooltip_rows, tooltip_cols) =
             tooltip_renderer.calculate_dimensions(self.mode_info.mode);
 
-        let width = tooltip_cols + 4; // 2 for borders, 2 for padding
-        let height = tooltip_rows + 2; // 2 for borders
+        let width = tooltip_cols + 4; //  2 用于边框，2 用于内边距
+        let height = tooltip_rows + 2; //  2 用于边框
         let x_position = 2;
         let y_position = self.display_area_rows.saturating_sub(height + 2);
 
@@ -481,7 +481,7 @@ impl State {
         .unwrap_or_default()
     }
 
-    // Rendering
+    //  渲染
     fn render_tooltip(&self, rows: usize, cols: usize) {
         let tooltip_renderer = TooltipRenderer::new(&self.mode_info);
         tooltip_renderer.render(rows, cols);

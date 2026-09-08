@@ -8,7 +8,7 @@ fn cursors<'a>(
     focused_clients: &'a [ClientId],
     colors: MultiplayerColors,
 ) -> (Vec<ANSIString<'a>>, usize) {
-    // cursor section, text length
+    //  光标部分，文本长度
     let mut len = 0;
     let mut cursors = vec![];
     for client_id in focused_clients.iter() {
@@ -17,7 +17,7 @@ fn cursors<'a>(
             len += 1;
         }
     }
-    len += 2; // 2 for the brackets: [ and ]
+    len += 2; //  2 用于方括号：[ 和 ]
     (cursors, len)
 }
 
@@ -66,7 +66,7 @@ pub fn render_tab(
         style!(foreground_color, background_color).bold()
     };
     let left_separator = style!(separator_fill_color, background_color).paint(separator);
-    let mut tab_text_len = text.width() + (separator_width * 2) + 2; // + 2 for padding
+    let mut tab_text_len = text.width() + (separator_width * 2) + 2; //  + 2 用于内边距
 
     let tab_styled_text = text_style.paint(format!(" {} ", text));
 
@@ -115,7 +115,7 @@ pub fn tab_style(
     if tab.has_bell_notification || tab.is_flashing_bell {
         tabname.push_str(" [!]");
     }
-    // we only color alternate tabs differently if we can't use the arrow fonts to separate them
+    //  仅当无法使用箭头字体分隔标签页时，才对交替标签页使用不同颜色
     if !capabilities.arrow_fonts {
         is_alternate_tab = false;
     }
@@ -130,7 +130,7 @@ pub(crate) fn get_tab_to_focus(
 ) -> Option<usize> {
     let clicked_line_part = get_clicked_line_part(tab_line, mouse_click_col)?;
     let clicked_tab_idx = clicked_line_part.tab_index?;
-    // tabs are indexed starting from 1 so we need to add 1
+    //  标签页从 1 开始索引，因此需要加 1
     let clicked_tab_idx = clicked_tab_idx + 1;
     if clicked_tab_idx != active_tab_idx {
         return Some(clicked_tab_idx);
