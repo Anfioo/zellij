@@ -4,36 +4,36 @@ use zellij_tile::prelude::*;
 use crate::CoordinatesInLine;
 use std::collections::HashMap;
 
-pub const USAGE_TITLE: &str = "How it works:";
-pub const FIRST_TIME_USAGE_TITLE: &str = "Before logging in for the first time:";
-pub const FIRST_TIME_BULLETIN_1: &str = "- Press <t> to generate a login token";
-pub const BULLETIN_1_FULL: &str = "- Visit base URL to start a new session";
-pub const BULLETIN_1_SHORT: &str = "- Base URL: new session";
-pub const BULLETIN_2_FULL: &str = "- Follow base URL with a session name to attach to or create it";
-pub const BULLETIN_2_SHORT: &str = "- Base URL + session name: attach or create";
+pub const USAGE_TITLE: &str = "使用方法:";
+pub const FIRST_TIME_USAGE_TITLE: &str = "首次登录前:";
+pub const FIRST_TIME_BULLETIN_1: &str = "- 按 <t> 生成登录令牌";
+pub const BULLETIN_1_FULL: &str = "- 访问基础 URL 以开始新会话";
+pub const BULLETIN_1_SHORT: &str = "- 基础 URL: 新会话";
+pub const BULLETIN_2_FULL: &str = "- 在基础 URL 后加上会话名称以附加或创建会话";
+pub const BULLETIN_2_SHORT: &str = "- 基础 URL + 会话名称: 附加或创建";
 pub const BULLETIN_3_FULL: &str =
-    "- By default sessions not started from the web must be explicitly shared";
-pub const BULLETIN_3_SHORT: &str = "- Sessions not started from the web must be explicitly shared";
-pub const BULLETIN_4: &str = "- <t> manage login tokens";
+    "- 默认情况下，非从 Web 启动的会话必须显式共享";
+pub const BULLETIN_3_SHORT: &str = "- 非从 Web 启动的会话必须显式共享";
+pub const BULLETIN_4: &str = "- <t> 管理登录令牌";
 
-pub const WEB_SERVER_TITLE: &str = "Web server: ";
-pub const WEB_SERVER_RUNNING: &str = "RUNNING ";
-pub const WEB_SERVER_NOT_RUNNING: &str = "NOT RUNNING";
-pub const WEB_SERVER_INCOMPATIBLE_PREFIX: &str = "RUNNING INCOMPATIBLE VERSION ";
-pub const CTRL_C_STOP: &str = "(<Ctrl c> - Stop)";
-pub const CTRL_C_STOP_OTHER: &str = "<Ctrl c> - Stop other server";
-pub const PRESS_ENTER_START: &str = "Press <ENTER> to start";
-pub const ERROR_PREFIX: &str = "ERROR: ";
-pub const URL_TITLE: &str = "URL: ";
+pub const WEB_SERVER_TITLE: &str = "Web 服务器: ";
+pub const WEB_SERVER_RUNNING: &str = "运行中 ";
+pub const WEB_SERVER_NOT_RUNNING: &str = "未运行";
+pub const WEB_SERVER_INCOMPATIBLE_PREFIX: &str = "运行版本不兼容 ";
+pub const CTRL_C_STOP: &str = "(<Ctrl c> - 停止)";
+pub const CTRL_C_STOP_OTHER: &str = "<Ctrl c> - 停止其他服务器";
+pub const PRESS_ENTER_START: &str = "按 <ENTER> 启动";
+pub const ERROR_PREFIX: &str = "错误: ";
+pub const URL_TITLE: &str = "地址: ";
 pub const UNENCRYPTED_MARKER: &str = " [*]";
 
-pub const CURRENT_SESSION_TITLE: &str = "Current session: ";
-pub const SESSION_URL_TITLE: &str = "Session URL: ";
-pub const SHARING_STATUS: &str = "SHARING (<SPACE> - Stop Sharing)";
-pub const SHARING_DISABLED: &str = "SHARING IS DISABLED";
-pub const NOT_SHARING: &str = "NOT SHARING";
-pub const PRESS_SPACE_SHARE: &str = "Press <SPACE> to share";
-pub const WEB_SERVER_OFFLINE: &str = "...but web server is offline";
+pub const CURRENT_SESSION_TITLE: &str = "当前会话: ";
+pub const SESSION_URL_TITLE: &str = "会话地址: ";
+pub const SHARING_STATUS: &str = "共享中 (<SPACE> - 停止共享)";
+pub const SHARING_DISABLED: &str = "共享已禁用";
+pub const NOT_SHARING: &str = "未共享";
+pub const PRESS_SPACE_SHARE: &str = "按 <SPACE> 共享";
+pub const WEB_SERVER_OFFLINE: &str = "...但 Web 服务器已离线";
 
 pub const COLOR_INDEX_0: usize = 0;
 pub const COLOR_INDEX_1: usize = 1;
@@ -565,7 +565,7 @@ impl CurrentSessionSection {
         let full_text = format!("{}{}", CURRENT_SESSION_TITLE, SHARING_STATUS);
         ColoredTextBuilder::new(full_text)
             .highlight_range(0, CURRENT_SESSION_TITLE.chars().count(), COLOR_INDEX_0)
-            .highlight_substring("SHARING", COLOR_HIGHLIGHT)
+            .highlight_substring("共享中", COLOR_HIGHLIGHT)
             .highlight_substring("<SPACE>", COLOR_HIGHLIGHT)
             .build()
     }
@@ -592,11 +592,11 @@ impl CurrentSessionSection {
         let web_server_ip = self
             .web_server_ip
             .map(|i| i.to_string())
-            .unwrap_or_else(|| "UNDEFINED".to_owned());
+            .unwrap_or_else(|| "未定义".to_owned());
         let web_server_port = self
             .web_server_port
             .map(|p| p.to_string())
-            .unwrap_or_else(|| "UNDEFINED".to_owned());
+            .unwrap_or_else(|| "未定义".to_owned());
         let prefix = if self.connection_is_unencrypted {
             "http"
         } else {

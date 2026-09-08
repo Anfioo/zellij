@@ -173,7 +173,7 @@ impl<'a> TokenManagementScreen<'a> {
         include_issued_prefix: bool,
     ) -> String {
         let full_text = if include_issued_prefix {
-            format!("issued on {}", created_at)
+            format!("签发于 {}", created_at)
         } else {
             created_at.to_string()
         };
@@ -203,9 +203,9 @@ impl<'a> TokenManagementScreen<'a> {
 
     fn format_read_only(&self, is_read_only: bool, max_width: usize) -> String {
         let full_text = if is_read_only {
-            "read-only"
+            "只读"
         } else {
-            "read-write"
+            "读写"
         };
         let short_text = if is_read_only { "RO" } else { "RW" };
 
@@ -238,7 +238,7 @@ impl<'a> TokenManagementScreen<'a> {
             return " ".repeat(max_width);
         }
 
-        let full_controls = "(<x> revoke, <r> rename)";
+        let full_controls = "(<x> 撤销, <r> 重命名)";
         let short_controls = "(<x>, <r>)";
 
         if full_controls.chars().count() <= max_width {
@@ -278,7 +278,7 @@ impl<'a> TokenManagementScreen<'a> {
         let max_table_width = self.cols;
         let column_widths = self.calculate_column_widths();
 
-        let title_text = "List of Login Tokens";
+        let title_text = "登录令牌列表";
         let title = Text::new(title_text).color_range(2, ..);
         max_width = std::cmp::max(max_width, title_text.len());
 
@@ -470,9 +470,9 @@ impl<'a> TokenManagementScreen<'a> {
         let controls_text = self.format_controls(column_widths.controls, true);
 
         // Determine highlight ranges for controls based on the actual content
-        let (x_range, r_range) = if controls_text.contains("revoke") {
-            // Full controls: "(<x> revoke, <r> rename)"
-            (1..=3, 13..=15)
+        let (x_range, r_range) = if controls_text.contains("撤销") {
+            // Full controls: "(<x> 撤销, <r> 重命名)"
+            (1..=3, 9..=11)
         } else {
             // Short controls: "(<x>, <r>)"
             (1..=3, 6..=8)
@@ -535,9 +535,9 @@ impl<'a> TokenManagementScreen<'a> {
     }
 
     fn create_new_token_line(&self) -> (String, Text) {
-        let full_create_text = "<n> - create new token, <o> - create read-only token".to_string();
-        let medium_create_text = "<n> - new token, <o> - read-only".to_string();
-        let short_create_text = "<n> - new, <o> - RO".to_string();
+        let full_create_text = "<n> - 创建新令牌, <o> - 创建只读令牌".to_string();
+        let medium_create_text = "<n> - 新令牌, <o> - 只读".to_string();
+        let short_create_text = "<n> - 新建, <o> - 只读".to_string();
 
         if let Some(name) = &self.entering_new_token_name {
             let max_width = self.cols.saturating_sub(1); // Leave room for cursor
@@ -552,11 +552,11 @@ impl<'a> TokenManagementScreen<'a> {
         } else {
             // Check which text fits
             let (text_to_use, n_range, o_range) = if full_create_text.chars().count() <= self.cols {
-                (&full_create_text, 0..=2, 24..=26)
+                (&full_create_text, 0..=2, 13..=15)
             } else if medium_create_text.chars().count() <= self.cols {
-                (&medium_create_text, 0..=2, 16..=19)
+                (&medium_create_text, 0..=2, 11..=13)
             } else {
-                (&short_create_text, 0..=2, 11..=14)
+                (&short_create_text, 0..=2, 10..=12)
             };
 
             (
@@ -571,18 +571,18 @@ impl<'a> TokenManagementScreen<'a> {
     fn create_help_line(&self) -> (String, Text) {
         let (text, highlight_range) = if self.entering_new_token_name.is_some() {
             (
-                "Help: Enter optional name for new token, <Enter> to submit",
-                41..=47,
+                "帮助: 输入新令牌的可选名称, <Enter> 提交",
+                16..=22,
             )
         } else if self.renaming_token.is_some() {
             (
-                "Help: Enter new name for this token, <Enter> to submit",
-                39..=45,
+                "帮助: 输入此令牌的新名称, <Enter> 提交",
+                15..=21,
             )
         } else {
             (
-                "Help: <Ctrl x> - revoke all tokens, <Esc> - go back",
-                6..=13,
+                "帮助: <Ctrl x> - 撤销所有令牌, <Esc> - 返回",
+                4..=11,
             )
         };
 
@@ -590,7 +590,7 @@ impl<'a> TokenManagementScreen<'a> {
 
         // Add second highlight for the back option
         if self.entering_new_token_name.is_none() && self.renaming_token.is_none() {
-            help_line = help_line.color_range(3, 36..=40);
+            help_line = help_line.color_range(3, 23..=27);
         }
 
         (text.to_string(), help_line)

@@ -86,7 +86,7 @@ impl App {
 
     fn set_plugin_title(&self) {
         if let Some(plugin_id) = self.state.own_plugin_id {
-            rename_plugin_pane(plugin_id, "Share Session");
+            rename_plugin_pane(plugin_id, "共享会话");
         }
     }
 
@@ -309,7 +309,7 @@ impl App {
                     if self.tokens.adjust_selection_after_list_change() {
                         self.change_to_main_screen();
                     }
-                    self.state.info = Some("Revoked. Connected clients not affected.".to_owned());
+                    self.state.info = Some("已撤销。已连接的客户端不受影响。".to_owned());
                 },
                 Err(e) => self.web_server.error = Some(e),
             }
@@ -325,7 +325,7 @@ impl App {
                 if self.tokens.adjust_selection_after_list_change() {
                     self.change_to_main_screen();
                 }
-                self.state.info = Some("Revoked. Connected clients not affected.".to_owned());
+                self.state.info = Some("已撤销。已连接的客户端不受影响。".to_owned());
             },
             Err(e) => self.web_server.error = Some(e),
         }
@@ -383,8 +383,8 @@ impl App {
     }
 
     fn render_no_capability_message(&self, rows: usize, cols: usize) {
-        let full_text = "This version of Zellij was compiled without web sharing capabilities";
-        let short_text = "No web server capabilities";
+        let full_text = "此版本的 Zellij 编译时未包含 Web 共享功能";
+        let short_text = "无 Web 服务器功能";
         let text = if cols >= full_text.chars().count() {
             full_text
         } else {
@@ -529,7 +529,7 @@ impl TokenManager {
                 self.list = tokens;
                 Ok(())
             },
-            Err(e) => Err(format!("Failed to retrieve login tokens: {}", e)),
+            Err(e) => Err(format!("获取登录令牌失败: {}", e)),
         }
     }
 
