@@ -274,7 +274,7 @@ fn get_keys_and_hints(mi: &ModeInfo) -> Vec<(String, String, Vec<KeyWithModifier
             initial_panes: None,
             first_pane_unblock_condition: None,
         }, TO_NORMAL])),
-        (s("Rename tab"), s("重命名"),
+        (s("重命名标签页"), s("重命名"),
             action_key(&km, &[A::SwitchToMode{input_mode: IM::RenameTab}, A::TabNameInput{input: vec![0]}])),
         (s("上一个标签页"), s("上一个"), action_key(&km, &[A::GoToPreviousTab, TO_NORMAL])),
         (s("下一个标签页"), s("下一个"), action_key(&km, &[A::GoToNextTab, TO_NORMAL])),
@@ -369,11 +369,11 @@ pub fn keybinds(help: &ModeInfo, tip_name: &str, max_width: usize) -> LinePart {
 }
 
 pub fn descended_into_nested_session_hint(help: &ModeInfo, max_len: usize) -> LinePart {
-    nested_session_status_hint(help, "Ascend: ", &help.nested_ascend_keys, max_len)
+    nested_session_status_hint(help, "上升： ", &help.nested_ascend_keys, max_len)
 }
 
 pub fn ascended_to_host_session_hint(help: &ModeInfo, max_len: usize) -> LinePart {
-    nested_session_status_hint(help, "Descend: ", &help.nested_descend_keys, max_len)
+    nested_session_status_hint(help, "下降： ", &help.nested_descend_keys, max_len)
 }
 
 fn nested_session_status_hint(

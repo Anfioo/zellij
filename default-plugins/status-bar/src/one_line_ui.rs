@@ -1813,7 +1813,7 @@ fn get_keys_and_hints(mi: &ModeInfo) -> Vec<(String, String, Vec<KeyWithModifier
             initial_panes: None,
             first_pane_unblock_condition: None,
         }, TO_NORMAL])),
-        (s("Rename tab"), s("重命名"),
+        (s("重命名标签页"), s("重命名"),
             action_key(&km, &[A::SwitchToMode{input_mode: IM::RenameTab}, A::TabNameInput{input: vec![0]}])),
         (s("上一个标签页"), s("上一个"), action_key(&km, &[A::GoToPreviousTab, TO_NORMAL])),
         (s("下一个标签页"), s("下一个"), action_key(&km, &[A::GoToNextTab, TO_NORMAL])),
