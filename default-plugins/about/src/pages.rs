@@ -909,8 +909,8 @@ impl Page {
         None
     }
     pub fn handle_mouse_hover(&mut self, x: usize, y: usize) -> bool {
-        let hover_cleared = self.clear_hover(); // TODO: do the right thing if the same component was hovered from
-                                                // previous motion
+        let hover_cleared = self.clear_hover(); // TODO: 如果同一个组件在上一次移动中已被悬停，需做正确处理
+                                                // （上一次移动）
         for rendered_component in &mut self.components_to_render {
             match rendered_component {
                 RenderedComponent::BulletinList(bulletin_list) => {
@@ -1037,9 +1037,8 @@ impl Page {
                         column_count = std::cmp::max(column_count, active_component.column_count());
                     }
                 },
-                RenderedComponent::HelpText(_text) => {}, // we ignore help text in column
-                                                          // calculation because it's always left
-                                                          // justified
+                RenderedComponent::HelpText(_text) => {}, // 我们在列数计算中忽略帮助文本
+                                                          // 因为它始终左对齐
             }
         }
         column_count
@@ -1057,8 +1056,8 @@ impl Page {
                 RenderedComponent::Paragraph(paragraph) => {
                     row_count += paragraph.len();
                 },
-                RenderedComponent::HelpText(_text) => {}, // we ignore help text as it is outside
-                                                          // the UI container
+                RenderedComponent::HelpText(_text) => {}, // 我们忽略帮助文本，因为它在
+                                                          // 界面容器之外
             }
         }
         row_count += self.components_to_render.len();
@@ -1103,7 +1102,7 @@ impl Page {
                 self.hovering_over_link,
                 self.menu_item_is_selected,
             );
-            current_y += rendered_rows + 1; // 1 for the line space between components
+            current_y += rendered_rows + 1; // 1 表示组件之间的行间距
         }
     }
 }
@@ -1172,7 +1171,7 @@ fn web_client_link_selected_len() -> usize {
     40
 }
 
-// Text components
+// 文本组件
 fn whats_new_title() -> Text {
     Text::new("What's new?")
 }
@@ -1273,8 +1272,8 @@ fn support_the_developer_text() -> Text {
 pub enum TextOrCustomRender {
     Text(Text),
     CustomRender(
-        Box<dyn Fn(usize, usize) -> usize>, // (rows, columns) -> text_len (render function)
-        Box<dyn Fn() -> usize>,             // length of rendered component
+        Box<dyn Fn(usize, usize) -> usize>, // (行数, 列数) -> 文本长度（渲染函数）
+        Box<dyn Fn() -> usize>,             // 已渲染组件的长度
     ),
 }
 
@@ -1383,7 +1382,7 @@ impl BulletinList {
         self
     }
     pub fn len(&self) -> usize {
-        self.items.len() + 1 // 1 for the title
+        self.items.len() + 1 // 1 表示标题
     }
     pub fn column_count(&self) -> usize {
         let mut column_count = 0;

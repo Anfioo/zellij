@@ -145,7 +145,7 @@ impl ComponentCoordinates {
 
 pub enum ClickAction {
     ChangePage(Box<dyn FnOnce() -> Page>),
-    OpenLink(String, Rc<RefCell<String>>), // (destination, executable)
+    OpenLink(String, Rc<RefCell<String>>), // (目标地址, 可执行程序)
 }
 
 impl std::fmt::Debug for ClickAction {

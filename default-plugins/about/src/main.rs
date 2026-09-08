@@ -175,7 +175,7 @@ impl ZellijPlugin for App {
             },
             Event::Key(key) => {
                 if let Some(_error) = self.error.take() {
-                    // dismiss error on any key
+                    // 按任意键关闭错误提示
                     should_render = true;
                 } else {
                     should_render = self.handle_key(key);
@@ -415,8 +415,8 @@ impl App {
         error_page.render(rows, cols, &None)
     }
     fn center_own_pane(&mut self, tab_info: Vec<TabInfo>) {
-        // we only take the size of the first tab because at the time of writing this is
-        // identical to all tabs, but this might not always be the case...
+        // 我们只取第一个标签页的尺寸，因为在编写此代码时它与所有标签页相同，
+        // 但这可能并非永远如此...
         if let Some(first_tab) = tab_info.get(0) {
             let prev_tab_columns = self.tab_columns;
             let prev_tab_rows = self.tab_rows;
