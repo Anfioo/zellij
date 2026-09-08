@@ -2,13 +2,13 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 #[allow(unused_imports)]
 use std::io::prelude::*;
-#[allow(unused_imports)] // Action is used in non-test code paths (run_action call)
+#[allow(unused_imports)] //  Action 用于非测试代码路径（run_action 调用）
 use zellij_tile::prelude::actions::Action;
 use zellij_tile::prelude::*;
 
-// This is a fixture plugin used only for tests in Zellij
-// it is not (and should not!) be included in the mainline executable
-// it's included here for convenience so that it will be built by the CI
+// 这是一个仅用于 Zellij 测试的 fixture 插件
+// 它不（也不应该！）包含在主线可执行文件中
+// 为方便起见包含在这里，以便由 CI 构建
 
 #[allow(dead_code)]
 #[derive(Default)]
@@ -20,7 +20,7 @@ struct State {
     explicit_string_to_render: Option<String>,
 }
 
-#[allow(dead_code)] // used when compiled as wasm plugin, not in native test target
+#[allow(dead_code)] // 在编译为 wasm 插件时使用，不在原生测试目标中
 #[derive(Default, Serialize, Deserialize)]
 struct TestWorker {
     number_of_messages_received: usize,
@@ -579,19 +579,19 @@ impl ZellijPlugin for State {
                     list_clients();
                 },
                 BareKey::Char('a') if key.has_only_modifiers(&[KeyModifier::Super]) => {
-                    // Test show_cursor with coordinates
+                    // 测试带坐标的 show_cursor
                     show_cursor(Some((5, 10)));
                 },
                 BareKey::Char('b') if key.has_only_modifiers(&[KeyModifier::Super]) => {
-                    // Test hide_cursor
+                    // 测试 hide_cursor
                     show_cursor(None);
                 },
                 BareKey::Char('c') if key.has_only_modifiers(&[KeyModifier::Super]) => {
-                    // Test copy_to_clipboard
+                    // 测试 copy_to_clipboard
                     copy_to_clipboard("test clipboard text");
                 },
                 BareKey::Char('d') if key.has_only_modifiers(&[KeyModifier::Super]) => {
-                    // Test run_action with MoveFocus
+                    // 测试带 MoveFocus 的 run_action
                     let mut context = BTreeMap::new();
                     context.insert("test_key".to_string(), "test_value".to_string());
                     run_action(
@@ -602,15 +602,15 @@ impl ZellijPlugin for State {
                     );
                 },
                 BareKey::Char('e') if key.has_only_modifiers(&[KeyModifier::Super]) => {
-                    // Test send_sigint_to_pane_id
+                    // 测试 send_sigint_to_pane_id
                     send_sigint_to_pane_id(PaneId::Terminal(1));
                 },
                 BareKey::Char('f') if key.has_only_modifiers(&[KeyModifier::Super]) => {
-                    // Test send_sigkill_to_pane_id
+                    // 测试 send_sigkill_to_pane_id
                     send_sigkill_to_pane_id(PaneId::Terminal(1));
                 },
                 BareKey::Char('g') if key.has_only_modifiers(&[KeyModifier::Super]) => {
-                    // Test set_pane_regex_highlights
+                    // 测试 set_pane_regex_highlights
                     let highlights = vec![RegexHighlight {
                         pattern: "test_pattern".to_string(),
                         style: HighlightStyle::Emphasis0,
@@ -625,7 +625,7 @@ impl ZellijPlugin for State {
                     set_pane_regex_highlights(PaneId::Terminal(1), highlights);
                 },
                 BareKey::Char('h') if key.has_only_modifiers(&[KeyModifier::Super]) => {
-                    // Test clear_pane_highlights
+                    // 测试 clear_pane_highlights
                     clear_pane_highlights(PaneId::Terminal(1));
                 },
                 BareKey::Char('i') if key.has_only_modifiers(&[KeyModifier::Super]) => {
@@ -658,7 +658,7 @@ impl ZellijPlugin for State {
                 BareKey::Char('c')
                     if key.has_only_modifiers(&[KeyModifier::Ctrl, KeyModifier::Shift]) =>
                 {
-                    // Test dump_layout() - not found case
+                    // 测试 dump_layout() - 未找到情况
                     match dump_layout("nonexistent_layout_xyz") {
                         Ok(kdl) => {
                             self.explicit_string_to_render =
@@ -673,7 +673,7 @@ impl ZellijPlugin for State {
                 BareKey::Char('d')
                     if key.has_only_modifiers(&[KeyModifier::Ctrl, KeyModifier::Shift]) =>
                 {
-                    // Test get_layout_dir()
+                    // 测试 get_layout_dir()
                     let dir = get_layout_dir();
                     if !dir.is_empty() {
                         self.explicit_string_to_render = Some(format!("Got layout folder"));
@@ -685,7 +685,7 @@ impl ZellijPlugin for State {
                 BareKey::Char('e')
                     if key.has_only_modifiers(&[KeyModifier::Ctrl, KeyModifier::Shift]) =>
                 {
-                    // Test get_focused_pane_info()
+                    // 测试 get_focused_pane_info()
                     match get_focused_pane_info() {
                         Ok((tab_index, pane_id)) => {
                             println!("Focused pane: tab={}, pane={:?}", tab_index, pane_id)
@@ -699,7 +699,7 @@ impl ZellijPlugin for State {
                 BareKey::Char('f')
                     if key.has_only_modifiers(&[KeyModifier::Ctrl, KeyModifier::Shift]) =>
                 {
-                    // Test dump_session_layout()
+                    // 测试 dump_session_layout()
                     match dump_session_layout() {
                         Ok((kdl, metadata)) => {
                             self.explicit_string_to_render = Some(format!(
@@ -717,7 +717,7 @@ impl ZellijPlugin for State {
                 BareKey::Char('g')
                     if key.has_only_modifiers(&[KeyModifier::Ctrl, KeyModifier::Shift]) =>
                 {
-                    // Test dump_session_layout_for_tab()
+                    // 测试 dump_session_layout_for_tab()
                     match dump_session_layout_for_tab(0) {
                         Ok((kdl, metadata)) => {
                             self.explicit_string_to_render = Some(format!(
@@ -735,7 +735,7 @@ impl ZellijPlugin for State {
                 BareKey::Char('h')
                     if key.has_only_modifiers(&[KeyModifier::Ctrl, KeyModifier::Shift]) =>
                 {
-                    // Test parse_layout() - valid KDL
+                    // 测试 parse_layout() - 有效 KDL
                     let valid_kdl = "layout { tab { pane; }; }";
                     match parse_layout(valid_kdl) {
                         Ok(metadata) => {
@@ -754,7 +754,7 @@ impl ZellijPlugin for State {
                 BareKey::Char('i')
                     if key.has_only_modifiers(&[KeyModifier::Ctrl, KeyModifier::Shift]) =>
                 {
-                    // Test parse_layout() - invalid KDL
+                    // 测试 parse_layout() - 无效 KDL
                     let invalid_kdl = "layout { this is not valid kdl }";
                     match parse_layout(invalid_kdl) {
                         Ok(metadata) => {
@@ -823,7 +823,7 @@ impl ZellijPlugin for State {
                 BareKey::Char('d')
                     if key.has_only_modifiers(&[KeyModifier::Ctrl, KeyModifier::Alt]) =>
                 {
-                    // Test save_layout() - invalid KDL
+                    // 测试 save_layout() - 无效 KDL
                     let invalid_kdl = "not valid kdl at all";
                     match save_layout("invalid_layout", invalid_kdl, false) {
                         Ok(_) => {
@@ -852,7 +852,7 @@ impl ZellijPlugin for State {
                 BareKey::Char('f')
                     if key.has_only_modifiers(&[KeyModifier::Ctrl, KeyModifier::Alt]) =>
                 {
-                    // Test rename_layout() - not found case
+                    // 测试 rename_layout() - 未找到情况
                     match rename_layout("nonexistent_layout", "new_name") {
                         Ok(_) => {
                             self.explicit_string_to_render =
@@ -867,7 +867,7 @@ impl ZellijPlugin for State {
                 BareKey::Char('g')
                     if key.has_only_modifiers(&[KeyModifier::Ctrl, KeyModifier::Alt]) =>
                 {
-                    // Test delete_layout() - success case
+                    // 测试 delete_layout() - 成功情况
                     match delete_layout("renamed_layout") {
                         Ok(_) => {
                             self.explicit_string_to_render = Some(format!("Delete layout success"))
@@ -881,7 +881,7 @@ impl ZellijPlugin for State {
                 BareKey::Char('h')
                     if key.has_only_modifiers(&[KeyModifier::Ctrl, KeyModifier::Alt]) =>
                 {
-                    // Test delete_layout() - not found case
+                    // 测试 delete_layout() - 未找到情况
                     match delete_layout("nonexistent_layout") {
                         Ok(_) => {
                             self.explicit_string_to_render =
@@ -911,7 +911,7 @@ impl ZellijPlugin for State {
                 BareKey::Char('j')
                     if key.has_only_modifiers(&[KeyModifier::Ctrl, KeyModifier::Alt]) =>
                 {
-                    // Test edit_layout()
+                    // 测试 edit_layout()
                     let mut context = BTreeMap::new();
                     context.insert("test_key".to_owned(), "test_value".to_owned());
                     match edit_layout("test_layout2", context) {
@@ -928,7 +928,7 @@ impl ZellijPlugin for State {
                 BareKey::Char('k')
                     if key.has_only_modifiers(&[KeyModifier::Ctrl, KeyModifier::Alt]) =>
                 {
-                    // Test override_layout()
+                    // 测试 override_layout()
                     let mut context = BTreeMap::new();
                     context.insert("override_test".to_owned(), "value".to_owned());
                     override_layout(
@@ -953,14 +953,14 @@ impl ZellijPlugin for State {
                 }
             },
             Event::BeforeClose => {
-                // this is just to assert something to make sure this event was triggered
+                // 这只是为了断言某些内容以确保此事件被触发
                 highlight_and_unhighlight_panes(vec![PaneId::Terminal(1)], vec![PaneId::Plugin(1)]);
             },
             Event::PluginConfigurationChanged(new_config) => {
                 self.configuration = new_config.clone();
             },
             Event::SystemClipboardFailure => {
-                // this is just to trigger the worker message
+                // 这只是为了触发 worker 消息
                 post_message_to(PluginMessage {
                     worker_name: Some("test".into()),
                     name: "ping".into(),
