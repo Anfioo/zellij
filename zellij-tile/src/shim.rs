@@ -48,9 +48,9 @@ use zellij_utils::plugin_api::plugin_ids::{ProtobufPluginIds, ProtobufZellijVers
 pub use super::ui_components::*;
 pub use prost::{self, *};
 
-// Subscription Handling
+// 订阅处理
 
-/// Subscribe to a list of [`Event`]s represented by their [`EventType`]s that will then trigger the `update` method
+/// 订阅由 [`EventType`] 表示的 [`事件`](Event) 列表，这些事件随后将触发 `update` 方法
 pub fn subscribe(event_types: &[EventType]) {
     let event_types: HashSet<EventType> = event_types.iter().cloned().collect();
     let plugin_command = PluginCommand::Subscribe(event_types);
@@ -59,7 +59,7 @@ pub fn subscribe(event_types: &[EventType]) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Unsubscribe to a list of [`Event`]s represented by their [`EventType`]s.
+/// 取消订阅由 [`EventType`] 表示的 [`事件`](Event) 列表。
 pub fn unsubscribe(event_types: &[EventType]) {
     let event_types: HashSet<EventType> = event_types.iter().cloned().collect();
     let plugin_command = PluginCommand::Unsubscribe(event_types);
@@ -68,9 +68,9 @@ pub fn unsubscribe(event_types: &[EventType]) {
     unsafe { host_run_plugin_command() };
 }
 
-// Plugin Settings
+// 插件设置
 
-/// Sets the plugin as selectable or unselectable to the user. Unselectable plugins might be desired when they do not accept user input.
+/// 将插件设置为用户可选或不可选。当插件不接受用户输入时，可能需要将其设为不可选。
 pub fn set_selectable(selectable: bool) {
     let plugin_command = PluginCommand::SetSelectable(selectable);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -78,10 +78,10 @@ pub fn set_selectable(selectable: bool) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Shows the cursor at specific coordinates or hides it
+/// 在指定坐标处显示光标或隐藏光标
 ///
-/// # Arguments
-/// * `cursor_position` - None to hide cursor, Some((x, y)) to show at coordinates
+/// # 参数
+/// * `cursor_position` - None 表示隐藏光标，Some((x, y)) 表示在指定坐标显示
 pub fn show_cursor(cursor_position: Option<(usize, usize)>) {
     let plugin_command = PluginCommand::ShowCursor(cursor_position);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -96,8 +96,8 @@ pub fn request_permission(permissions: &[PermissionType]) {
     unsafe { host_run_plugin_command() };
 }
 
-// Query Functions
-/// Returns the unique Zellij pane ID for the plugin as well as the Zellij process id.
+// 查询函数
+/// 返回插件的唯一 Zellij 窗格 ID 以及 Zellij 进程 ID。
 pub fn get_plugin_ids() -> PluginIds {
     let plugin_command = PluginCommand::GetPluginIds;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -108,7 +108,7 @@ pub fn get_plugin_ids() -> PluginIds {
     PluginIds::try_from(protobuf_plugin_ids).unwrap()
 }
 
-/// Returns the version of the running Zellij instance - can be useful to check plugin compatibility
+/// 返回正在运行的 Zellij 实例的版本——可用于检查插件兼容性
 pub fn get_zellij_version() -> String {
     let plugin_command = PluginCommand::GetZellijVersion;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -119,11 +119,11 @@ pub fn get_zellij_version() -> String {
     protobuf_zellij_version.version
 }
 
-/// Generates a random human-readable name using Zellij's curated word lists.
-/// Returns a name in the format AdjectiveNoun (e.g., "BraveRustacean", "ZippyWeasel").
+/// 使用 Zellij 精选的词表生成一个随机的、人类可读的名称。
+/// 返回格式为 AdjectiveNoun 的名称（例如 "BraveRustacean"、"ZippyWeasel"）。
 ///
-/// This uses the same word lists as session name generation, providing
-/// approximately 4,096 unique combinations.
+/// 它使用与会话名称生成相同的词表，提供
+/// 约 4,096 种唯一组合。
 pub fn generate_random_name() -> String {
     let plugin_command = PluginCommand::GenerateRandomName;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -134,29 +134,29 @@ pub fn generate_random_name() -> String {
     response.name
 }
 
-/// Dumps a layout by name and returns its KDL content as a String
+/// 按名称导出布局并以字符串形式返回其 KDL 内容
 ///
-/// Supports both built-in layouts (eg. "default", "compact", "welcome")
-/// and custom layouts from the plugin's layout directory.
+/// 支持内置布局（例如 "default"、"compact"、"welcome"）
+/// 以及插件布局目录中的自定义布局。
 pub fn dump_layout(layout_name: &str) -> Result<String, String> {
-    // Create the plugin command with the layout name
+    // 使用布局名称创建插件命令
     let plugin_command = PluginCommand::DumpLayout(layout_name.to_string());
 
-    // Convert to protobuf and encode
+    // 转换为 protobuf 并编码
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
     object_to_stdout(&protobuf_plugin_command.encode_to_vec());
 
-    // Call the host function (blocks until response)
+    // 调用宿主函数（阻塞直到收到响应）
     unsafe { host_run_plugin_command() };
 
-    // Read and decode the response
+    // 读取并解码响应
     let response_bytes =
         bytes_from_stdin().map_err(|e| format!("Failed to read response from stdin: {:?}", e))?;
 
     let protobuf_response = ProtobufDumpLayoutResponse::decode(response_bytes.as_slice())
         .map_err(|e| format!("Failed to decode protobuf response: {}", e))?;
 
-    // Extract result from the oneof field
+    // 从 oneof 字段中提取结果
     match protobuf_response.result {
         Some(dump_layout_response::Result::LayoutContent(content)) => Ok(content),
         Some(dump_layout_response::Result::Error(error)) => Err(error),
@@ -164,17 +164,17 @@ pub fn dump_layout(layout_name: &str) -> Result<String, String> {
     }
 }
 
-/// Returns the path to the layout directory.
+/// 返回布局目录的路径。
 ///
-/// This is the directory where Zellij looks for layout files. It can be:
-/// - The directory specified via CLI `--layout-dir` flag
-/// - The directory specified in the config file
-/// - The directory specified via ZELLIJ_LAYOUT_DIR env var
-/// - The default: `~/.config/zellij/layouts`
+/// 这是 Zellij 查找布局文件的目录。它可以是：
+/// - 通过 CLI `--layout-dir` 标志指定的目录
+/// - 配置文件中指定的目录
+/// - 通过 ZELLIJ_LAYOUT_DIR 环境变量指定的目录
+/// - 默认值：`~/.config/zellij/layouts`
 ///
-/// # Returns
-/// A String containing the absolute path to the layout directory.
-/// Returns an empty string if the layout directory cannot be determined (rare edge case).
+/// # 返回值
+/// 包含布局目录绝对路径的字符串。
+/// 如果无法确定布局目录则返回空字符串（罕见的边界情况）。
 pub fn get_layout_dir() -> String {
     let plugin_command = PluginCommand::GetLayoutDir;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -204,7 +204,7 @@ pub fn get_session_environment_variables() -> BTreeMap<String, String> {
         .collect()
 }
 
-/// Returns the focused pane ID and tab index for the client associated with this plugin.
+/// 返回与此插件关联的客户端的焦点窗格 ID 和标签页索引。
 pub fn get_focused_pane_info() -> Result<(usize, PaneId), String> {
     let plugin_command = PluginCommand::GetFocusedPaneInfo;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -230,26 +230,26 @@ pub fn get_focused_pane_info() -> Result<(usize, PaneId), String> {
     }
 }
 
-/// Query information about a specific pane by its PaneId.
+/// 通过 PaneId 查询特定窗格的信息。
 ///
-/// This synchronously queries Zellij for detailed information about the pane with the given ID,
-/// including its position, size, state, and other metadata.
+/// 这会同步向 Zellij 查询具有给定 ID 的窗格的详细信息，
+/// 包括其位置、大小、状态和其他元数据。
 ///
-/// # Parameters
+/// # 参数
 ///
-/// - `pane_id`: The ID of the pane to query
+/// - `pane_id`：要查询的窗格 ID
 ///
 /// # Returns
 ///
-/// - `Some(PaneInfo)` if the pane exists and information was successfully retrieved
-/// - `None` if the pane does not exist or could not be found
+/// - 如果窗格存在且信息成功获取，返回 `Some(PaneInfo)`
+/// - 如果窗格不存在或无法找到，返回 `None`
 ///
-/// # Example
+/// # 示例
 ///
 /// ```no_run
 /// use zellij_tile::prelude::*;
 ///
-/// // Query info for a specific pane
+/// // 查询特定窗格的信息
 /// let pane_id = PaneId::Terminal(1);
 /// match get_pane_info(pane_id) {
 ///     Some(info) => {
@@ -274,26 +274,26 @@ pub fn get_pane_info(pane_id: PaneId) -> Option<PaneInfo> {
         .and_then(|pb_pane_info| pb_pane_info.try_into().ok())
 }
 
-/// Query information about a specific tab by its tab ID.
+/// 通过标签页 ID 查询特定标签页的信息。
 ///
-/// This synchronously queries Zellij for detailed information about the tab with the given ID,
-/// including its name, position, active state, pane counts, and other metadata.
+/// 这会同步向 Zellij 查询具有给定 ID 的标签页的详细信息，
+/// 包括其名称、位置、活动状态、窗格数量和其他元数据。
 ///
 /// # Parameters
 ///
-/// - `tab_id`: The stable ID of the tab to query
+/// - `tab_id`：要查询的标签页的稳定 ID
 ///
 /// # Returns
 ///
-/// - `Some(TabInfo)` if the tab exists and information was successfully retrieved
-/// - `None` if the tab does not exist or could not be found
+/// - 如果标签页存在且信息成功获取，返回 `Some(TabInfo)`
+/// - 如果标签页不存在或无法找到，返回 `None`
 ///
 /// # Example
 ///
 /// ```no_run
 /// use zellij_tile::prelude::*;
 ///
-/// // Query info for a specific tab
+/// // 查询特定标签页的信息
 /// let tab_id = 3;
 /// match get_tab_info(tab_id) {
 ///     Some(info) => {
@@ -319,22 +319,22 @@ pub fn get_tab_info(tab_id: usize) -> Option<TabInfo> {
         .and_then(|pb_tab_info| pb_tab_info.try_into().ok())
 }
 
-/// Save the current session state to disk immediately.
+/// 立即将当前会话状态保存到磁盘。
 ///
-/// This triggers an immediate write of the current session metadata and layout
-/// to the session cache directory (~/.cache/zellij/contract_version_1/session_info/<session_name>/).
+/// 这会触发立即将当前会话元数据和布局写入
+/// 到会话缓存目录（~/.cache/zellij/contract_version_1/session_info/<session_name>/）。
 ///
 /// # Returns
 ///
-/// - `Ok(())` if the save request was successfully sent
-/// - `Err(String)` if there was an error sending the request
+/// - 如果保存请求成功发送，返回 `Ok(())`
+/// - 如果发送请求时出错，返回 `Err(String)`
 ///
 /// # Example
 ///
 /// ```no_run
 /// use zellij_tile::prelude::*;
 ///
-/// // Save the current session
+/// // 保存当前会话
 /// match save_session() {
 ///     Ok(()) => println!("Session saved successfully"),
 ///     Err(e) => eprintln!("Failed to save session: {}", e),
@@ -359,10 +359,10 @@ pub fn save_session() -> Result<(), String> {
     }
 }
 
-/// Returns the elapsed time in milliseconds since the current session state was last saved to disk.
+/// 返回自当前会话状态上次保存到磁盘以来经过的时间（毫秒）。
 ///
-/// Returns `None` if the session has never been saved during this session.
-/// The returned value is the number of milliseconds elapsed since the last save, not a Unix epoch timestamp.
+/// 如果会话在此期间从未保存过，返回 `None`。
+/// 返回值是自上次保存以来经过的毫秒数，而非 Unix 时间戳。
 ///
 /// # Example
 ///
@@ -388,9 +388,9 @@ pub fn current_session_last_saved_time() -> Option<u64> {
     protobuf_response.timestamp_millis
 }
 
-// Host Functions
+// 宿主函数
 
-/// Open a file in the user's default `$EDITOR` in a new pane
+/// 在用户默认的 `$EDITOR` 中打开文件，位于新窗格中
 pub fn open_file(file_to_open: FileToOpen, context: BTreeMap<String, String>) -> Option<PaneId> {
     let plugin_command = PluginCommand::OpenFile(file_to_open, context);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -407,7 +407,7 @@ pub fn open_file(file_to_open: FileToOpen, context: BTreeMap<String, String>) ->
     response.and_then(|r| OpenFileResponse::try_from(r).ok().flatten())
 }
 
-/// Open a file in the user's default `$EDITOR` in a new floating pane
+/// 在用户默认的 `$EDITOR` 中打开文件，位于新浮动窗格中
 pub fn open_file_floating(
     file_to_open: FileToOpen,
     coordinates: Option<FloatingPaneCoordinates>,
@@ -423,7 +423,7 @@ pub fn open_file_floating(
     OpenFileFloatingResponse::try_from(response).unwrap()
 }
 
-/// Open a file in the user's default `$EDITOR`, replacing the focused pane
+/// 在用户默认的 `$EDITOR` 中打开文件，替换焦点窗格
 pub fn open_file_in_place(
     file_to_open: FileToOpen,
     context: BTreeMap<String, String>,
@@ -438,7 +438,7 @@ pub fn open_file_in_place(
     OpenFileInPlaceResponse::try_from(response).unwrap()
 }
 
-/// Open a file in the user's default `$EDITOR` in a new pane near th eplugin
+/// 在用户默认的 `$EDITOR` 中打开文件，位于插件附近的新窗格中
 pub fn open_file_near_plugin(
     file_to_open: FileToOpen,
     context: BTreeMap<String, String>,
@@ -453,7 +453,7 @@ pub fn open_file_near_plugin(
     OpenFileNearPluginResponse::try_from(response).unwrap()
 }
 
-/// Open a file in the user's default `$EDITOR` in a new floating pane near the plugin
+/// 在用户默认的 `$EDITOR` 中打开文件，位于插件附近的新浮动窗格中
 pub fn open_file_floating_near_plugin(
     file_to_open: FileToOpen,
     coordinates: Option<FloatingPaneCoordinates>,
@@ -471,7 +471,7 @@ pub fn open_file_floating_near_plugin(
     OpenFileFloatingNearPluginResponse::try_from(response).unwrap()
 }
 
-/// Open a file in the user's default `$EDITOR`, replacing the plugin pane
+/// 在用户默认的 `$EDITOR` 中打开文件，替换插件窗格
 pub fn open_file_in_place_of_plugin(
     file_to_open: FileToOpen,
     close_plugin_after_replace: bool,
@@ -488,7 +488,7 @@ pub fn open_file_in_place_of_plugin(
             .unwrap();
     OpenFileInPlaceOfPluginResponse::try_from(response).unwrap()
 }
-/// Open a new terminal pane to the specified location on the host filesystem
+/// 在宿主文件系统的指定位置打开新的终端窗格
 pub fn open_terminal<P: AsRef<Path>>(path: P) -> Option<PaneId> {
     let file_to_open = FileToOpen::new(path.as_ref().to_path_buf());
     let plugin_command = PluginCommand::OpenTerminal(file_to_open);
@@ -501,9 +501,9 @@ pub fn open_terminal<P: AsRef<Path>>(path: P) -> Option<PaneId> {
     OpenTerminalResponse::try_from(response).unwrap()
 }
 
-/// Open a new terminal pane to the specified location on the host filesystem
-/// This variant is identical to open_terminal, excpet it opens it near the plugin regardless of
-/// whether the user was focused on it or not
+/// 在宿主文件系统的指定位置打开新的终端窗格
+/// 此变体与 open_terminal 相同，只是它会在插件附近打开，无论
+/// 用户是否正聚焦于该插件
 pub fn open_terminal_near_plugin<P: AsRef<Path>>(path: P) -> Option<PaneId> {
     let file_to_open = FileToOpen::new(path.as_ref().to_path_buf());
     let plugin_command = PluginCommand::OpenTerminalNearPlugin(file_to_open);
@@ -517,7 +517,7 @@ pub fn open_terminal_near_plugin<P: AsRef<Path>>(path: P) -> Option<PaneId> {
     OpenTerminalNearPluginResponse::try_from(response).unwrap()
 }
 
-/// Open a new floating terminal pane to the specified location on the host filesystem
+/// 在宿主文件系统的指定位置打开新的浮动终端窗格
 pub fn open_terminal_floating<P: AsRef<Path>>(
     path: P,
     coordinates: Option<FloatingPaneCoordinates>,
@@ -534,8 +534,8 @@ pub fn open_terminal_floating<P: AsRef<Path>>(
     OpenTerminalFloatingResponse::try_from(response).unwrap()
 }
 
-/// Open a new floating terminal pane to the specified location on the host filesystem
-/// This variant is identical to open_terminal_floating, excpet it opens it near the plugin regardless of
+/// 在宿主文件系统的指定位置打开新的浮动终端窗格
+/// 此变体与 open_terminal_floating 相同，只是它会在插件附近打开，无论
 /// whether the user was focused on it or not
 pub fn open_terminal_floating_near_plugin<P: AsRef<Path>>(
     path: P,
@@ -554,8 +554,8 @@ pub fn open_terminal_floating_near_plugin<P: AsRef<Path>>(
     OpenTerminalFloatingNearPluginResponse::try_from(response).unwrap()
 }
 
-/// Open a new terminal pane to the specified location on the host filesystem, temporarily
-/// replacing the focused pane
+/// 在宿主文件系统的指定位置打开新的终端窗格，临时
+/// 替换焦点窗格
 pub fn open_terminal_in_place<P: AsRef<Path>>(path: P) -> Option<PaneId> {
     let file_to_open = FileToOpen::new(path.as_ref().to_path_buf());
     let plugin_command = PluginCommand::OpenTerminalInPlace(file_to_open);
@@ -569,8 +569,8 @@ pub fn open_terminal_in_place<P: AsRef<Path>>(path: P) -> Option<PaneId> {
     OpenTerminalInPlaceResponse::try_from(response).unwrap()
 }
 
-/// Open a new terminal pane to the specified location on the host filesystem, temporarily
-/// replacing the plugin pane
+/// 在宿主文件系统的指定位置打开新的终端窗格, temporarily
+/// 替换插件窗格
 pub fn open_terminal_in_place_of_plugin<P: AsRef<Path>>(
     path: P,
     close_plugin_after_replace: bool,
@@ -588,7 +588,7 @@ pub fn open_terminal_in_place_of_plugin<P: AsRef<Path>>(
     OpenTerminalInPlaceOfPluginResponse::try_from(response).unwrap()
 }
 
-/// Open a new command pane with the specified command and args (this sort of pane allows the user to control the command, re-run it and see its exit status through the Zellij UI).
+/// 使用指定的命令和参数打开新的命令窗格（此类窗格允许用户通过 Zellij 界面控制命令、重新运行并查看其退出状态）。
 pub fn open_command_pane(
     command_to_run: CommandToRun,
     context: BTreeMap<String, String>,
@@ -603,9 +603,9 @@ pub fn open_command_pane(
     OpenCommandPaneResponse::try_from(response).unwrap()
 }
 
-/// Open a new command pane with the specified command and args (this sort of pane allows the user to control the command, re-run it and see its exit status through the Zellij UI).
-/// This variant is the same as `open_command_pane` except it opens the pane in the same tab as the
-/// plugin regardless of whether the user is focused on it
+/// 使用指定的命令和参数打开新的命令窗格（此类窗格允许用户通过 Zellij 界面控制命令、重新运行并查看其退出状态）。
+/// 此变体与 `open_command_pane` 相同，只是它会在与插件相同的标签页中打开窗格，
+/// 无论用户是否正聚焦于该插件
 pub fn open_command_pane_near_plugin(
     command_to_run: CommandToRun,
     context: BTreeMap<String, String>,
@@ -621,7 +621,7 @@ pub fn open_command_pane_near_plugin(
     OpenCommandPaneNearPluginResponse::try_from(response).unwrap()
 }
 
-/// Open a new floating command pane with the specified command and args (this sort of pane allows the user to control the command, re-run it and see its exit status through the Zellij UI).
+/// 使用指定的命令和参数打开新的浮动命令窗格（此类窗格允许用户通过 Zellij 界面控制命令、重新运行并查看其退出状态）。
 pub fn open_command_pane_floating(
     command_to_run: CommandToRun,
     coordinates: Option<FloatingPaneCoordinates>,
@@ -639,8 +639,8 @@ pub fn open_command_pane_floating(
     OpenCommandPaneFloatingResponse::try_from(response).unwrap()
 }
 
-/// Open a new floating command pane with the specified command and args (this sort of pane allows the user to control the command, re-run it and see its exit status through the Zellij UI).
-/// This variant is the same as `open_command_pane_floating` except it opens the pane in the same tab as the
+/// 使用指定的命令和参数打开新的浮动命令窗格（此类窗格允许用户通过 Zellij 界面控制命令、重新运行并查看其退出状态）。
+/// 此变体与 `open_command_pane_floating` 相同，只是它会在与插件相同的标签页中打开窗格，
 /// plugin regardless of whether the user is focused on it
 pub fn open_command_pane_floating_near_plugin(
     command_to_run: CommandToRun,
@@ -660,7 +660,7 @@ pub fn open_command_pane_floating_near_plugin(
     OpenCommandPaneFloatingNearPluginResponse::try_from(response).unwrap()
 }
 
-/// Open a new in place command pane with the specified command and args (this sort of pane allows the user to control the command, re-run it and see its exit status through the Zellij UI).
+/// 使用指定的命令和参数打开新的原位命令窗格（此类窗格允许用户通过 Zellij 界面控制命令、重新运行并查看其退出状态）。
 pub fn open_command_pane_in_place(
     command_to_run: CommandToRun,
     context: BTreeMap<String, String>,
@@ -676,9 +676,9 @@ pub fn open_command_pane_in_place(
     OpenCommandPaneInPlaceResponse::try_from(response).unwrap()
 }
 
-/// Open a new in place command pane with the specified command and args (this sort of pane allows the user to control the command, re-run it and see its exit status through the Zellij UI).
-/// This variant is the same as open_command_pane_in_place, except that it always replaces the
-/// plugin pane rather than whichever pane the user is focused on
+/// 使用指定的命令和参数打开新的原位命令窗格（此类窗格允许用户通过 Zellij 界面控制命令、重新运行并查看其退出状态）。
+/// 此变体与 open_command_pane_in_place 相同，只是它始终替换
+/// 插件窗格，而非用户当前聚焦的任何窗格
 pub fn open_command_pane_in_place_of_plugin(
     command_to_run: CommandToRun,
     close_plugin_after_replace: bool,
@@ -700,11 +700,11 @@ pub fn open_command_pane_in_place_of_plugin(
     OpenCommandPaneInPlaceOfPluginResponse::try_from(response).unwrap()
 }
 
-/// Opens a command pane in place of the pane identified by `pane_id`.
-/// Unlike `open_command_pane_in_place`, this targets an arbitrary pane by ID rather than the
-/// focused pane, and does not change focus. If `close_replaced_pane` is false, the replaced
-/// pane is suppressed and restored when the new pane closes; if true, it is permanently closed.
-/// Returns the `PaneId` of the newly opened pane, or `None` if the operation failed.
+/// 打开一个命令窗格，替换由 `pane_id` 标识的窗格。
+/// 与 `open_command_pane_in_place` 不同，此函数通过 ID 定位任意窗格，而非
+/// 焦点窗格，且不会改变焦点。如果 `close_replaced_pane` 为 false，被替换的
+/// 窗格将被抑制，并在新窗格关闭时恢复；如果为 true，则被永久关闭。
+/// 返回新打开窗格的 `PaneId`，如果操作失败则返回 `None`。
 pub fn open_command_pane_in_place_of_pane_id(
     pane_id: PaneId,
     command_to_run: CommandToRun,
@@ -728,12 +728,12 @@ pub fn open_command_pane_in_place_of_pane_id(
     OpenCommandPaneInPlaceOfPaneIdResponse::try_from(response).unwrap()
 }
 
-/// Opens a terminal pane in place of the pane identified by `pane_id`.
-/// Unlike `open_terminal_in_place`, this targets an arbitrary pane by ID rather than the
+/// 打开一个终端窗格，替换由 `pane_id` 标识的窗格。
+/// 与 `open_terminal_in_place` 不同，此函数通过 ID 定位任意窗格，而非
 /// focused pane, and does not change focus. If `close_replaced_pane` is false, the replaced
 /// pane is suppressed and restored when the new pane closes; if true, it is permanently closed.
-/// `cwd` sets the working directory for the new terminal. Returns the `PaneId` of the newly
-/// opened pane, or `None` if the operation failed.
+/// `cwd` 设置新终端的工作目录。返回新打开
+/// 窗格的 `PaneId`，如果操作失败则返回 `None`。
 pub fn open_terminal_pane_in_place_of_pane_id<P: AsRef<Path>>(
     pane_id: PaneId,
     cwd: P,
@@ -756,11 +756,11 @@ pub fn open_terminal_pane_in_place_of_pane_id<P: AsRef<Path>>(
     OpenTerminalPaneInPlaceOfPaneIdResponse::try_from(response).unwrap()
 }
 
-/// Opens an editor pane in place of the pane identified by `pane_id`.
-/// Unlike `open_file_in_place`, this targets an arbitrary pane by ID rather than the
+/// 打开一个编辑器窗格，替换由 `pane_id` 标识的窗格。
+/// 与 `open_file_in_place` 不同，此函数通过 ID 定位任意窗格，而非
 /// focused pane, and does not change focus. If `close_replaced_pane` is false, the replaced
 /// pane is suppressed and restored when the new pane closes; if true, it is permanently closed.
-/// Returns the `PaneId` of the newly opened pane, or `None` if the operation failed.
+/// 返回新打开窗格的 `PaneId`，如果操作失败则返回 `None`。
 pub fn open_edit_pane_in_place_of_pane_id(
     pane_id: PaneId,
     file_to_open: FileToOpen,
@@ -783,7 +783,7 @@ pub fn open_edit_pane_in_place_of_pane_id(
     OpenEditPaneInPlaceOfPaneIdResponse::try_from(response).unwrap()
 }
 
-/// Open a new hidden (background) command pane with the specified command and args (this sort of pane allows the user to control the command, re-run it and see its exit status through the Zellij UI).
+/// 使用指定的命令和参数打开新的隐藏（后台）命令窗格（此类窗格允许用户通过 Zellij 界面控制命令、重新运行并查看其退出状态）。
 pub fn open_command_pane_background(
     command_to_run: CommandToRun,
     context: BTreeMap<String, String>,
@@ -799,7 +799,7 @@ pub fn open_command_pane_background(
     OpenCommandPaneBackgroundResponse::try_from(response).unwrap()
 }
 
-/// Change the focused tab to the specified index (corresponding with the default tab names, to starting at `1`, `0` will be considered as `1`).
+/// 将焦点标签页切换到指定索引（与默认标签页名称对应，从 `1` 开始，`0` 将被视为 `1`）。
 pub fn switch_tab_to(tab_idx: u32) {
     let plugin_command = PluginCommand::SwitchTabTo(tab_idx);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -807,7 +807,7 @@ pub fn switch_tab_to(tab_idx: u32) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Set a timeout in seconds (or fractions thereof) after which the plugins [update](./plugin-api-events#update) method will be called with the [`Timer`](./plugin-api-events.md#timer) event.
+/// 设置以秒（或其分数）为单位的超时，超时后将以 [`Timer`](./plugin-api-events.md#timer) 事件调用插件的 [update](./plugin-api-events#update) 方法。
 pub fn set_timeout(secs: f64) {
     let plugin_command = PluginCommand::SetTimeout(secs);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -824,8 +824,8 @@ pub fn exec_cmd(cmd: &[&str]) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Run this command in the background on the host machine, optionally being notified of its output
-/// if subscribed to the `RunCommandResult` Event
+/// 在宿主机器上后台运行此命令，如果订阅了 `RunCommandResult` 事件，
+/// 可选择性地收到其输出通知
 pub fn run_command(cmd: &[&str], context: BTreeMap<String, String>) {
     let plugin_command = PluginCommand::RunCommand(
         cmd.iter().cloned().map(|s| s.to_owned()).collect(),
@@ -838,8 +838,8 @@ pub fn run_command(cmd: &[&str], context: BTreeMap<String, String>) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Run this command in the background on the host machine, providing environment variables and a
-/// cwd. Optionally being notified of its output if subscribed to the `RunCommandResult` Event
+/// 在宿主机器上后台运行此命令，提供环境变量和
+/// 工作目录。如果订阅了 `RunCommandResult` 事件，可选择性地收到其输出通知
 pub fn run_command_with_env_variables_and_cwd(
     cmd: &[&str],
     env_variables: BTreeMap<String, String>,
@@ -857,9 +857,9 @@ pub fn run_command_with_env_variables_and_cwd(
     unsafe { host_run_plugin_command() };
 }
 
-/// Make a web request, optionally being notified of its output
-/// if subscribed to the `WebRequestResult` Event, the context will be returned verbatim in this
-/// event and can be used for eg. marking the request_id
+/// 发起网络请求，如果订阅了 `WebRequestResult` 事件，
+/// 可选择性地收到其输出通知，context 将在此事件中原样返回，
+/// 可用于例如标记 request_id
 pub fn web_request<S: AsRef<str>>(
     url: S,
     verb: HttpVerb,
@@ -875,7 +875,7 @@ pub fn web_request<S: AsRef<str>>(
     unsafe { host_run_plugin_command() };
 }
 
-/// Hide the plugin pane (suppress it) from the UI
+/// 从界面中隐藏插件窗格（抑制它）
 pub fn hide_self() {
     let plugin_command = PluginCommand::HideSelf;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -883,7 +883,7 @@ pub fn hide_self() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Hide the pane (suppress it) with the specified [PaneId] from the UI
+/// 从界面中隐藏具有指定 [PaneId] 的窗格（抑制它）
 pub fn hide_pane_with_id(pane_id: PaneId) {
     let plugin_command = PluginCommand::HidePaneWithId(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -891,7 +891,7 @@ pub fn hide_pane_with_id(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Show the plugin pane (unsuppress it if it is suppressed), focus it and switch to its tab
+/// 显示插件窗格（如果被抑制则取消抑制），聚焦它并切换到其标签页
 pub fn show_self(should_float_if_hidden: bool) {
     let plugin_command = PluginCommand::ShowSelf(should_float_if_hidden);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -899,7 +899,7 @@ pub fn show_self(should_float_if_hidden: bool) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Show the pane (unsuppress it if it is suppressed) with the specified [PaneId], focus it and switch to its tab
+/// 显示具有指定 [PaneId] 的窗格（如果被抑制则取消抑制），聚焦它并切换到其标签页
 pub fn show_pane_with_id(pane_id: PaneId, should_float_if_hidden: bool, should_focus_pane: bool) {
     let plugin_command =
         PluginCommand::ShowPaneWithId(pane_id, should_float_if_hidden, should_focus_pane);
@@ -908,7 +908,7 @@ pub fn show_pane_with_id(pane_id: PaneId, should_float_if_hidden: bool, should_f
     unsafe { host_run_plugin_command() };
 }
 
-/// Close this plugin pane
+/// 关闭此插件窗格
 pub fn close_self() {
     let plugin_command = PluginCommand::CloseSelf;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -916,7 +916,7 @@ pub fn close_self() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Switch to the specified Input Mode (eg. `Normal`, `Tab`, `Pane`)
+/// 切换到指定的输入模式（例如 `Normal`、`Tab`、`Pane`）
 pub fn switch_to_input_mode(mode: &InputMode) {
     let plugin_command = PluginCommand::SwitchToMode(*mode);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -924,7 +924,7 @@ pub fn switch_to_input_mode(mode: &InputMode) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Provide a stringified [`layout`](https://zellij.dev/documentation/layouts.html) to be applied to the current session. If the layout has multiple tabs, they will all be opened.
+/// 提供字符串化的 [`布局`](https://zellij.dev/documentation/layouts.html) 以应用于当前会话。如果布局包含多个标签页，它们都将被打开。
 pub fn new_tabs_with_layout(layout: &str) -> Vec<usize> {
     let plugin_command = PluginCommand::NewTabsWithLayout(layout.to_owned());
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -935,7 +935,7 @@ pub fn new_tabs_with_layout(layout: &str) -> Vec<usize> {
     NewTabsResponse::try_from(response).unwrap()
 }
 
-/// Provide a LayoutInfo to be applied to the current session in a new tab. If the layout has multiple tabs, they will all be opened.
+/// 提供 LayoutInfo 以在新标签页中应用于当前会话。如果布局包含多个标签页，它们都将被打开。
 pub fn new_tabs_with_layout_info<L: AsRef<LayoutInfo>>(layout_info: L) -> Vec<usize> {
     let plugin_command = PluginCommand::NewTabsWithLayoutInfo(layout_info.as_ref().clone());
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -946,7 +946,7 @@ pub fn new_tabs_with_layout_info<L: AsRef<LayoutInfo>>(layout_info: L) -> Vec<us
     NewTabsResponse::try_from(response).unwrap()
 }
 
-/// Open a new tab with the default layout
+/// 使用默认布局打开新标签页
 pub fn new_tab<S: AsRef<str>>(name: Option<S>, cwd: Option<S>) -> Option<usize>
 where
     S: ToString,
@@ -989,8 +989,8 @@ pub fn new_tiled_pane_in_tab(tab_position: usize) -> Option<PaneId> {
     NewTiledPaneInTabResponse::try_from(response).unwrap()
 }
 
-/// Opens a new tab with a command pane running `command_to_run`.
-/// Returns `(tab_id, pane_id)` of the created tab and pane, or `None` if unavailable.
+/// 打开一个新标签页，其中包含运行 `command_to_run` 的命令窗格。
+/// 返回所创建标签页和窗格的 `(tab_id, pane_id)`，如果不可用则返回 `None`。
 pub fn open_command_pane_in_new_tab(
     command_to_run: CommandToRun,
     context: BTreeMap<String, String>,
@@ -1006,9 +1006,9 @@ pub fn open_command_pane_in_new_tab(
     (result.tab_id, result.pane_id)
 }
 
-/// Opens a new tab with a plugin pane loaded from `plugin_url`.
-/// `plugin_url` can be a path (`file:/path/to/plugin.wasm`) or a named alias.
-/// Returns `(tab_id, pane_id)` of the created tab and pane.
+/// 打开一个新标签页，其中包含从 `plugin_url` 加载的插件窗格。
+/// `plugin_url` 可以是路径（`file:/path/to/plugin.wasm`）或命名别名。
+/// 返回所创建标签页和窗格的 `(tab_id, pane_id)`。
 pub fn open_plugin_pane_in_new_tab(
     plugin_url: impl ToString,
     configuration: BTreeMap<String, String>,
@@ -1029,8 +1029,8 @@ pub fn open_plugin_pane_in_new_tab(
     (result.tab_id, result.pane_id)
 }
 
-/// Open a new floating plugin pane with the specified plugin URL and configuration.
-/// Returns the pane ID of the newly created plugin pane, if successful.
+/// 使用指定的插件 URL 和配置打开新的浮动插件窗格。
+/// 如果成功，返回新创建插件窗格的窗格 ID。
 pub fn open_plugin_pane_floating(
     plugin_url: &str,
     configuration: BTreeMap<String, String>,
@@ -1053,8 +1053,8 @@ pub fn open_plugin_pane_floating(
     OpenPluginPaneFloatingResponse::try_from(response).unwrap()
 }
 
-/// Opens a new tab with an editor pane for `file_to_open`.
-/// Returns `(tab_id, pane_id)` of the created tab and pane.
+/// 打开一个新标签页，其中包含用于 `file_to_open` 的编辑器窗格。
+/// 返回所创建标签页和窗格的 `(tab_id, pane_id)`。
 pub fn open_editor_pane_in_new_tab(
     file_to_open: FileToOpen,
     context: BTreeMap<String, String>,
@@ -1070,7 +1070,7 @@ pub fn open_editor_pane_in_new_tab(
     (result.tab_id, result.pane_id)
 }
 
-/// Change focus to the next tab or loop back to the first
+/// 将焦点切换到下一个标签页，或循环回到第一个
 pub fn go_to_next_tab() {
     let plugin_command = PluginCommand::GoToNextTab;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1078,7 +1078,7 @@ pub fn go_to_next_tab() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Change focus to the previous tab or loop back to the last
+/// 将焦点切换到上一个标签页，或循环回到最后一个
 pub fn go_to_previous_tab() {
     let plugin_command = PluginCommand::GoToPreviousTab;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1099,7 +1099,7 @@ pub fn report_panic(info: &std::panic::PanicHookInfo) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Either Increase or Decrease the size of the focused pane
+/// 增大或减小焦点窗格的大小
 pub fn resize_focused_pane(resize: Resize) {
     let plugin_command = PluginCommand::Resize(resize);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1107,7 +1107,7 @@ pub fn resize_focused_pane(resize: Resize) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Either Increase or Decrease the size of the focused pane in a specified direction (eg. `Left`, `Right`, `Up`, `Down`).
+/// 沿指定方向增大或减小焦点窗格的大小（例如 `Left`、`Right`、`Up`、`Down`）。
 pub fn resize_focused_pane_with_direction(resize: Resize, direction: Direction) {
     let resize_strategy = ResizeStrategy {
         resize,
@@ -1120,7 +1120,7 @@ pub fn resize_focused_pane_with_direction(resize: Resize, direction: Direction) 
     unsafe { host_run_plugin_command() };
 }
 
-/// Change focus tot he next pane in chronological order
+/// 按时间顺序将焦点切换到下一个窗格
 pub fn focus_next_pane() {
     let plugin_command = PluginCommand::FocusNextPane;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1128,7 +1128,7 @@ pub fn focus_next_pane() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Change focus to the previous pane in chronological order
+/// 按时间顺序将焦点切换到上一个窗格
 pub fn focus_previous_pane() {
     let plugin_command = PluginCommand::FocusPreviousPane;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1136,7 +1136,7 @@ pub fn focus_previous_pane() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Change focus to the previously focused pane
+/// 将焦点切换到之前聚焦的窗格
 pub fn focus_last_pane() {
     let plugin_command = PluginCommand::FocusLastPane;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1144,7 +1144,7 @@ pub fn focus_last_pane() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Change the focused pane in the specified direction
+/// 沿指定方向切换焦点窗格
 pub fn move_focus(direction: Direction) {
     let plugin_command = PluginCommand::MoveFocus(direction);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1152,7 +1152,7 @@ pub fn move_focus(direction: Direction) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Change the focused pane in the specified direction, if the pane is on the edge of the screen, the next tab is focused (next if right edge, previous if left edge).
+/// 沿指定方向切换焦点窗格，如果窗格位于屏幕边缘，则聚焦下一个标签页（右边缘则下一个，左边缘则上一个）。
 pub fn move_focus_or_tab(direction: Direction) {
     let plugin_command = PluginCommand::MoveFocusOrTab(direction);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1160,7 +1160,7 @@ pub fn move_focus_or_tab(direction: Direction) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Detach the user from the active session
+/// 将用户从活动会话中分离
 pub fn detach() {
     let plugin_command = PluginCommand::Detach;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1168,7 +1168,7 @@ pub fn detach() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Edit the scrollback of the focused pane in the user's default `$EDITOR`
+/// 在用户默认的 `$EDITOR` 中编辑焦点窗格的回滚缓冲区
 pub fn edit_scrollback() {
     let plugin_command = PluginCommand::EditScrollback;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1176,7 +1176,7 @@ pub fn edit_scrollback() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Write bytes to the `STDIN` of the focused pane
+/// 将字节写入焦点窗格的 `STDIN`
 pub fn write(bytes: Vec<u8>) {
     let plugin_command = PluginCommand::Write(bytes);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1184,7 +1184,7 @@ pub fn write(bytes: Vec<u8>) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Write characters to the `STDIN` of the focused pane
+/// 将字符写入焦点窗格的 `STDIN`
 pub fn write_chars(chars: &str) {
     let plugin_command = PluginCommand::WriteChars(chars.to_owned());
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1192,10 +1192,10 @@ pub fn write_chars(chars: &str) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Copy arbitrary text to the user's clipboard
+/// 将任意文本复制到用户的剪贴板
 ///
-/// Respects the user's configured clipboard destination (system clipboard or primary selection).
-/// Requires the WriteToClipboard permission.
+/// 遵循用户配置的剪贴板目标（系统剪贴板或主选区）。
+/// 需要 WriteToClipboard 权限。
 pub fn copy_to_clipboard(text: impl Into<String>) {
     let plugin_command = PluginCommand::CopyToClipboard(text.into());
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1203,7 +1203,7 @@ pub fn copy_to_clipboard(text: impl Into<String>) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Focused the previously focused tab (regardless of the tab position)
+/// 聚焦之前聚焦的标签页（无论标签页位置如何）
 pub fn toggle_tab() {
     let plugin_command = PluginCommand::ToggleTab;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1211,7 +1211,7 @@ pub fn toggle_tab() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Switch the position of the focused pane with a different pane
+/// 将焦点窗格与另一个窗格交换位置
 pub fn move_pane() {
     let plugin_command = PluginCommand::MovePane;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1219,7 +1219,7 @@ pub fn move_pane() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Switch the position of the focused pane with a different pane in the specified direction (eg. `Down`, `Up`, `Left`, `Right`).
+/// 沿指定方向将焦点窗格与另一个窗格交换位置（例如 `Down`、`Up`、`Left`、`Right`）。
 pub fn move_pane_with_direction(direction: Direction) {
     let plugin_command = PluginCommand::MovePaneWithDirection(direction);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1227,7 +1227,7 @@ pub fn move_pane_with_direction(direction: Direction) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Clear the scroll buffer of the focused pane
+/// 清除焦点窗格的滚动缓冲区
 pub fn clear_screen() {
     let plugin_command = PluginCommand::ClearScreen;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1235,7 +1235,7 @@ pub fn clear_screen() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Scroll the focused pane up 1 line
+/// 将焦点窗格向上滚动 1 行
 pub fn scroll_up() {
     let plugin_command = PluginCommand::ScrollUp;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1243,7 +1243,7 @@ pub fn scroll_up() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Scroll the focused pane down 1 line
+/// 将焦点窗格向下滚动 1 行
 pub fn scroll_down() {
     let plugin_command = PluginCommand::ScrollDown;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1251,7 +1251,7 @@ pub fn scroll_down() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Scroll the focused pane all the way to the top of the scrollbuffer
+/// 将焦点窗格一直滚动到滚动缓冲区顶部
 pub fn scroll_to_top() {
     let plugin_command = PluginCommand::ScrollToTop;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1259,7 +1259,7 @@ pub fn scroll_to_top() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Scroll the focused pane all the way to the bottom of the scrollbuffer
+/// 将焦点窗格一直滚动到滚动缓冲区底部
 pub fn scroll_to_bottom() {
     let plugin_command = PluginCommand::ScrollToBottom;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1267,7 +1267,7 @@ pub fn scroll_to_bottom() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Scroll the focused pane up one page
+/// 将焦点窗格向上滚动一页
 pub fn page_scroll_up() {
     let plugin_command = PluginCommand::PageScrollUp;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1275,7 +1275,7 @@ pub fn page_scroll_up() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Scroll the focused pane down one page
+/// 将焦点窗格向下滚动一页
 pub fn page_scroll_down() {
     let plugin_command = PluginCommand::PageScrollDown;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1283,7 +1283,7 @@ pub fn page_scroll_down() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Toggle the focused pane to be fullscreen or normal sized
+/// 切换焦点窗格为全屏或正常大小
 pub fn toggle_focus_fullscreen() {
     let plugin_command = PluginCommand::ToggleFocusFullscreen;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1305,7 +1305,7 @@ pub fn focus_host_session() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Toggle the UI pane frames on or off
+/// 切换界面窗格边框的开启或关闭
 pub fn toggle_pane_frames() {
     let plugin_command = PluginCommand::TogglePaneFrames;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1320,7 +1320,7 @@ pub fn set_pane_frame_style(pane_frame_style: PaneFrameStyle) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Embed the currently focused pane (make it stop floating) or turn it to a float pane if it is not
+/// 嵌入当前焦点窗格（使其停止浮动），如果它不是浮动窗格则将其变为浮动窗格
 pub fn toggle_pane_embed_or_eject() {
     let plugin_command = PluginCommand::TogglePaneEmbedOrEject;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1335,7 +1335,7 @@ pub fn undo_rename_pane() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Close the focused pane
+/// 关闭焦点窗格
 pub fn close_focus() {
     let plugin_command = PluginCommand::CloseFocus;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1357,7 +1357,7 @@ pub fn toggle_floating_panes(tab_id: Option<u64>) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Turn the `STDIN` synchronization of the current tab on or off
+/// 开启或关闭当前标签页的 `STDIN` 同步
 pub fn toggle_active_tab_sync() {
     let plugin_command = PluginCommand::ToggleActiveTabSync;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1365,7 +1365,7 @@ pub fn toggle_active_tab_sync() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Close the focused tab
+/// 关闭焦点标签页
 pub fn close_focused_tab() {
     let plugin_command = PluginCommand::CloseFocusedTab;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1380,7 +1380,7 @@ pub fn undo_rename_tab() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Compeltely quit Zellij for this and all other connected clients
+/// 完全退出此客户端及所有其他已连接客户端的 Zellij
 pub fn quit_zellij() {
     let plugin_command = PluginCommand::QuitZellij;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1388,7 +1388,7 @@ pub fn quit_zellij() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Change to the previous [swap layout](https://zellij.dev/documentation/swap-layouts.html)
+/// 切换到上一个 [交换布局](https://zellij.dev/documentation/swap-layouts.html)
 pub fn previous_swap_layout() {
     let plugin_command = PluginCommand::PreviousSwapLayout;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1396,7 +1396,7 @@ pub fn previous_swap_layout() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Change to the next [swap layout](https://zellij.dev/documentation/swap-layouts.html)
+/// 切换到下一个 [交换布局](https://zellij.dev/documentation/swap-layouts.html)
 pub fn next_swap_layout() {
     let plugin_command = PluginCommand::NextSwapLayout;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1404,7 +1404,7 @@ pub fn next_swap_layout() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Change focus to the tab with the specified name
+/// 将焦点切换到具有指定名称的标签页
 pub fn go_to_tab_name(tab_name: &str) {
     let plugin_command = PluginCommand::GoToTabName(tab_name.to_owned());
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1412,7 +1412,7 @@ pub fn go_to_tab_name(tab_name: &str) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Change focus to the tab with the specified name or create it if it does not exist
+/// 将焦点切换到具有指定名称的标签页，如果不存在则创建它
 pub fn focus_or_create_tab(tab_name: &str) -> Option<usize> {
     let plugin_command = PluginCommand::FocusOrCreateTab(tab_name.to_owned());
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1438,7 +1438,7 @@ pub fn start_or_reload_plugin(url: &str) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Closes a terminal pane with the specified id
+/// 关闭具有指定 ID 的终端窗格
 pub fn close_terminal_pane(terminal_pane_id: u32) {
     let plugin_command = PluginCommand::CloseTerminalPane(terminal_pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1446,7 +1446,7 @@ pub fn close_terminal_pane(terminal_pane_id: u32) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Closes a plugin pane with the specified id
+/// 关闭具有指定 ID 的插件窗格
 pub fn close_plugin_pane(plugin_pane_id: u32) {
     let plugin_command = PluginCommand::ClosePluginPane(plugin_pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1454,7 +1454,7 @@ pub fn close_plugin_pane(plugin_pane_id: u32) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Changes the focus to the terminal pane with the specified id, unsuppressing it if it was suppressed and switching to its tab and layer (eg. floating/tiled).
+/// 将焦点切换到具有指定 ID 的终端窗格，如果它被抑制则取消抑制，并切换到其标签页和层级（例如 floating/tiled）。
 pub fn focus_terminal_pane(
     terminal_pane_id: u32,
     should_float_if_hidden: bool,
@@ -1470,7 +1470,7 @@ pub fn focus_terminal_pane(
     unsafe { host_run_plugin_command() };
 }
 
-/// Changes the focus to the plugin pane with the specified id, unsuppressing it if it was suppressed and switching to its tab and layer (eg. floating/tiled).
+/// 将焦点切换到具有指定 ID 的插件窗格，如果它被抑制则取消抑制，并切换到其标签页和层级（例如 floating/tiled）。
 pub fn focus_plugin_pane(
     plugin_pane_id: u32,
     should_float_if_hidden: bool,
@@ -1486,7 +1486,7 @@ pub fn focus_plugin_pane(
     unsafe { host_run_plugin_command() };
 }
 
-/// Changes the name (the title that appears in the UI) of the terminal pane with the specified id.
+/// 修改具有指定 ID 的终端窗格的名称（显示在界面中的标题）。
 pub fn rename_terminal_pane<S: AsRef<str>>(terminal_pane_id: u32, new_name: S)
 where
     S: ToString,
@@ -1497,7 +1497,7 @@ where
     unsafe { host_run_plugin_command() };
 }
 
-/// Changes the name (the title that appears in the UI) of the plugin pane with the specified id.
+/// 修改具有指定 ID 的插件窗格的名称（显示在界面中的标题）。
 pub fn rename_plugin_pane<S: AsRef<str>>(plugin_pane_id: u32, new_name: S)
 where
     S: ToString,
@@ -1508,7 +1508,7 @@ where
     unsafe { host_run_plugin_command() };
 }
 
-/// Changes the name (the title that appears in the UI) of the tab with the specified position.
+/// 修改具有指定位置的标签页的名称（显示在界面中的标题）。
 pub fn rename_tab<S: AsRef<str>>(tab_position: u32, new_name: S)
 where
     S: ToString,
@@ -1519,7 +1519,7 @@ where
     unsafe { host_run_plugin_command() };
 }
 
-/// Changes the name (the title that appears in the UI) of the tab with the specified id.
+/// 修改具有指定 ID 的标签页的名称（显示在界面中的标题）。
 pub fn rename_tab_with_id<S: AsRef<str>>(tab_id: u64, new_name: S)
 where
     S: ToString,
@@ -1530,7 +1530,7 @@ where
     unsafe { host_run_plugin_command() };
 }
 
-/// Switch to a session with the given name, create one if no name is given
+/// 切换到具有给定名称的会话，如果未提供名称则创建一个
 pub fn switch_session(name: Option<&str>) {
     let plugin_command = PluginCommand::SwitchSession(ConnectToSession {
         name: name.map(|n| n.to_string()),
@@ -1541,7 +1541,7 @@ pub fn switch_session(name: Option<&str>) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Switch to a session with the given name, create one if no name is given
+/// 切换到具有给定名称的会话，如果未提供名称则创建一个
 pub fn switch_session_with_layout(name: Option<&str>, layout: LayoutInfo, cwd: Option<PathBuf>) {
     let plugin_command = PluginCommand::SwitchSession(ConnectToSession {
         name: name.map(|n| n.to_string()),
@@ -1554,7 +1554,7 @@ pub fn switch_session_with_layout(name: Option<&str>, layout: LayoutInfo, cwd: O
     unsafe { host_run_plugin_command() };
 }
 
-/// Switch to a session with the given name, create one if no name is given
+/// 切换到具有给定名称的会话，如果未提供名称则创建一个
 pub fn switch_session_with_cwd(name: Option<&str>, cwd: Option<PathBuf>) {
     let plugin_command = PluginCommand::SwitchSession(ConnectToSession {
         name: name.map(|n| n.to_string()),
@@ -1566,8 +1566,8 @@ pub fn switch_session_with_cwd(name: Option<&str>, cwd: Option<PathBuf>) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Switch to a session with the given name, focusing either the provided pane_id or the provided
-/// tab position (in that order)
+/// 切换到具有给定名称的会话，聚焦提供的 pane_id 或提供的
+/// 标签页位置（按此优先级）
 pub fn switch_session_with_focus(
     name: &str,
     tab_position: Option<usize>,
@@ -1584,10 +1584,10 @@ pub fn switch_session_with_focus(
     unsafe { host_run_plugin_command() };
 }
 
-/// Permanently delete a resurrectable session with the given name.
+/// 永久删除具有给定名称的可恢复会话。
 ///
-/// Returns `Ok(())` if the session's cache directory was removed; `Err(...)`
-/// if the underlying `remove_dir_all` failed (e.g. permissions, missing path).
+/// 如果会话的缓存目录已删除，返回 `Ok(())`；`Err(...)`
+/// 如果底层 `remove_dir_all` 失败（例如权限不足、路径不存在）。
 pub fn delete_dead_session(name: &str) -> Result<(), String> {
     let plugin_command = PluginCommand::DeleteDeadSessionAndReply(name.to_owned());
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1604,10 +1604,10 @@ pub fn delete_dead_session(name: &str) -> Result<(), String> {
     }
 }
 
-/// Permanently delete all resurrectable sessions on this machine.
+/// 永久删除此机器上的所有可恢复会话。
 ///
-/// Bounded by a host-side wedge timeout (matching the kill-all budget) so a
-/// pathological filesystem cannot freeze the calling plugin.
+/// 受宿主端卡死超时限制（与 kill-all 预算一致），因此
+/// 异常的文件系统不会冻结调用插件。
 pub fn delete_all_dead_sessions() -> Result<(), String> {
     let plugin_command = PluginCommand::DeleteAllDeadSessionsAndReply;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1625,7 +1625,7 @@ pub fn delete_all_dead_sessions() -> Result<(), String> {
     }
 }
 
-/// Rename the current session
+/// 重命名当前会话
 pub fn rename_session(name: &str) {
     let plugin_command = PluginCommand::RenameSession(name.to_owned());
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1633,7 +1633,7 @@ pub fn rename_session(name: &str) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Unblock the input side of a pipe, requesting the next message be sent if there is one
+/// 解除管道输入端的阻塞，如果有下一条消息则请求发送
 pub fn unblock_cli_pipe_input(pipe_name: &str) {
     let plugin_command = PluginCommand::UnblockCliPipeInput(pipe_name.to_owned());
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1641,7 +1641,7 @@ pub fn unblock_cli_pipe_input(pipe_name: &str) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Block the input side of a pipe, will only be released once this or another plugin unblocks it
+/// 阻塞管道的输入端，只有在此插件或另一个插件解除阻塞后才会释放
 pub fn block_cli_pipe_input(pipe_name: &str) {
     let plugin_command = PluginCommand::BlockCliPipeInput(pipe_name.to_owned());
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1649,7 +1649,7 @@ pub fn block_cli_pipe_input(pipe_name: &str) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Send output to the output side of a pipe, ths does not affect the input side of same pipe
+/// 向管道的输出端发送输出，这不会影响同一管道的输入端
 pub fn cli_pipe_output(pipe_name: &str, output: &str) {
     let plugin_command = PluginCommand::CliPipeOutput(pipe_name.to_owned(), output.to_owned());
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1657,7 +1657,7 @@ pub fn cli_pipe_output(pipe_name: &str, output: &str) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Send a message to a plugin, it will be launched if it is not already running
+/// 向插件发送消息，如果插件尚未运行则将其启动
 pub fn pipe_message_to_plugin(message_to_plugin: MessageToPlugin) {
     let plugin_command = PluginCommand::MessageToPlugin(message_to_plugin);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1665,7 +1665,7 @@ pub fn pipe_message_to_plugin(message_to_plugin: MessageToPlugin) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Disconnect all other clients from the current session
+/// 断开所有其他客户端与当前会话的连接
 pub fn disconnect_other_clients() {
     let plugin_command = PluginCommand::DisconnectOtherClients;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1673,13 +1673,13 @@ pub fn disconnect_other_clients() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Kill all Zellij sessions in the list.
+/// 终止列表中的所有 Zellij 会话。
 ///
-/// Waits for each peer session to acknowledge the kill (over its own IPC
-/// socket -- the server-side handler reads back the `Exit` message the peer
-/// sends as part of its shutdown, or a stream-close if the peer dies first).
-/// Returns once every kill has been confirmed or one has failed. A wedged
-/// peer is bounded by a short server-side wedge timeout.
+/// 等待每个对等会话确认终止（通过其自己的 IPC
+/// 套接字——服务端处理器会读回对等方
+/// 作为关闭一部分发送的 `Exit` 消息，或者如果对等方先死亡则读取流关闭）。
+/// 在所有终止都已确认或其中一个失败后返回。卡死的
+/// 对等方受短暂的服务端卡死超时限制。
 pub fn kill_sessions<S: AsRef<str>>(session_names: &[S]) -> Result<(), String>
 where
     S: ToString,
@@ -1701,9 +1701,9 @@ where
     }
 }
 
-/// List Windows volumes (drives and WSL distributions).
-/// Results are returned via the `FileSystemUpdate` event.
-/// This command is only supported on Windows and requires FullHdAccess permission.
+/// 列出 Windows 卷（驱动器和 WSL 发行版）。
+/// 结果通过 `FileSystemUpdate` 事件返回。
+/// 此命令仅在 Windows 上受支持，需要 FullHdAccess 权限。
 pub fn list_windows_volumes() {
     let plugin_command = PluginCommand::ListWindowsVolumes;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1711,8 +1711,8 @@ pub fn list_windows_volumes() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Scan a specific folder in the host filesystem (this is a hack around some WASI runtime performance
-/// issues), will not follow symlinks
+/// 扫描宿主文件系统中的特定文件夹（这是针对某些 WASI 运行时性能
+/// 问题的变通方案），不会跟随符号链接
 pub fn scan_host_folder<S: AsRef<Path>>(folder_to_scan: &S) {
     let plugin_command = PluginCommand::ScanHostFolder(folder_to_scan.as_ref().to_path_buf());
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1727,8 +1727,8 @@ pub fn set_soft_keyboard(on: bool) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Start watching the host folder for filesystem changes (Note: somewhat unstable at the time
-/// being)
+/// 开始监视宿主文件夹的文件系统更改（注意：目前
+/// 有些不稳定）
 pub fn watch_filesystem() {
     let plugin_command = PluginCommand::WatchFilesystem;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1736,13 +1736,13 @@ pub fn watch_filesystem() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Get the serialized session layout in KDL format synchronously
-/// note: this removes the requesting plugin from the dumped layout
+/// 同步获取 KDL 格式的序列化会话布局
+/// 注意：这会从导出的布局中移除发起请求的插件
 pub fn dump_session_layout() -> Result<(String, Option<LayoutMetadata>), String> {
     dump_session_layout_impl(None)
 }
 
-/// Get the serialized layout for a specific tab in KDL format synchronously
+/// 同步获取特定标签页的 KDL 格式序列化布局
 /// note: this removes the requesting plugin from the dumped layout
 pub fn dump_session_layout_for_tab(
     tab_index: usize,
@@ -1764,7 +1764,7 @@ fn dump_session_layout_impl(
     let protobuf_response = ProtobufDumpSessionLayoutResponse::decode(response_bytes.as_slice())
         .map_err(|e| format!("Failed to decode protobuf response: {}", e))?;
 
-    // Extract metadata if present
+    // 如果存在则提取元数据
     let metadata = protobuf_response
         .metadata
         .and_then(|pb_metadata| pb_metadata.try_into().ok());
@@ -1778,7 +1778,7 @@ fn dump_session_layout_impl(
     }
 }
 
-/// Parses a KDL layout string and returns LayoutMetadata
+/// 解析 KDL 布局字符串并返回 LayoutMetadata
 pub fn parse_layout(layout_string: &str) -> Result<LayoutMetadata, LayoutParsingError> {
     let plugin_command = PluginCommand::ParseLayout(layout_string.to_string());
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1802,8 +1802,8 @@ pub fn parse_layout(layout_string: &str) -> Result<LayoutMetadata, LayoutParsing
     }
 }
 
-/// Get a list of clients, their focused pane and running command or focused plugin back as an
-/// Event::ListClients (note: this event must be subscribed to)
+/// 获取客户端列表、其焦点窗格和正在运行的命令或焦点插件，以
+/// Event::ListClients 形式返回（注意：必须订阅此事件）
 pub fn list_clients() {
     let plugin_command = PluginCommand::ListClients;
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1811,7 +1811,7 @@ pub fn list_clients() {
     unsafe { host_run_plugin_command() };
 }
 
-/// Change configuration for the current user
+/// 更改当前用户的配置
 pub fn reconfigure(new_config: String, save_configuration_file: bool) {
     let plugin_command = PluginCommand::Reconfigure(new_config, save_configuration_file);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1819,7 +1819,7 @@ pub fn reconfigure(new_config: String, save_configuration_file: bool) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Re-run command in pane
+/// 在窗格中重新运行命令
 pub fn rerun_command_pane(terminal_pane_id: u32) {
     let plugin_command = PluginCommand::RerunCommandPane(terminal_pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1827,7 +1827,7 @@ pub fn rerun_command_pane(terminal_pane_id: u32) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Sugar for close_terminal_pane and close_plugin_pane
+/// close_terminal_pane 和 close_plugin_pane 的语法糖
 pub fn close_pane_with_id(pane_id: PaneId) {
     let plugin_command = match pane_id {
         PaneId::Terminal(terminal_pane_id) => PluginCommand::CloseTerminalPane(terminal_pane_id),
@@ -1838,7 +1838,7 @@ pub fn close_pane_with_id(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Resize the specified pane (increase/decrease) with an optional direction (left/right/up/down)
+/// 使用可选方向（左/右/上/下）调整指定窗格的大小（增大/减小）
 pub fn resize_pane_with_id(resize_strategy: ResizeStrategy, pane_id: PaneId) {
     let plugin_command = PluginCommand::ResizePaneIdWithDirection(resize_strategy, pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1846,7 +1846,7 @@ pub fn resize_pane_with_id(resize_strategy: ResizeStrategy, pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Changes the focus to the pane with the specified id, unsuppressing it if it was suppressed and switching to its tab and layer (eg. floating/tiled).
+/// 将焦点切换到具有指定 ID 的窗格，如果它被抑制则取消抑制，并切换到其标签页和层级（例如 floating/tiled）。
 pub fn focus_pane_with_id(
     pane_id: PaneId,
     should_float_if_hidden: bool,
@@ -1869,8 +1869,8 @@ pub fn focus_pane_with_id(
     unsafe { host_run_plugin_command() };
 }
 
-/// Edit the scrollback of the specified pane in the user's default `$EDITOR` (currently only works
-/// for terminal panes)
+/// 在用户默认的 `$EDITOR` 中编辑指定窗格的回滚缓冲区（目前仅
+/// 适用于终端窗格）
 pub fn edit_scrollback_for_pane_with_id(pane_id: PaneId) {
     let plugin_command = PluginCommand::EditScrollbackForPaneWithId(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1878,15 +1878,15 @@ pub fn edit_scrollback_for_pane_with_id(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Retrieves the scrollback contents from the specified pane
+/// 从指定窗格检索回滚缓冲区内容
 ///
 /// # Arguments
-/// * `pane_id` - The ID of the pane to get scrollback from
-/// * `get_full_scrollback` - Whether to retrieve the full scrollback buffer (including lines above and below viewport)
+/// * `pane_id` - 要获取回滚缓冲区的窗格 ID
+/// * `get_full_scrollback` - 是否检索完整的回滚缓冲区（包括视口上方和下方的行）
 ///
 /// # Returns
-/// * `Ok(PaneContents)` - The pane contents if successful
-/// * `Err(String)` - An error message if the pane was not found, timed out, or another error occurred
+/// * `Ok(PaneContents)` - 成功时返回窗格内容
+/// * `Err(String)` - 如果窗格未找到、超时或发生其他错误时的错误消息
 pub fn get_pane_scrollback(
     pane_id: PaneId,
     get_full_scrollback: bool,
@@ -1899,26 +1899,26 @@ pub fn get_pane_scrollback(
     object_to_stdout(&protobuf_plugin_command.encode_to_vec());
     unsafe { host_run_plugin_command() };
 
-    // Read response from stdin
+    // 从 stdin 读取响应
     let response_bytes =
         bytes_from_stdin().map_err(|e| format!("Failed to read response from stdin: {:?}", e))?;
 
-    // Decode protobuf response
+    // 解码 protobuf 响应
     let protobuf_response = ProtobufPaneScrollbackResponse::decode(response_bytes.as_slice())
         .map_err(|e| format!("Failed to decode protobuf response: {}", e))?;
 
-    // Convert to Rust type
+    // 转换为 Rust 类型
     let response = PaneScrollbackResponse::try_from(protobuf_response)
         .map_err(|e| format!("Failed to convert protobuf response: {}", e))?;
 
-    // Convert Result enum to actual Result type
+    // 将 Result 枚举转换为实际的 Result 类型
     match response {
         PaneScrollbackResponse::Ok(contents) => Ok(contents),
         PaneScrollbackResponse::Err(error_msg) => Err(error_msg),
     }
 }
 
-/// Write bytes to the `STDIN` of the specified pane
+/// 将字节写入指定窗格的 `STDIN`
 pub fn write_to_pane_id(bytes: Vec<u8>, pane_id: PaneId) {
     let plugin_command = PluginCommand::WriteToPaneId(bytes, pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1926,7 +1926,7 @@ pub fn write_to_pane_id(bytes: Vec<u8>, pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Write characters to the `STDIN` of the specified pane
+/// 将字符写入指定窗格的 `STDIN`
 pub fn write_chars_to_pane_id(chars: &str, pane_id: PaneId) {
     let plugin_command = PluginCommand::WriteCharsToPaneId(chars.to_owned(), pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1934,7 +1934,7 @@ pub fn write_chars_to_pane_id(chars: &str, pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Send SIGINT to the process running inside a terminal pane identified by this PaneId
+/// 向由此 PaneId 标识的终端窗格内运行的进程发送 SIGINT
 pub fn send_sigint_to_pane_id(pane_id: PaneId) {
     let plugin_command = PluginCommand::SendSigintToPaneId(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1942,7 +1942,7 @@ pub fn send_sigint_to_pane_id(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Send SIGKILL to the process running inside a terminal pane identified by this PaneId
+/// 向由此 PaneId 标识的终端窗格内运行的进程发送 SIGKILL
 pub fn send_sigkill_to_pane_id(pane_id: PaneId) {
     let plugin_command = PluginCommand::SendSigkillToPaneId(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1950,7 +1950,7 @@ pub fn send_sigkill_to_pane_id(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Get the PID of the process running inside a terminal pane
+/// 获取终端窗格内运行进程的 PID
 pub fn get_pane_pid(pane_id: PaneId) -> Result<i32, String> {
     let plugin_command = PluginCommand::GetPanePid { pane_id };
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -1976,24 +1976,24 @@ pub fn get_pane_pid(pane_id: PaneId) -> Result<i32, String> {
     }
 }
 
-/// Gets the current running command for a specific pane by its ID.
+/// 通过 ID 获取特定窗格当前正在运行的命令。
 ///
-/// This queries the operating system for the **current** running command,
-/// not the initial command used to launch the pane. The command is returned
-/// as a vector of strings (argv-style), where the first element is the
-/// executable and subsequent elements are arguments.
+/// 这会向操作系统查询**当前**正在运行的命令，
+/// 而非启动窗格时使用的初始命令。命令以
+/// 字符串向量（argv 风格）返回，其中第一个元素是
+/// 可执行文件，后续元素是参数。
 ///
 /// # Arguments
-/// * `pane_id` - The ID of the pane to query
+/// * `pane_id` - 要查询的窗格 ID
 ///
 /// # Returns
-/// * `Ok(Vec<String>)` - The command and arguments as separate strings
-/// * `Err(String)` - Error message if:
-///   - Pane is a plugin (only terminal panes have commands)
-///   - Pane doesn't exist
-///   - OS query failed
+/// * `Ok(Vec<String>)` - 命令和参数作为独立字符串
+/// * `Err(String)` - 以下情况的错误消息：
+///   - 窗格是插件（只有终端窗格有命令）
+///   - 窗格不存在
+///   - 操作系统查询失败
 ///
-/// # Permissions Required
+/// # 所需权限
 /// * `ReadApplicationState`
 ///
 /// # Example
@@ -2023,9 +2023,9 @@ pub fn get_pane_running_command(pane_id: PaneId) -> Result<Vec<String>, String> 
     }
 }
 
-/// Fetches a fresh snapshot of all live and resurrectable sessions on this machine.
+/// 获取此机器上所有活动和可恢复会话的最新快照。
 ///
-/// # Permissions Required
+/// # 权限 Required
 /// * `ReadApplicationState`
 pub fn get_session_list() -> Result<SessionListSnapshot, String> {
     let plugin_command = PluginCommand::GetSessionList;
@@ -2060,22 +2060,22 @@ pub fn get_session_list() -> Result<SessionListSnapshot, String> {
     }
 }
 
-/// Gets the current working directory for a specific pane by its ID.
+/// 通过 ID 获取特定窗格的当前工作目录。
 ///
-/// This queries the operating system for the **current** working directory
-/// of the process running in the pane. The CWD may change as the user
-/// navigates directories within the terminal.
+/// 这会向操作系统查询窗格中运行进程的**当前**工作目录。
+/// CWD 可能会随着用户
+/// 在终端中导航目录而改变。
 ///
 /// # Arguments
 /// * `pane_id` - The ID of the pane to query
 ///
 /// # Returns
-/// * `Ok(PathBuf)` - The current working directory
+/// * `Ok(PathBuf)` - 当前工作目录
 /// * `Err(String)` - Error message if:
-///   - Pane is a plugin (only terminal panes have CWDs)
+///   - 窗格是插件（只有终端窗格有 CWD）
 ///   - Pane doesn't exist
-///   - OS query failed (process may have exited)
-///   - CWD is inaccessible (permissions, deleted directory)
+///   - 操作系统查询失败（进程可能已退出）
+///   - CWD 不可访问（权限不足、目录已删除）
 ///
 /// # Permissions Required
 /// * `ReadApplicationState`
@@ -2106,16 +2106,16 @@ pub fn get_pane_cwd(pane_id: PaneId) -> Result<PathBuf, String> {
     }
 }
 
-/// Save a layout to the user's layout directory
+/// 将布局保存到用户的布局目录
 ///
 /// # Arguments
-/// * `layout_name` - Name of the layout file (without .kdl extension)
-/// * `layout_kdl` - KDL string representing the layout
-/// * `overwrite` - Whether to overwrite if the file already exists
+/// * `layout_name` - 布局文件的名称（不含 .kdl 扩展名）
+/// * `layout_kdl` - 表示布局的 KDL 字符串
+/// * `overwrite` - 如果文件已存在是否覆盖
 ///
 /// # Returns
-/// * `Ok(())` - Layout was successfully validated and saved
-/// * `Err(String)` - Error message (parse error, I/O error, file exists, etc.)
+/// * `Ok(())` - 布局成功验证并保存
+/// * `Err(String)` - 错误消息（解析错误、I/O 错误、文件已存在等）
 pub fn save_layout<S: AsRef<str>>(
     layout_name: S,
     layout_kdl: S,
@@ -2149,28 +2149,28 @@ pub fn save_layout<S: AsRef<str>>(
     }
 }
 
-/// Delete a layout from the user's layout directory.
+/// 从用户的布局目录中删除布局。
 ///
 /// # Arguments
 ///
-/// * `layout_name` - The name of the layout file to delete (without the `.kdl` extension).
-///                   Layout names are sanitized server-side to prevent directory traversal.
+/// * `layout_name` - 要删除的布局文件的名称（不含 `.kdl` 扩展名）。
+///                   布局名称在服务端经过清理，以防止目录遍历。
 ///
 /// # Returns
 ///
-/// * `Ok(())` - The layout was successfully deleted
-/// * `Err(String)` - An error occurred with a descriptive message (e.g., file not found, permission denied)
+/// * `Ok(())` - 布局成功删除
+/// * `Err(String)` - 发生错误并附带描述性消息（例如文件未找到、权限被拒绝）
 ///
 /// # Permissions
 ///
-/// Requires the `ChangeApplicationState` permission.
+/// 需要 `ChangeApplicationState` 权限。
 ///
-/// # Examples
+/// # 示例
 ///
 /// ```no_run
 /// use zellij_tile::prelude::*;
 ///
-/// // Delete a layout named "my-layout"
+/// // 删除名为 "my-layout" 的布局
 /// match delete_layout("my-layout") {
 ///     Ok(_) => eprintln!("Layout deleted successfully"),
 ///     Err(e) => eprintln!("Failed to delete layout: {}", e),
@@ -2203,34 +2203,34 @@ pub fn delete_layout<S: AsRef<str>>(layout_name: S) -> Result<(), String> {
     }
 }
 
-/// Rename a layout file in the user's layout directory
+/// 重命名用户布局目录中的布局文件
 ///
 /// # Arguments
-/// * `old_layout_name` - Current name of the layout (without .kdl extension)
-/// * `new_layout_name` - New name for the layout (without .kdl extension)
+/// * `old_layout_name` - 布局的当前名称（不含 .kdl 扩展名）
+/// * `new_layout_name` - 布局的新名称（不含 .kdl 扩展名）
 ///
 /// # Returns
-/// * `Ok(())` - Layout was successfully renamed
-/// * `Err(String)` - Error message describing what went wrong
+/// * `Ok(())` - 布局成功重命名
+/// * `Err(String)` - 描述出错原因的错误消息
 ///
-/// # Error Cases
-/// * Old layout name is invalid (empty, contains path separators, etc.)
-/// * New layout name is invalid
-/// * Source layout file doesn't exist
-/// * Target layout file already exists (no overwrite)
-/// * Layout directory not found
-/// * File system error during rename operation
+/// # 错误情况
+/// * 旧布局名称无效（为空、包含路径分隔符等）
+/// * 新布局名称无效
+/// * 源布局文件不存在
+/// * 目标布局文件已存在（不覆盖）
+/// * 布局目录未找到
+/// * 重命名操作期间的文件系统错误
 ///
 /// # Permissions
 ///
-/// Requires the `ChangeApplicationState` permission.
+/// 需要 `ChangeApplicationState` 权限。
 ///
 /// # Examples
 ///
 /// ```no_run
 /// use zellij_tile::prelude::*;
 ///
-/// // Rename a layout from "old-name" to "new-name"
+/// // 将布局从 "old-name" 重命名为 "new-name"
 /// match rename_layout("old-name", "new-name") {
 ///     Ok(_) => eprintln!("Layout renamed successfully"),
 ///     Err(e) => eprintln!("Failed to rename layout: {}", e),
@@ -2256,7 +2256,7 @@ pub fn rename_layout(
     let protobuf_response = ProtobufRenameLayoutResponse::decode(response_bytes.as_slice())
         .map_err(|e| format!("Failed to decode protobuf response: {}", e))?;
 
-    // Convert to native response type
+    // 转换为原生响应类型
     let response: RenameLayoutResponse = protobuf_response
         .try_into()
         .map_err(|e| format!("Failed to convert protobuf response: {}", e))?;
@@ -2267,7 +2267,7 @@ pub fn rename_layout(
     }
 }
 
-/// Opens a layout file in the user's default `$EDITOR`
+/// 在用户默认的 `$EDITOR` 中打开布局文件
 pub fn edit_layout<S: AsRef<str>>(
     layout_name: S,
     context: BTreeMap<String, String>,
@@ -2300,7 +2300,7 @@ pub fn edit_layout<S: AsRef<str>>(
     }
 }
 
-/// Switch the position of the pane with this id with a different pane
+/// 将具有此 ID 的窗格与另一个窗格交换位置
 pub fn move_pane_with_pane_id(pane_id: PaneId) {
     let plugin_command = PluginCommand::MovePaneWithPaneId(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2308,7 +2308,7 @@ pub fn move_pane_with_pane_id(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Switch the position of the pane with this id with a different pane in the specified direction (eg. `Down`, `Up`, `Left`, `Right`).
+/// 沿指定方向将具有此 ID 的窗格与另一个窗格交换位置（例如 `Down`、`Up`、`Left`、`Right`）。
 pub fn move_pane_with_pane_id_in_direction(pane_id: PaneId, direction: Direction) {
     let plugin_command = PluginCommand::MovePaneWithPaneIdInDirection(pane_id, direction);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2316,7 +2316,7 @@ pub fn move_pane_with_pane_id_in_direction(pane_id: PaneId, direction: Direction
     unsafe { host_run_plugin_command() };
 }
 
-/// Clear the scroll buffer of the specified pane
+/// 清除指定窗格的滚动缓冲区
 pub fn clear_screen_for_pane_id(pane_id: PaneId) {
     let plugin_command = PluginCommand::ClearScreenForPaneId(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2324,7 +2324,7 @@ pub fn clear_screen_for_pane_id(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Scroll the specified pane up 1 line
+/// 将指定窗格向上滚动 1 行
 pub fn scroll_up_in_pane_id(pane_id: PaneId) {
     let plugin_command = PluginCommand::ScrollUpInPaneId(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2332,7 +2332,7 @@ pub fn scroll_up_in_pane_id(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Scroll the specified pane down 1 line
+/// 将指定窗格向下滚动 1 行
 pub fn scroll_down_in_pane_id(pane_id: PaneId) {
     let plugin_command = PluginCommand::ScrollDownInPaneId(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2340,7 +2340,7 @@ pub fn scroll_down_in_pane_id(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Scroll the specified pane all the way to the top of the scrollbuffer
+/// 将指定窗格一直滚动到滚动缓冲区顶部
 pub fn scroll_to_top_in_pane_id(pane_id: PaneId) {
     let plugin_command = PluginCommand::ScrollToTopInPaneId(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2348,7 +2348,7 @@ pub fn scroll_to_top_in_pane_id(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Scroll the specified pane all the way to the bottom of the scrollbuffer
+/// 将指定窗格一直滚动到滚动缓冲区底部
 pub fn scroll_to_bottom_in_pane_id(pane_id: PaneId) {
     let plugin_command = PluginCommand::ScrollToBottomInPaneId(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2356,7 +2356,7 @@ pub fn scroll_to_bottom_in_pane_id(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Scroll the specified pane up one page
+/// 将指定窗格向上滚动一页
 pub fn page_scroll_up_in_pane_id(pane_id: PaneId) {
     let plugin_command = PluginCommand::PageScrollUpInPaneId(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2364,7 +2364,7 @@ pub fn page_scroll_up_in_pane_id(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Scroll the specified pane down one page
+/// 将指定窗格向下滚动一页
 pub fn page_scroll_down_in_pane_id(pane_id: PaneId) {
     let plugin_command = PluginCommand::PageScrollDownInPaneId(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2372,7 +2372,7 @@ pub fn page_scroll_down_in_pane_id(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Toggle the specified pane to be fullscreen or normal sized
+/// 切换指定窗格为全屏或正常大小
 pub fn toggle_pane_id_fullscreen(pane_id: PaneId) {
     let plugin_command = PluginCommand::TogglePaneIdFullscreen(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2380,7 +2380,7 @@ pub fn toggle_pane_id_fullscreen(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Embed the specified pane (make it stop floating) or turn it to a float pane if it is not
+/// 嵌入指定窗格（使其停止浮动），如果它不是浮动窗格则将其变为浮动窗格
 pub fn toggle_pane_embed_or_eject_for_pane_id(pane_id: PaneId) {
     let plugin_command = PluginCommand::TogglePaneEmbedOrEjectForPaneId(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2388,7 +2388,7 @@ pub fn toggle_pane_embed_or_eject_for_pane_id(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Close the focused tab
+/// 关闭焦点标签页
 pub fn close_tab_with_index(tab_index: usize) {
     let plugin_command = PluginCommand::CloseTabWithIndex(tab_index);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2396,11 +2396,11 @@ pub fn close_tab_with_index(tab_index: usize) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Close the tab with the given stable ID.
+/// 关闭具有给定稳定 ID 的标签页。
 ///
-/// Unlike `close_tab_with_index`, this function identifies the tab by its stable
-/// `tab_id` rather than its display position, which may change as tabs are moved
-/// or closed. The tab_id can be obtained from `TabInfo.tab_id`.
+/// 与 `close_tab_with_index` 不同，此函数通过标签页的稳定
+/// `tab_id` 而非显示位置来标识标签页，显示位置可能会随着标签页的移动
+/// 或关闭而改变。tab_id 可从 `TabInfo.tab_id` 获取。
 pub fn close_tab_with_id(tab_id: u64) {
     let plugin_command = PluginCommand::CloseTabWithId(tab_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2408,7 +2408,7 @@ pub fn close_tab_with_id(tab_id: u64) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Rename the specified pane
+/// 重命名指定窗格
 pub fn rename_pane_with_id<S: AsRef<str>>(pane_id: PaneId, new_name: S)
 where
     S: ToString,
@@ -2426,7 +2426,7 @@ where
     unsafe { host_run_plugin_command() };
 }
 
-/// Create a new tab that includes the specified pane ids
+/// 创建一个包含指定窗格 ID 的新标签页
 pub fn break_panes_to_new_tab(
     pane_ids: &[PaneId],
     new_tab_name: Option<String>,
@@ -2446,7 +2446,7 @@ pub fn break_panes_to_new_tab(
     BreakPanesToNewTabResponse::try_from(response).unwrap()
 }
 
-/// Move the pane ids to the tab with the specified index
+/// 将窗格 ID 移动到具有指定索引的标签页
 pub fn break_panes_to_tab_with_index(
     pane_ids: &[PaneId],
     tab_index: usize,
@@ -2467,7 +2467,7 @@ pub fn break_panes_to_tab_with_index(
     BreakPanesToTabWithIndexResponse::try_from(response).unwrap()
 }
 
-/// Move the pane ids to the tab with the specified id
+/// 将窗格 ID 移动到具有指定 ID 的标签页
 pub fn break_panes_to_tab_with_id(
     pane_ids: &[PaneId],
     tab_id: usize,
@@ -2488,7 +2488,7 @@ pub fn break_panes_to_tab_with_id(
     BreakPanesToTabWithIdResponse::try_from(response).unwrap()
 }
 
-/// Reload an already-running in this session, optionally skipping the cache
+/// 重新加载此会话中已在运行的插件，可选择性跳过缓存
 pub fn reload_plugin_with_id(plugin_id: u32) {
     let plugin_command = PluginCommand::ReloadPlugin(plugin_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2496,7 +2496,7 @@ pub fn reload_plugin_with_id(plugin_id: u32) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Reload an already-running in this session, optionally skipping the cache
+/// 重新加载此会话中已在运行的插件，可选择性跳过缓存
 pub fn load_new_plugin<S: AsRef<str>>(
     url: S,
     config: BTreeMap<String, String>,
@@ -2516,7 +2516,7 @@ pub fn load_new_plugin<S: AsRef<str>>(
     unsafe { host_run_plugin_command() };
 }
 
-/// Rebind keys for the current user
+/// 为当前用户重新绑定按键
 pub fn rebind_keys(
     keys_to_unbind: Vec<(InputMode, KeyWithModifier)>,
     keys_to_rebind: Vec<(InputMode, KeyWithModifier, Vec<Action>)>,
@@ -2562,10 +2562,10 @@ pub fn change_floating_panes_coordinates(
     unsafe { host_run_plugin_command() };
 }
 
-/// Toggle the borderless state of a pane identified by pane_id
+/// 切换由 pane_id 标识的窗格的无边框状态
 ///
 /// # Arguments
-/// * `pane_id` - The ID of the pane to toggle (PaneId::Terminal or PaneId::Plugin)
+/// * `pane_id` - 要切换的窗格 ID（PaneId::Terminal 或 PaneId::Plugin）
 pub fn toggle_pane_borderless(pane_id: PaneId) {
     let plugin_command = PluginCommand::TogglePaneBorderless(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2573,11 +2573,11 @@ pub fn toggle_pane_borderless(pane_id: PaneId) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Set the borderless state of a pane explicitly
+/// 显式设置窗格的无边框状态
 ///
 /// # Arguments
-/// * `pane_id` - The ID of the pane (PaneId::Terminal or PaneId::Plugin)
-/// * `borderless` - true for borderless, false for bordered
+/// * `pane_id` - 窗格 ID（PaneId::Terminal 或 PaneId::Plugin）
+/// * `borderless` - true 表示无边框，false 表示有边框
 pub fn set_pane_borderless(pane_id: PaneId, borderless: bool) {
     let plugin_command = PluginCommand::SetPaneBorderless(pane_id, borderless);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2585,12 +2585,12 @@ pub fn set_pane_borderless(pane_id: PaneId, borderless: bool) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Set the default foreground and/or background color of a pane
+/// 设置窗格的默认前景色和/或背景色
 ///
 /// # Arguments
 /// * `pane_id` - The ID of the pane (PaneId::Terminal or PaneId::Plugin)
-/// * `fg` - Optional foreground color string (e.g. "#00e000"), None to leave unchanged
-/// * `bg` - Optional background color string (e.g. "#001a3a"), None to leave unchanged
+/// * `fg` - 可选的前景色字符串（例如 "#00e000"），None 表示不更改
+/// * `bg` - 可选的背景色字符串（例如 "#001a3a"），None 表示不更改
 pub fn set_pane_color(pane_id: PaneId, fg: Option<String>, bg: Option<String>) {
     let plugin_command = PluginCommand::SetPaneColor(pane_id, fg, bg);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2801,10 +2801,10 @@ pub fn replace_pane_with_existing_pane(
     unsafe { host_run_plugin_command() };
 }
 
-// Utility Functions
+// 工具函数
 
 #[allow(unused)]
-/// Returns the `TabInfo` corresponding to the currently active tab
+/// 返回与当前活动标签页对应的 `TabInfo`
 pub fn get_focused_tab(tab_infos: &Vec<TabInfo>) -> Option<TabInfo> {
     for tab_info in tab_infos {
         if tab_info.active {
@@ -2815,7 +2815,7 @@ pub fn get_focused_tab(tab_infos: &Vec<TabInfo>) -> Option<TabInfo> {
 }
 
 #[allow(unused)]
-/// Returns the `PaneInfo` corresponding to the currently active pane (ignoring plugins)
+/// 返回与当前活动窗格对应的 `PaneInfo`（忽略插件）
 pub fn get_focused_pane(tab_position: usize, pane_manifest: &PaneManifest) -> Option<PaneInfo> {
     let panes = pane_manifest.panes.get(&tab_position);
     if let Some(panes) = panes {
@@ -2847,7 +2847,7 @@ pub fn override_layout<L: AsRef<LayoutInfo>>(
     unsafe { host_run_plugin_command() };
 }
 
-// Internal Functions
+// 内部函数
 
 #[doc(hidden)]
 pub fn object_from_stdin<T: DeserializeOwned>() -> Result<T> {
@@ -2872,7 +2872,7 @@ pub fn object_to_stdout(object: &impl Serialize) {
     println!("{}", serde_json::to_string(object).unwrap());
 }
 
-/// Post a message to a worker of this plugin, for more information please see [Plugin Workers](https://zellij.dev/documentation/plugin-api-workers.md)
+/// 向此插件的工作器发送消息，更多信息请参阅 [插件工作器](https://zellij.dev/documentation/plugin-api-workers.md)
 pub fn post_message_to(plugin_message: PluginMessage) {
     let plugin_command = PluginCommand::PostMessageTo(plugin_message);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2880,7 +2880,7 @@ pub fn post_message_to(plugin_message: PluginMessage) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Post a message to this plugin, for more information please see [Plugin Workers](https://zellij.dev/documentation/plugin-api-workers.md)
+/// 向此插件发送消息，更多信息请参阅 [插件工作器](https://zellij.dev/documentation/plugin-api-workers.md)
 pub fn post_message_to_plugin(plugin_message: PluginMessage) {
     let plugin_command = PluginCommand::PostMessageToPlugin(plugin_message);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2896,13 +2896,13 @@ pub fn run_action(action: Action, context: BTreeMap<String, String>) {
     unsafe { host_run_plugin_command() };
 }
 
-/// Show all floating panes in the specified tab, or the active tab if `tab_id` is `None`.
+/// 显示指定标签页中的所有浮动窗格，如果 `tab_id` 为 `None` 则显示活动标签页。
 ///
-/// Blocks until the server-side action is complete.
+/// 阻塞直到服务端操作完成。
 ///
-/// Returns `Ok(true)` if the floating panes were made visible (state changed),
-/// `Ok(false)` if the floating panes were already visible (no change),
-/// or `Err(String)` if the specified tab was not found.
+/// 如果浮动窗格已变为可见（状态改变），返回 `Ok(true)`，
+/// 如果浮动窗格已经可见（无变化），返回 `Ok(false)`，
+/// 如果指定的标签页未找到，返回 `Err(String)`。
 pub fn show_floating_panes(tab_id: Option<usize>) -> Result<bool, String> {
     let plugin_command = PluginCommand::ShowFloatingPanes { tab_id };
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2919,12 +2919,12 @@ pub fn show_floating_panes(tab_id: Option<usize>) -> Result<bool, String> {
     }
 }
 
-/// Hide all floating panes in the specified tab, or the active tab if `tab_id` is `None`.
+/// 隐藏指定标签页中的所有浮动窗格，如果 `tab_id` 为 `None` 则隐藏活动标签页。
 ///
-/// Blocks until the server-side action is complete.
+/// 阻塞直到服务端操作完成。
 ///
-/// Returns `Ok(true)` if the floating panes were hidden (state changed),
-/// `Ok(false)` if the floating panes were already hidden (no change),
+/// 如果浮动窗格已被隐藏（状态改变），返回 `Ok(true)`，
+/// 如果浮动窗格已经隐藏（无变化），返回 `Ok(false)`，
 /// or `Err(String)` if the specified tab was not found.
 pub fn hide_floating_panes(tab_id: Option<usize>) -> Result<bool, String> {
     let plugin_command = PluginCommand::HideFloatingPanes { tab_id };
@@ -2942,23 +2942,23 @@ pub fn hide_floating_panes(tab_id: Option<usize>) -> Result<bool, String> {
     }
 }
 
-/// Set or update regex-based content highlights for a pane.
+/// 为窗格设置或更新基于正则表达式的内容高亮。
 ///
-/// Each entry in `highlights` is keyed by its `pattern` string. Calling this
-/// function again with the same pattern updates its style; new patterns are
-/// added; patterns not present in this call are kept. To remove all highlights
-/// for this plugin on the pane, use `clear_pane_highlights`.
+/// `highlights` 中的每个条目都以其 `pattern` 字符串为键。再次
+/// 使用相同的模式调用此函数会更新其样式；新的模式将被
+/// 添加；本次调用中未出现的模式将被保留。要移除此插件在
+/// 该窗格上的所有高亮，请使用 `clear_pane_highlights`。
 ///
-/// Pattern matching is performed by the server against the current viewport at
-/// render time. The plugin never handles coordinates, so there is no race
-/// condition between content changes and highlight application.
+/// 模式匹配由服务端在渲染时针对当前视口执行。
+/// 插件从不处理坐标，因此不存在内容更改与高亮应用之间的
+/// 竞态条件。
 ///
-/// When `on_hover` is `true` and `tooltip_text` is `Some(...)`, the tooltip
-/// text is displayed at the bottom of the pane frame (formatted as
-/// `" Alt <Click> - {tooltip_text} "`) whenever the mouse cursor hovers over
-/// the highlighted region.
+/// 当 `on_hover` 为 `true` 且 `tooltip_text` 为 `Some(...)` 时，工具提示
+/// 文本显示在窗格边框底部（格式为
+/// `" Alt <Click> - {tooltip_text} "`），每当鼠标光标悬停在
+/// 高亮区域上方时。
 ///
-/// Requires `ChangeApplicationState` permission.
+/// 需要 `ChangeApplicationState` 权限。
 pub fn set_pane_regex_highlights(pane_id: PaneId, highlights: Vec<RegexHighlight>) {
     let plugin_command = PluginCommand::SetPaneRegexHighlights(pane_id, highlights);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();
@@ -2966,11 +2966,11 @@ pub fn set_pane_regex_highlights(pane_id: PaneId, highlights: Vec<RegexHighlight
     unsafe { host_run_plugin_command() };
 }
 
-/// Remove all regex highlights this plugin has set on the given pane.
+/// 移除此插件在给定窗格上设置的所有正则高亮。
 ///
-/// Other plugins' highlights on the same pane are not affected.
+/// 同一窗格上其他插件的高亮不受影响。
 ///
-/// Requires `ChangeApplicationState` permission.
+/// 需要 `ChangeApplicationState` 权限。
 pub fn clear_pane_highlights(pane_id: PaneId) {
     let plugin_command = PluginCommand::ClearPaneHighlights(pane_id);
     let protobuf_plugin_command: ProtobufPluginCommand = plugin_command.try_into().unwrap();

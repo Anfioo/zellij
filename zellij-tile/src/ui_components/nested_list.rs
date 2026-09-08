@@ -130,7 +130,7 @@ impl NestedListItem {
     }
 }
 
-/// render a nested list with arbitrary data
+/// 使用任意数据渲染嵌套列表
 pub fn print_nested_list(items: Vec<NestedListItem>) {
     let items = items
         .into_iter()

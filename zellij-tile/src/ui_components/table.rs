@@ -1,6 +1,6 @@
 use super::Text;
 
-/// render a table with arbitrary data
+/// 使用任意数据渲染表格
 #[derive(Debug, Clone)]
 pub struct Table {
     contents: Vec<Vec<Text>>,
