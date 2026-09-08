@@ -257,9 +257,9 @@ impl Controls {
     }
 
     fn get_new_layout_text_and_keys(&self, max_cols: usize) -> (&str, &[&str]) {
-        let long_text = "- New Layout: <n> from current session, <i> import";
-        let short_text = "New: <n> current, <i> import";
-        let minimum_text = "New: <n>/<N>/<i> ...";
+        let long_text = "- 新布局：<n> 来自当前会话，<i> 导入";
+        let short_text = "新建：<n> 当前，<i> 导入";
+        let minimum_text = "新建：<n>/<N>/<i> ...";
         let text = if max_cols >= long_text.chars().count() {
             long_text
         } else if max_cols >= short_text.chars().count() {
@@ -327,7 +327,7 @@ impl Controls {
 
     fn render_new_layout_controls(&self, x: usize, y: usize, max_cols: usize) {
         let (text, keys) = self.get_new_layout_text_and_keys(max_cols);
-        let new_layout_line = color_control_text(text, keys).color_substring(2, "New Layout:");
+        let new_layout_line = color_control_text(text, keys).color_substring(2, "新布局：");
         print_text_with_coordinates(new_layout_line, x, y, None, None);
     }
 
@@ -441,13 +441,13 @@ impl<'a> ErrorMessage<'a> {
     }
 
     pub fn render(&self, x: usize, y: usize) {
-        let title = Text::new("Error").error_color_all();
+        let title = Text::new("错误").error_color_all();
         print_text_with_coordinates(title, x, y, None, None);
 
         let message = Text::new(self.message).error_color_all();
         print_text_with_coordinates(message, x, y + 2, None, None);
 
-        let help = Text::new("Press any key to continue");
+        let help = Text::new("按任意键继续");
         print_text_with_coordinates(help, x, y + 4, None, None);
     }
 }

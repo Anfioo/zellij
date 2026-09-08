@@ -188,7 +188,7 @@ pub fn get_last_modified_string(metadata: Option<&LayoutMetadata>, is_builtin: b
     if let Some(metadata) = metadata {
         format_elapsed(&metadata.update_time)
     } else if is_builtin {
-        "Built-in".to_string()
+        "内置".to_string()
     } else {
         " ".to_string()
     }

@@ -75,7 +75,7 @@ impl<'a> LayoutDetail<'a> {
     }
 
     fn render_no_metadata(&self, x: usize, y: usize) {
-        let msg = Text::new("No metadata available").color_all(1);
+        let msg = Text::new("无可用元数据").color_all(1);
         print_text_with_coordinates(msg, x, y + 1, None, None);
     }
     fn render_built_in_indication(
@@ -90,7 +90,7 @@ impl<'a> LayoutDetail<'a> {
             return;
         }
 
-        let full_text = format!("{} is a built-in layout. Create your own layouts to automate or share workspace setup.", name);
+        let full_text = format!("{} 是内置布局。创建你自己的布局来自动化或共享工作区设置。", name);
         let wrapped_lines = wrap_text_to_width(&full_text, max_cols);
 
         let mut current_y = y;
@@ -128,7 +128,7 @@ impl<'a> LayoutDetail<'a> {
             current_y += 1;
         }
 
-        let hint = Text::new("<m> - Show detailed error").color_substring(3, "<m>");
+        let hint = Text::new("<m> - 显示详细错误").color_substring(3, "<m>");
         print_text_with_coordinates(hint, x, current_y + 1, None, None); // 1 for gap
     }
 
@@ -210,7 +210,7 @@ impl<'a> LayoutDetail<'a> {
         let mut lines = Vec::new();
 
         // Add title
-        let title = "Tabs:";
+        let title = "标签：";
         lines.push(truncate_with_ellipsis(title, max_width));
 
         // Add tabs
@@ -218,7 +218,7 @@ impl<'a> LayoutDetail<'a> {
             let tab_label = if let Some(name) = &tab.name {
                 name.clone()
             } else {
-                format!("Tab {}", i + 1)
+                format!("标签 {}", i + 1)
             };
 
             // Account for "  - " prefix (4 characters)
@@ -241,7 +241,7 @@ impl<'a> LayoutDetail<'a> {
         }
 
         // Add title
-        let title = "Panes:";
+        let title = "窗格：";
         lines.push(truncate_with_ellipsis(title, max_width));
 
         // Add named panes

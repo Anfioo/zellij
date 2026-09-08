@@ -23,11 +23,11 @@ pub fn format_kdl_error(error: LayoutParsingError) -> String {
             output
         },
         LayoutParsingError::SyntaxError => {
-            format!("Failed to deserialize KDL node. \nPossible reasons:\n{}\n{}\n{}\n{}",
-            "- Missing `;` after a node name, eg. { node; another_node; }",
-            "- Missing quotations (\") around an argument node eg. { first_node \"argument_node\"; }",
-            "- Missing an equal sign (=) between node arguments on a title line. eg. argument=\"value\"",
-            "- Found an extraneous equal sign (=) between node child arguments and their values. eg. { argument=\"value\" }")
+            format!("无法反序列化 KDL 节点。\n可能的原因：\n{}\n{}\n{}\n{}",
+            "- 节点名称后缺少 `;`，例如 { node; another_node; }",
+            "- 参数节点缺少引号（\"），例如 { first_node \"argument_node\"; }",
+            "- 标题行的节点参数之间缺少等号（=），例如 argument=\"value\"",
+            "- 节点子参数与其值之间有多余的等号（=），例如 { argument=\"value\" }")
         },
     }
 }
@@ -82,7 +82,7 @@ impl ErrorDetailScreen {
 
     pub fn render(&self, rows: usize, cols: usize) {
         // Header: show layout name
-        let header = format!("Error in layout: {}", self.layout_name);
+        let header = format!("布局错误：{}", self.layout_name);
         let header_text = Text::new(&header).error_color_all();
         print_text_with_coordinates(header_text, 1, 0, None, None);
 
@@ -127,7 +127,7 @@ impl ErrorDetailScreen {
             }
 
             // Render omission indicator
-            let indicator = format!("... {} lines omitted ...", omitted_count);
+            let indicator = format!("... 省略 {} 行 ...", omitted_count);
             let indicator_text = Text::new(&indicator).color_range(0, ..);
             print_text_with_coordinates(
                 indicator_text,

@@ -99,11 +99,11 @@ impl NewLayoutFromCurrentSessionScreen {
                     None
                 },
                 Ok((_, None)) => Some(Screen::Error(super::ErrorScreen {
-                    message: "Failed to retrieve session layout metadata".to_string(),
+                    message: "无法获取会话布局元数据".to_string(),
                     return_to_screen: Box::new(Screen::LayoutList(Default::default())),
                 })),
                 Err(error_msg) => Some(Screen::Error(super::ErrorScreen {
-                    message: format!("Failed to dump session layout: {}", error_msg),
+                    message: format!("无法导出会话布局：{}", error_msg),
                     return_to_screen: Box::new(Default::default()),
                 })),
             }
@@ -115,11 +115,11 @@ impl NewLayoutFromCurrentSessionScreen {
                     None
                 },
                 Ok((_, None)) => Some(Screen::Error(super::ErrorScreen {
-                    message: "Failed to retrieve session layout metadata".to_string(),
+                    message: "无法获取会话布局元数据".to_string(),
                     return_to_screen: Box::new(Screen::LayoutList(Default::default())),
                 })),
                 Err(error_msg) => Some(Screen::Error(super::ErrorScreen {
-                    message: format!("Failed to dump session layout: {}", error_msg),
+                    message: format!("无法导出会话布局：{}", error_msg),
                     return_to_screen: Box::new(Default::default()),
                 })),
             }
@@ -168,10 +168,10 @@ impl NewLayoutFromCurrentSessionScreen {
 
     fn save_session_layout(&self, layout_name: &str) -> Result<(), String> {
         save_layout(layout_name.to_owned(), self.session_layout.clone(), false)
-            .map_err(|err| format!("Failed to save layout '{}': {}", layout_name, err))?;
+            .map_err(|err| format!("无法保存布局 '{}'：{}", layout_name, err))?;
 
         eprintln!(
-            "Successfully saved current session as layout: {}",
+            "已成功将当前会话保存为布局：{}",
             layout_name
         );
         Ok(())
@@ -229,20 +229,20 @@ impl NewLayoutFromCurrentSessionScreen {
     }
 
     fn render_title(&self, x: usize, y: usize, width: usize) {
-        let title = Text::new("Save Layout of Current Session").color_all(2);
+        let title = Text::new("保存当前会话的布局").color_all(2);
         print_text_with_coordinates(title, x, y, Some(width), None);
     }
 
     fn description_text_full(&self) -> (&str, &str) {
         (
-            "This layout was created from the current session.",
-            "Save it to recreate the session later or share it with others.",
+            "此布局基于当前会话创建。",
+            "保存后可稍后重建会话或与他人分享。",
         )
     }
     fn description_text_short(&self) -> (&str, &str) {
         (
-            "Layout from current session.",
-            "Save it to recreate or share the later.",
+            "来自当前会话的布局。",
+            "保存后可重建或稍后分享。",
         )
     }
     fn render_description(&self, x: usize, y: usize, width: usize) {
@@ -269,16 +269,16 @@ impl NewLayoutFromCurrentSessionScreen {
         } else {
             input_text
         };
-        let mut text = format!("Save as: {} (<r> Rename)", display_name);
-        let mut cursor_position_in_line = 9 + cursor_pos;
+        let mut text = format!("保存为：{}（<r> 重命名）", display_name);
+        let mut cursor_position_in_line = 5 + cursor_pos;
         if text.chars().count() > width {
             let truncated_display_name = truncate_with_ellipsis_start(
                 display_name,
-                width.saturating_sub(22), // size of text without the display name
+                width.saturating_sub(15), // 文本中除显示名称外的部分大小
             );
-            text = format!("Save as: {} (<r> Rename)", truncated_display_name);
+            text = format!("保存为：{}（<r> 重命名）", truncated_display_name);
             let truncated_len = truncated_display_name.chars().count();
-            cursor_position_in_line = 9 + cursor_pos.min(truncated_len);
+            cursor_position_in_line = 5 + cursor_pos.min(truncated_len);
         }
         (text, cursor_position_in_line)
     }
@@ -291,15 +291,15 @@ impl NewLayoutFromCurrentSessionScreen {
 
     fn render_tab_toggle(&self, x: usize, y: usize, width: usize) {
         let text = if self.save_current_tab_only {
-            "<Tab>  All Tabs  | [Current Tab Only]"
+            "<Tab>  所有标签  | [仅当前标签]"
         } else {
-            "<Tab> [All Tabs] |  Current Tab Only"
+            "<Tab> [所有标签] |  仅当前标签"
         };
 
         let short_text = if self.save_current_tab_only {
-            "<Tab>  All  | [Current Tab]"
+            "<Tab>  全部  | [当前标签]"
         } else {
-            "<Tab> [All] |  Current Tab"
+            "<Tab> [全部] |  当前标签"
         };
         let text = if text.chars().count() > width {
             short_text
@@ -308,23 +308,23 @@ impl NewLayoutFromCurrentSessionScreen {
         };
         let colored = Text::new(text)
             .color_substring(3, "<Tab>")
-            .color_substring(0, "[All Tabs]")
-            .color_substring(0, "[All]")
-            .color_substring(0, "[Current Tab Only]")
-            .color_substring(0, "[Current Tab]");
+            .color_substring(0, "[所有标签]")
+            .color_substring(0, "[全部]")
+            .color_substring(0, "[仅当前标签]")
+            .color_substring(0, "[当前标签]");
 
         print_text_with_coordinates(colored, x, y, None, None);
     }
 
     fn help_text_full(&self) -> (&str, &[&str]) {
         (
-            "<Enter> - Save, <u> - Update Layout, <Esc> - Back",
+            "<Enter> - 保存，<u> - 更新布局，<Esc> - 返回",
             &["<Enter>", "<u>", "<Esc>"],
         )
     }
     fn help_text_short(&self) -> (&str, &[&str]) {
         (
-            "<Enter> - Save, <u> - Update, <Esc> - Back",
+            "<Enter> - 保存，<u> - 更新，<Esc> - 返回",
             &["<Enter>", "<u>", "<Esc>"],
         )
     }

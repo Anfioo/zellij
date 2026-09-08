@@ -223,7 +223,7 @@ impl ZellijPlugin for State {
             EventType::AvailableLayoutInfo,
             EventType::PermissionRequestResult,
         ]);
-        rename_plugin_pane(get_plugin_ids().plugin_id, "Layout Manager");
+        rename_plugin_pane(get_plugin_ids().plugin_id, "布局管理器");
     }
 
     fn update(&mut self, event: Event) -> bool {
@@ -248,9 +248,9 @@ impl ZellijPlugin for State {
                     let stringified_error = format_kdl_error(layout_error.error.clone());
                     let error_message = match &layout_error.error {
                         LayoutParsingError::KdlError { kdl_error, .. } => {
-                            format!("Layout Error: {}", kdl_error.error_message)
+                            format!("布局错误：{}", kdl_error.error_message)
                         },
-                        LayoutParsingError::SyntaxError => "KDL parsing error".to_owned(),
+                        LayoutParsingError::SyntaxError => "KDL 解析错误".to_owned(),
                     };
 
                     display_layouts.push(DisplayLayout::Error {
