@@ -49,8 +49,8 @@ macro_rules! get_or_create_grid {
     ($self:ident, $client_id:ident) => {{
         let rows = $self.get_content_rows();
         let cols = $self.get_content_columns();
-        let osc8_hyperlinks = true; // N/A for plugins, always enabled
-        let explicitly_disable_kitty_keyboard_protocol = false; // N/A for plugins
+        let osc8_hyperlinks = true; // 对插件不适用，始终启用
+        let explicitly_disable_kitty_keyboard_protocol = false; // 对插件不适用
 
         $self.grids.entry($client_id).or_insert_with(|| {
             let mut grid = Grid::new(
@@ -178,9 +178,9 @@ impl PluginPane {
 }
 
 impl Pane for PluginPane {
-    // FIXME: These position and size things should all be moved to default trait implementations,
-    // with something like a get_pos_and_sz() method underpinning all of them. Alternatively and
-    // preferably, just use an enum and not a trait object
+    // FIXME: 这些位置和大小的东西都应该移到默认 trait 实现中，
+    // 用类似 get_pos_and_sz() 的方法支撑它们。或者更
+    // 好的是，直接用枚举而不是 trait 对象
     fn x(&self) -> usize {
         self.geom_override.unwrap_or(self.geom).x
     }
@@ -200,14 +200,14 @@ impl Pane for PluginPane {
         self.y() + self.content_offset.top
     }
     fn get_content_columns(&self) -> usize {
-        // content columns might differ from the pane's columns if the pane has a frame
-        // in that case they would be 2 less
+        // 内容列数可能与窗格列数不同，如果窗格有边框
+        // 在那种情况下它们会少 2
         self.cols()
             .saturating_sub(self.content_offset.left + self.content_offset.right)
     }
     fn get_content_rows(&self) -> usize {
-        // content rows might differ from the pane's rows if the pane has a frame
-        // in that case they would be 2 less
+        // 内容行数可能与窗格行数不同，如果窗格有边框
+        // 在那种情况下它们会少 2
         self.rows()
             .saturating_sub(self.content_offset.top + self.content_offset.bottom)
     }
@@ -240,8 +240,8 @@ impl Pane for PluginPane {
 
         let grid = get_or_create_grid!(self, client_id);
 
-        // this is part of the plugin contract, whenever we update the plugin and call its render function, we delete the existing viewport
-        // and scroll, reset the cursor position and make sure all the viewport is rendered
+        // 这是插件契约的一部分，每当我们更新插件并调用其渲染函数时，我们删除现有的视口
+        // 和滚动，重置光标位置并确保整个视口被渲染
         grid.delete_viewport_and_scroll();
         grid.reset_cursor_position();
         grid.render_full_viewport();
@@ -268,7 +268,7 @@ impl Pane for PluginPane {
                     if x >= own_content_columns || y >= own_content_rows {
                         None
                     } else {
-                        Some((x, y, true)) // plugins always show cursor when position is set
+                        Some((x, y, true)) // 插件在设置位置时始终显示光标
                     }
                 })
         } else {
@@ -309,12 +309,12 @@ impl Pane for PluginPane {
                 }
             } else {
                 match raw_input_bytes.as_slice() {
-                    // Y or y
+                    // Y 或 y
                     &[89] | &[121] => Some(AdjustedInput::PermissionRequestResult(
                         permissions,
                         PermissionStatus::Granted,
                     )),
-                    // N or n
+                    // N 或 n
                     &[78] | &[110] => Some(AdjustedInput::PermissionRequestResult(
                         permissions,
                         PermissionStatus::Denied,
@@ -362,7 +362,7 @@ impl Pane for PluginPane {
         self.geom_override
     }
     fn should_render(&self) -> bool {
-        // set should_render for all clients
+        // 为所有客户端设置 should_render
         self.should_render.values().any(|v| *v)
     }
     fn set_should_render(&mut self, should_render: bool) {
@@ -371,8 +371,8 @@ impl Pane for PluginPane {
             .for_each(|v| *v = should_render);
     }
     fn render_full_viewport(&mut self) {
-        // this marks the pane for a full re-render, rather than just rendering the
-        // diff as it usually does with the OutputBuffer
+        // 这将窗格标记为完全重新渲染，而不是像通常使用 OutputBuffer 那样
+        // 只渲染差异
         self.frame.clear();
         for grid in self.grids.values_mut() {
             grid.render_full_viewport();
@@ -390,8 +390,8 @@ impl Pane for PluginPane {
     }
     fn request_permissions_from_user(&mut self, permissions: Option<PluginPermission>) {
         self.requesting_permissions = permissions;
-        self.handle_plugin_bytes_for_all_clients(Default::default()); // to trigger the render of
-                                                                      // the permission message
+        self.handle_plugin_bytes_for_all_clients(Default::default()); // 以触发
+                                                                      // 权限消息的渲染
     }
     fn render(
         &mut self,
@@ -477,7 +477,7 @@ impl Pane for PluginPane {
         }
 
         let res = match self.frame.get(&client_id) {
-            // TODO: use and_then or something?
+            // TODO: 用 and_then 或什么？
             Some(last_frame) => {
                 if &frame != last_frame || is_pinned {
                     if !self.borderless {
@@ -526,7 +526,7 @@ impl Pane for PluginPane {
                 self.pane_name = String::new();
             },
             "\u{007F}" | "\u{0008}" => {
-                //delete and backspace keys
+                //删除和退格键
                 self.pane_name.pop();
             },
             c => {
@@ -628,10 +628,10 @@ impl Pane for PluginPane {
             .unwrap();
     }
     fn clear_screen(&mut self) {
-        // do nothing
+        // 什么都不做
     }
     fn clear_scroll(&mut self) {
-        // noop
+        // 空操作
     }
     fn set_selection_options(&mut self, osc133_command_selection: bool, word_separators: &str) {
         for grid in self.grids.values_mut() {
@@ -658,7 +658,7 @@ impl Pane for PluginPane {
         if self.supports_mouse_selection {
             if let Some(grid) = self.grids.get_mut(&client_id) {
                 grid.update_selection(position);
-                self.set_should_render(true); // TODO: no??
+                self.set_should_render(true); // TODO: 不？
             }
         } else {
             self.send_plugin_instructions
@@ -770,11 +770,11 @@ impl Pane for PluginPane {
         text: Option<String>,
         _client_id: Option<ClientId>,
     ) {
-        // TODO: if we have a client_id, we should only highlight the frame for this client
+        // TODO: 如果我们有 client_id，我们应该只高亮这个客户端的边框
         self.pane_frame_color_override = Some((self.style.colors.frame_highlight.base, text));
     }
     fn clear_pane_frame_color_override(&mut self, _client_id: Option<ClientId>) {
-        // TODO: if we have a client_id, we should only clear the highlight for this client
+        // TODO: 如果我们有 client_id，我们应该只清除这个客户端的高亮
         self.pane_frame_color_override = None;
     }
     fn frame_color_override(&self) -> Option<PaletteColor> {

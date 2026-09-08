@@ -14,7 +14,7 @@ const MOVE_INCREMENT_VERTICAL: usize = 5;
 
 const MAX_PANES: usize = 100;
 
-// For error reporting
+// 用于错误报告
 fn no_pane_id(pane_id: &PaneId) -> String {
     format!("no floating pane with ID {:?} found", pane_id)
 }
@@ -22,8 +22,8 @@ fn no_pane_id(pane_id: &PaneId) -> String {
 pub struct FloatingPaneGrid<'a> {
     panes: Rc<RefCell<HashMap<PaneId, &'a mut Box<dyn Pane>>>>,
     desired_pane_positions: Rc<RefCell<&'a mut HashMap<PaneId, PaneGeom>>>,
-    display_area: Size, // includes all panes (including eg. the status bar and tab bar in the default layout)
-    viewport: Viewport, // includes all non-UI panes
+    display_area: Size, // 包含所有窗格（包括例如默认布局中的状态栏和标签栏）
+    viewport: Viewport, // 包含所有非 UI 窗格
 }
 
 impl<'a> FloatingPaneGrid<'a> {
@@ -44,7 +44,7 @@ impl<'a> FloatingPaneGrid<'a> {
     pub fn move_pane_by(&mut self, pane_id: PaneId, x: isize, y: isize) -> Result<()> {
         let err_context = || format!("failed to move pane {pane_id:?} by ({x}, {y})");
 
-        // true => succeeded to move, false => failed to move
+        // true => 移动成功，false => 移动失败
         let new_pane_position = {
             let mut panes = self.panes.borrow_mut();
             let pane = panes
@@ -104,8 +104,8 @@ impl<'a> FloatingPaneGrid<'a> {
         let mut panes = self.panes.borrow_mut();
         let desired_pane_positions = self.desired_pane_positions.borrow();
 
-        // account for the difference between the viewport (including non-ui pane items which we
-        // do not want to override) and the display_area, which is the area we can go over
+        // 考虑视口（包括我们不想覆盖的非 ui 窗格项）与
+        // display_area 之间的差异，display_area 是我们可以越过的区域
         let display_size_row_difference = self.display_area.rows.saturating_sub(self.viewport.rows);
         let display_size_column_difference =
             self.display_area.cols.saturating_sub(self.viewport.cols);
@@ -142,7 +142,7 @@ impl<'a> FloatingPaneGrid<'a> {
                 let extra_width = viewport_right_side.saturating_sub(pane_right_side);
                 let extra_height = viewport_bottom_side.saturating_sub(pane_bottom_side);
 
-                // handle shrink width
+                // 处理收缩宽度
                 if excess_width > 0 && new_pane_geom.x.saturating_sub(excess_width) > new_viewport.x
                 {
                     new_pane_geom.x = new_pane_geom.x.saturating_sub(excess_width);
@@ -165,7 +165,7 @@ impl<'a> FloatingPaneGrid<'a> {
                         .set_inner(std::cmp::max(reduced_width, MIN_TERMINAL_WIDTH));
                 }
 
-                // handle shrink height
+                // 处理收缩高度
                 if excess_height > 0
                     && new_pane_geom.y.saturating_sub(excess_height) > new_viewport.y
                 {
@@ -189,7 +189,7 @@ impl<'a> FloatingPaneGrid<'a> {
                         .set_inner(std::cmp::max(reduced_height, MIN_TERMINAL_HEIGHT));
                 }
 
-                // handle expand width
+                // 处理扩展宽度
                 if extra_width > 0 {
                     let max_right_coords = new_viewport.x + new_viewport.cols;
                     if new_pane_geom.x < desired_pane_geom.x {
@@ -225,7 +225,7 @@ impl<'a> FloatingPaneGrid<'a> {
                     }
                 }
 
-                // handle expand height
+                // 处理扩展高度
                 if extra_height > 0 {
                     let max_bottom_coords = new_viewport.y + new_viewport.rows;
                     if new_pane_geom.y < desired_pane_geom.y {
@@ -499,10 +499,10 @@ impl<'a> FloatingPaneGrid<'a> {
             change_by
         };
 
-        // Move left border
+        // 移动左边框
         if strategy.move_left_border_left() || strategy.move_all_borders_out() {
             let increment = std::cmp::min(geometry.x.saturating_sub(self.viewport.x), change_by.0);
-            // Invert if on boundary already
+            // 如果已在边界上则反转
             if increment == 0 && strategy.direction.is_some() {
                 return self.change_pane_size(pane_id, &strategy.invert(), change_by);
             }
@@ -522,14 +522,14 @@ impl<'a> FloatingPaneGrid<'a> {
                 .set_inner(geometry.cols.as_usize() - increment);
         };
 
-        // Move right border
+        // 移动右边框
         if strategy.move_right_border_right() || strategy.move_all_borders_out() {
             let increment = std::cmp::min(
                 (self.viewport.x + self.viewport.cols)
                     .saturating_sub(geometry.x + geometry.cols.as_usize()),
                 change_by.0,
             );
-            // Invert if on boundary already
+            // 如果已在边界上则反转
             if increment == 0 && strategy.direction.is_some() {
                 return self.change_pane_size(pane_id, &strategy.invert(), change_by);
             }
@@ -547,10 +547,10 @@ impl<'a> FloatingPaneGrid<'a> {
                 .set_inner(geometry.cols.as_usize() - increment);
         };
 
-        // Move upper border
+        // 移动上边框
         if strategy.move_upper_border_up() || strategy.move_all_borders_out() {
             let increment = std::cmp::min(geometry.y.saturating_sub(self.viewport.y), change_by.1);
-            // Invert if on boundary already
+            // 如果已在边界上则反转
             if increment == 0 && strategy.direction.is_some() {
                 return self.change_pane_size(pane_id, &strategy.invert(), change_by);
             }
@@ -570,14 +570,14 @@ impl<'a> FloatingPaneGrid<'a> {
                 .set_inner(geometry.rows.as_usize() - increment);
         }
 
-        // Move lower border
+        // 移动下边框
         if strategy.move_lower_border_down() || strategy.move_all_borders_out() {
             let increment = std::cmp::min(
                 (self.viewport.y + self.viewport.rows)
                     .saturating_sub(geometry.y + geometry.rows.as_usize()),
                 change_by.1,
             );
-            // Invert if on boundary already
+            // 如果已在边界上则反转
             if increment == 0 && strategy.direction.is_some() {
                 return self.change_pane_size(pane_id, &strategy.invert(), change_by);
             }
@@ -813,7 +813,7 @@ impl<'a> FloatingPaneGrid<'a> {
                     } else if !pane_geom_is_inside_viewport($viewport, &geom_with_current_offset) {
                         break;
                     } else if offset > MAX_PANES {
-                        // this is mostly to kill the loop no matter what
+                        // 这主要是为了无论如何都终止循环
                         break;
                     } else {
                         offset += 2;

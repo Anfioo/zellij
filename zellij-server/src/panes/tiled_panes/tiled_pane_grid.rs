@@ -20,7 +20,7 @@ const DEFAULT_CURSOR_HEIGHT_WIDTH_RATIO: usize = 4;
 
 type BorderAndPaneIds = (usize, Vec<PaneId>);
 
-// For error reporting
+// 用于错误报告
 fn no_pane_id(pane_id: &PaneId) -> String {
     format!("no floating pane with ID {:?} found", pane_id)
 }
@@ -86,7 +86,7 @@ impl<'a> TiledPaneGrid<'a> {
     }
     fn neighbor_pane_ids(&self, pane_id: &PaneId, direction: Direction) -> Result<Vec<PaneId>> {
         let err_context = || format!("Failed to get neighboring panes");
-        // Shorthand
+        // 简写
         use Direction as Dir;
         let mut neighbor_terminals = self
             .pane_ids_directly_next_to(pane_id, &direction)
@@ -104,7 +104,7 @@ impl<'a> TiledPaneGrid<'a> {
                 .collect()
         };
 
-        // Only return those neighbors that are aligned and between pane borders
+        // 仅返回那些对齐且在窗格边界之间的邻居
         let (some_direction, other_direction) = match direction {
             Dir::Left | Dir::Right => (Dir::Up, Dir::Down),
             Dir::Down | Dir::Up => (Dir::Left, Dir::Right),
@@ -135,8 +135,8 @@ impl<'a> TiledPaneGrid<'a> {
         Ok(neighbor_terminals)
     }
 
-    // Check if panes in the desired direction can be resized. Returns the maximum resize that's
-    // possible (at most `change_by`).
+    // 检查所需方向的窗格是否可以调整大小。返回可能的最大调整大小
+    // （至多 `change_by`）。
     pub fn can_change_pane_size(
         &self,
         pane_id: &PaneId,
@@ -178,7 +178,7 @@ impl<'a> TiledPaneGrid<'a> {
                     .with_context(err_context);
             }
             if pane_ids.is_empty() {
-                // TODO: proper error
+                // TODO: 适当的错误
                 return Ok(false);
             }
 
@@ -218,14 +218,14 @@ impl<'a> TiledPaneGrid<'a> {
                 }
             }
         } else {
-            // Undirected resize, this is checked elsewhere
+            // 无向调整大小，这在其他地方检查
             Ok(true)
         }
     }
 
-    /// Change a tiled panes size based on the given strategy.
+    /// 根据给定策略更改平铺窗格的大小。
     ///
-    /// Returns true upon successful resize, false otherwise.
+    /// 成功调整大小返回 true，否则返回 false。
     pub fn change_pane_size(
         &mut self,
         pane_id: &PaneId,
@@ -233,12 +233,12 @@ impl<'a> TiledPaneGrid<'a> {
         change_by: (f64, f64),
     ) -> Result<bool> {
         let err_context = || format!("failed to {strategy} by {change_by:?} for pane {pane_id:?}");
-        // Shorthand
+        // 简写
         use Direction as Dir;
         let mut fixed_panes_blocking_resize = vec![];
 
-        // Default behavior is to only increase pane size, unless the direction being resized to is
-        // a boundary. In this case, decrease size from the other side (invert strategy)!
+        // 默认行为是仅增加窗格大小，除非被调整大小的方向是
+        // 一个边界。在这种情况下，从另一侧减小大小（反转策略）！
         let can_invert_strategy_if_needed = strategy.resize_increase()  // Only invert when increasing
             && strategy.invert_on_boundaries          // Only invert if configured to do so
             && strategy.direction.is_some(); // Only invert if there's a direction
@@ -271,8 +271,8 @@ impl<'a> TiledPaneGrid<'a> {
             && !can_change_pane_size_in_main_direction
             && !can_change_pane_size_in_inverted_direction
         {
-            // we can't resize in any direction, not playing the blame game, but I'm looking at
-            // you: fixed_panes_blocking_resize
+            // 我们无法在任何方向调整大小，不是在玩指责游戏，但我在看着
+            // 你：fixed_panes_blocking_resize
             return Err(ZellijError::CantResizeFixedPanes {
                 pane_ids: fixed_panes_blocking_resize,
             })
@@ -289,7 +289,7 @@ impl<'a> TiledPaneGrid<'a> {
                 .pane_ids_directly_next_to(pane_id, &direction)
                 .with_context(err_context)?;
             if neighbor_terminals.is_empty() {
-                // Nothing to do.
+                // 无事可做。
                 return Ok(false);
             }
 
@@ -305,7 +305,7 @@ impl<'a> TiledPaneGrid<'a> {
                     .collect()
             };
 
-            // Only resize those neighbors that are aligned and between pane borders
+            // 仅调整那些对齐且在窗格边界之间的邻居的大小
             let (some_direction, other_direction) = match direction {
                 Dir::Left | Dir::Right => (Dir::Up, Dir::Down),
                 Dir::Down | Dir::Up => (Dir::Left, Dir::Right),
@@ -334,7 +334,7 @@ impl<'a> TiledPaneGrid<'a> {
                 }
             });
 
-            // Perform the resize
+            // 执行调整大小
             let change_by = match direction {
                 Dir::Left | Dir::Right => change_by.0,
                 Dir::Down | Dir::Up => change_by.1,
@@ -383,7 +383,7 @@ impl<'a> TiledPaneGrid<'a> {
                 .with_context(err_context);
             }
 
-            // Update grid
+            // 更新网格
             let mut pane_resizer = PaneResizer::new(self.panes.clone());
             if direction.is_horizontal() {
                 pane_resizer
@@ -395,14 +395,14 @@ impl<'a> TiledPaneGrid<'a> {
                     .with_context(err_context)?;
             }
         } else {
-            // Get panes aligned at corners, so we can change their sizes manually afterwards
+            // 获取在角落对齐的窗格，以便我们之后可以手动更改它们的大小
             let mut aligned_panes = [
                 None, // right, below
                 None, // left, below
                 None, // right, above
                 None, // left, above
             ];
-            // For the borrow checker
+            // 为了借用检查器
             {
                 // let panes = self.panes.borrow();
                 let active_pane = self
@@ -416,10 +416,10 @@ impl<'a> TiledPaneGrid<'a> {
                         .with_context(|| no_pane_id(&p_id))
                         .with_context(err_context)?;
                     if active_pane.x + active_pane.cols.as_usize() == pane.x {
-                        // right aligned
+                        // 右对齐
                         aligned_panes[0] = Some(p_id);
                     } else if active_pane.x == pane.x + pane.cols.as_usize() {
-                        // left aligned
+                        // 左对齐
                         aligned_panes[1] = Some(p_id);
                     }
                 }
@@ -429,16 +429,16 @@ impl<'a> TiledPaneGrid<'a> {
                         .with_context(|| no_pane_id(&p_id))
                         .with_context(err_context)?;
                     if active_pane.x + active_pane.cols.as_usize() == pane.x {
-                        // right aligned
+                        // 右对齐
                         aligned_panes[2] = Some(p_id);
                     } else if active_pane.x == pane.x + pane.cols.as_usize() {
-                        // left aligned
+                        // 左对齐
                         aligned_panes[3] = Some(p_id);
                     }
                 }
             }
 
-            // Resize pane in every direction that fits
+            // 在每个适合的方向调整窗格大小
             let options = [
                 (Dir::Right, Some(Dir::Down), Some(Dir::Left), 0),
                 (Dir::Left, Some(Dir::Down), Some(Dir::Right), 1),
@@ -463,9 +463,9 @@ impl<'a> TiledPaneGrid<'a> {
                         ..strategy
                     };
 
-                    // TODO: instead of unwrap_or(false) here we need to do the same with the fixed
-                    // panes error above, only make sure that we only error if we cannot resize in
-                    // any directions and have blocking fixed panes
+                    // TODO: 这里不用 unwrap_or(false)，我们需要对固定
+                    // 窗格错误做同样的事情，只确保我们仅在无法在
+                    // 任何方向调整大小且有阻塞的固定窗格时才报错
                     if self
                         .can_change_pane_size(pane_id, &main_strategy, change_by)
                         .unwrap_or(false)
@@ -630,10 +630,9 @@ impl<'a> TiledPaneGrid<'a> {
         }
     }
 
-    /// Return a vector of [`PaneId`]s directly adjacent to the given [`PaneId`], if any.
+    /// 返回与给定 [`PaneId`] 直接相邻的 [`PaneId`] 向量（如果有）。
     ///
-    /// The vector is empty for example if the given pane (`id`) is at the boundary of the viewport
-    /// already.
+    /// 例如，如果给定窗格（`id`）已经在视口边界处，则向量为空。
     fn pane_ids_directly_next_to(&self, id: &PaneId, direction: &Direction) -> Result<Vec<PaneId>> {
         let err_context = || format!("failed to find panes {direction} from pane {id:?}");
 
@@ -672,7 +671,7 @@ impl<'a> TiledPaneGrid<'a> {
         Ok(ids)
     }
 
-    /// Return a vector of [`PaneId`]s aligned with the given [`PaneId`] on the `direction` border.
+    /// 返回在 `direction` 边界上与给定 [`PaneId`] 对齐的 [`PaneId`] 向量。
     fn pane_ids_aligned_with(
         &self,
         pane_id: &PaneId,
@@ -717,7 +716,7 @@ impl<'a> TiledPaneGrid<'a> {
         Ok(result)
     }
 
-    /// Searches for contiguous panes
+    /// 搜索连续的窗格
     fn contiguous_panes_with_alignment(
         &self,
         id: &PaneId,
@@ -1311,8 +1310,8 @@ impl<'a> TiledPaneGrid<'a> {
         };
     }
     pub fn fill_space_over_pane(&mut self, id: PaneId) -> bool {
-        // true => successfully filled space over pane
-        // false => didn't succeed, so didn't do anything
+        // true => 成功填充了窗格上方的空间
+        // false => 没有成功，所以没有做任何事情
         let (freed_width, freed_height, pane_to_close_is_stacked) = {
             let panes = self.panes.borrow_mut();
             let Some(pane_to_close) = panes.get(&id) else {
@@ -1345,8 +1344,8 @@ impl<'a> TiledPaneGrid<'a> {
                 return true;
             }
         } else {
-            // best effort resize - we just remove the pane and relayout everything
-            // this might happen if we are closing a fixed pane
+            // 尽力调整大小 - 我们只是移除窗格并重新布局一切
+            // 这可能在我们关闭固定窗格时发生
             self.panes.borrow_mut().remove(&id);
             let mut pane_resizer = PaneResizer::new(self.panes.clone());
             let _ = pane_resizer.layout(SplitDirection::Horizontal, self.display_area.cols);
@@ -1406,9 +1405,9 @@ impl<'a> TiledPaneGrid<'a> {
         active_pane_id: &PaneId,
         cursor_height_width_ratio: Option<usize>,
     ) -> Option<(PaneId, SplitDirection)> {
-        // right now the minimum here is hard-coded to a sane "I don't want my terminal smaller"
-        // number, but we might want to change this to be a percentage of the current screen if it
-        // feels better
+        // 目前这里的最小值被硬编码为一个合理的"我不希望我的终端更小"
+        // 数字，但如果感觉更好，我们可能希望将其更改为当前屏幕的百分比
+        // 
         let panes = self.panes.borrow();
         let Some(pane_to_split) = panes.get(active_pane_id) else {
             return None;
@@ -1469,9 +1468,9 @@ impl<'a> TiledPaneGrid<'a> {
         panes_all_have_the_same_y
     }
     fn group_panes_by_highest_y(&self, pane_ids: &[PaneId]) -> (Vec<PaneId>, Vec<PaneId>) {
-        // returns (left to right)
-        // 1. panes with the highest y (geometrically closer to the bottom)
-        // 2. if there are panes left, returns them as the second group
+        // 返回（从左到右）
+        // 1. y 最高的窗格（几何上更靠近底部）
+        // 2. 如果还有窗格，将它们作为第二组返回
         let panes = self.panes.borrow();
         let mut highest_pane_y = 0;
         let mut first_group = vec![];
@@ -1494,9 +1493,9 @@ impl<'a> TiledPaneGrid<'a> {
         (first_group, second_group)
     }
     fn group_panes_by_highest_x(&self, pane_ids: &[PaneId]) -> (Vec<PaneId>, Vec<PaneId>) {
-        // returns (left to right)
-        // 1. panes with the highest x (geometrically closer to the left)
-        // 2. if there are panes remaining, returns them as the second group
+        // 返回（从左到右）
+        // 1. x 最高的窗格（几何上更靠近左侧）
+        // 2. 如果还有窗格，将它们作为第二组返回
         let panes = self.panes.borrow();
         let mut highest_pane_x = 0;
         let mut first_group = vec![];
@@ -1519,10 +1518,10 @@ impl<'a> TiledPaneGrid<'a> {
         (first_group, second_group)
     }
     fn group_panes_by_lowest_rows(&self, pane_ids: &[PaneId]) -> (Vec<PaneId>, Vec<PaneId>) {
-        // returns (left to right)
-        // 1. panes with the lowest rows
-        // 2. if there are panes left, returns them as the second group
-        // we expect all given panes here to have the same y
+        // 返回（从左到右）
+        // 1. 行数最少的窗格
+        // 2. 如果还有窗格，将它们作为第二组返回
+        // 我们期望这里所有给定的窗格都有相同的 y
         let panes = self.panes.borrow();
         let mut lowest_row_count = None;
         let mut first_group = vec![];
@@ -1549,10 +1548,10 @@ impl<'a> TiledPaneGrid<'a> {
         (first_group, second_group)
     }
     fn group_panes_by_lowest_cols(&self, pane_ids: &[PaneId]) -> (Vec<PaneId>, Vec<PaneId>) {
-        // returns (left to right)
-        // 1. panes with the lowest cols
-        // 2. if there are panes left, returns them as the second group
-        // we expect all given panes here to have the same x
+        // 返回（从左到右）
+        // 1. 列数最少的窗格
+        // 2. 如果还有窗格，将它们作为第二组返回
+        // 我们期望这里所有给定的窗格都有相同的 x
         let panes = self.panes.borrow();
         let mut lowest_col_count = None;
         let mut first_group = vec![];
@@ -1639,8 +1638,8 @@ impl<'a> TiledPaneGrid<'a> {
         panes_all_have_the_same_width
     }
     pub fn direct_neighboring_pane_ids_above(&self, root_pane_id: &PaneId) -> Vec<PaneId> {
-        // here we look for panes that are directly above the provided root pane but that do not
-        // exceed its vertical borders (x and x + cols)
+        // 这里我们寻找直接在提供的根窗格上方但不
+        // 超过其垂直边界（x 和 x + cols）的窗格
         let Some(root_pane_geom) = self.get_pane_geom(root_pane_id) else {
             log::error!("Could nto find root pane geom");
             return vec![];
@@ -1661,8 +1660,8 @@ impl<'a> TiledPaneGrid<'a> {
             })
             .copied()
             .collect::<Vec<_>>();
-        // we only want to return these if they cover the entire vertical surface of the root pane id
-        // (as in - one of the panes contains its x and one of the panes contains its x + cols)
+        // 我们仅在它们覆盖根窗格 id 的整个垂直表面时才返回这些
+        // （即 - 一个窗格包含其 x，一个窗格包含其 x + cols）
         let mut boundaries_of_pane_ids = vec![];
         for p_id in &neighbor_pane_ids {
             let mut vertical_boundaries_of_pane = self.get_vertical_boundaries_of_pane(p_id);
@@ -1701,10 +1700,10 @@ impl<'a> TiledPaneGrid<'a> {
         pane_ids_to_expand: &[PaneId],
         holes: &[PaneId],
     ) -> Result<()> {
-        // here we fill in the pane_ids_to_expand over the holes horizontally and then shorten the
-        // height of the holes by the pane_ids_to_expand (squeeze them upwards)
-        // we expect the pane_ids_to_expand to all have the same y and height and for the holes to
-        // all be higher
+        // 这里我们在洞上水平填充 pane_ids_to_expand，然后通过 pane_ids_to_expand
+        // 缩短洞的高度（向上挤压它们）
+        // 我们期望 pane_ids_to_expand 都有相同的 y 和高度，并且洞
+        // 都更高
         let err_context = || format!("Failed to fill_geom_holes_horizontally_upwards");
         let mut panes_to_expand = vec![];
         let mut hole_panes = vec![];
@@ -1727,7 +1726,7 @@ impl<'a> TiledPaneGrid<'a> {
                 .iter()
                 .find(|(_p_id, p_geom)| p_geom.x >= hole_x)
             else {
-                // can happen if the last geom was a hole
+                // 如果最后一个 geom 是洞可能会发生
                 uncovered_hole = Some((hole_id, hole_geom));
                 continue;
             };
@@ -1784,11 +1783,11 @@ impl<'a> TiledPaneGrid<'a> {
         pane_ids_to_expand: &[PaneId],
         holes: &[PaneId],
     ) -> Result<()> {
-        // here we fill in the pane_ids_to_expand over the holes horizontally and then shorten the
-        // height of the holes by the pane_ids_to_expand, as well as increase their y by the same
-        // count (squeeze them downwards)
-        // we expect the pane_ids_to_expand to all have the same y and height and for the holes to
-        // all be higher and have the same y
+        // 这里我们在洞上水平填充 pane_ids_to_expand，然后通过 pane_ids_to_expand
+        // 缩短洞的高度，同时将它们的 y 增加相同的
+        // 数量（向下挤压它们）
+        // 我们期望 pane_ids_to_expand 都有相同的 y 和高度，并且洞
+        // 都更高且有相同的 y
         let err_context = || format!("Failed to fill_geom_holes_horizontally_downwards");
         let mut panes_to_expand = vec![];
         let mut hole_panes = vec![];
@@ -1811,7 +1810,7 @@ impl<'a> TiledPaneGrid<'a> {
                 .iter()
                 .find(|(_p_id, p_geom)| p_geom.x >= hole_x)
             else {
-                // can happen if the last geom was a hole
+                // 如果最后一个 geom 是洞可能会发生
                 uncovered_hole = Some((hole_id, hole_geom));
                 continue;
             };
@@ -1870,11 +1869,11 @@ impl<'a> TiledPaneGrid<'a> {
         pane_ids_to_expand: &[PaneId],
         holes: &[PaneId],
     ) -> Result<()> {
-        // here we fill in the pane_ids_to_expand over the holes vertically and then shorten the
-        // width of the holes by the pane_ids_to_expand, as well as increase their x by the same
-        // count (squeeze them to the right)
-        // we expect the pane_ids_to_expand to all have the same x and width and for the holes to
-        // all be wider and have the same x
+        // 这里我们在洞上垂直填充 pane_ids_to_expand，然后通过 pane_ids_to_expand 的宽度
+        // 缩短洞的宽度，同时将它们的 x 增加相同的
+        // 数量（向右挤压它们）
+        // 我们期望 pane_ids_to_expand 都有相同的 x 和宽度，并且洞
+        // 都更宽且有相同的 x
         let err_context = || format!("Failed to fill_geom_holes_vertically_to_the_right");
         let mut panes_to_expand = vec![];
         let mut hole_panes = vec![];
@@ -1897,7 +1896,7 @@ impl<'a> TiledPaneGrid<'a> {
                 .iter()
                 .find(|(_p_id, p_geom)| p_geom.y >= hole_y)
             else {
-                // can happen if the last geom was a hole
+                // 如果最后一个 geom 是洞可能会发生
                 uncovered_hole = Some((hole_id, hole_geom));
                 continue;
             };
@@ -1956,10 +1955,10 @@ impl<'a> TiledPaneGrid<'a> {
         pane_ids_to_expand: &[PaneId],
         holes: &[PaneId],
     ) -> Result<()> {
-        // here we fill in the pane_ids_to_expand over the holes vertically and then shorten the
-        // width of the holes by the pane_ids_to_expand's width (squeeze them to the right)
-        // we expect the pane_ids_to_expand to all have the same x and width and for the holes to
-        // all be wider
+        // 这里我们在洞上垂直填充 pane_ids_to_expand，然后通过 pane_ids_to_expand 的宽度
+        // 缩短洞的宽度（向右挤压它们）
+        // 我们期望 pane_ids_to_expand 都有相同的 x 和宽度，并且洞
+        // 都更宽
         let err_context = || format!("Failed to fill_geom_holes_vertically_to_the_left");
         let mut panes_to_expand = vec![];
         let mut hole_panes = vec![];
@@ -1982,7 +1981,7 @@ impl<'a> TiledPaneGrid<'a> {
                 .iter()
                 .find(|(_p_id, p_geom)| p_geom.y >= hole_y)
             else {
-                // can happen if the last geom was a hole
+                // 如果最后一个 geom 是洞可能会发生
                 uncovered_hole = Some((hole_id, hole_geom));
                 continue;
             };
@@ -2081,8 +2080,8 @@ impl<'a> TiledPaneGrid<'a> {
         }
     }
     pub fn direct_neighboring_pane_ids_below(&self, root_pane_id: &PaneId) -> Vec<PaneId> {
-        // here we look for panes that are directly below the provided root pane but that do not
-        // exceed its vertical borders (x and x + cols)
+        // 这里我们寻找直接在提供的根窗格下方但不
+        // 超过其垂直边界（x 和 x + cols）的窗格
         let Some(root_pane_geom) = self.get_pane_geom(root_pane_id) else {
             log::error!("Could nto find root pane geom");
             return vec![];
@@ -2103,8 +2102,8 @@ impl<'a> TiledPaneGrid<'a> {
             })
             .copied()
             .collect::<Vec<_>>();
-        // we only want to return these if they cover the entire vertical surface of the root pane id
-        // (as in - one of the panes contains its x and one of the panes contains its x + cols)
+        // 我们仅在它们覆盖根窗格 id 的整个垂直表面时才返回这些
+        // （即 - 一个窗格包含其 x，一个窗格包含其 x + cols）
         let mut boundaries_of_pane_ids = vec![];
         for p_id in &neighbor_pane_ids {
             let mut vertical_boundaries_of_pane = self.get_vertical_boundaries_of_pane(p_id);
@@ -2154,8 +2153,8 @@ impl<'a> TiledPaneGrid<'a> {
         Some(vec![*pane_id])
     }
     pub fn direct_neighboring_pane_ids_to_the_left(&self, root_pane_id: &PaneId) -> Vec<PaneId> {
-        // here we look for panes that are directly to the left the provided root pane but that do not
-        // exceed its horizontal borders (y and y + rows)
+        // 这里我们寻找直接在提供的根窗格左侧但不
+        // 超过其水平边界（y 和 y + rows）的窗格
         let Some(root_pane_geom) = self.get_pane_geom(root_pane_id) else {
             log::error!("Could nto find root pane geom");
             return vec![];
@@ -2176,8 +2175,8 @@ impl<'a> TiledPaneGrid<'a> {
             })
             .copied()
             .collect::<Vec<_>>();
-        // we only want to return these if they cover the entire horizontal surface of the root pane id
-        // (as in - one of the panes contains its y and one of the panes contains its y + rows)
+        // 我们仅在它们覆盖根窗格 id 的整个水平表面时才返回这些
+        // （即 - 一个窗格包含其 y，一个窗格包含其 y + rows）
         let mut boundaries_of_pane_ids = vec![];
         for p_id in &neighbor_pane_ids {
             let mut horizontal_boundaries_of_pane = self.get_horizontal_boundaries_of_pane(p_id);
@@ -2228,8 +2227,8 @@ impl<'a> TiledPaneGrid<'a> {
         Some(vec![*pane_id])
     }
     pub fn direct_neighboring_pane_ids_to_the_right(&self, root_pane_id: &PaneId) -> Vec<PaneId> {
-        // here we look for panes that are directly to the right the provided root pane but that do not
-        // exceed its horizontal borders (y and y + rows)
+        // 这里我们寻找直接在提供的根窗格右侧但不
+        // 超过其水平边界（y 和 y + rows）的窗格
         let Some(root_pane_geom) = self.get_pane_geom(root_pane_id) else {
             log::error!("Could nto find root pane geom");
             return vec![];
@@ -2250,8 +2249,8 @@ impl<'a> TiledPaneGrid<'a> {
             })
             .copied()
             .collect::<Vec<_>>();
-        // we only want to return these if they cover the entire horizontal surface of the root pane id
-        // (as in - one of the panes contains its y and one of the panes contains its y + rows)
+        // 我们仅在它们覆盖根窗格 id 的整个水平表面时才返回这些
+        // （即 - 一个窗格包含其 y，一个窗格包含其 y + rows）
         let mut boundaries_of_pane_ids = vec![];
         for p_id in &neighbor_pane_ids {
             let mut horizontal_boundaries_of_pane = self.get_horizontal_boundaries_of_pane(p_id);

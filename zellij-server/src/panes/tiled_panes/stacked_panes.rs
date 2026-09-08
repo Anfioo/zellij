@@ -63,8 +63,8 @@ impl<'a> StackedPanes<'a> {
                 .with_context(err_context)?;
             destination_pane.set_geom(destination_pane_geom);
         } else if destination_pane_stack_id.is_some() {
-            // we're moving down to the highest pane in the stack, we need to expand it and shrink the
-            // expanded stack pane
+            // 我们正在向下移动到堆叠中最高的窗格，我们需要扩展它并收缩
+            // 已扩展的堆叠窗格
             self.make_highest_pane_in_stack_flexible(destination_pane_id)?;
         }
         Ok(())
@@ -99,14 +99,14 @@ impl<'a> StackedPanes<'a> {
                 .with_context(err_context)?;
             destination_pane.set_geom(destination_pane_geom);
         } else if destination_pane_stack_id.is_some() {
-            // we're moving up to the lowest pane in the stack, we need to expand it and shrink the
-            // expanded stack pane
+            // 我们正在向上移动到堆叠中最低的窗格，我们需要扩展它并收缩
+            // 已扩展的堆叠窗格
             self.make_lowest_pane_in_stack_flexible(destination_pane_id)?;
         }
         Ok(())
     }
     pub fn expand_pane(&mut self, pane_id: &PaneId) -> Result<Vec<PaneId>> {
-        // returns all the pane ids in the stack
+        // 返回堆叠中的所有窗格 id
         let err_context = || format!("Failed to focus stacked pane");
         let all_stacked_pane_positions =
             self.positions_in_stack(pane_id).with_context(err_context)?;
@@ -146,13 +146,13 @@ impl<'a> StackedPanes<'a> {
 
             for (i, (pid, _position)) in all_stacked_pane_positions.iter().enumerate() {
                 if i > position_of_pane_to_focus && i <= position_of_flexible_pane {
-                    // the flexible pane has moved up the stack, we need to push this pane down
+                    // 灵活窗格已在堆叠中向上移动，我们需要将此窗格向下推
                     let pane = panes.get_mut(pid).with_context(err_context)?;
                     let mut pane_position_and_size = pane.position_and_size();
                     pane_position_and_size.y += height_of_flexible_pane.as_usize() - 1;
                     pane.set_geom(pane_position_and_size);
                 } else if i > position_of_flexible_pane && i <= position_of_pane_to_focus {
-                    // the flexible pane has moved down the stack, we need to pull this pane up
+                    // 灵活窗格已在堆叠中向下移动，我们需要将此窗格向上拉
                     let pane = panes.get_mut(pid).with_context(err_context)?;
                     let mut pane_position_and_size = pane.position_and_size();
                     pane_position_and_size.y -= height_of_flexible_pane.as_usize() - 1;
@@ -192,7 +192,7 @@ impl<'a> StackedPanes<'a> {
             cols: first_pane_in_stack.cols,
             rows,
             stacked: None, // important because otherwise the minimum stack size will not be
-            // respected
+            // 已遵守
             ..Default::default()
         })
     }
@@ -315,7 +315,7 @@ impl<'a> StackedPanes<'a> {
         Ok(pane_to_close.position_and_size().rows.is_fixed())
     }
     fn positions_in_stack(&self, id: &PaneId) -> Result<Vec<(PaneId, PaneGeom)>> {
-        // find the full stack of panes around the given id, sorted by pane location top to bottom
+        // 找到给定 id 周围的完整窗格堆叠，按窗格位置从上到下排序
         let err_context = || format!("Failed to find stacked panes");
         let panes = self.panes.borrow();
         let pane_in_stack = panes.get(id).with_context(err_context)?;
@@ -398,7 +398,7 @@ impl<'a> StackedPanes<'a> {
                 for (pane_id, pane_geom) in positions_in_stack {
                     seen.insert(pane_id);
                     if pane_geom.rows.is_percent() {
-                        // this is the flexible pane
+                        // 这是灵活窗格
                         current_pane_is_above_stack = false;
                         continue;
                     }
@@ -501,13 +501,13 @@ impl<'a> StackedPanes<'a> {
         Err(anyhow!("Not enough room for another pane!"))
     }
     pub fn room_left_in_stack_of_pane_id(&self, pane_id: &PaneId) -> Option<usize> {
-        // if the pane is stacked, returns the number of panes possible to add to this stack
+        // 如果窗格是堆叠的，返回可以添加到此堆叠的窗格数量
         let Ok(stack) = self.positions_in_stack(pane_id) else {
             return None;
         };
         stack.iter().find_map(|(_p_id, p)| {
             if !p.rows.is_fixed() {
-                // this is the flexible pane
+                // 这是灵活窗格
                 Some(p.rows.as_usize().saturating_sub(MIN_TERMINAL_HEIGHT))
             } else {
                 None
@@ -555,7 +555,7 @@ impl<'a> StackedPanes<'a> {
             let other_panes_in_stack = self.positions_in_stack(&root_pane_id).ok()?;
             for other_pane in other_panes_in_stack {
                 if other_pane.0 != root_pane_id {
-                    // so it is not duplicated
+                    // 这样它就不会重复
                     extra_stacked_geoms_of_main_pane.push(other_pane);
                 }
             }
@@ -633,7 +633,7 @@ impl<'a> StackedPanes<'a> {
             .positions_of_panes_and_their_stacks(neighboring_pane_ids)
             .ok_or_else(|| anyhow!("Failed to get pane geoms"))?;
         if other_pane_ids_and_geoms.is_empty() {
-            // nothing to do
+            // 无事可做
             return Ok(());
         };
         let Some(geom_to_combine) = self.combine_geoms_horizontally(&other_pane_ids_and_geoms)
@@ -647,12 +647,12 @@ impl<'a> StackedPanes<'a> {
             geom_of_main_pane.combine_vertically_with(&geom_to_combine)
         };
         let Some(new_stack_geom) = new_stack_geom else {
-            // nothing to do, likely the pane below is fixed
+            // 无事可做，可能下面的窗格是固定的
             return Ok(());
         };
         let stack_id = self.next_stack_id();
-        // we add the extra panes in the original stack (if any) so that they will be assigned pane
-        // positions but not affect the stack geometry
+        // 我们在原始堆叠中添加额外的窗格（如果有），以便它们将被分配窗格
+        // 位置但不影响堆叠几何形状
         other_pane_ids_and_geoms.append(&mut extra_stacked_geoms_of_main_pane);
         let mut panes = self.panes.borrow_mut();
         let mut running_y = new_stack_geom.y;
@@ -709,7 +709,7 @@ impl<'a> StackedPanes<'a> {
             .positions_of_panes_and_their_stacks(neighboring_pane_ids)
             .ok_or_else(|| anyhow!("Failed to get pane geoms"))?;
         if other_pane_ids_and_geoms.is_empty() {
-            // nothing to do
+            // 无事可做
             return Ok(());
         };
         let Some(geom_to_combine) = self.combine_geoms_vertically(&other_pane_ids_and_geoms) else {
@@ -722,12 +722,12 @@ impl<'a> StackedPanes<'a> {
             geom_of_main_pane.combine_horizontally_with(&geom_to_combine)
         };
         let Some(new_stack_geom) = new_stack_geom else {
-            // nothing to do, likely the pane below is fixed
+            // 无事可做，可能下面的窗格是固定的
             return Ok(());
         };
         let stack_id = self.next_stack_id();
-        // we add the extra panes in the original stack (if any) so that they will be assigned pane
-        // positions but not affect the stack geometry
+        // 我们在原始堆叠中添加额外的窗格（如果有），以便它们将被分配窗格
+        // 位置但不影响堆叠几何形状
         other_pane_ids_and_geoms.append(&mut extra_stacked_geoms_of_main_pane);
         let mut panes = self.panes.borrow_mut();
         let mut running_y = new_stack_geom.y;

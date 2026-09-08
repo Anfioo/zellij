@@ -35,8 +35,8 @@ pub const RESET_STYLES: CharacterStyles = CharacterStyles {
     styled_underlines_enabled: false,
 };
 
-// Prefer to use RcCharacterStyles::default() where it makes sense
-// as it will reduce memory usage
+// 在合理的地方优先使用 RcCharacterStyles::default()
+// 因为它会减少内存使用
 pub const DEFAULT_STYLES: CharacterStyles = CharacterStyles {
     foreground: None,
     background: None,
@@ -153,8 +153,8 @@ impl NamedColor {
     }
 }
 
-// This enum carefully only has two variants so
-// enum niche optimisations can keep it at the same byte size as pointers
+// 这个枚举精心只包含两个变体，以便
+// 枚举 niche 优化可以使其保持与指针相同的字节大小
 #[derive(Clone, Debug, PartialEq)]
 pub enum RcCharacterStyles {
     Reset,
@@ -332,7 +332,7 @@ impl CharacterStyles {
             return Some(RESET_STYLES.enable_styled_underlines(self.styled_underlines_enabled));
         }
 
-        // create diff from all changed styles
+        // 从所有更改的样式创建差异
         let mut diff = DEFAULT_STYLES.enable_styled_underlines(self.styled_underlines_enabled);
 
         if self.foreground != new_styles.foreground {
@@ -375,7 +375,7 @@ impl CharacterStyles {
             diff.link_anchor = new_styles.link_anchor;
         }
 
-        // apply new styles
+        // 应用新样式
         *self = new_styles.enable_styled_underlines(self.styled_underlines_enabled);
 
         if let Some(changed_colors) = changed_colors {
@@ -405,7 +405,7 @@ impl CharacterStyles {
         self.reverse = Some(AnsiCode::Reset);
         self.hidden = Some(AnsiCode::Reset);
         self.strike = Some(AnsiCode::Reset);
-        // Deliberately don't end link anchor
+        // 故意不结束链接锚点
     }
     pub fn add_style_from_ansi_params(&mut self, params: &mut ParamsIter) {
         while let Some(param) = params.next() {
@@ -579,7 +579,7 @@ impl Display for CharacterStyles {
             && self.dim == Some(AnsiCode::Reset)
             && self.italic == Some(AnsiCode::Reset)
         {
-            write!(f, "\u{1b}[m")?; // reset all
+            write!(f, "\u{1b}[m")?; // 重置所有
             return Ok(());
         }
         if let Some(ansi_code) = self.foreground {
@@ -735,7 +735,7 @@ impl Display for CharacterStyles {
                 },
                 AnsiCode::Reset => {
                     write!(f, "\u{1b}[22m")?;
-                    // ⬑ this SGR also clears bold, so reapply it
+                    // ⬑ 这个 SGR 也会清除粗体，所以重新应用它
                     if let Some(AnsiCode::On) = self.bold {
                         write!(f, "\u{1b}[1m")?;
                     }
@@ -798,8 +798,8 @@ impl Default for StandardCharset {
 }
 
 impl StandardCharset {
-    /// Switch/Map character to the active charset. Ascii is the common case and
-    /// for that we want to do as little as possible.
+    /// 将字符切换/映射到活动字符集。Ascii 是常见情况，
+    /// 对于这种情况我们希望尽可能少做操作。
     #[inline]
     pub fn map(self, c: char) -> char {
         match self {
@@ -924,8 +924,8 @@ pub struct TerminalCharacter {
     width: u8,
 }
 
-// This size has significant memory and CPU implications for long lines,
-// be careful about allowing it to grow
+// 这个大小对长行有显著的内存和 CPU 影响，
+// 要小心允许它增长
 #[cfg(target_arch = "x86_64")]
 const _: [(); 16] = [(); std::mem::size_of::<TerminalCharacter>()];
 

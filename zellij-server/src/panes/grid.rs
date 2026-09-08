@@ -371,7 +371,7 @@ fn transfer_rows_from_lines_above_to_viewport(
                     next_lines =
                         Row::from_rows(next_lines).split_to_rows_of_length(max_viewport_width);
                     if next_lines.is_empty() {
-                        // no more lines at lines_above, the line we popped was probably empty
+                        // lines_above 中没有更多行了，弹出的行可能是空的
                         break;
                     }
                     let row_count_delta = next_lines.len() as isize - 1 - merged_row_count as isize;
@@ -577,8 +577,8 @@ macro_rules! dump_screen {
                 buf.push_str("\n");
             }
             let s: String = (&line.columns).into_iter().map(|x| x.character).collect();
-            // Replace the spaces at the end of the line. Sometimes, the lines are
-            // collected with spaces until the end of the panel.
+            // 替换行尾的空格。有时，行会被
+            // 收集空格直到面板末尾。
             buf.push_str(&s.trim_end_matches(' '));
             is_first = false;
         }
@@ -611,7 +611,7 @@ macro_rules! dump_screen_with_ansi {
                 .unwrap_or(0);
 
             for tc in line.columns.iter().take(last_non_space) {
-                // Only output style codes if style changed
+                // 仅在样式改变时输出样式代码
                 if last_styles.as_ref() != Some(&tc.styles) {
                     write!(buf, "{}", tc.styles).unwrap();
                     last_styles = Some(tc.styles.clone());
@@ -647,13 +647,13 @@ fn utf8_mouse_coordinates(column: usize, line: isize) -> Vec<u8> {
     coordinates
 }
 
-/// Find the canonical root row for a logical line group containing `row_idx`,
-/// collect the non-canonical tail rows, and build the concatenated text with
-/// a byte-offset boundary table.
+/// 查找包含 `row_idx` 的逻辑行组的规范根行，
+/// 收集非规范尾行，并构建带有
+/// 字节偏移边界表的拼接文本。
 ///
-/// Returns `(canonical_idx, group_len, text, boundaries)` where `group_len`
-/// is the total number of viewport rows in the group (1 + tail count).
-/// Returns `None` if `row_idx` is out of bounds.
+/// 返回 `(canonical_idx, group_len, text, boundaries)`，其中 `group_len`
+/// 是组中视口行的总数（1 + 尾行数）。
+/// 如果 `row_idx` 超出范围则返回 `None`。
 fn collect_and_build_logical_line(
     viewport: &VecDeque<Row>,
     row_idx: usize,
@@ -661,7 +661,7 @@ fn collect_and_build_logical_line(
     if row_idx >= viewport.len() {
         return None;
     }
-    // Walk backward to find the canonical root.
+    // 向后遍历以找到规范根行。
     let mut canonical = row_idx;
     while canonical > 0 {
         match viewport.get(canonical) {
@@ -670,7 +670,7 @@ fn collect_and_build_logical_line(
         }
     }
     let canonical_row = viewport.get(canonical)?;
-    // Collect non-canonical tail rows.
+    // 收集非规范的尾行。
     let mut tail_count = 0;
     loop {
         let tail_idx = canonical + tail_count + 1;
@@ -680,7 +680,7 @@ fn collect_and_build_logical_line(
         }
     }
     let group_len = 1 + tail_count;
-    // Build concatenated text and boundary table.
+    // 构建拼接文本和边界表。
     let mut text = String::new();
     let mut boundaries: Vec<(usize, usize)> = Vec::with_capacity(group_len);
     boundaries.push((canonical, 0));
@@ -699,15 +699,15 @@ fn collect_and_build_logical_line(
     Some((canonical, group_len, text, boundaries))
 }
 
-/// Map a byte offset in the concatenated logical-line string back to
-/// (viewport_row_idx, display_column).
+/// 将拼接逻辑行字符串中的字节偏移映射回
+/// (viewport_row_idx, display_column)。
 ///
-/// display_column is the sum of character.width() for all characters
-/// before the target character in that row — NOT a char count or byte count.
-/// This correctly handles wide characters (CJK, emoji).
+/// display_column 是该行中目标字符之前所有字符的
+/// character.width() 之和 — 不是字符计数或字节计数。
+/// 这正确处理了宽字符（CJK、表情符号）。
 ///
-/// `boundaries` is the table produced by `collect_and_build_logical_line`.
-/// `viewport` is `&self.viewport`.
+/// `boundaries` 是由 `collect_and_build_logical_line` 生成的表。
+/// `viewport` 是 `&self.viewport`。
 fn byte_offset_to_display_col(
     byte_offset: usize,
     boundaries: &[(usize, usize)],
@@ -716,14 +716,14 @@ fn byte_offset_to_display_col(
     if boundaries.is_empty() {
         return None;
     }
-    // Find which row the byte offset falls in (last boundary whose byte_start <= offset).
+    // 查找字节偏移落在哪一行（byte_start <= offset 的最后一个边界）。
     let boundary_idx = boundaries
         .partition_point(|&(_, byte_start)| byte_start <= byte_offset)
         .saturating_sub(1);
     let &(row_idx, row_byte_start) = boundaries.get(boundary_idx)?;
     let intra_byte_offset = byte_offset - row_byte_start;
 
-    // Count display columns up to (but not including) the character at intra_byte_offset.
+    // 计算直到 intra_byte_offset 处字符（不包含）的显示列数。
     let row = viewport.get(row_idx)?;
     let mut display_col = 0usize;
     let mut bytes_seen = 0usize;
@@ -737,8 +737,8 @@ fn byte_offset_to_display_col(
     Some((row_idx, display_col))
 }
 
-/// Convert a regex match into a `Selection` spanning the matched display region.
-/// Returns `None` if the boundary table or viewport lookup fails.
+/// 将正则匹配转换为跨越匹配显示区域的 `Selection`。
+/// 如果边界表或视口查找失败则返回 `None`。
 fn match_to_selection(
     mat: &regex::Match,
     boundaries: &[(usize, usize)],
@@ -754,17 +754,17 @@ fn match_to_selection(
     Some((sel, start_row, start_col, end_row, end_col))
 }
 
-/// Extract the effective match from a set of captures.
-/// If capture group 1 exists, it is used (allowing patterns to include
-/// context such as surrounding whitespace in the full match while
-/// highlighting only the content in group 1). Otherwise the full match
-/// (group 0) is returned.
+/// 从一组捕获中提取有效匹配。
+/// 如果捕获组 1 存在，则使用它（允许模式包含
+/// 上下文，例如完整匹配中的周围空白，同时
+/// 仅高亮组 1 中的内容）。否则使用完整匹配
+/// （组 0）。
 fn highlight_match<'t>(captures: &regex::Captures<'t>) -> Option<regex::Match<'t>> {
     captures.get(1).or_else(|| captures.get(0))
 }
 
-/// Check whether a (row, col) position falls within a display span.
-/// The span is inclusive at start and exclusive at end.
+/// 检查 (row, col) 位置是否落在显示范围内。
+/// 范围在起点包含，在终点不包含。
 fn position_in_span(
     row: usize,
     col: usize,
@@ -841,22 +841,22 @@ pub struct Grid {
     pub mouse_mode: MouseMode,
     pub mouse_tracking: MouseTracking,
     pub focus_event_tracking: bool,
-    /// Has the app in this pane subscribed to host color-palette theme
-    /// notifications via `CSI ? 2031 h`? When true, host-emitted DSR 997
-    /// notifications (received by the client and forwarded as
-    /// `ScreenInstruction::HostTerminalThemeChanged`) are pushed onto
-    /// `pending_messages_to_pty` for this pane.
+    /// 此窗格中的应用是否通过 `CSI ? 2031 h` 订阅了主机调色板主题
+    /// 通知？当为 true 时，主机发出的 DSR 997 通知
+    /// （由客户端接收并作为
+    /// `ScreenInstruction::HostTerminalThemeChanged` 转发）被推送到
+    /// 此窗格的 `pending_messages_to_pty`。
     pub color_palette_notification_enabled: bool,
     pub search_results: SearchResult,
     pub pending_clipboard_update: Option<String>,
     pub pending_osc7_cwd: Option<std::path::PathBuf>,
     pub pending_desktop_notifications: Vec<PendingNotification>,
     notification_tracker: NotificationTracker,
-    /// Whitelisted host-terminal queries intercepted from the app running
-    /// in this pane (CSI 14t / 16t pixel-dim queries, OSC 10;? / 11;? /
-    /// 4;N;? color queries). Each entry is the raw byte sequence that
-    /// Zellij should forward to the host terminal; the host's reply is
-    /// later routed back to this pane's pty.
+    /// 从运行中的应用拦截的白名单主机终端查询
+    /// （CSI 14t / 16t 像素维度查询，OSC 10;? / 11;? /
+    /// 4;N;? 颜色查询）。每个条目是 Zellij 应转发到主机终端的原始字节序列；
+    /// 主机的回复随后被路由回此窗格的 pty。
+    /// 
     pub pending_forwarded_queries: Vec<crate::host_query::HostQuery>,
     pub pending_nested_session_messages: Vec<NestedSessionMessage>,
     ui_component_bytes: Option<Vec<u8>>,
@@ -869,20 +869,20 @@ pub struct Grid {
     osc8_hyperlinks: bool,
     pub supports_kitty_keyboard_protocol: bool, // has the app requested kitty keyboard support?
     explicitly_disable_kitty_keyboard_protocol: bool, // has kitty keyboard support been explicitly
-    // disabled by user config?
+    // 被用户配置禁用了？
     click: Click,
     hyperlink_tracker: HyperlinkTracker,
-    /// Pane-scoped override for the default foreground colour. Narrow
-    /// to literal RGB by construction — the setters below refuse
-    /// palette-indexed / named variants silently, so this field can be
-    /// converted to an `OSC 10` reply without fallibility and the
-    /// render path can wrap it unconditionally.
+    /// 窗格范围的默认前景色覆盖。通过构造缩小为字面 RGB —
+    /// 下面的设置器静默拒绝调色板索引 / 命名变体，
+    /// 因此此字段可以无错误地转换为 `OSC 10` 回复，
+    /// 并且渲染路径可以无条件地包装它。
+    /// 
     pub pane_default_fg: Option<(u8, u8, u8)>,
-    /// Pane-scoped override for the default background colour. Same
-    /// invariant as `pane_default_fg`.
+    /// 窗格范围的默认背景色覆盖。与 `pane_default_fg` 具有相同的不变性。
+    /// 
     pub pane_default_bg: Option<(u8, u8, u8)>,
     pub plugin_highlights: HashMap<u32, Vec<(String, CompiledHighlight)>>,
-    // key: plugin_id (u32), inner vec: (pattern, compiled) pairs
+    // 键：plugin_id (u32)，内部 vec：(pattern, compiled) 对
     pub hover_position: Option<Position>, // pane-relative cursor cell; None when outside pane
     pub cached_hover_tooltip: Option<String>,
     osc133_markers_seen: bool,
@@ -893,9 +893,9 @@ pub struct Grid {
 
 impl Grid {
     pub fn set_pane_default_colors(&mut self, fg: Option<String>, bg: Option<String>) {
-        // Parse inputs; anything that isn't literal RGB (palette
-        // index / named colour / parse failure) is silently dropped so
-        // the invariant on `pane_default_{fg,bg}` is preserved.
+        // 解析输入；任何非字面 RGB 的内容（调色板
+        // 索引 / 命名颜色 / 解析失败）都会被静默丢弃，以便
+        // 保持 `pane_default_{fg,bg}` 的不变性。
         self.pane_default_fg = fg
             .as_ref()
             .and_then(|s| xparse_color(s.as_bytes()))
@@ -914,10 +914,10 @@ impl Grid {
     }
 }
 
-/// Extract the RGB triple from an `AnsiCode`, or `None` for any
-/// other variant. Used at the ingress points that populate
-/// `Grid::pane_default_{fg,bg}` to keep those fields narrow to
-/// literal RGB.
+/// 从 `AnsiCode` 中提取 RGB 三元组，对于任何
+/// 其他变体返回 `None`。在填充
+/// `Grid::pane_default_{fg,bg}` 的入口点使用，以保持这些字段狭窄为
+/// 字面 RGB。
 fn rgb_of_ansi_code(code: AnsiCode) -> Option<(u8, u8, u8)> {
     match code {
         AnsiCode::RgbCode(rgb) => Some(rgb),
@@ -929,10 +929,10 @@ fn rgb_to_hex_string((r, g, b): (u8, u8, u8)) -> String {
     format!("#{:02x}{:02x}{:02x}", r, g, b)
 }
 
-/// Format an RGB triple as the body of an OSC 10/11 reply —
-/// `rgb:RRRR/GGGG/BBBB` per xterm's ctlseqs, where each 8-bit
-/// component is widened to the 16-bit hex form by repetition
-/// (`0xAB` → `0xABAB`).
+/// 将 RGB 三元组格式化为 OSC 10/11 回复的主体 —
+/// 按照 xterm 的 ctlseqs 为 `rgb:RRRR/GGGG/BBBB`，其中每个 8 位
+/// 组件通过重复扩展为 16 位十六进制形式
+/// （`0xAB` → `0xABAB`）。
 fn osc_color_reply_body((r, g, b): (u8, u8, u8)) -> String {
     let expand = |c: u8| (c as u16) * 0x0101;
     format!("rgb:{:04x}/{:04x}/{:04x}", expand(r), expand(g), expand(b))
@@ -962,7 +962,7 @@ fn encode_hex_ascii(value: &str) -> String {
         .collect::<String>()
 }
 
-/// A compiled highlight entry for one plugin/pattern combination.
+/// 一个插件/模式组合的编译高亮条目。
 #[derive(Clone)]
 pub struct CompiledHighlight {
     pub regex: regex::Regex,
@@ -978,7 +978,7 @@ pub struct CompiledHighlight {
 }
 
 impl CompiledHighlight {
-    /// Whether this highlight would produce any visible styling change.
+    /// 此高亮是否会产生任何可见的样式更改。
     pub fn has_visual_effect(&self) -> bool {
         self.bg.is_some() || self.fg.is_some() || self.bold || self.italic || self.underline
     }
@@ -1053,12 +1053,12 @@ impl Default for MouseTracking {
 impl Debug for Grid {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut buffer: Vec<Row> = Vec::from(self.viewport.clone());
-        // pad buffer
+        // 填充缓冲区
         for _ in buffer.len()..self.height {
             buffer.push(Row::new().canonical());
         }
 
-        // display sixel placeholder
+        // 显示 sixel 占位符
         let sixel_indication_character = |x| {
             let sixel_indication_word = "Sixel";
             sixel_indication_word
@@ -1106,7 +1106,7 @@ impl Debug for Grid {
             }
         }
 
-        // display terminal characters with stripped styles
+        // 显示去除样式后的终端字符
         for (i, row) in buffer.iter().enumerate() {
             let mut cow_row = Cow::Borrowed(row);
             self.search_results
@@ -1183,10 +1183,10 @@ impl Grid {
     ) -> Self {
         let sixel_grid = SixelGrid::new(character_cell_size.clone(), sixel_image_store);
         let kitty_grid = KittyGrid::new(character_cell_size.clone(), kitty_image_store);
-        // make sure this is initialized as it is used internally
-        // if it was already initialized (which should happen normally unless this is a test or
-        // something changed since this comment was written), we get an Error which we ignore
-        // I don't know why this needs to be a OneCell, but whatevs
+        // 确保这已被初始化，因为它在内部被使用
+        // 如果它已经被初始化（通常应该发生，除非这是一个测试或
+        // 自写此注释以来发生了某些变化），我们会得到一个被忽略的 Error
+        // 我不知道为什么这需要是 OneCell，但无所谓
         let _ = SCROLL_BUFFER_SIZE.set(DEFAULT_SCROLL_BUFFER_SIZE);
         Grid {
             lines_above: VecDeque::new(),
@@ -1315,7 +1315,7 @@ impl Grid {
         self.cursor.get_shape()
     }
     pub fn scrollback_position_and_length(&self) -> (usize, usize) {
-        // (position, length)
+        // (位置, 长度)
         (
             self.lines_below.len(),
             (self.scrollback_buffer_lines + self.lines_below.len()),
@@ -1326,7 +1326,7 @@ impl Grid {
         let mut scrollback_buffer_count = 0;
         for row in &mut self.lines_above {
             let row_width = row.width_cached();
-            // rows in lines_above are unwrapped, so we need to account for that
+            // lines_above 中的行是未换行的，所以我们需要考虑这一点
             if row_width > self.width {
                 scrollback_buffer_count += calculate_row_display_height(row_width, self.width);
             } else {
@@ -1373,7 +1373,7 @@ impl Grid {
         }
         cursor_canonical_line_index
     }
-    // TODO: merge these two functions
+    // TODO: 合并这两个函数
     fn cursor_index_in_canonical_line(&self) -> usize {
         let mut cursor_canonical_line_index = 0;
         let mut cursor_index_in_canonical_line = 0;
@@ -1547,7 +1547,7 @@ impl Grid {
             if let Some(command_output_flash) = self.command_output_flash.as_mut() {
                 command_output_flash.move_down(1);
             }
-            // Move all search-selections down one line as well
+            // 也将所有搜索选择向下移动一行
             found_something = self
                 .search_results
                 .move_down(1, &self.viewport, self.height);
@@ -1577,8 +1577,8 @@ impl Grid {
                         last_line_above
                     },
                     None => {
-                        // in this case, this line was not canonical but its beginning line was
-                        // dropped out of scope, so we make it canonical and push it up
+                        // 在这种情况下，这一行不是规范行，但它的起始行是
+                        // 被移出了范围，所以我们将其设为规范行并向上推
                         self.kitty_grid.insert_canonical_anchor_line_at_front();
                         line_to_push_up.canonical()
                     },
@@ -1611,7 +1611,7 @@ impl Grid {
             if let Some(command_output_flash) = self.command_output_flash.as_mut() {
                 command_output_flash.move_up(1);
             }
-            // Move all search-selections up one line as well
+            // 也将所有搜索选择向上移动一行
             found_something =
                 self.search_results
                     .move_up(1, &self.viewport, &self.lines_below, self.height);
@@ -1623,10 +1623,10 @@ impl Grid {
         found_something
     }
     pub fn force_change_size(&mut self, new_rows: usize, new_columns: usize) {
-        // this is an ugly hack - it's here because sometimes we need to change_size to the
-        // existing size (eg. when resizing an alternative_grid to the current height/width) and
-        // the change_size method is a no-op in that case. Should be fixed by making the
-        // change_size method atomic
+        // 这是一个丑陋的 hack - 它在这里是因为有时我们需要将大小更改为
+        // 现有大小（例如，将 alternative_grid 调整为当前高度/宽度时）以及
+        // change_size 方法在那种情况下是空操作。应该通过使
+        // change_size 方法原子化来修复
         let intermediate_rows = if new_rows == self.height {
             new_rows + 1
         } else {
@@ -1641,13 +1641,13 @@ impl Grid {
         self.change_size(new_rows, new_columns);
     }
     pub fn change_size(&mut self, new_rows: usize, new_columns: usize) {
-        // Do nothing if this pane hasn't been given a proper size yet
+        // 如果此窗格尚未获得正确的大小，则不执行任何操作
         if new_columns == 0 || new_rows == 0 {
             return;
         }
         if self.alternate_screen_state.is_some() {
-            // in alternate screen we do nothing but log the new size, the program in the terminal
-            // is in control now...
+            // 在备用屏幕中我们只记录新大小，终端中的程序
+            // 现在掌控一切...
             self.height = new_rows;
             self.width = new_columns;
             self.set_scroll_region_to_viewport_size();
@@ -1681,18 +1681,18 @@ impl Grid {
                             last_line.append(&mut row);
                         },
                         None => {
-                            // the state is corrupted somehow
-                            // this is a bug and I'm not yet sure why it happens
-                            // usually it fixes itself and is a result of some race
-                            // TODO: investigate why this happens and solve it
+                            // 状态不知何故被破坏了
+                            // 这是一个 bug，我还不确定为什么会发生
+                            // 通常它会自行修复，是某种竞态的结果
+                            // TODO: 调查为什么会发生这种情况并解决它
                             return;
                         },
                     }
                 }
             }
 
-            // trim lines after the last empty space that has no following character, because
-            // terminals don't trim empty lines
+            // 在最后一个没有后续字符的空格之后修剪行，因为
+            // 终端不会修剪空行
             for line in &mut viewport_canonical_lines {
                 let mut trim_at = None;
                 for (index, character) in line.columns.iter().enumerate() {
@@ -1701,12 +1701,12 @@ impl Grid {
                         && matches!(character.styles.background, Some(AnsiCode::Reset) | None);
 
                     if !is_trimmable_space {
-                        // we can't trim this character, meaning that if we had a previous
-                        // character that we marked as the trim_at point, we need to clear it
+                        // 我们不能修剪这个字符，这意味着如果我们有一个先前的
+                        // 被标记为 trim_at 点的字符，我们需要清除它
                         trim_at = None;
                     } else if trim_at.is_none() {
-                        // we CAN trim this character, set the trim_at point only if it's not set
-                        // because we want the trim_at point to be the EARLIEST trimmable character
+                        // 我们可以修剪这个字符，仅在 trim_at 点未设置时设置它
+                        // 因为我们希望 trim_at 点是最早的可修剪字符
                         trim_at = Some(index);
                     }
                 }
@@ -1719,8 +1719,8 @@ impl Grid {
             let mut new_viewport_rows = vec![];
             for mut canonical_line in viewport_canonical_lines {
                 let mut canonical_line_parts = canonical_line.split_to_rows_of_length(new_columns);
-                // If a character is wider than the grid, split_to_rows_of_length returns an empty
-                // vec — skip the line, matching the old `break` behavior
+                // 如果字符比网格宽，split_to_rows_of_length 返回一个空的
+                // vec — 跳过该行，匹配旧的 `break` 行为
                 if canonical_line_parts.is_empty() {
                     continue;
                 }
@@ -1737,9 +1737,9 @@ impl Grid {
                         + saved_cursor_index_in_canonical_line.as_ref().unwrap() / new_columns
                 });
 
-            // A cursor at EOL has two equivalent positions - end of this line or beginning of
-            // next. If not already at the beginning of line, bias to EOL so add character logic
-            // doesn't create spurious canonical lines
+            // EOL 处的光标有两个等效位置 - 此行末尾或
+            // 下一行开头。如果尚未在行首，则偏向 EOL，以便添加字符逻辑
+            // 不会创建虚假的规范行
             let mut new_cursor_x = cursor_index_in_canonical_line % new_columns;
             if self.cursor.x != 0 && new_cursor_x == 0 {
                 new_cursor_y = new_cursor_y.saturating_sub(1);
@@ -1793,8 +1793,8 @@ impl Grid {
         };
 
         if let Some(cursors) = cursors {
-            // At this point the x coordinates have been calculated, the y coordinates
-            // will be updated within this block
+            // 此时 x 坐标已计算完毕，y 坐标
+            // 将在此块内更新
             let (
                 mut new_cursor_y,
                 mut saved_cursor_y_coordinates,
@@ -1868,21 +1868,21 @@ impl Grid {
         self.scrollback_buffer_lines = self.recalculate_scrollback_buffer_count();
         self.search_results.selections.clear();
         self.search_viewport();
-        // If we have thrown out the active element, set it to None
+        // 如果我们已经丢弃了活动元素，将其设置为 None
         self.search_results.unset_active_selection_if_nonexistent();
         self.output_buffer.update_all_lines();
     }
     pub fn as_character_lines(&self) -> Vec<Vec<TerminalCharacter>> {
-        // this is only used in the tests
-        // it's not part of testing the app, but rather is used to interpret the snapshots created
-        // by it
+        // 这仅在测试中使用
+        // 它不是测试应用的一部分，而是用于解释创建的快照
+        // 由它
         let mut lines: Vec<Vec<TerminalCharacter>> = self
             .viewport
             .iter()
             .map(|r| {
                 let excess_width = r.excess_width();
                 let mut line: Vec<TerminalCharacter> = r.columns.iter().cloned().collect();
-                // pad line
+                // 填充行
                 line.resize(
                     self.width.saturating_sub(excess_width),
                     EMPTY_TERMINAL_CHARACTER,
@@ -1997,11 +1997,11 @@ impl Grid {
 
         for character_chunk in character_chunks.iter_mut() {
             character_chunk.add_changed_colors(self.changed_colors);
-            // CharacterChunk still carries `Option<AnsiCode>` because
-            // `adjust_styles_for_custom_bg_fg` assigns the value into
-            // `CharacterStyles.{foreground,background}` (themselves
-            // `Option<AnsiCode>`). Re-wrap the narrow RGB at the
-            // boundary so the downstream pipeline stays uniform.
+            // CharacterChunk 仍然携带 `Option<AnsiCode>`，因为
+            // `adjust_styles_for_custom_bg_fg` 将值分配到
+            // `CharacterStyles.{foreground,background}`（它们本身
+            // 也是 `Option<AnsiCode>`）。在边界处重新包装窄 RGB，
+            // 以便下游管道保持统一。
             character_chunk.add_pane_defaults(
                 self.pane_default_fg.map(AnsiCode::RgbCode),
                 self.pane_default_bg.map(AnsiCode::RgbCode),
@@ -2092,7 +2092,7 @@ impl Grid {
                     );
                 }
             }
-            // Apply pre-computed plugin highlight selections to this chunk.
+            // 将预先计算的插件高亮选择应用到此块。
             for hs in &plugin_highlight_selections {
                 if hs
                     .selection
@@ -2109,10 +2109,10 @@ impl Grid {
             kitty_image_chunks,
         )));
     }
-    /// Returns the cursor position and whether it is visible.
-    /// The position is returned unconditionally (as long as the cursor is within
-    /// bounds) so that the host terminal can position the cursor for IME even
-    /// when the app has hidden it. The bool is true when the cursor is visible.
+    /// 返回光标位置及其是否可见。
+    /// 位置无条件返回（只要光标在
+    /// 范围内），以便主机终端即使在应用隐藏了光标时也能为 IME 定位光标。
+    /// 当光标可见时 bool 为 true。
     pub fn cursor_coordinates(&self) -> Option<(usize, usize, bool)> {
         if self.cursor.x >= self.width || self.cursor.y >= self.height {
             None
@@ -2123,7 +2123,7 @@ impl Grid {
     pub fn is_mid_frame(&self) -> bool {
         self.lock_renders
     }
-    /// Clears all buffers with text for a current screen
+    /// 清除当前屏幕的所有文本缓冲区
     pub fn clear_screen(&mut self) {
         if self.alternate_screen_state.is_some() {
             log::warn!("Tried to clear pane with alternate_screen_state");
@@ -2132,7 +2132,7 @@ impl Grid {
         self.reset_terminal_state();
         self.mark_for_rerender();
     }
-    /// Dumps all lines above terminal viewport and the viewport itself to a string
+    /// 将终端视口上方的所有行和视口本身转储为字符串
     pub fn dump_screen(&self, full: bool) -> String {
         let viewport: String = dump_screen!(self.viewport);
         if !full {
@@ -2145,7 +2145,7 @@ impl Grid {
         scrollback.push_str(&viewport);
         scrollback
     }
-    /// Dumps all lines (with ansi) above terminal viewport and the viewport itself to a string
+    /// 将终端视口上方的所有行（带 ansi）和视口本身转储为字符串
     pub fn dump_screen_with_ansi(&self, full: bool) -> String {
         let viewport: String = dump_screen_with_ansi!(self.viewport);
         if !full {
@@ -2378,9 +2378,9 @@ impl Grid {
             return;
         }
         if self.viewport.len() <= self.cursor.y + 1 {
-            // FIXME: this should add an empty line with the pad_character
-            // but for some reason this breaks rendering in various situations
-            // it needs to be investigated and fixed
+            // FIXME: 这应该添加一个带有 pad_character 的空行
+            // 但由于某种原因，这在各种情况下会破坏渲染
+            // 需要调查并修复它
             let new_row = Row::new().canonical();
             self.viewport.push_back(new_row);
         }
@@ -2406,8 +2406,8 @@ impl Grid {
             &mut self.lines_above,
             &mut self.link_handler.borrow_mut(),
         );
-        // this function assumes the current line has enough room for terminal_character (that its
-        // width has been checked beforehand)
+        // 此函数假设当前行有足够空间容纳 terminal_character（即其
+        // 宽度已事先检查过）
         match self.viewport.get_mut(self.cursor.y) {
             Some(row) => {
                 if self.insert_mode || should_insert_character {
@@ -2442,7 +2442,7 @@ impl Grid {
                 self.output_buffer.update_line(self.cursor.y);
             },
             None => {
-                // pad lines until cursor if they do not exist
+                // 如果行不存在则填充直到光标
                 for _ in self.viewport.len()..self.cursor.y {
                     self.viewport.push_back(Row::new().canonical());
                 }
@@ -2455,9 +2455,9 @@ impl Grid {
     }
     pub fn add_character(&mut self, terminal_character: TerminalCharacter) {
         let character_width = terminal_character.width();
-        // Drop zero-width Unicode/UTF-8 codepoints, like for example Variation Selectors.
-        // This breaks unicode grapheme segmentation, and is the reason why some characters
-        // aren't displayed correctly. Refer to this issue for more information:
+        // 丢弃零宽度 Unicode/UTF-8 码点，例如变体选择器。
+        // 这会破坏 unicode 字素分割，也是某些字符
+        // 无法正确显示的原因。更多信息请参考此 issue：
         //     https://github.com/zellij-org/zellij/issues/1538
         if character_width == 0 {
             return;
@@ -2540,9 +2540,9 @@ impl Grid {
             }
             self.scroll_region_up_at_bottom(Row::new(), true);
         } else if self.cursor.y == self.height.saturating_sub(1) {
-            // the cursor is on the last line of the screen but below the scroll region's
-            // bottom margin: there is nowhere to scroll to, so we wrap onto the same line
-            // (mirroring what add_canonical_line does in this situation)
+            // 光标在屏幕的最后一行，但在滚动区域的
+            // 下边距之下：没有地方可以滚动，所以我们回绕到同一行
+            // （镜像 add_canonical_line 在这种情况下的行为）
             self.output_buffer.update_line(self.cursor.y);
         } else {
             self.cursor.y += 1;
@@ -2623,8 +2623,8 @@ impl Grid {
         for _ in 0..count {
             let current_line_index = self.cursor.y;
             if current_line_index == scroll_region_top {
-                // if we're at the top line, we create a new line and remove the last line that
-                // would otherwise overflow
+                // 如果我们在顶行，我们创建一个新行并删除最后一行，
+                // 否则会溢出
                 self.scroll_region_content_down(
                     current_line_index,
                     scroll_region_bottom,
@@ -2653,7 +2653,7 @@ impl Grid {
     }
     pub fn move_cursor_back(&mut self, count: usize) {
         if self.cursor.x == self.width {
-            // on the rightmost screen edge, backspace skips one character
+            // 在屏幕最右边缘，退格跳过一个字符
             self.cursor.x -= 1;
         }
         if self.cursor.x < count {
@@ -2686,10 +2686,10 @@ impl Grid {
         let (scroll_region_top, scroll_region_bottom) = self.scroll_region;
         let current_line_index = self.cursor.y;
         if current_line_index >= scroll_region_top && current_line_index <= scroll_region_bottom {
-            // when deleting lines inside the scroll region, we must make sure it stays the
-            // same size (and that other lines below it aren't shifted inside it)
-            // so we delete the current line(s) and add an empty line at the end of the scroll
-            // region
+            // 在滚动区域内删除行时，我们必须确保它保持
+            // 相同大小（并且其下方的其他行不会被移入其中）
+            // 所以我们删除当前行并在滚动区域末尾添加一个空行
+            // 
             for _ in 0..count {
                 let columns = VecDeque::from(vec![pad_character.clone(); self.width]);
                 self.scroll_region_content_up(
@@ -2710,10 +2710,10 @@ impl Grid {
         let (scroll_region_top, scroll_region_bottom) = self.scroll_region;
         let current_line_index = self.cursor.y;
         if current_line_index >= scroll_region_top && current_line_index <= scroll_region_bottom {
-            // when adding empty lines inside the scroll region, we must make sure it stays the
-            // same size and that lines don't "leak" outside of it
-            // so we add an empty line where the cursor currently is, and delete the last line
-            // of the scroll region
+            // 在滚动区域内添加空行时，我们必须确保它保持
+            // 相同大小，并且行不会"泄漏"到其外部
+            // 所以我们在光标当前位置添加一个空行，并删除最后一行
+            // 的滚动区域
             for _ in 0..count {
                 let columns = VecDeque::from(vec![pad_character.clone(); self.width]);
                 self.scroll_region_content_down(
@@ -2752,7 +2752,7 @@ impl Grid {
         let mut empty_character = EMPTY_TERMINAL_CHARACTER;
         empty_character.styles = empty_char_style;
         if let Some(current_row) = self.viewport.get_mut(self.cursor.y) {
-            // pad row if needed
+            // 如有需要填充行
             if current_row.width_cached() < self.width {
                 let padding_count = self.width - current_row.width_cached();
                 let mut columns_padding =
@@ -2823,8 +2823,8 @@ impl Grid {
     fn set_preceding_character(&mut self, terminal_character: TerminalCharacter) {
         self.preceding_char = Some(terminal_character);
     }
-    /// Called by the server-side handler for SetPaneRegexHighlights.
-    /// Upserts highlights keyed by pattern string for the given plugin.
+    /// 由 SetPaneRegexHighlights 的服务端处理程序调用。
+    /// 为给定插件按模式字符串键 Upsert 高亮。
     pub fn set_plugin_regex_highlights(
         &mut self,
         plugin_id: u32,
@@ -2838,7 +2838,7 @@ impl Grid {
         for h in highlights {
             let (fg, bg) = resolve_highlight_colors(&h.style, style);
             if let Ok(regex) = regex::Regex::new(&h.pattern) {
-                // Upsert: replace existing entry with same pattern and on_hover flag, or push new
+                // Upsert：替换具有相同 pattern 和 on_hover 标志的现有条目，或推送新条目
                 let on_hover = h.on_hover;
                 if let Some(existing) = slot
                     .iter_mut()
@@ -2885,7 +2885,7 @@ impl Grid {
         self.recompute_hover_tooltip();
     }
 
-    /// Called by the server-side handler for ClearPaneHighlights.
+    /// 由 ClearPaneHighlights 的服务端处理程序调用。
     pub fn clear_plugin_highlights(&mut self, plugin_id: u32) {
         if self.plugin_highlights.remove(&plugin_id).is_some() {
             self.output_buffer.update_all_lines();
@@ -2893,9 +2893,9 @@ impl Grid {
         }
     }
 
-    /// Returns (plugin_id, pattern, matched_string, context) if the given
-    /// pane-relative position falls inside any plugin highlight match, or None.
-    /// Uses logical-line grouping so multi-line (wrapped) matches are detected.
+    /// 如果给定的窗格相对位置落在任何插件高亮匹配内，
+    /// 返回 (plugin_id, pattern, matched_string, context)，否则返回 None。
+    /// 使用逻辑行分组，以便检测多行（换行）匹配。
     pub fn plugin_highlight_at(
         &self,
         position: &Position,
@@ -2961,11 +2961,11 @@ impl Grid {
             return false;
         }
 
-        // Mark the canonical group containing the old hover row dirty.
+        // 将包含旧悬停行的规范组标记为脏。
         if let Some(old_pos) = self.hover_position {
             self.mark_logical_line_dirty(old_pos.line.0 as usize);
         }
-        // Mark the canonical group containing the new hover row dirty.
+        // 将包含新悬停行的规范组标记为脏。
         if let Some(new_pos_inner) = new_pos {
             self.mark_logical_line_dirty(new_pos_inner.line.0 as usize);
         }
@@ -2975,8 +2975,8 @@ impl Grid {
         true
     }
 
-    /// Mark all physical rows belonging to the logical line group that contains
-    /// `row_idx` as dirty in the output buffer.
+    /// 将包含 `row_idx` 的逻辑行组所属的所有物理行
+    /// 在输出缓冲区中标记为脏。
     fn mark_logical_line_dirty(&mut self, row_idx: usize) {
         if let Some((canonical, group_len, _, _)) =
             collect_and_build_logical_line(&self.viewport, row_idx)
@@ -2987,9 +2987,9 @@ impl Grid {
         }
     }
 
-    /// Recompute the cached hover tooltip from the current hover position and
-    /// plugin highlights.  Called whenever the hover position, highlight set, or
-    /// highlight clearing changes.
+    /// 从当前悬停位置和插件高亮重新计算缓存的悬停工具提示。
+    /// 每当悬停位置、高亮集或高亮清除更改时调用。
+    /// 
     fn recompute_hover_tooltip(&mut self) {
         self.cached_hover_tooltip = None;
         let hover_pos = match self.hover_position {
@@ -3042,9 +3042,9 @@ impl Grid {
         self.cached_hover_tooltip = best_tooltip;
     }
 
-    /// Pre-compute plugin highlight selections across all logical line groups in
-    /// the viewport.  Hover highlights are emitted first so they take priority
-    /// when the cursor overlaps a match; non-hover highlights follow.
+    /// 预先计算视口中所有逻辑行组的插件高亮选择。
+    /// 悬停高亮首先发出，以便在光标与匹配项重叠时优先；
+    /// 非悬停高亮随后发出。
     fn compute_plugin_highlight_selections(&self) -> Vec<HighlightSelection> {
         if self.plugin_highlights.is_empty() {
             return vec![];
@@ -3059,11 +3059,11 @@ impl Grid {
                     None => break,
                 };
 
-            // Hover highlights are pushed first so that `.find()` in
-            // `adjust_styles_for_possible_selection` returns the hover
-            // style when the cursor overlaps the match.  They are suppressed
-            // when mouse tracking is active (events pass through to the app)
-            // and on unfocused panes (hover_position is not set for those).
+            // 悬停高亮首先被推送，以便
+            // `adjust_styles_for_possible_selection` 在光标与匹配项重叠时
+            // 返回悬停样式。当鼠标跟踪处于活动状态（事件传递给应用）时
+            // 以及在未聚焦的窗格上（这些窗格未设置 hover_position），它们被抑制。
+            // 
             if self.mouse_tracking == MouseTracking::Off {
                 if let Some(hover_pos) = self.hover_position {
                     let hover_row = hover_pos.line.0 as usize;
@@ -3105,8 +3105,8 @@ impl Grid {
                 }
             }
 
-            // Non-hover highlights are pushed after hover so that hover
-            // takes precedence for overlapping regions.
+            // 非悬停高亮在悬停之后推送，以便悬停
+            // 在重叠区域优先。
             for (_plugin_id, pattern_map) in &self.plugin_highlights {
                 for (_pattern, compiled) in pattern_map {
                     if compiled.on_hover || !compiled.has_visual_effect() {
@@ -3135,9 +3135,9 @@ impl Grid {
 
             ridx += group_len; // advance past this logical line group
         }
-        // Sort by layer priority (highest first) and within the same layer,
-        // hover highlights before non-hover (hover entries were pushed first,
-        // so a stable sort preserves their relative order).
+        // 按层优先级排序（最高优先），在同一层内，
+        // 悬停高亮在非悬停之前（悬停条目首先被推送，
+        // 所以稳定排序会保留它们的相对顺序）。
         selections.sort_by(|a, b| {
             use std::cmp::Reverse;
             Reverse(a.layer).cmp(&Reverse(b.layer))
@@ -3151,7 +3151,7 @@ impl Grid {
 
         if self.click.is_double_click() {
             let Some((start_position, end_position)) = self.word_around_position(&start) else {
-                // no-op
+                // 空操作
                 return;
             };
             self.selection
@@ -3168,7 +3168,7 @@ impl Grid {
                 .osc133_command_around_position(start)
                 .or_else(|| self.canonical_line_around_position(start))
             else {
-                // no-op
+                // 空操作
                 return;
             };
             self.selection
@@ -3189,7 +3189,7 @@ impl Grid {
             if self.click.is_double_click() {
                 let Some((word_start_position, word_end_position)) = self.word_around_position(&to)
                 else {
-                    // no-op
+                    // 空操作
                     return;
                 };
                 self.selection
@@ -3220,10 +3220,10 @@ impl Grid {
             self.selection.end(*end);
             self.update_selected_lines(&old_selection, &self.selection.clone());
         } else {
-            // we do this rather than using .end() so that the selection will be marked as inactive
-            // (so we won't keep changing its start/end points as we scroll) but so we won't update
-            // its end position to the above "end" position (which is incorrect behavior for
-            // double/triple click - it will mean we won't mark until the end of the word/line)
+            // 我们这样做而不是使用 .end()，以便选择将被标记为非活动
+            // （这样我们在滚动时就不会不断改变其起点/终点），但我们也不会更新
+            // 其终点位置为上述"end"位置（这对于双击/三击是不正确的行为 -
+            // 它将意味着我们不会标记到单词/行的末尾）
             self.selection.finalize();
         }
         self.mark_for_rerender();
@@ -3255,11 +3255,11 @@ impl Grid {
         for l in sorted_selection.line_indices() {
             let mut line_selection = String::new();
 
-            // on the first line of the selection, use the selection start column
-            // otherwise, start at the beginning of the line
+            // 在选择的第一行，使用选择起始列
+            // 否则，从行首开始
             let start_column = if l == start.line.0 { start.column.0 } else { 0 };
 
-            // same thing on the last line, but with the selection end column
+            // 最后一行同理，但使用选择结束列
             let end_column = if l == end.line.0 {
                 end.column.0
             } else {
@@ -3273,7 +3273,7 @@ impl Grid {
             let empty_row =
                 Row::from_columns(VecDeque::from(vec![EMPTY_TERMINAL_CHARACTER; self.width]));
 
-            // get the row from lines_above, viewport, or lines below depending on index
+            // 根据索引从 lines_above、视口或下方行中获取行
             let row = if l < 0 && self.lines_above.len() >= l.abs() as usize {
                 let offset_from_end = l.abs();
                 &self.lines_above[self
@@ -3283,13 +3283,13 @@ impl Grid {
             } else if l >= 0 && (l as usize) < self.viewport.len() {
                 &self.viewport[l as usize]
             } else if (l as usize) < self.height {
-                // index is in viewport but there is no line
+                // 索引在视口中但没有行
                 &empty_row
             } else if self.lines_below.len() > (l as usize).saturating_sub(self.viewport.len()) {
                 &self.lines_below[(l as usize) - self.viewport.len()]
             } else {
-                // can't find the line, this probably it's on the pane border
-                // is on the pane border
+                // 找不到行，这可能是在窗格边框上
+                // 在窗格边框上
                 continue;
             };
 
@@ -3305,7 +3305,7 @@ impl Grid {
             if row.is_canonical {
                 selection.push(line_selection);
             } else {
-                // rejoin wrapped lines if possible
+                // 如有可能重新连接换行的行
                 match selection.last_mut() {
                     Some(previous_line) => previous_line.push_str(&line_selection),
                     None => selection.push(line_selection),
@@ -3313,9 +3313,9 @@ impl Grid {
             }
         }
 
-        // TODO: distinguish whitespace that was output explicitly vs implicitly (e.g add_newline)
-        // for example: echo "     " vs empty lines
-        // for now trim after building the selection to handle whitespace in wrapped lines
+        // TODO: 区分显式输出与隐式输出的空白（例如 add_newline）
+        // 例如：echo "     " 与空行
+        // 目前在构建选择后修剪以处理换行中的空白
         let selection: Vec<_> = selection.iter().map(|l| l.trim_end()).collect();
 
         if selection.is_empty() {
@@ -3723,7 +3723,7 @@ impl Grid {
             let c = *self.character_cell_size.borrow();
             c
         } {
-            // thanks borrow checker
+            // 感谢借用检查器
             let pixel_height = character_cell_size.height;
             let to_move = (pixel_count as f64 / pixel_height as f64).ceil() as usize;
             for _ in 0..to_move {
@@ -4197,8 +4197,8 @@ impl Grid {
                 Some(String::from_utf8_lossy(&msg).into())
             },
             (MouseMode::Sgr, _) => {
-                // TODO: these don't add a +1 because it's done outside, we should change it to
-                // happen here for consistency
+                // TODO: 这些不添加 +1，因为它在外部完成，我们应该将其改为
+                // 在这里发生以保持一致性
                 let mouse_event = format!(
                     "\u{1b}[<1;{:?};{:?}m",
                     position.column() + 1,
@@ -4275,9 +4275,9 @@ impl Grid {
     pub fn reset_cursor_position(&mut self) {
         self.cursor = Cursor::new(0, 0, self.styled_underlines);
     }
-    /// Queue a CSI ?997;{1|2}n DSR notification of host color-palette
-    /// theme mode onto this grid's pty-write queue. No-op when the app
-    /// has not opted in via `CSI ? 2031 h`.
+    /// 将主机调色板主题模式的 CSI ?997;{1|2}n DSR 通知排队
+    /// 到此网格的 pty 写入队列。当应用未通过 `CSI ? 2031 h` 选择加入时为空操作。
+    /// 
     pub fn push_color_palette_dsr(&mut self, mode: HostTerminalThemeMode) {
         if !self.color_palette_notification_enabled {
             return;
@@ -4339,7 +4339,7 @@ impl Grid {
                 let s: String = (&row.columns).into_iter().map(|x| x.character).collect();
                 lines_above_viewport.push(s);
             }
-            // Truncate to last N lines if max specified (Some(0) means "all" — no truncation)
+            // 如果指定了 max 则截断到最后 N 行（Some(0) 表示"全部" — 不截断）
             if let Some(max) = max_scrollback_lines {
                 if max > 0 && lines_above_viewport.len() > max {
                     let start = lines_above_viewport.len() - max;
@@ -4464,21 +4464,21 @@ impl Perform for Grid {
                 self.ring_bell = true;
             },
             8 => {
-                // backspace
+                // 退格
                 self.move_cursor_back(1);
             },
             9 => {
-                // tab
+                // 制表符
                 self.advance_to_next_tabstop(self.cursor.pending_styles.clone());
             },
             10 | 11 | 12 => {
-                // 0a, newline
-                // 0b, vertical tabulation
-                // 0c, form feed
+                // 0a，换行
+                // 0b，垂直制表
+                // 0c，换页
                 self.add_newline();
             },
             13 => {
-                // 0d, carriage return
+                // 0d，回车
                 self.move_cursor_to_beginning_of_line();
             },
             14 => {
@@ -4499,8 +4499,8 @@ impl Perform for Grid {
         if c == 'q' && intermediates.get(0) == Some(&b'+') {
             self.xtgettcap_bytes = Some(vec![]);
         } else if c == 'q' && intermediates.is_empty() {
-            // we only process sixel images if we know the pixel size of each character cell,
-            // otherwise we can't reliably display them
+            // 只有在知道每个字符单元格的像素大小时，我们才处理 sixel 图像，
+            // 否则我们无法可靠地显示它们
             if self.current_cursor_pixel_coordinates().is_some() {
                 let max_sixel_height_in_pixels = if self.sixel_scrolling {
                     let character_cell_height = self.character_cell_size.borrow().unwrap().height; // unwrap here is safe because `current_cursor_pixel_coordinates` above is only Some if it exists
@@ -4515,7 +4515,7 @@ impl Perform for Grid {
                 );
             }
         } else if c == 'z' {
-            // UI-component (Zellij internal)
+            // UI 组件（Zellij 内部）
             self.ui_component_bytes = Some(vec![]);
         } else if c == 'n'
             && intermediates.is_empty()
@@ -4529,8 +4529,8 @@ impl Perform for Grid {
     fn put(&mut self, byte: u8) {
         if self.sixel_grid.is_parsing() {
             self.sixel_grid.handle_byte(byte);
-            // we explicitly set this to false here because in the context of Sixel, we only render the
-            // image when it's done, i.e. in the unhook method
+            // 我们在这里显式将其设置为 false，因为在 Sixel 的上下文中，我们只在
+            // 图像完成时渲染它，即在 unhook 方法中
             self.should_render = false;
         } else if let Some(ui_component_bytes) = self.ui_component_bytes.as_mut() {
             ui_component_bytes.push(byte);
@@ -4571,7 +4571,7 @@ impl Perform for Grid {
         }
 
         match params[0] {
-            // Set window title.
+            // 设置窗口标题。
             b"0" | b"2" => {
                 if params.len() >= 2 {
                     let title = params[1..]
@@ -4593,7 +4593,7 @@ impl Perform for Grid {
                 }
             },
 
-            // Set color index.
+            // 设置颜色索引。
             b"4" => {
                 for chunk in params[1..].chunks(2) {
                     let index = chunk.get(0).and_then(|index| parse_number(index));
@@ -4606,11 +4606,11 @@ impl Perform for Grid {
                         return;
                     } else if chunk.get(1).as_ref().and_then(|c| c.get(0)) == Some(&b'?') {
                         if let Some(index) = index {
-                            // Forward palette-register queries to the
-                            // host — apps want the actual host palette,
-                            // not Zellij's cached copy. (Zellij's cache
-                            // still auto-refreshes via double-dispatch
-                            // when the host's reply comes back.)
+                            // 将调色板寄存器查询转发到
+                            // 主机 — 应用想要实际的主机调色板，
+                            // 而不是 Zellij 的缓存副本。（Zellij 的缓存
+                            // 在主机回复返回时仍会通过双重调度自动刷新。）
+                            // 
                             self.pending_forwarded_queries.push(
                                 crate::host_query::HostQuery::PaletteRegister {
                                     index,
@@ -4625,7 +4625,7 @@ impl Perform for Grid {
                 }
             },
 
-            // define hyperlink
+            // 定义超链接
             b"8" => {
                 if params.len() < 3 {
                     return;
@@ -4635,22 +4635,22 @@ impl Perform for Grid {
                 })
             },
 
-            // Get/set Foreground (b"10") or background (b"11") colors
+            // 获取/设置前景 (b"10") 或背景 (b"11") 颜色
             b"10" | b"11" => {
                 if params.len() >= 2 {
                     if let Some(mut dynamic_code) = parse_number(params[0]) {
                         for param in &params[1..] {
                             if param == b"?" {
-                                // If this pane has a local override for
-                                // the channel being queried (set via
-                                // `zellij action set-pane-color` or via
-                                // a prior OSC 10;<rgb> / 11;<rgb> from
-                                // inside the pane), answer with that
-                                // override directly instead of
-                                // forwarding to the host. Apps inside
-                                // the pane must see the colors Zellij
-                                // is actually rendering for them, not
-                                // the host terminal's background.
+                                // 如果此窗格对正在查询的通道有本地覆盖
+                                // （通过 `zellij action set-pane-color` 设置，
+                                // 或通过窗格内部先前的 OSC 10;<rgb> / 11;<rgb> 设置），
+                                // 直接用该覆盖回答，而不是转发到主机。
+                                // 窗格内部的应用必须看到 Zellij 实际为它们渲染的颜色，
+                                // 而不是主机终端的背景。
+                                // 
+                                // 
+                                // 
+                                // 
                                 let local_override = match dynamic_code {
                                     10 => self.pane_default_fg,
                                     11 => self.pane_default_bg,
@@ -4665,11 +4665,11 @@ impl Perform for Grid {
                                     );
                                     self.pending_messages_to_pty.push(reply.as_bytes().to_vec());
                                 } else {
-                                    // No local override — forward to
-                                    // the host so the app observes the
-                                    // terminal's actual color. Zellij's
-                                    // cached copy is refreshed via the
-                                    // double-dispatch on the reply.
+                                    // 没有本地覆盖 — 转发到主机，以便应用观察到
+                                    // 终端的实际颜色。Zellij 的缓存副本通过
+                                    // 回复上的双重调度刷新。
+                                    // 
+                                    // 
                                     let term =
                                         crate::host_query::OscTerminator::from_bell_terminated(
                                             bell_terminated,
@@ -4682,10 +4682,10 @@ impl Perform for Grid {
                                             terminator: term,
                                         },
                                         _ => {
-                                            // Out-of-range dynamic_code
-                                            // (shouldn't happen since
-                                            // the outer match pins it to
-                                            // 10 or 11): skip.
+                                            // 超出范围的 dynamic_code
+                                            // （不应该发生，因为
+                                            // 外部匹配将其固定为
+                                            // 10 或 11）：跳过。
                                             dynamic_code += 1;
                                             continue;
                                         },
@@ -4693,12 +4693,12 @@ impl Perform for Grid {
                                     self.pending_forwarded_queries.push(query);
                                 }
                             } else {
-                                // Set: parse color and store as pane
-                                // default. Only literal RGB is stored;
-                                // palette-indexed / named variants (or
-                                // a parse failure) are silently dropped
-                                // to keep the pane-default fields
-                                // narrow.
+                                // 设置：解析颜色并存储为窗格默认值。
+                                // 仅存储字面 RGB；调色板索引 / 命名变体
+                                // （或解析失败）被静默丢弃以保持窗格默认字段
+                                // 狭窄。
+                                // 
+                                // 
                                 if let Some(rgb) = xparse_color(param).and_then(rgb_of_ansi_code) {
                                     if dynamic_code == 10 {
                                         self.pane_default_fg = Some(rgb);
@@ -4715,7 +4715,7 @@ impl Perform for Grid {
             },
 
             b"12" => {
-                // get/set cursor color currently unimplemented
+                // 获取/设置光标颜色目前未实现
             },
 
             b"133" => {
@@ -4737,7 +4737,7 @@ impl Perform for Grid {
                 }
             },
 
-            // Set cursor style.
+            // 设置光标样式。
             b"50" => {
                 if params.len() >= 2
                     && params[1].len() >= 13
@@ -4755,7 +4755,7 @@ impl Perform for Grid {
                 }
             },
 
-            // Set clipboard.
+            // 设置剪贴板。
             b"52" => {
                 if params.len() < 3 {
                     return;
@@ -4783,15 +4783,15 @@ impl Perform for Grid {
                 }
             },
 
-            // Reset color index.
+            // 重置颜色索引。
             b"104" => {
-                // Reset all color indexes when no parameters are given.
+                // 未给定参数时重置所有颜色索引。
                 if params.len() == 1 {
                     self.changed_colors = None;
                     return;
                 }
 
-                // Reset color indexes given as parameters.
+                // 重置作为参数给定的颜色索引。
                 for param in &params[1..] {
                     if let Some(index) = parse_number(param) {
                         if self.changed_colors.is_some() {
@@ -4800,35 +4800,35 @@ impl Perform for Grid {
                     }
                 }
 
-                // Reset all color indexes when no parameters are given.
+                // 未给定参数时重置所有颜色索引。
                 if params.len() == 1 {
-                    // TBD - reset all color changes - currently unsupported
+                    // 待定 - 重置所有颜色更改 - 目前不支持
                     return;
                 }
 
-                // Reset color indexes given as parameters.
+                // 重置作为参数给定的颜色索引。
                 for param in &params[1..] {
                     if let Some(_index) = parse_number(param) {
-                        // TBD - reset color index - currently unimplemented
+                        // 待定 - 重置颜色索引 - 目前未实现
                     }
                 }
             },
 
-            // Reset foreground color.
+            // 重置前景色。
             b"110" => {
                 self.pane_default_fg = None;
                 self.output_buffer.update_all_lines();
             },
 
-            // Reset background color.
+            // 重置背景色。
             b"111" => {
                 self.pane_default_bg = None;
                 self.output_buffer.update_all_lines();
             },
 
-            // Reset text cursor color.
+            // 重置文本光标颜色。
             b"112" => {
-                // TBD - reset text cursor color - currently unimplemented
+                // 待定 - 重置文本光标颜色 - 目前未实现
             },
 
             b"99" => {
@@ -4941,11 +4941,11 @@ impl Perform for Grid {
                     .update(|styles| styles.add_style_from_ansi_params(&mut params_iter))
             }
         } else if c == 'C' || c == 'a' {
-            // move cursor forward
+            // 光标前移
             let move_by = next_param_or(1);
             self.move_cursor_forward_until_edge(move_by);
         } else if c == 'K' {
-            // clear line (0 => right, 1 => left, 2 => all)
+            // 清除行（0 => 右侧，1 => 左侧，2 => 全部）
             if let Some(clear_type) = params_iter.next().map(|param| param[0]) {
                 let mut char_to_replace = EMPTY_TERMINAL_CHARACTER;
                 if let Some(background_color) = self.cursor.pending_styles.background {
@@ -4962,7 +4962,7 @@ impl Perform for Grid {
                 }
             };
         } else if c == 'J' {
-            // clear all (0 => below, 1 => above, 2 => all, 3 => saved)
+            // 清除全部（0 => 下方，1 => 上方，2 => 全部，3 => 已保存）
             let mut char_to_replace = EMPTY_TERMINAL_CHARACTER;
             if let Some(background_color) = self.cursor.pending_styles.background {
                 char_to_replace
@@ -4991,17 +4991,17 @@ impl Perform for Grid {
                 }
             };
         } else if c == 'H' || c == 'f' {
-            // goto row/col
-            // we subtract 1 from the row/column because these are 1 indexed
+            // 跳转到行/列
+            // 我们从行/列中减去 1，因为它们是 1 索引的
             let row = next_param_or(1).saturating_sub(1);
             let col = next_param_or(1).saturating_sub(1);
             self.move_cursor_to(col, row, EMPTY_TERMINAL_CHARACTER);
         } else if c == 'A' {
-            // move cursor up until edge of screen
+            // 光标上移直到屏幕边缘
             let move_up_count = next_param_or(1);
             self.move_cursor_up(move_up_count as usize);
         } else if c == 'B' || c == 'e' {
-            // move cursor down until edge of screen
+            // 光标下移直到屏幕边缘
             let move_down_count = next_param_or(1);
             let pad_character = EMPTY_TERMINAL_CHARACTER;
             self.move_cursor_down_until_edge_of_screen(move_down_count as usize, pad_character);
@@ -5028,9 +5028,9 @@ impl Perform for Grid {
                                 self.alternate_screen_state.take()
                             {
                                 if let Some(image_ids_to_reap) = self.sixel_grid.clear() {
-                                    // reap images before dropping the alternate_screen_state contents
-                                    // - we can't implement a drop method for this because the store is
-                                    // outside of the alternate_screen_state struct
+                                    // 在丢弃 alternate_screen_state 内容之前回收图像
+                                    // - 我们无法为此实现 drop 方法，因为存储在
+                                    // alternate_screen_state 结构体之外
                                     self.sixel_grid.reap_images(image_ids_to_reap);
                                 }
                                 self.kitty_grid.clear_all_placements();
@@ -5056,7 +5056,7 @@ impl Perform for Grid {
                             self.cursor_key_mode = false;
                         },
                         3 => {
-                            // DECCOLM - only side effects
+                            // DECCOLM - 仅副作用
                             self.set_scroll_region_to_viewport_size();
                             self.clear_all(EMPTY_TERMINAL_CHARACTER);
                             self.cursor.x = 0;
@@ -5128,7 +5128,7 @@ impl Perform for Grid {
                             self.bracketed_paste_mode = true;
                         },
                         1049 => {
-                            // enter alternate buffer
+                            // 进入备用缓冲区
                             let current_lines_above =
                                 std::mem::replace(&mut self.lines_above, VecDeque::new());
                             let current_viewport = std::mem::replace(
@@ -5170,7 +5170,7 @@ impl Perform for Grid {
                             self.cursor_key_mode = true;
                         },
                         3 => {
-                            // DECCOLM - only side effects
+                            // DECCOLM - 仅副作用
                             self.set_scroll_region_to_viewport_size();
                             self.clear_all(EMPTY_TERMINAL_CHARACTER);
                             self.cursor.x = 0;
@@ -5268,15 +5268,15 @@ impl Perform for Grid {
                 self.set_scroll_region_to_viewport_size();
             }
         } else if c == 'M' {
-            // delete lines if currently inside scroll region, or otherwise
-            // delete lines in the entire viewport
+            // 如果当前在滚动区域内则删除行，否则
+            // 删除整个视口中的行
             let line_count_to_delete = next_param_or(1);
             let mut pad_character = EMPTY_TERMINAL_CHARACTER;
             pad_character.styles = self.cursor.pending_styles.clone();
             self.delete_lines_in_scroll_region(line_count_to_delete, pad_character);
         } else if c == 'L' {
-            // insert blank lines if inside scroll region, or otherwise insert
-            // blank lines in the entire viewport
+            // 如果在滚动区域内则插入空行，否则插入
+            // 整个视口中的空行
             let line_count_to_add = next_param_or(1);
             let mut pad_character = EMPTY_TERMINAL_CHARACTER;
             pad_character.styles = self.cursor.pending_styles.clone();
@@ -5293,23 +5293,23 @@ impl Perform for Grid {
                 self.clear_all_tabstops();
             }
         } else if c == 'd' {
-            // goto line
+            // 跳转到行
             let line = next_param_or(1).saturating_sub(1);
             let pad_character = EMPTY_TERMINAL_CHARACTER;
             self.move_cursor_to_line(line, pad_character);
         } else if c == 'P' {
-            // erase characters
+            // 擦除字符
             let count = next_param_or(1);
             self.erase_characters(count, self.cursor.pending_styles.clone());
         } else if c == 'X' {
-            // erase characters and replace with empty characters of current style
+            // 擦除字符并用当前样式的空字符替换
             let count = next_param_or(1);
             self.replace_with_empty_chars(count, self.cursor.pending_styles.clone());
         } else if c == 'T' {
             /*
              * 124  54  T   SD
-             * Scroll down, new lines inserted at top of screen
-             * [4T = Scroll down 4, bring previous lines back into view
+             * 向下滚动，新行插入屏幕顶部
+             * [4T = 向下滚动 4，将先前的行带回视图
              */
             let line_count = next_param_or(1);
             self.rotate_scroll_region_up(line_count as usize);
@@ -5326,7 +5326,7 @@ impl Perform for Grid {
                     // XTSMGRAPHICS
                     match query_type {
                         Some(&[1]) => {
-                            // number of color registers
+                            // 颜色寄存器数量
                             let response = if self.sixel_host_support {
                                 "\u{1b}[?1;0;65536S"
                             } else {
@@ -5336,7 +5336,7 @@ impl Perform for Grid {
                                 .push(response.as_bytes().to_vec());
                         },
                         Some(&[2]) => {
-                            // Sixel graphics geometry in pixels
+                            // Sixel 图形几何（像素）
                             if !self.sixel_host_support {
                                 let response = "\u{1b}[?2;3;0S";
                                 self.pending_messages_to_pty
@@ -5354,21 +5354,21 @@ impl Perform for Grid {
                             }
                         },
                         _ => {
-                            // unsupported (eg. ReGIS graphics geometry)
+                            // 不支持（例如 ReGIS 图形几何）
                         },
                     }
                 }
             } else {
-                // move scroll up
+                // 向上移动滚动
                 let count = next_param_or(1);
                 self.rotate_scroll_region_down(count);
             }
         } else if c == 's' {
             self.save_cursor_position();
         } else if c == 'u' && intermediates == &[b'>'] {
-            // Zellij only supports the first "progressive enhancement" layer of the kitty keyboard
-            // protocol
-            // 0 disables, everything else enables.
+            // Zellij 仅支持 kitty 键盘协议的第一个"渐进增强"层
+            // 协议
+            // 0 禁用，其他一切启用。
             let count = next_param_or(0);
             if !self.explicitly_disable_kitty_keyboard_protocol {
                 if count > 0 {
@@ -5378,14 +5378,14 @@ impl Perform for Grid {
                 }
             }
         } else if c == 'u' && intermediates == &[b'<'] {
-            // Zellij only supports the first "progressive enhancement" layer of the kitty keyboard
-            // protocol
+            // Zellij 仅支持 kitty 键盘协议的第一个"渐进增强"层
+            // 协议
             if !self.explicitly_disable_kitty_keyboard_protocol {
                 self.supports_kitty_keyboard_protocol = false;
             }
         } else if c == 'u' && intermediates == &[b'?'] {
-            // Zellij only supports the first "progressive enhancement" layer of the kitty keyboard
-            // protocol
+            // Zellij 仅支持 kitty 键盘协议的第一个"渐进增强"层
+            // 协议
             let reply = if self.supports_kitty_keyboard_protocol {
                 "\u{1b}[?1u"
             } else {
@@ -5393,8 +5393,8 @@ impl Perform for Grid {
             };
             self.pending_messages_to_pty.push(reply.as_bytes().to_vec());
         } else if c == 'u' && intermediates == &[b'='] {
-            // kitty keyboard protocol without the stack, just setting.
-            // 0 disables, everything else enables.
+            // 没有堆栈的 kitty 键盘协议，仅设置。
+            // 0 禁用，其他一切启用。
             let count = next_param_or(0);
             if !self.explicitly_disable_kitty_keyboard_protocol {
                 if count > 0 {
@@ -5419,13 +5419,13 @@ impl Perform for Grid {
                 }
             }
         } else if c == 'E' {
-            // Moves cursor to beginning of the line n (default 1) lines down.
+            // 将光标移动到下方 n（默认 1）行的行首。
             let count = next_param_or(1);
             let pad_character = EMPTY_TERMINAL_CHARACTER;
             self.move_cursor_down_until_edge_of_screen(count, pad_character);
             self.move_cursor_to_beginning_of_line();
         } else if c == 'F' {
-            // Moves cursor to beginning of the line n (default 1) lines up.
+            // 将光标移动到上方 n（默认 1）行的行首。
             let count = next_param_or(1);
             self.move_cursor_up(count);
             self.move_cursor_to_beginning_of_line();
@@ -5436,7 +5436,7 @@ impl Perform for Grid {
         } else if c == 'q' {
             let first_intermediate_is_space = matches!(intermediates.get(0), Some(b' '));
             if first_intermediate_is_space {
-                // DECSCUSR (CSI Ps SP q) -- Set Cursor Style.
+                // DECSCUSR (CSI Ps SP q) -- 设置光标样式。
                 let cursor_style_id = next_param_or(0);
                 let shape = match cursor_style_id {
                     0 => Some(CursorShape::Initial),
@@ -5462,12 +5462,12 @@ impl Perform for Grid {
                 self.move_to_previous_tabstop();
             }
         } else if c == 'c' {
-            // identify terminal
+            // 识别终端
             // https://vt100.net/docs/vt510-rm/DA1.html
             match intermediates.get(0) {
                 None | Some(0) => {
-                    // primary device attributes - VT220 with OSC 52 clipboard, advertising
-                    // sixel (attribute 4) only if the attached terminal supports it
+                    // 主要设备属性 - 带 OSC 52 剪贴板的 VT220，仅当连接的终端支持时
+                    // 才通告 sixel（属性 4）
                     let terminal_capabilities = if self.sixel_host_support {
                         "\u{1b}[?62;4;52c"
                     } else {
@@ -5477,7 +5477,7 @@ impl Perform for Grid {
                         .push(terminal_capabilities.as_bytes().to_vec());
                 },
                 Some(b'>') => {
-                    // secondary device attributes
+                    // 次要设备属性
                     let version = version_number(VERSION);
                     let text = format!("\u{1b}[>0;{};1c", version);
                     self.pending_messages_to_pty.push(text.as_bytes().to_vec());
@@ -5485,7 +5485,7 @@ impl Perform for Grid {
                 _ => {},
             }
         } else if c == 'n' {
-            // DSR - device status report
+            // DSR - 设备状态报告
             // https://vt100.net/docs/vt510-rm/DSR.html
             let first_intermediate_is_questionmark = match intermediates.get(0) {
                 Some(b'?') => true,
@@ -5493,16 +5493,16 @@ impl Perform for Grid {
                 _ => false,
             };
             if first_intermediate_is_questionmark {
-                // CSI ? 996 n — query host terminal color-palette mode
-                // (Contour spec; see contour-terminal.org). Zellij
-                // short-circuits this query: we know the host's mode
-                // from our own startup `\e[?996n` plus unsolicited DSR
-                // 997 updates while `\e[?2031h` is enabled, so the
-                // pane gets answered locally without a host round-trip.
-                // Pushing onto `pending_forwarded_queries` enrols the
-                // query in the existing Grid → Tab → Screen pipeline;
-                // Screen recognises the variant and writes the reply
-                // straight to the pane's pty.
+                // CSI ? 996 n — 查询主机终端调色板模式
+                // （Contour 规范；参见 contour-terminal.org）。Zellij
+                // 短路此查询：我们从自己的启动 `\e[?996n` 以及在
+                // `\e[?2031h` 启用时的非请求 DSR 997 更新中知道主机的模式，
+                // 因此窗格在本地得到回答，无需主机往返。
+                // 推送到 `pending_forwarded_queries` 会将查询登记到
+                // 现有的 Grid → Tab → Screen 管道中；
+                // Screen 识别该变体并将回复直接写入窗格的 pty。
+                // 
+                // 
                 for param in params_iter.map(|param| param[0]) {
                     if param == 996 {
                         self.pending_forwarded_queries
@@ -5512,15 +5512,15 @@ impl Perform for Grid {
             } else {
                 match next_param_or(0) {
                     5 => {
-                        // report terminal status
+                        // 报告终端状态
                         let all_good = "\u{1b}[0n";
                         self.pending_messages_to_pty
                             .push(all_good.as_bytes().to_vec());
                     },
                     6 => {
-                        // CPR - cursor position report
+                        // CPR - 光标位置报告
 
-                        // Note that this is relative to scrolling region.
+                        // 请注意，这是相对于滚动区域的。
                         let offset = self.scroll_region.0; // scroll_region_top
                         let position_report = format!(
                             "\u{1b}[{};{}R",
@@ -5534,15 +5534,15 @@ impl Perform for Grid {
                 }
             }
         } else if c == 'x' {
-            // DECREQTPARM - Request Terminal Parameters
+            // DECREQTPARM - 请求终端参数
             // https://vt100.net/docs/vt100-ug/chapter3.html#DECREQTPARM
             //
-            // Respond with (same as xterm): Parity NONE, 8 bits,
-            // xmitspeed 38400, recvspeed 38400.  (CLoCk MULtiplier =
-            // 1, STP option flags = 0)
+            // 回复（与 xterm 相同）：奇偶校验 NONE，8 位，
+            // 发送速度 38400，接收速度 38400。（时钟乘数 =
+            // 1，STP 选项标志 = 0）
             //
-            // (xterm used to respond to DECREQTPARM in all modes.
-            // Now it seems to only do so when explicitly in VT100 mode.)
+            // （xterm 过去在所有模式下都回复 DECREQTPARM。
+            // 现在似乎只在显式处于 VT100 模式时才这样做。）
             let query = next_param_or(0);
             match query {
                 0 | 1 => {
@@ -5555,21 +5555,21 @@ impl Perform for Grid {
         } else if c == 't' {
             match next_param_or(1) as usize {
                 14 => {
-                    // Forward to host: apps asking for text-area pixels
-                    // want the real window size, not Zellij's synthesised
-                    // (cell_size * grid_size) value. The host's reply will
-                    // be written back to this pane by the forwarding
-                    // infrastructure on Screen.
+                    // 转发到主机：询问文本区域像素的应用
+                    // 想要真实的窗口大小，而不是 Zellij 合成的
+                    // （cell_size * grid_size）值。主机的回复将
+                    // 由 Screen 上的转发基础设施写回此窗格。
+                    // 
                     self.pending_forwarded_queries
                         .push(crate::host_query::HostQuery::TextAreaPixelSize);
                 },
                 16 => {
-                    // Forward to host: character-cell pixel size.
+                    // 转发到主机：字符单元格像素大小。
                     self.pending_forwarded_queries
                         .push(crate::host_query::HostQuery::CharacterCellPixelSize);
                 },
                 18 => {
-                    // report text area
+                    // 报告文本区域
                     let text_area_report = format!("\x1b[8;{};{}t", self.height, self.width);
                     self.pending_messages_to_pty
                         .push(text_area_report.as_bytes().to_vec());
@@ -5598,7 +5598,7 @@ impl Perform for Grid {
                     Some(b'*') => CharsetIndex::G2,
                     Some(b'+') => CharsetIndex::G3,
                     _ => {
-                        // invalid, silently do nothing
+                        // 无效，静默不执行任何操作
                         return;
                     },
                 };
@@ -5611,7 +5611,7 @@ impl Perform for Grid {
                     Some(b'*') => CharsetIndex::G2,
                     Some(b'+') => CharsetIndex::G3,
                     _ => {
-                        // invalid, silently do nothing
+                        // 无效，静默不执行任何操作
                         return;
                     },
                 };
@@ -5624,7 +5624,7 @@ impl Perform for Grid {
                     Some(b'*') => CharsetIndex::G2,
                     Some(b'+') => CharsetIndex::G3,
                     _ => {
-                        // invalid, silently do nothing
+                        // 无效，静默不执行任何操作
                         return;
                     },
                 };
@@ -5641,7 +5641,7 @@ impl Perform for Grid {
                 self.move_cursor_to_beginning_of_line();
             },
             (b'M', None) => {
-                // TODO: if cursor is at the top, it should go down one
+                // TODO: 如果光标在顶部，它应该向下移动一个
                 self.move_cursor_up_with_scrolling(1);
             },
             (b'c', None) => {
@@ -5840,7 +5840,7 @@ impl Row {
         acc
     }
     pub fn absolute_character_index(&self, x: usize) -> usize {
-        // return x's width aware index
+        // 返回 x 的宽度感知索引
         let mut absolute_index = x;
         for (i, terminal_character) in self.columns.iter().enumerate().take(x) {
             if i == absolute_index {
@@ -5853,8 +5853,8 @@ impl Row {
         absolute_index
     }
     pub fn absolute_character_index_and_position_in_char(&self, x: usize) -> (usize, usize) {
-        // returns x's width aware index as well as its position inside the wide char (eg. 1 if
-        // it's in the middle of a 2-char wide character)
+        // 返回 x 的宽度感知索引及其在宽字符内的位置（例如，如果
+        // 它在 2 字符宽字符的中间则为 1）
         let mut accumulated_width = 0;
         let mut absolute_index = x;
         let mut position_inside_character = 0;
@@ -5872,14 +5872,14 @@ impl Row {
     pub fn add_character_at(&mut self, terminal_character: TerminalCharacter, x: usize) {
         match self.width_cached().cmp(&x) {
             Ordering::Equal => {
-                // this is unwrapped because this always happens after self.width_cached()
+                // 这是未包装的，因为这总是在 self.width_cached() 之后发生
                 *self.width.as_mut().unwrap() += terminal_character.width();
-                // adding the character at the end of the current line
+                // 在当前行末尾添加字符
                 self.columns.push_back(terminal_character);
             },
             Ordering::Less => {
-                // adding the character after the end of the current line
-                // we pad the line up to the character and then add it
+                // 在当前行末尾之后添加字符
+                // 我们将行填充到字符位置然后添加它
                 let width_offset = self.excess_width_until(x);
                 let mut gap_fill = EMPTY_TERMINAL_CHARACTER;
                 if let Some(bg_color) = self.bg_color {
@@ -5893,8 +5893,8 @@ impl Row {
                 self.width = None;
             },
             Ordering::Greater => {
-                // adding the character in the middle of the line
-                // we replace the character at its position
+                // 在行中间添加字符
+                // 我们替换其位置处的字符
                 let (absolute_x_index, position_inside_character) =
                     self.absolute_character_index_and_position_in_char(x);
                 let character_width = terminal_character.width();
@@ -5911,25 +5911,25 @@ impl Row {
                     std::mem::replace(&mut self.columns[absolute_x_index], terminal_character);
                 match character_width.cmp(&replaced_character.width()) {
                     Ordering::Greater => {
-                        // the replaced character is narrower than the current character
-                        // (eg. we added a wide emoji in place of an English character)
-                        // we remove the character after it to make room
+                        // 被替换的字符比当前字符窄
+                        // （例如，我们用宽表情符号替换了英文字符）
+                        // 我们删除它后面的字符以腾出空间
                         let position_to_remove = absolute_x_index + 1;
                         if let Some(removed) = self.columns.remove(position_to_remove) {
                             if removed.width() > 1 {
-                                // the character we removed is a wide character itself, so we add
-                                // padding
+                                // 我们删除的字符本身是宽字符，所以我们添加
+                                // 填充
                                 self.columns
                                     .insert(position_to_remove, EMPTY_TERMINAL_CHARACTER);
                             }
                         }
                     },
                     Ordering::Less => {
-                        // the replaced character is wider than the current character
-                        // (eg. we added an English character in place of a wide emoji)
-                        // we must make sure to add padding either before the character we added
-                        // or after it, depending on our position inside said removed wide character
-                        // TODO: support characters wider than 2
+                        // 被替换的字符比当前字符宽
+                        // （例如，我们用英文字符替换了宽表情符号）
+                        // 我们必须确保在我们添加的字符之前或之后添加填充，
+                        // 取决于我们在所述被删除宽字符内的位置
+                        // TODO: 支持宽度大于 2 的字符
                         if position_inside_character > 0 {
                             self.columns
                                 .insert(absolute_x_index, EMPTY_TERMINAL_CHARACTER);
@@ -6045,8 +6045,8 @@ impl Row {
         let mut drained_part_len = 0;
         let mut split_pos = 0;
         for next_character in self.columns.iter() {
-            // drained_part_len == 0 here is so that if the grid is resized
-            // to a size of 1, we won't drop wide characters
+            // 这里 drained_part_len == 0 是为了如果网格被调整大小
+            // 为大小 1，我们不会丢弃宽字符
             if drained_part_len + next_character.width() <= x || drained_part_len == 0 {
                 drained_part_len += next_character.width();
                 split_pos += 1
@@ -6054,7 +6054,7 @@ impl Row {
                 break;
             }
         }
-        // Can't use split_off because it doesn't reduce capacity, causing OOM with long lines
+        // 不能使用 split_off，因为它不会减少容量，长行会导致 OOM
         let drained_part = self.columns.drain(..split_pos).collect();
         self.width = None;
         drained_part
@@ -6196,7 +6196,7 @@ impl Row {
             })
             .unwrap_or(0);
         if start_position == end_position {
-            // so that if this is only one character, it'll still be marked
+            // 这样如果这只有一个字符，它仍然会被标记
             end_position += 1;
         }
         Some((start_position, end_position))

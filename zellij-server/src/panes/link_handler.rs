@@ -32,7 +32,7 @@ impl LinkHandler {
         );
 
         if !uri.is_empty() {
-            // save the link, and the id if present to hashmap
+            // 保存链接以及 id（如果存在）到 hashmap
             String::from_utf8(uri.to_vec()).ok().map(|uri| {
                 let id = link_params
                     .split(|&b| b == b':')
@@ -44,7 +44,7 @@ impl LinkHandler {
                 anchor
             })
         } else {
-            // there is no link, so consider it a link end
+            // 没有链接，因此视为链接结束
             Some(LinkAnchor::End)
         }
     }

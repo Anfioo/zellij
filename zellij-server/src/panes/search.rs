@@ -7,7 +7,7 @@ use std::fmt::Debug;
 use zellij_utils::input::actions::SearchDirection;
 use zellij_utils::position::Position;
 
-// If char is neither alphanumeric nor an underscore do we consider it a word-boundary
+// 如果字符既不是字母数字也不是下划线，我们是否将其视为单词边界
 fn is_word_boundary(x: &Option<char>) -> bool {
     x.map_or(true, |c| !c.is_ascii_alphanumeric() && c != '_')
 }
@@ -19,10 +19,10 @@ enum SearchSource<'a> {
 }
 
 impl<'a> SearchSource<'a> {
-    /// Returns true, if a new source was found, false otherwise (reached the end of the tail).
-    /// If we are in the middle of a line, nothing will be changed.
-    /// Only, when we have to switch to a new line, will the source update itself,
-    /// as well as the corresponding indices.
+    /// 如果找到新的源则返回 true，否则返回 false（到达尾部末尾）。
+    /// 如果我们在行的中间，不会有任何改变。
+    /// 只有当我们必须切换到新行时，源才会更新自身，
+    /// 以及相应的索引。
     fn get_next_source(
         &mut self,
         ridx: &mut usize,
@@ -32,54 +32,54 @@ impl<'a> SearchSource<'a> {
     ) -> bool {
         match self {
             SearchSource::Main(row) => {
-                // If we are at the end of the main row, we need to start looking into the tail
+                // 如果我们在主行的末尾，需要开始查看尾部
                 if hidx >= &mut row.columns.len() {
                     let curr_tail = tailit.next();
-                    // If we are at the end and found a partial hit, we have to extend the search into the next line
+                    // 如果我们在末尾并找到了部分匹配，必须将搜索扩展到下一行
                     if let Some(curr_tail) = start.and(curr_tail) {
-                        *ridx += 1; // Go one line down
-                        *hidx = 0; // and start from the beginning of the new line
+                        *ridx += 1; // 向下一行
+                        *hidx = 0; // 并从新行的开头开始
                         *self = SearchSource::Tail(curr_tail);
                     } else {
-                        return false; // We reached the end of the tail
+                        return false; // 我们到达了尾部的末尾
                     }
                 }
             },
             SearchSource::Tail(tail) => {
                 if hidx >= &mut tail.columns.len() {
-                    // If we are still searching (didn't hit a mismatch yet) and there is still more tail to go
-                    // just continue with the next line
+                    // 如果我们仍在搜索（尚未遇到不匹配）并且还有更多尾部可查
+                    // 就继续下一行
                     if let Some(curr_tail) = tailit.next() {
-                        *ridx += 1; // Go one line down
-                        *hidx = 0; // and start from the beginning of the new line
+                        *ridx += 1; // 向下一行
+                        *hidx = 0; // 并从新行的开头开始
                         *self = SearchSource::Tail(curr_tail);
                     } else {
-                        return false; // We reached the end of the tail
+                        return false; // 我们到达了尾部的末尾
                     }
                 }
             },
         }
-        // We have found a new source, or we are in the middle of a line, so no need to change anything
+        // 我们找到了新的源，或者我们在行的中间，因此无需更改任何内容
         true
     }
 
-    // Get the char at hidx and, if existing, the following char as well
+    // 获取 hidx 处的字符，如果存在，还获取下一个字符
     fn get_next_two_chars(&self, hidx: usize, whole_word_search: bool) -> (char, Option<char>) {
-        // Get the current haystack character
+        // 获取当前干草堆字符
         let haystack_char = match self {
             SearchSource::Main(row) => row.columns[hidx].character,
             SearchSource::Tail(tail) => tail.columns[hidx].character,
         };
 
-        // Get the next haystack character (relevant for whole-word search only)
+        // 获取下一个干草堆字符（仅对全词搜索相关）
         let next_haystack_char = if whole_word_search {
-            // Everything (incl. end of line) that is not [a-zA-Z0-9_] is considered a word boundary
+            // 所有内容（包括行尾）不是 [a-zA-Z0-9_] 的都被视为单词边界
             match self {
                 SearchSource::Main(row) => row.columns.get(hidx + 1).map(|c| c.character),
                 SearchSource::Tail(tail) => tail.columns.get(hidx + 1).map(|c| c.character),
             }
         } else {
-            None // Doesn't get used, when not doing whole-word search
+            None // 不做全词搜索时不会被使用
         };
         (haystack_char, next_haystack_char)
     }
@@ -87,23 +87,23 @@ impl<'a> SearchSource<'a> {
 
 #[derive(Debug, Clone, Default)]
 pub struct SearchResult {
-    // What we have already found in the viewport
+    // 我们在视口中已经找到的内容
     pub selections: Vec<Selection>,
-    // Which of the selections we found is currently 'active' (highlighted differently)
+    // 我们找到的选择中哪个当前是"活动的"（以不同方式高亮）
     pub active: Option<Selection>,
-    // What we are looking for
+    // 我们在寻找什么
     pub needle: String,
-    // Does case matter?
+    // 大小写是否重要？
     pub case_insensitive: bool,
-    // Only search whole words, not parts inside a word
+    // 仅搜索整个单词，而不是单词内的部分
     pub whole_word_only: bool, // TODO
-    // Jump from the bottom to the top (or vice versa), if we run out of lines to search
+    // 如果我们没有更多行可搜索，从底部跳到顶部（或反之）
     pub wrap_search: bool,
 }
 
 impl SearchResult {
-    /// This is only used for Debug formatting Grid, which itself is only used
-    /// for tests.
+    /// 这仅用于 Debug 格式化 Grid，而 Grid 本身仅用于
+    /// 测试。
     #[allow(clippy::ptr_arg)]
     pub(crate) fn mark_search_results_in_row(&self, row: &mut Cow<Row>, ridx: usize) {
         for s in &self.selections {
@@ -119,15 +119,15 @@ impl SearchResult {
                     let take = if s.end.line() == s.start.line() {
                         s.end.column() - s.start.column()
                     } else {
-                        // Just mark the rest of the line. This number is certainly too big but the iterator takes care of this
+                        // 只标记行的其余部分。这个数字肯定太大了，但迭代器会处理这个
                         row.columns.len()
                     };
                     (skip, take)
                 } else if ridx as isize == s.end.line() {
-                    // We wrapped a line and the end is in this row, so take from the beginning to the end
+                    // 我们换行了，末尾在这一行，所以从开头取到末尾
                     (0, s.end.column())
                 } else {
-                    // We are in the middle (start is above and end is below), so mark all
+                    // 我们在中间（开头在上方，末尾在下方），所以全部标记
                     (0, row.columns.len())
                 };
 
@@ -153,30 +153,30 @@ impl SearchResult {
         prev_haystack_char: Option<char>,
     ) -> bool {
         let mut chars_match = if self.case_insensitive {
-            // Case insensitive search
-            // Currently only ascii, as this whole search-function is very sub-optimal anyways
+            // 不区分大小写搜索
+            // 目前只有 ascii，因为这个整个搜索函数无论如何都非常次优
             haystack_char.to_ascii_lowercase() == needle_char.to_ascii_lowercase()
         } else {
-            // Case sensitive search
+            // 区分大小写搜索
             haystack_char == needle_char
         };
 
-        // Whole-word search
-        // It's a match only, if the first haystack char that is _not_ a hit, is a word-boundary
+        // 全词搜索
+        // 只有当第一个不是匹配的干草堆字符是单词边界时，才是匹配
         if chars_match
             && self.whole_word_only
             && nidx == 0
             && !is_word_boundary(&prev_haystack_char)
         {
-            // Start of the match is not a word boundary, so this is not a hit
+            // 匹配的开头不是单词边界，所以这不是命中
             chars_match = false;
         }
 
         chars_match
     }
 
-    /// Search a row and its tail.
-    /// The tail are all the non-canonical lines below `row`, with `row` not necessarily being canonical itself.
+    /// 搜索一行及其尾部。
+    /// 尾部是 `row` 下方所有非规范行，`row` 本身不一定是规范的。
     pub(crate) fn search_row(&self, mut ridx: usize, row: &Row, tail: &[&Row]) -> Vec<Selection> {
         let mut res = Vec::new();
         if self.needle.is_empty() || row.columns.is_empty() {
@@ -184,21 +184,21 @@ impl SearchResult {
         }
 
         let mut tailit = tail.iter();
-        let mut source = SearchSource::Main(row); // Where we currently get the haystack-characters from
+        let mut source = SearchSource::Main(row); // 我们当前从哪里获取干草堆字符
         let orig_ridx = ridx;
-        let mut start = None; // If we find a hit, this is where it starts
-        let mut nidx = 0; // Needle index
-        let mut hidx = 0; // Haystack index
+        let mut start = None; // 如果我们找到命中，这就是它开始的地方
+        let mut nidx = 0; // 针索引
+        let mut hidx = 0; // 干草堆索引
         let mut prev_haystack_char: Option<char> = None;
         loop {
-            // Get the current and next haystack character
+            // 获取当前和下一个干草堆字符
             let (mut haystack_char, next_haystack_char) =
                 source.get_next_two_chars(hidx, self.whole_word_only);
 
-            // Get current needle character
-            let needle_char = self.needle.chars().nth(nidx).unwrap(); // Unwrapping is safe here
+            // 获取当前针字符
+            let needle_char = self.needle.chars().nth(nidx).unwrap(); // 这里解包是安全的
 
-            // Check if needle and haystack match (with search-options)
+            // 检查针和干草堆是否匹配（带搜索选项）
             let chars_match = self.check_if_haystack_char_matches_needle(
                 nidx,
                 needle_char,
@@ -207,30 +207,30 @@ impl SearchResult {
             );
 
             if chars_match {
-                // If the needle is only 1 long, the next `if` could also happen, so we are not merging it into one big if-else
+                // 如果针只有 1 长，下一个 `if` 也可能发生，所以我们不把它合并成一个大的 if-else
                 if nidx == 0 {
                     start = Some(Position::new(ridx as i32, hidx as u16));
                 }
                 if nidx == self.needle.len() - 1 {
                     let mut end_found = true;
-                    // If we search whole-word-only, the next non-needle char needs to be a word-boundary,
-                    // otherwise its not a hit (e.g. some occurrence inside a longer word).
+                    // 如果我们搜索全词，下一个非针字符需要是单词边界，
+                    // 否则它不是命中（例如，较长单词内部的某个出现）。
                     if self.whole_word_only && !is_word_boundary(&next_haystack_char) {
-                        // The end of the match is not a word boundary, so this is not a hit!
-                        // We have to jump back from where we started (plus one char)
+                        // 匹配的末尾不是单词边界，所以这不是命中！
+                        // 我们必须从开始的地方跳回（加一个字符）
                         nidx = 0;
                         ridx = start.unwrap().line() as usize;
-                        hidx = start.unwrap().column(); // Will be incremented below
+                        hidx = start.unwrap().column(); // 将在下面递增
                         if start.unwrap().line() as usize == orig_ridx {
                             source = SearchSource::Main(row);
-                            haystack_char = row.columns[hidx].character; // so that prev_char gets set correctly
+                            haystack_char = row.columns[hidx].character; // 以便 prev_char 被正确设置
                         } else {
-                            // The -1 comes from the main row
+                            // -1 来自主行
                             let tail_idx = start.unwrap().line() as usize - orig_ridx - 1;
-                            // We have to reset the tail-iterator as well.
+                            // 我们也必须重置尾部迭代器。
                             tailit = tail[tail_idx..].iter();
                             let trow = tailit.next().unwrap();
-                            haystack_char = trow.columns[hidx].character; // so that prev_char gets set correctly
+                            haystack_char = trow.columns[hidx].character; // 以便 prev_char 被正确设置
                             source = SearchSource::Tail(trow);
                         }
                         start = None;
@@ -243,7 +243,7 @@ impl SearchResult {
                         res.push(selection);
                         nidx = 0;
                         if matches!(source, SearchSource::Tail(..)) {
-                            // When searching the tail, we can only find one additional selection, so stopping here
+                            // 搜索尾部时，我们只能找到一个额外的选择，所以在这里停止
                             break;
                         }
                     }
@@ -251,26 +251,26 @@ impl SearchResult {
                     nidx += 1;
                 }
             } else {
-                // Chars don't match. Start searching the needle from the beginning
+                // 字符不匹配。从头开始搜索针
                 start = None;
                 nidx = 0;
                 if matches!(source, SearchSource::Tail(..)) {
-                    // When searching the tail and we find a mismatch, just quit right now
+                    // 搜索尾部时发现不匹配，立即退出
                     break;
                 }
             }
 
             hidx += 1;
             prev_haystack_char = Some(haystack_char);
-            // We might need to switch to a new line in the tail
+            // 我们可能需要切换到尾部的新行
             if !source.get_next_source(&mut ridx, &mut hidx, &mut tailit, &start) {
                 break;
             }
         }
 
-        // The tail may have not been wrapped yet (when coming from lines_below),
-        // so it could be that the end extends across more characters than the row is wide.
-        // Therefore we need to reflow the end:
+        // 尾部可能还没有被换行（当来自 lines_below 时），
+        // 所以末尾可能跨越比行宽更多的字符。
+        // 因此我们需要重新排版末尾：
         for s in res.iter_mut() {
             while s.end.column() > row.width() {
                 s.end.column.0 -= row.width();
@@ -327,10 +327,10 @@ impl SearchResult {
             .chain(self.active.iter_mut())
             .for_each(|x| x.move_down(amount));
 
-        // Throw out all search-results outside of the new viewport
+        // 丢弃所有在新视口之外的搜索结果
         self.adjust_selections_to_moved_viewport(grid_height);
 
-        // Search the new line for our needle
+        // 在新行中搜索我们的针
         if !self.needle.is_empty() {
             if let Some(row) = viewport.front() {
                 let mut tail = Vec::new();
@@ -364,16 +364,16 @@ impl SearchResult {
             .iter_mut()
             .chain(self.active.iter_mut())
             .for_each(|x| x.move_up(amount));
-        // Throw out all search-results outside of the new viewport
+        // 丢弃所有在新视口之外的搜索结果
         self.adjust_selections_to_moved_viewport(grid_height);
 
-        // Search the new line for our needle
+        // 在新行中搜索我们的针
         if !self.needle.is_empty() {
             if let Some(row) = viewport.back() {
                 let tail: Vec<&Row> = lines_below.iter().take_while(|r| !r.is_canonical).collect();
                 let selections = self.search_row(viewport.len() - 1, row, &tail);
                 for selection in selections {
-                    // We are only interested in results that start in the this new row
+                    // 我们只对从这个新行开始的结果感兴趣
                     if selection.start.line() as usize == viewport.len() - 1 {
                         self.selections.push(selection);
                         found_something = true;
@@ -385,10 +385,10 @@ impl SearchResult {
     }
 
     fn adjust_selections_to_moved_viewport(&mut self, grid_height: usize) {
-        // Throw out all search-results outside of the new viewport
+        // 丢弃所有在新视口之外的搜索结果
         self.selections
             .retain(|s| (s.start.line() as usize) < grid_height && s.end.line() >= 0);
-        // If we have thrown out the active element, set it to None
+        // 如果我们丢弃了活动元素，将其设置为 None
         self.unset_active_selection_if_nonexistent();
     }
 }
@@ -403,7 +403,7 @@ impl Grid {
     }
 
     pub fn clear_search(&mut self) {
-        // Clearing all previous highlights
+        // 清除所有先前的高亮
         for res in &self.search_results.selections {
             self.output_buffer
                 .update_lines(res.start.line() as usize, res.end.line() as usize);
@@ -414,16 +414,16 @@ impl Grid {
     pub fn set_search_string(&mut self, needle: &str) {
         self.search_results.needle = needle.to_string();
         self.search_viewport();
-        // If the current viewport does not contain any hits,
-        // we jump around until we find something. Starting
-        // going backwards.
+        // 如果当前视口不包含任何命中，
+        // 我们来回跳转直到找到东西。从
+        // 向后开始。
         if self.search_results.selections.is_empty() {
             self.search_up();
         }
         if self.search_results.selections.is_empty() {
             self.search_down();
         }
-        // We still don't want to pre-select anything at this stage
+        // 我们在这个阶段仍然不想预选任何东西
         self.search_results.active = None;
         self.is_scrolled = true;
     }
@@ -442,7 +442,7 @@ impl Grid {
             }
             let selections = self.search_results.search_row(ridx, row, &tail);
             for sel in &selections {
-                // Cast works because we can' be negative here
+                // 强制转换有效，因为我们在这里不可能是负数
                 self.output_buffer
                     .update_lines(sel.start.line() as usize, sel.end.line() as usize);
             }
@@ -460,7 +460,7 @@ impl Grid {
                 .update_lines(line.start.line() as usize, line.end.line() as usize);
         }
         self.search_viewport();
-        // Maybe the selection we had is now gone
+        // 也许我们之前的选择现在消失了
         self.search_results.unset_active_selection_if_nonexistent();
     }
 
@@ -476,7 +476,7 @@ impl Grid {
         }
         self.search_results.active = None;
         self.search_viewport();
-        // Maybe the selection we had is now gone
+        // 也许我们之前的选择现在消失了
         self.search_results.unset_active_selection_if_nonexistent();
     }
 
@@ -487,7 +487,7 @@ impl Grid {
         let search_viewport_for_the_first_time =
             self.search_results.active.is_none() && !self.search_results.selections.is_empty();
 
-        // We are not at the end yet, so we can iterate to the next search-result within the current viewport
+        // 我们还没到末尾，所以可以迭代到当前视口内的下一个搜索结果
         let search_viewport_again = !self.search_results.selections.is_empty()
             && self.search_results.active.is_some()
             && match dir {
@@ -496,13 +496,13 @@ impl Grid {
             };
 
         if search_viewport_for_the_first_time || search_viewport_again {
-            // We can stay in the viewport and just move the active selection
+            // 我们可以留在视口中，只需移动活动选择
             self.search_viewport_again(search_viewport_for_the_first_time, dir);
         } else {
-            // Need to move the viewport
+            // 需要移动视口
             let found_something = self.search_viewport_move(dir);
 
-            // We haven't found anything, but we are allowed to wrap around
+            // 我们没有找到任何东西，但我们被允许环绕
             if !found_something && self.search_results.wrap_search {
                 self.search_viewport_wrap(dir);
             }
@@ -518,7 +518,7 @@ impl Grid {
             SearchDirection::Up => self.search_results.selections.last().cloned().unwrap(),
             SearchDirection::Down => self.search_results.selections.first().cloned().unwrap(),
         };
-        // We can stay in the viewport and just move the active selection
+        // 我们可以留在视口中，只需移动活动选择
         let active_idx = self.search_results.active.get_or_insert(new_active);
         self.output_buffer.update_lines(
             active_idx.start.line() as usize,
@@ -546,11 +546,11 @@ impl Grid {
     }
 
     fn search_viewport_move(&mut self, dir: SearchDirection) -> bool {
-        // We need to move the viewport
+        // 我们需要移动视口
         let mut rows = 0;
         let mut found_something = false;
 
-        // We might loose the current selection, if we can't find anything
+        // 如果找不到任何东西，我们可能会丢失当前选择
         let current_active_selection = self.search_results.active;
         while !found_something && !self.search_reached_opposite_end(dir) {
             rows += 1;
@@ -563,7 +563,7 @@ impl Grid {
         if found_something {
             self.search_adjust_to_new_selection(dir);
         } else {
-            // We didn't find something, so we scroll back to the start
+            // 我们没有找到东西，所以滚回开头
             for _ in 0..rows {
                 match dir {
                     SearchDirection::Up => self.scroll_down_one_line(),
@@ -581,8 +581,8 @@ impl Grid {
                 self.search_results.move_active_selection_to_prev();
             },
             SearchDirection::Down => {
-                // We may need to scroll a bit further, because we are at the beginning of the
-                // search result, but the end might be invisible
+                // 我们可能需要再滚动一点，因为我们在搜索结果的开头，
+                // 但末尾可能不可见
                 if let Some(last) = self.search_results.selections.last() {
                     let distance = (last.end.line() - last.start.line()) as usize;
                     if distance < self.height {
@@ -598,20 +598,20 @@ impl Grid {
     }
 
     fn search_viewport_wrap(&mut self, dir: SearchDirection) {
-        // We might loose the current selection, if we can't find anything
+        // 如果找不到任何东西，我们可能会丢失当前选择
         let current_active_selection = self.search_results.active;
-        // UP
-        // Go to the opposite end (bottom when searching up and top when searching down)
+        // 向上
+        // 到对面的一端（向上搜索时到底部，向下搜索时到顶部）
         let mut rows = self.move_viewport_to_opposite_end(dir);
 
-        // We are at the bottom or top. Maybe we found already something there
-        // If not, scroll back again, until we find something
+        // 我们在底部或顶部。也许我们已经在那里找到了东西
+        // 如果没有，再滚回来，直到找到东西
         let mut found_something = match dir {
             SearchDirection::Up => self.search_results.selections.last().is_some(),
             SearchDirection::Down => self.search_results.selections.first().is_some(),
         };
 
-        // We didn't find anything at the opposing end of the scrollbuffer, so we scroll back until we find something
+        // 我们在回滚缓冲区的另一端没有找到任何东西，所以滚回来直到找到东西
         if !found_something {
             while rows >= 0 && !found_something {
                 rows -= 1;
@@ -625,7 +625,7 @@ impl Grid {
             self.search_results.active = match dir {
                 SearchDirection::Up => self.search_results.selections.last().cloned(),
                 SearchDirection::Down => {
-                    // We need to scroll until the found item is at the top
+                    // 我们需要滚动直到找到的项目在顶部
                     if let Some(first) = self.search_results.selections.first() {
                         for _ in 0..first.start.line() {
                             self.scroll_down_one_line();
@@ -636,7 +636,7 @@ impl Grid {
             };
             self.output_buffer.update_all_lines();
         } else {
-            // We didn't find anything, so we reset the old active selection
+            // 我们没有找到任何东西，所以重置旧的活动选择
             self.search_results.active = current_active_selection;
         }
     }
@@ -645,14 +645,14 @@ impl Grid {
         let mut rows = 0;
         match dir {
             SearchDirection::Up => {
-                // Go to the bottom
+                // 到底部
                 while !self.lines_below.is_empty() {
                     rows += 1;
                     self.scroll_down_one_line();
                 }
             },
             SearchDirection::Down => {
-                // Go to the top
+                // 到顶部
                 while !self.lines_above.is_empty() {
                     rows += 1;
                     self.scroll_up_one_line();

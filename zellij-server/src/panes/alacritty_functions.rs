@@ -13,7 +13,7 @@ pub fn parse_sgr_color(params: &mut dyn Iterator<Item = u16>) -> Option<AnsiCode
     }
 }
 
-/// Parse colors in XParseColor format.
+/// 解析 XParseColor 格式的颜色。
 pub fn xparse_color(color: &[u8]) -> Option<AnsiCode> {
     if !color.is_empty() && color[0] == b'#' {
         parse_legacy_color(&color[1..])
@@ -24,7 +24,7 @@ pub fn xparse_color(color: &[u8]) -> Option<AnsiCode> {
     }
 }
 
-/// Parse colors in `rgb:r(rrr)/g(ggg)/b(bbb)` format.
+/// 解析 `rgb:r(rrr)/g(ggg)/b(bbb)` 格式的颜色。
 pub fn parse_rgb_color(color: &[u8]) -> Option<AnsiCode> {
     let colors = std::str::from_utf8(color)
         .ok()?
@@ -35,7 +35,7 @@ pub fn parse_rgb_color(color: &[u8]) -> Option<AnsiCode> {
         return None;
     }
 
-    // Scale values instead of filling with `0`s.
+    // 缩放值而不是用 `0` 填充。
     let scale = |input: &str| {
         if input.len() > 4 {
             None
@@ -53,11 +53,11 @@ pub fn parse_rgb_color(color: &[u8]) -> Option<AnsiCode> {
     )))
 }
 
-/// Parse colors in `#r(rrr)g(ggg)b(bbb)` format.
+/// 解析 `#r(rrr)g(ggg)b(bbb)` 格式的颜色。
 pub fn parse_legacy_color(color: &[u8]) -> Option<AnsiCode> {
     let item_len = color.len() / 3;
 
-    // Truncate/Fill to two byte precision.
+    // 截断/填充到两字节精度。
     let color_from_slice = |slice: &[u8]| {
         let col = usize::from_str_radix(std::str::from_utf8(slice).ok()?, 16).ok()? << 4;
         Some((col >> (4 * slice.len().saturating_sub(1))) as u8)
@@ -89,10 +89,9 @@ pub fn parse_number(input: &[u8]) -> Option<u8> {
     Some(num)
 }
 
-// these functions are copied verbatim (with slight modifications) from alacritty, mainly in order
-// to be able to use the VTE API provided by their great package of the same name more easily
-// The following license refers to this file and the functions
-// within it only
+// 这些函数是从 alacritty 逐字复制（略有修改）的，主要是为了
+// 能够更轻松地使用他们同名的优秀包提供的 VTE API
+// 以下许可证仅适用于本文件及其中的函数
 //
 //                               Apache License
 //                         Version 2.0, January 2004

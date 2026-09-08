@@ -2,13 +2,13 @@ use std::{collections::HashSet, ops::Range};
 
 use zellij_utils::position::Position;
 
-// The selection is empty when start == end
-// it includes the character at start, and everything before end.
+// 当 start == end 时选择为空
+// 它包含 start 处的字符，以及 end 之前的所有内容。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Selection {
     pub start: Position,
     pub end: Position,
-    active: bool, // used to handle moving the selection up and down
+    active: bool, // 用于处理上下移动选择
     last_added_word_position: Option<(Position, Position)>, // (start / end)
     last_added_line_index: Option<isize>,
 }
@@ -53,7 +53,7 @@ impl Selection {
         self.last_added_line_index = Some(start.line.0);
     }
     pub fn add_word_to_position(&mut self, word_start: Position, word_end: Position) {
-        // here we assume word_start is smaller or equal to word_end
+        // 这里我们假设 word_start 小于或等于 word_end
         let already_added = self
             .last_added_word_position
             .map(|(last_word_start, last_word_end)| {
@@ -72,16 +72,16 @@ impl Selection {
             .map(|(_l_start, l_end)| word_end.line > l_end.line)
             .unwrap_or(false);
         if word_is_above_last_added_word && word_start.line < self.start.line {
-            // extend line above
+            // 向上扩展行
             self.start = word_start;
         } else if word_is_below_last_added_word && word_end.line > self.end.line {
-            // extend line below
+            // 向下扩展行
             self.end = word_end;
         } else if word_is_below_last_added_word && word_start.line > self.start.line {
-            // reduce from above
+            // 从上方缩减
             self.start = word_start;
         } else if word_is_above_last_added_word && word_end.line < self.end.line {
-            // reduce from below
+            // 从下方缩减
             self.end = word_end;
         } else {
             let word_end_is_to_the_left_of_last_word_start = self
@@ -109,19 +109,19 @@ impl Selection {
                 && selection_start_column_is_to_the_right_of_word_start
                 && selection_start_is_on_same_line_as_word_start
             {
-                // extend selection left
+                // 向左扩展选择
                 self.start.column = word_start.column;
             } else if word_start_is_to_the_right_of_last_word_end
                 && selection_end_is_to_the_left_of_word_end
                 && selection_end_is_on_same_line_as_word_end
             {
-                // extend selection right
+                // 向右扩展选择
                 self.end.column = word_end.column;
             } else if last_word_start_equals_word_end {
-                // reduce selection from the right
+                // 从右侧缩减选择
                 self.end.column = word_end.column;
             } else if last_word_end_equals_word_start {
-                // reduce selection from the left
+                // 从左侧缩减选择
                 self.start.column = word_start.column;
             }
         }
@@ -145,17 +145,17 @@ impl Selection {
             .unwrap_or(false);
 
         if line_index_is_smaller_than_last_added_line_index && self.start.line.0 > line_index {
-            // extend selection one line upwards
+            // 向上扩展选择一行
             self.start = Position::new(line_index as i32, 0);
         } else if line_index_is_larger_than_last_added_line_index && self.end.line.0 < line_index {
-            // extend selection one line downwards
+            // 向下扩展选择一行
             self.end = Position::new(line_index as i32, last_index_in_line as u16);
         } else if line_index_is_smaller_than_last_added_line_index && self.end.line.0 > line_index {
-            // reduce selection one line from below
+            // 从下方缩减选择一行
             self.end = Position::new(line_index as i32, last_index_in_line as u16);
         } else if line_index_is_larger_than_last_added_line_index && self.start.line.0 < line_index
         {
-            // reduce selection one line from above
+            // 从上方缩减选择一行
             self.start = Position::new(line_index as i32, 0);
         }
 
@@ -242,8 +242,8 @@ impl Selection {
         self
     }
 
-    /// Return an iterator over the line indices, up to max, that are not present in both self and other,
-    /// except for the indices of the first and last line of both self and s2, that are always included.
+    /// 返回一个迭代器，遍历 self 和 other 中不同时存在的行索引（不超过 max），
+    /// 但 self 和 s2 首尾行的索引始终包含在内。
     pub fn diff(&self, other: &Self, max: usize) -> impl Iterator<Item = isize> {
         let mut lines_to_update = HashSet::new();
 

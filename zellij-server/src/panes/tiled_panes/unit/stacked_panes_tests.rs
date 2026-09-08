@@ -823,8 +823,8 @@ fn break_pane_out_of_stack_top() {
     let mock_panes = Rc::new(RefCell::new(mock_panes));
     let focused_pane = PaneId::Terminal(3);
 
-    // here the bottom pane should be broken out because the focused pane is the top one and should
-    // remain in the stack
+    // 这里底部窗格应该被拆分出来，因为聚焦的窗格是顶部的，应该
+    // 留在堆叠中
     StackedPanes::new(mock_panes.clone())
         .break_pane_out_of_stack(&focused_pane)
         .unwrap();
@@ -890,7 +890,7 @@ fn break_pane_out_of_stack_middle() {
     let mock_panes = Rc::new(RefCell::new(mock_panes));
     let focused_pane = PaneId::Terminal(4);
 
-    // here the bottom pane should be broken out (default behavior)
+    // 这里底部窗格应该被拆分出来（默认行为）
     StackedPanes::new(mock_panes.clone())
         .break_pane_out_of_stack(&focused_pane)
         .unwrap();
@@ -956,8 +956,8 @@ fn break_pane_out_of_stack_bottom() {
     let mock_panes = Rc::new(RefCell::new(mock_panes));
     let focused_pane = PaneId::Terminal(5);
 
-    // here the top pane should be broken out, because the focused pane is the bottom one and it
-    // should remain in the stack
+    // 这里顶部窗格应该被拆分出来，因为聚焦的窗格是底部的，它
+    // 应该留在堆叠中
     StackedPanes::new(mock_panes.clone())
         .break_pane_out_of_stack(&focused_pane)
         .unwrap();

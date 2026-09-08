@@ -13,7 +13,7 @@ use zellij_utils::pane_size::SizeInPixels;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct PixelRect {
     pub x: usize,
-    pub y: isize, // this can potentially be negative (eg. when the image top has scrolled past the edge of the scrollbuffer)
+    pub y: isize, // 这可能是负数（例如，当图像顶部滚动超过回滚缓冲区边缘时）
     pub width: usize,
     pub height: usize,
 }
@@ -28,7 +28,7 @@ impl PixelRect {
         }
     }
     pub fn intersecting_rect(&self, other: &PixelRect) -> Option<PixelRect> {
-        // if the two rects intersect, this returns a PixelRect *relative to self*
+        // 如果两个矩形相交，返回一个 *相对于 self* 的 PixelRect
         let self_top_edge = self.y;
         let self_bottom_edge = self.y + self.height as isize;
         let self_left_edge = self.x;
@@ -125,7 +125,7 @@ impl SixelGrid {
             self.handle_byte(*byte);
         }
 
-        // send DCS event to parser
+        // 向解析器发送 DCS 事件
         for (i, param) in dcs_params.iter().enumerate() {
             if i != 0 {
                 self.handle_byte(b';');
@@ -148,7 +148,7 @@ impl SixelGrid {
         x_pixel_coordinates: usize,
         y_pixel_coordinates: usize,
     ) -> Option<SixelImage> {
-        // usize is image_id
+        // usize 是 image_id
         self.sixel_parser = None;
         if let Some(sixel_deserializer) = self.currently_parsing.as_mut() {
             if let Ok(sixel_image) = sixel_deserializer.create_image() {
@@ -160,9 +160,9 @@ impl SixelGrid {
                     image_pixel_size.1,
                 );
 
-                // here we remove images which this image covers completely to save on system
-                // resources - TODO: also do this with partial covers, eg. if several images
-                // together cover one image
+                // 这里我们移除被这张图像完全覆盖的图像以节省系统
+                // 资源 - TODO: 也对部分覆盖做这个，例如，如果几张图像
+                // 一起覆盖了一张图像
                 for (image_id, pixel_rect) in &self.sixel_image_locations {
                     if let Some(intersecting_rect) =
                         pixel_rect.intersecting_rect(&image_size_and_coordinates)
@@ -200,7 +200,7 @@ impl SixelGrid {
         &mut self,
         rect_to_cut_out: PixelRect,
     ) -> Option<Vec<(usize, PixelRect)>> {
-        // if there is an image at this cursor location, this returns the image ID and the PixelRect inside the image to be removed
+        // 如果在此光标位置有图像，返回图像 ID 和图像中要移除的 PixelRect
         let mut ret = None;
         for (image_id, pixel_rect) in &self.sixel_image_locations {
             if let Some(intersecting_rect) = pixel_rect.intersecting_rect(&rect_to_cut_out) {
@@ -248,7 +248,7 @@ impl SixelGrid {
         self.previous_cell_size = *self.character_cell_size.borrow();
     }
     pub fn clear(&mut self) -> Option<Vec<usize>> {
-        // returns image ids to reap
+        // 返回要回收的图像 id
         let mut image_ids: Vec<usize> = self
             .sixel_image_locations
             .drain()
@@ -283,7 +283,7 @@ impl SixelGrid {
                 pixel_rect.width,
                 pixel_rect.height,
             );
-            sixel_image_cache.clear(); // TODO: more intelligent cache clearing
+            sixel_image_cache.clear(); // TODO: 更智能的缓存清除
         }
     }
     pub fn reap_images(&mut self, ids_to_reap: Vec<usize>) {
@@ -381,7 +381,7 @@ impl SixelGrid {
 
                     let sixel_image_cell_distance_from_scrollback_top =
                         sixel_image_top_edge as usize / character_cell_size.height;
-                    // if the image is above the rect top, this will be 0
+                    // 如果图像在矩形顶部之上，这将是 0
                     let sixel_image_cell_distance_from_changed_rect_top =
                         sixel_image_cell_distance_from_scrollback_top
                             .saturating_sub(line_index + scrollback_size_in_lines);
@@ -389,7 +389,7 @@ impl SixelGrid {
                         + line_index
                         + sixel_image_cell_distance_from_changed_rect_top;
                     let sixel_image_pixel_x = 0;
-                    // if the image is above the rect top, this will be 0
+                    // 如果图像在矩形顶部之上，这将是 0
                     let sixel_image_pixel_y = (changed_rect_top_edge as usize)
                         .saturating_sub(sixel_image_top_edge as usize)
                         as usize;

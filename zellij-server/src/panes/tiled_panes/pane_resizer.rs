@@ -16,8 +16,8 @@ pub struct PaneResizer<'a> {
     solver: Solver,
 }
 
-// FIXME: Just hold a mutable Pane reference instead of the PaneId, fixed, pos, and size?
-// Do this after panes are no longer trait-objects!
+// FIXME: 直接持有一个可变的 Pane 引用而不是 PaneId、fixed、pos 和 size？
+// 在窗格不再是 trait 对象之后再做这个！
 #[derive(Debug, Clone, Copy)]
 struct Span {
     pid: PaneId,
@@ -88,7 +88,7 @@ impl<'a> PaneResizer<'a> {
             })
             .collect();
 
-        // Round f64 pane sizes to usize without gaps or overlap
+        // 将 f64 窗格大小四舍五入为 usize，不留间隙或重叠
         let mut finalised = Vec::new();
         for spans in &mut grid {
             let rounded_size: isize = spans.iter().map(|s| rounded_sizes[&s.size_var]).sum();
@@ -110,7 +110,7 @@ impl<'a> PaneResizer<'a> {
             finalised.extend(spans.iter().map(|s| s.pid));
         }
 
-        // Update span positions based on their rounded sizes
+        // 根据四舍五入后的大小更新跨度位置
         for spans in &mut grid {
             let mut offset = 0;
             for span in spans {
@@ -127,11 +127,11 @@ impl<'a> PaneResizer<'a> {
         Ok(grid.into_iter().flatten().collect())
     }
 
-    // HACK: This whole function is a bit of a hack — it's here to stop us from breaking the layout if we've been given
-    // a bad state to start with. If this function returns false, nothing is resized.
+    // HACK: 这整个函数有点像 hack — 它在这里是为了防止我们在被给予
+    // 一个糟糕的初始状态时破坏布局。如果此函数返回 false，则不会调整任何大小。
     fn is_layout_valid(&self, spans: &[Span]) -> bool {
-        // If pane stacks are too tall to fit on the screen, abandon ship before the status bar gets caught up in
-        // any erroneous resizing...
+        // 如果窗格堆叠太高无法容纳在屏幕上，在状态栏被卷入
+        // 任何错误的调整大小之前放弃...
         for span in spans {
             let pane_is_stacked = self
                 .panes
@@ -216,17 +216,17 @@ impl<'a> PaneResizer<'a> {
         if geoms_changed {
             Ok(())
         } else {
-            // probably a rounding issue - this might be considered an error depending on who
-            // called us - if it's an explicit resize operation, it's clearly an error (the user
-            // wanted to resize and doesn't care about percentage rounding), if it's resizing the
-            // terminal window as a whole, it might not be
+            // 可能是四舍五入问题 - 这可能被认为是错误，取决于谁
+            // 调用了我们 - 如果是显式调整大小操作，那显然是错误（用户
+            // 想要调整大小且不关心百分比四舍五入），如果是调整整个
+            // 终端窗口的大小，那可能不是
             Err(ZellijError::PaneSizeUnchanged).with_context(err_context)
         }
     }
 
-    // FIXME: Functions like this should have unit tests!
+    // FIXME: 这样的函数应该有单元测试！
     fn grid_boundaries(&self, direction: SplitDirection) -> Vec<(usize, usize)> {
-        // Select the spans running *perpendicular* to the direction of resize
+        // 选择与调整大小方向 *垂直* 运行的跨度
         let spans: Vec<Span> = self
             .panes
             .borrow()
@@ -272,14 +272,14 @@ impl<'a> PaneResizer<'a> {
         let position_and_size = {
             let pas = pane.current_geom();
             if pas.is_stacked() && pas.rows.is_percent() {
-                // this is the main pane of the stack
+                // 这是堆叠的主窗格
                 StackedPanes::new(self.panes.clone()).position_and_size_of_stack(&pane.pid())
             } else if pas.is_stacked() {
-                // this is a one-liner stacked pane and should be handled as the same rect with
-                // the rest of the stack, represented by the main pane in the if branch above
+                // 这是一个单行堆叠窗格，应该与堆叠的其余部分作为同一个 rect 处理，
+                // 由上面 if 分支中的主窗格表示
                 None
             } else {
-                // non-stacked pane, treat normally
+                // 非堆叠窗格，正常处理
                 Some(pas)
             }
         }?;
@@ -306,7 +306,7 @@ impl<'a> PaneResizer<'a> {
 fn constrain_spans(space: usize, spans: &[Span]) -> HashSet<kasuari::Constraint> {
     let mut constraints = HashSet::new();
 
-    // Calculating "flexible" space (space not consumed by fixed-size spans)
+    // 计算"灵活"空间（未被固定大小跨度消耗的空间）
     let new_flex_space = spans.iter().fold(space, |a, s| {
         if let Constraint::Fixed(sz) = s.size.constraint {
             a.saturating_sub(sz)
@@ -315,13 +315,13 @@ fn constrain_spans(space: usize, spans: &[Span]) -> HashSet<kasuari::Constraint>
         }
     });
 
-    // Spans must use all of the available space
+    // 跨度必须使用所有可用空间
     let full_size = spans
         .iter()
         .fold(Expression::from_constant(0.0), |acc, s| acc + s.size_var);
     constraints.insert(full_size.clone() | EQ(Strength::REQUIRED) | space as f64);
 
-    // Try to maintain ratios and lock non-flexible sizes
+    // 尝试保持比例并锁定非灵活大小
     for span in spans {
         match span.size.constraint {
             Constraint::Fixed(s) => {

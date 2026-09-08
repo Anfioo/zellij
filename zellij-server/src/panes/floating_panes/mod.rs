@@ -235,13 +235,13 @@ impl FloatingPanes {
                 Ok(removed_pane)
             });
 
-        // update the desired_pane_positions to relate to the new pane
+        // 更新 desired_pane_positions 以关联到新窗格
         if let Some(desired_pane_position) = self.desired_pane_positions.remove(&pane_id) {
             self.desired_pane_positions
                 .insert(with_pane_id, desired_pane_position);
         }
 
-        // move clients from the previously active pane to the new pane we just inserted
+        // 将客户端从先前活动的窗格移动到我们刚插入的新窗格
         self.move_clients_between_panes(pane_id, with_pane_id);
         let _ = self.set_pane_frames();
         removed_pane
@@ -297,9 +297,9 @@ impl FloatingPanes {
         self.z_indices.iter().position(|id| id == &pane_id)
     }
     pub fn active_pane_id_or_focused_pane_id(&self, client_id: Option<ClientId>) -> Option<PaneId> {
-        // returns the focused pane of any client_id - should be safe because the way things are
-        // set up at the time of writing, all clients are focused on the same floating pane due to
-        // z_index issues
+        // 返回任何 client_id 的聚焦窗格 - 应该是安全的，因为在编写时
+        // 事物的设置方式，所有客户端都聚焦在同一个浮动窗格上，这是由于
+        // z_index 问题
         client_id
             .and_then(|client_id| self.active_panes.get(&client_id).copied())
             .or_else(|| self.panes.keys().next().copied())
@@ -461,7 +461,7 @@ impl FloatingPanes {
                     .with_context(|| err_context(&pane.pid()))?;
                 continue;
             }
-            // floating panes should always have a frame unless explicitly set otherwise
+            // 浮动窗格应始终有边框，除非明确设置为否则
             if !pane.borderless() {
                 pane.set_frame(true);
                 pane.set_content_offset(Offset::frame(1));
@@ -487,7 +487,7 @@ impl FloatingPanes {
         let mut connected_clients: HashSet<ClientId> =
             { self.connected_clients.borrow().iter().copied().collect() };
 
-        // If we have a client_id_override (for watcher rendering), add it temporarily
+        // 如果我们有 client_id_override（用于观察者渲染），临时添加它
         if let Some(override_id) = client_id_override {
             connected_clients.insert(override_id);
         }
@@ -632,8 +632,8 @@ impl FloatingPanes {
                     client_mode,
                     &mut self.window_title,
                 );
-                // this is done for panes that don't have their own cursor (eg. panes of
-                // another user)
+                // 这是为没有自己光标的窗格做的（例如
+                // 另一个用户的窗格）
                 pane_contents_and_ui
                     .render_fake_cursor_if_needed(*client_id)
                     .with_context(err_context)?;
@@ -693,7 +693,7 @@ impl FloatingPanes {
         _os_api: &mut Box<dyn ServerOsApi>,
         strategy: &ResizeStrategy,
     ) -> Result<bool> {
-        // true => successfully resized
+        // true => 成功调整大小
         if let Some(active_floating_pane_id) = self.active_panes.get(&client_id) {
             return self.resize_pane_with_id(*strategy, *active_floating_pane_id);
         }
@@ -704,7 +704,7 @@ impl FloatingPanes {
         strategy: ResizeStrategy,
         pane_id: PaneId,
     ) -> Result<bool> {
-        // true => successfully resized
+        // true => 成功调整大小
         let err_context = || format!("Failed to resize pane with id: {:?}", pane_id);
         let display_area = *self.display_area.borrow();
         let viewport = *self.viewport.borrow();
@@ -746,7 +746,7 @@ impl FloatingPanes {
             viewport,
         );
 
-        // Apply each strategy
+        // 应用每个策略
         for strategy in strategies {
             floating_pane_grid
                 .change_pane_size(&pane_id, strategy, change_by)
@@ -778,7 +778,7 @@ impl FloatingPanes {
         connected_clients: &HashSet<ClientId>,
         direction: &Direction,
     ) -> Result<bool> {
-        // true => successfully moved
+        // true => 成功移动
         let _err_context = || {
             format!("failed to move focus of floating pane {direction:?} for client {client_id}")
         };
@@ -814,16 +814,16 @@ impl FloatingPanes {
             };
             match next_index {
                 Some(p) => {
-                    // render previously active pane so that its frame does not remain actively
-                    // colored
+                    // 渲染先前活动的窗格，使其边框不会保持活动
+                    // 着色
                     let Some(previously_active_pane) = self.get_active_pane_mut(client_id) else {
                         log::error!("Failed to get active pane");
                         return Ok(false);
                     };
 
                     previously_active_pane.set_should_render(true);
-                    // we render the full viewport to remove any ui elements that might have been
-                    // there before (eg. another user's cursor)
+                    // 我们渲染完整视口以移除可能之前存在的任何 ui 元素
+                    // （例如另一个用户的光标）
                     previously_active_pane.render_full_viewport();
 
                     let Some(next_active_pane) = self.get_pane_mut(p) else {
@@ -831,11 +831,11 @@ impl FloatingPanes {
                         return Ok(false);
                     };
                     next_active_pane.set_should_render(true);
-                    // we render the full viewport to remove any ui elements that might have been
-                    // there before (eg. another user's cursor)
+                    // 我们渲染完整视口以移除可能之前存在的任何 ui 元素
+                    // （例如另一个用户的光标）
                     next_active_pane.render_full_viewport();
 
-                    // move all clients
+                    // 移动所有客户端
                     let connected_clients: Vec<ClientId> =
                         connected_clients.iter().copied().collect();
                     for client_id in connected_clients {
@@ -861,7 +861,7 @@ impl FloatingPanes {
                 self.set_force_render();
             },
             None => {
-                // TODO: can this happen?
+                // TODO: 这会发生吗？
                 self.active_panes.clear(&mut self.panes);
                 self.z_indices.clear();
             },
@@ -1126,8 +1126,8 @@ impl FloatingPanes {
             pane.set_geom(pane_geom);
             pane.set_should_render(true);
 
-            // we do this in case this moves the pane under another pane so that the pane user's
-            // are focused on will always be on top
+            // 我们这样做是为了防止这将窗格移动到另一个窗格下方，以便窗格用户的
+            // 聚焦的窗格将始终在顶部
             let is_focused = self.active_panes.pane_id_is_focused(&pane_id);
             if is_focused {
                 self.z_indices.retain(|p_id| *p_id != pane_id);
@@ -1147,7 +1147,7 @@ impl FloatingPanes {
             .map(|(cid, pid)| (*cid, *pid))
             .collect();
 
-        // find the most recently active pane
+        // 找到最近活动的窗格
         let mut next_active_pane_candidates: Vec<(&PaneId, &Box<dyn Pane>)> = self
             .panes
             .iter()
@@ -1379,14 +1379,14 @@ impl FloatingPanes {
     ) -> Result<Option<PaneId>> {
         let _err_context = || format!("failed to determine floating pane at point {point:?}");
 
-        // TODO: better - loop through z-indices and check each one if it contains the point
+        // TODO: 更好 - 遍历 z-indices 并检查每个是否包含该点
         let mut panes: Vec<_> = if search_selectable {
             self.panes.iter().filter(|(_, p)| p.selectable()).collect()
         } else {
             self.panes.iter().collect()
         };
         panes.sort_by(|(a_id, _a_pane), (b_id, _b_pane)| {
-            // TODO: continue
+            // TODO: 继续
             Ord::cmp(
                 &self
                     .z_indices
@@ -1425,7 +1425,7 @@ impl FloatingPanes {
                 .collect()
         };
         panes.sort_by(|(a_id, _a_pane), (b_id, _b_pane)| {
-            // TODO: continue
+            // TODO: 继续
             Ord::cmp(
                 &self
                     .z_indices
@@ -1482,7 +1482,7 @@ impl FloatingPanes {
             .map(|(pane_id, initial_position, _)| (pane_id, initial_position))
         {
             if last_pane_id == pane_id {
-                // preserve initial_position
+                // 保留 initial_position
                 self.pane_being_moved_with_mouse = Some((pane_id, initial_position, last_position));
                 return;
             }
@@ -1493,7 +1493,7 @@ impl FloatingPanes {
         self.pane_being_moved_with_mouse.is_some()
     }
     pub fn move_pane_to_position(&mut self, click_position: &Position) -> bool {
-        // true => changed position
+        // true => 位置已更改
         let display_area = *self.display_area.borrow();
         let viewport = *self.viewport.borrow();
         let Some((pane_id, _initial_position, previous_position)) =
@@ -1520,14 +1520,14 @@ impl FloatingPanes {
         true
     }
     pub fn move_pane_with_mouse(&mut self, position: Position, search_selectable: bool) -> bool {
-        // true => handled, false => not handled (eg. no pane at this position)
+        // true => 已处理，false => 未处理（例如此位置没有窗格）
         if *self.fullscreen_covers_ui.borrow() || self.fullscreen_pane_id.is_some() {
             return false;
         }
         let show_panes = self.show_panes;
         if self.pane_being_moved_with_mouse.is_some() {
             if self.move_pane_to_position(&position) {
-                // pane was moved to a new position
+                // 窗格已移动到新位置
                 self.set_force_render();
                 return true;
             }
@@ -1546,9 +1546,9 @@ impl FloatingPanes {
         false
     }
     pub fn stop_moving_pane_with_mouse(&mut self, position: Position) -> bool {
-        // bool -> this
-        // pane was never
-        // moved (initial
+        // bool -> 这个
+        // 窗格从未
+        // 被移动（initial
         // position ==
         // last_position)
         let mut never_moved = false;
@@ -1597,7 +1597,7 @@ impl FloatingPanes {
     }
     pub fn reapply_pane_focus(&mut self) {
         if let Some(focused_pane) = self.first_active_floating_pane_id() {
-            // floating pane focus is the same for all clients
+            // 浮动窗格焦点对所有客户端都是相同的
             self.focus_pane_for_all_clients(focused_pane);
         }
     }

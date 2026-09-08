@@ -47,9 +47,9 @@ use std::{
 
 fn pane_content_offset(position_and_size: &PaneGeom, viewport: &Viewport) -> (usize, usize) {
     // (columns_offset, rows_offset)
-    // if the pane is not on the bottom or right edge on the screen, we need to reserve one space
-    // from its content to leave room for the boundary between it and the next pane (if it doesn't
-    // draw its own frame)
+    // 如果窗格不在屏幕的底部或右边缘，我们需要从其内容中预留一个空间
+    // 以便为它和下一个窗格之间的边界留出空间（如果它不
+    // 绘制自己的边框）
     let columns_offset = if position_and_size.x + position_and_size.cols.as_usize() < viewport.cols
     {
         1
@@ -155,14 +155,14 @@ impl TiledPanes {
         client_id: ClientId,
     ) -> Option<Box<dyn Pane>> {
         let pane_id = pane.pid();
-        // remove the currently active pane
+        // 移除当前活动的窗格
         let previously_active_pane = self
             .active_panes
             .get(&client_id)
             .copied()
             .and_then(|active_pane_id| self.replace_pane(active_pane_id, pane));
 
-        // move clients from the previously active pane to the new pane we just inserted
+        // 将客户端从先前活动的窗格移动到我们刚插入的新窗格
         if let Some(previously_active_pane) = previously_active_pane.as_ref() {
             let previously_active_pane_id = previously_active_pane.pid();
             self.move_clients_between_panes(previously_active_pane_id, pane_id);
@@ -188,17 +188,17 @@ impl TiledPanes {
                 None => with_pane.reset_size_and_position_override(),
             };
             self.panes.insert(with_pane_id, with_pane);
-            // The replacement inherits the removed pane's geom_override (above);
-            // if the removed pane was the fullscreen pane, retarget the fullscreen
-            // bookkeeping so unset_fullscreen can later reset the override on the
-            // pane that actually carries it.
+            // 替换项继承被移除窗格的 geom_override（如上）；
+            // 如果被移除的窗格是全屏窗格，重新定位全屏
+            // 记录，以便 unset_fullscreen 稍后可以在实际携带它的
+            // 窗格上重置覆盖。
             if self.fullscreen_is_active == Some(pane_id) {
                 self.fullscreen_is_active = Some(with_pane_id);
             }
             removed_pane
         });
 
-        // move clients from the previously active pane to the new pane we just inserted
+        // 将客户端从先前活动的窗格移动到我们刚插入的新窗格
         self.move_clients_between_panes(pane_id, with_pane_id);
         self.reapply_pane_frames();
         removed_pane
@@ -252,8 +252,8 @@ impl TiledPanes {
     }
 
     pub fn assign_geom_for_pane_with_run(&mut self, run: Option<Run>) {
-        // here we're removing the first pane we find with this run instruction and re-adding it so
-        // that it gets a new geom similar to how it would when being added to the tab originally
+        // 这里我们移除找到的第一个带有此运行指令的窗格并重新添加它，以便
+        // 它获得一个新的 geom，类似于最初添加到标签页时的方式
         if let Some(pane_id) = self
             .panes
             .iter()
@@ -267,8 +267,8 @@ impl TiledPanes {
             .copied()
         {
             if let Some(mut pane) = self.panes.remove(&pane_id) {
-                // we must strip the logical position here because it's likely a straggler from
-                // this pane's previous tab and would cause chaos if considered in the new one
+                // 我们必须在这里剥离逻辑位置，因为它很可能是
+                // 这个窗格先前标签页的遗留物，如果在新标签页中被考虑会造成混乱
                 let mut pane_geom = pane.position_and_size();
                 pane_geom.logical_position = None;
                 pane.set_geom(pane_geom);
@@ -334,7 +334,7 @@ impl TiledPanes {
             pane_grid.find_room_for_new_pane(cursor_height_width_ratio);
         match pane_id_and_split_direction {
             Some((pane_id_to_split, split_direction)) => {
-                // this unwrap is safe because floating panes should not be visible if there are no floating panes
+                // 这个 unwrap 是安全的，因为如果没有浮动窗格，浮动窗格不应该可见
                 let pane_to_split = self.panes.get_mut(&pane_id_to_split).unwrap();
                 let size_of_both_panes = pane_to_split.position_and_size();
                 if let Some((first_geom, second_geom)) = split(split_direction, &size_of_both_panes)
@@ -348,8 +348,8 @@ impl TiledPanes {
                 }
             },
             None => {
-                // we couldn't add the pane normally, let's see if there's room in one of the
-                // stacks...
+                // 我们无法正常添加窗格，让我们看看其中一个
+                // 堆叠中是否有空间...
                 match pane_grid.make_room_in_stack_for_pane() {
                     Ok(new_pane_geom) => {
                         pane.set_geom(new_pane_geom);
@@ -386,7 +386,7 @@ impl TiledPanes {
             .map(|p| p.is_stacked())
             .unwrap_or(false)
         {
-            // try to add the pane to the stack of the active pane
+            // 尝试将窗格添加到活动窗格的堆叠中
             match pane_grid.make_room_in_stack_of_pane_id_for_pane(active_pane_id) {
                 Ok(new_pane_geom) => {
                     pane.set_geom(new_pane_geom);
@@ -404,7 +404,7 @@ impl TiledPanes {
             pane_grid.split_pane(active_pane_id, cursor_height_width_ratio);
         match pane_id_and_split_direction {
             Some((pane_id_to_split, split_direction)) => {
-                // this unwrap is safe because floating panes should not be visible if there are no floating panes
+                // 这个 unwrap 是安全的，因为如果没有浮动窗格，浮动窗格不应该可见
                 let pane_to_split = self.panes.get_mut(&pane_id_to_split).unwrap();
                 let size_of_both_panes = pane_to_split.position_and_size();
                 if let Some((first_geom, second_geom)) = split(split_direction, &size_of_both_panes)
@@ -418,8 +418,8 @@ impl TiledPanes {
                 }
             },
             None => {
-                // we couldn't add the pane normally, let's see if there's room in one of the
-                // stacks...
+                // 我们无法正常添加窗格，让我们看看其中一个
+                // 堆叠中是否有空间...
                 let _ = pane_grid.make_pane_stacked(active_pane_id);
                 match pane_grid.make_room_in_stack_of_pane_id_for_pane(active_pane_id) {
                     Ok(new_pane_geom) => {
@@ -537,11 +537,11 @@ impl TiledPanes {
             .values()
             .filter_map(|p| {
                 let geom = p.position_and_size();
-                // a borderless plugin pane is part of the ui (eg. the tab-bar or the status-bar)
-                // and so is offset out of the viewport just like a non-selectable pane - we cannot
-                // rely on selectability alone here, because a plugin only reports it once it has
-                // loaded, and until then we'd be calculating (and sending to the pty) wrong sizes
-                // for the other panes in this tab
+                // 无边框插件窗格是 ui 的一部分（例如标签栏或状态栏）
+                // 因此像不可选择的窗格一样被偏移出视口 - 我们不能
+                // 仅在这里依赖可选择性，因为插件只在加载后才报告它，
+                // 在那之前我们会计算（并发送到 pty）错误的大小
+                // 用于此标签页中的其他窗格
                 let is_ui_pane =
                     !p.selectable() || (p.borderless() && matches!(p.pid(), PaneId::Plugin(_)));
                 if is_ui_pane && is_inside_viewport(&self.viewport.borrow(), p) {
@@ -604,7 +604,7 @@ impl TiledPanes {
         self.set_pane_frames(self.pane_frame_style);
     }
     pub fn reapply_pane_frames(&mut self) {
-        // same as set_pane_frames except it reapplies the current situation
+        // 与 set_pane_frames 相同，只是它重新应用当前情况
         self.set_pane_frames(self.pane_frame_style);
     }
     pub fn set_pane_frames(&mut self, pane_frame_style: PaneFrameStyle) {
@@ -976,7 +976,7 @@ impl TiledPanes {
         self.reapply_pane_frames();
     }
     pub fn expand_pane_in_stack(&mut self, pane_id: PaneId) -> Vec<PaneId> {
-        // returns all pane ids in stack
+        // 返回堆叠中的所有窗格 id
         match StackedPanes::new_from_btreemap(&mut self.panes, &self.panes_to_hide)
             .expand_pane(&pane_id)
         {
@@ -1024,8 +1024,8 @@ impl TiledPanes {
             return;
         }
         if self.panes_to_hide.contains(&pane_id) {
-            // this means there is a fullscreen pane that is not the current pane, let's unset it
-            // before changing focus
+            // 这意味着有一个全屏窗格不是当前窗格，让我们在改变焦点之前
+            // 取消设置它
             self.unset_fullscreen();
         }
         if let Some(stack_id) = self
@@ -1041,7 +1041,7 @@ impl TiledPanes {
         self.active_panes
             .insert(client_id, pane_id, &mut self.panes);
         if self.session_is_mirrored {
-            // move all clients
+            // 移动所有客户端
             let connected_clients: Vec<ClientId> =
                 self.connected_clients.borrow().iter().copied().collect();
             for client_id in connected_clients {
@@ -1153,7 +1153,7 @@ impl TiledPanes {
         let mut connected_clients: HashSet<ClientId> =
             { self.connected_clients.borrow().iter().copied().collect() };
 
-        // If we have a client_id_override (for watcher rendering), add it temporarily
+        // 如果我们有 client_id_override（用于观察者渲染），临时添加它
         if let Some(override_id) = client_id_override {
             connected_clients.insert(override_id);
         }
@@ -1346,8 +1346,8 @@ impl TiledPanes {
                         client_mode,
                         &mut self.window_title,
                     );
-                    // this is done for panes that don't have their own cursor (eg. panes of
-                    // another user)
+                    // 这是为没有自己光标的窗格做的（例如
+                    // 另一个用户的窗格）
                     pane_contents_and_ui
                         .render_fake_cursor_if_needed(*client_id)
                         .with_context(err_context)?;
@@ -1384,7 +1384,7 @@ impl TiledPanes {
                 }
             }
         }
-        // render boundaries if needed
+        // 如有需要渲染边界
         for (client_id, boundaries) in client_id_to_boundaries {
             let mut boundaries_to_render = boundaries
                 .render(self.client_id_to_boundaries.get(&client_id))
@@ -1398,7 +1398,7 @@ impl TiledPanes {
                 .with_context(err_context)?;
         }
         if floating_panes_are_visible {
-            // we do this here so that when they are toggled off, we will make sure to re-render the title
+            // 我们在这里这样做，以便当它们被关闭时，我们将确保重新渲染标题
             self.window_title = None;
         }
         Ok(())
@@ -1551,7 +1551,7 @@ impl TiledPanes {
         Ok(())
     }
     fn resize_or_stack_pane_up(&mut self, pane_id: PaneId, resize_percent: (f64, f64)) -> bool {
-        // true - successfully resized
+        // true - 成功调整大小
         let mut strategy = ResizeStrategy::new(Resize::Increase, Some(Direction::Up));
         strategy.invert_on_boundaries = false;
         let successfully_resized_up =
@@ -1581,7 +1581,7 @@ impl TiledPanes {
         false
     }
     fn resize_or_stack_pane_down(&mut self, pane_id: PaneId, resize_percent: (f64, f64)) -> bool {
-        // true - successfully resized
+        // true - 成功调整大小
         let mut strategy = ResizeStrategy::new(Resize::Increase, Some(Direction::Down));
         strategy.invert_on_boundaries = false;
         let successfully_resized_up =
@@ -1611,7 +1611,7 @@ impl TiledPanes {
         false
     }
     fn resize_or_stack_pane_left(&mut self, pane_id: PaneId, resize_percent: (f64, f64)) -> bool {
-        // true - successfully resized
+        // true - 成功调整大小
         let mut strategy = ResizeStrategy::new(Resize::Increase, Some(Direction::Left));
         strategy.invert_on_boundaries = false;
         let successfully_resized_up =
@@ -1641,7 +1641,7 @@ impl TiledPanes {
         false
     }
     fn resize_or_stack_pane_right(&mut self, pane_id: PaneId, resize_percent: (f64, f64)) -> bool {
-        // true - successfully resized
+        // true - 成功调整大小
         let mut strategy = ResizeStrategy::new(Resize::Increase, Some(Direction::Right));
         strategy.invert_on_boundaries = false;
         let successfully_resized_up =
@@ -1742,7 +1742,7 @@ impl TiledPanes {
         &mut self,
         pane_id: PaneId,
         strategy: &ResizeStrategy,
-        // override as rarely as possible to maintain ux consistency
+        // 尽可能少地覆盖以保持 ux 一致性
         resize_percent_override: Option<(f64, f64)>,
     ) -> Result<bool> {
         let resize_percent = resize_percent_override.unwrap_or((30.0, 30.0));
@@ -1817,7 +1817,7 @@ impl TiledPanes {
                         return Ok(true);
                     }
                 }
-                // normal resize if we can't do anything...
+                // 如果我们无法做任何事情则正常调整大小...
                 match self.resize_pane_with_id(*strategy, pane_id, None) {
                     Ok(size_changed) => {
                         if size_changed {
@@ -1884,8 +1884,8 @@ impl TiledPanes {
                     self.update_tombstones_before_decrease(pane_id, current_pane_state);
                     Ok(true)
                 } else {
-                    // normal resize if we were not inside a stack
-                    // first try with our custom resize_percent
+                    // 如果我们不在堆叠中则正常调整大小
+                    // 首先尝试我们的自定义 resize_percent
                     match self.resize_pane_with_id(*strategy, pane_id, Some(resize_percent)) {
                         Ok(pane_size_changed) => {
                             if pane_size_changed {
@@ -1893,7 +1893,7 @@ impl TiledPanes {
                                 self.reapply_pane_frames();
                                 Ok(pane_size_changed)
                             } else {
-                                // if it doesn't work, try with the default resize percent
+                                // 如果不起作用，尝试默认的调整大小百分比
                                 match self.resize_pane_with_id(*strategy, pane_id, None) {
                                     Ok(pane_size_changed) => {
                                         if pane_size_changed {
@@ -1944,7 +1944,7 @@ impl TiledPanes {
             },
             Err(err) => match err.downcast_ref::<ZellijError>() {
                 Some(ZellijError::PaneSizeUnchanged) => {
-                    // try once more with double the resize percent, but let's keep it at that
+                    // 再试一次，使用双倍的调整大小百分比，但我们就到此为止
                     match pane_grid
                         .change_pane_size(
                             &pane_id,
@@ -1969,7 +1969,7 @@ impl TiledPanes {
         }
 
         for pane in self.panes.values_mut() {
-            // TODO: only for the panes whose width/height actually changed
+            // TODO: 仅针对宽度/高度实际改变的窗格
             resize_pty!(pane, self.os_api, self.senders, self.character_cell_size).non_fatal();
         }
         self.reset_boundaries();
@@ -2079,23 +2079,23 @@ impl TiledPanes {
         let previously_active_pane = self.panes.get_mut(&previously_active_pane_id).unwrap();
 
         previously_active_pane.set_should_render(true);
-        // we render the full viewport to remove any ui elements that might have been
-        // there before (eg. another user's cursor)
+        // 我们渲染完整视口以移除可能之前存在的任何 ui 元素
+        // （例如另一个用户的光标）
         previously_active_pane.render_full_viewport();
 
         let next_active_pane = self.panes.get_mut(&last_pane_id).unwrap();
         let stacked = next_active_pane.current_geom().stacked;
         next_active_pane.set_should_render(true);
-        // we render the full viewport to remove any ui elements that might have been
-        // there before (eg. another user's cursor)
+        // 我们渲染完整视口以移除可能之前存在的任何 ui 元素
+        // （例如另一个用户的光标）
         next_active_pane.render_full_viewport();
 
         self.focus_pane(last_pane_id, client_id);
         self.set_pane_active_at(last_pane_id);
         if let Some(stack_id) = stacked {
-            // we do this because a stack pane focus change also changes its
-            // geometry and we need to let the pty know about this (like in a
-            // normal size change)
+            // 我们这样做是因为堆叠窗格焦点改变也会改变其
+            // 几何形状，我们需要让 pty 知道这一点（就像在
+            // 正常大小改变中一样）
             self.focus_pane_for_all_clients_in_stack(last_pane_id, stack_id);
             self.reapply_pane_frames();
         }
@@ -2119,22 +2119,22 @@ impl TiledPanes {
             *self.viewport.borrow(),
         );
         let next_index = pane_grid.pane_id_on_edge(direction).unwrap();
-        // render previously active pane so that its frame does not remain actively
-        // colored
+        // 渲染先前活动的窗格，使其边框不会保持活动
+        // 着色
         let previously_active_pane = self
             .panes
             .get_mut(self.active_panes.get(&client_id).unwrap())
             .unwrap();
 
         previously_active_pane.set_should_render(true);
-        // we render the full viewport to remove any ui elements that might have been
-        // there before (eg. another user's cursor)
+        // 我们渲染完整视口以移除可能之前存在的任何 ui 元素
+        // （例如另一个用户的光标）
         previously_active_pane.render_full_viewport();
 
         let next_active_pane = self.panes.get_mut(&next_index).unwrap();
         next_active_pane.set_should_render(true);
-        // we render the full viewport to remove any ui elements that might have been
-        // there before (eg. another user's cursor)
+        // 我们渲染完整视口以移除可能之前存在的任何 ui 元素
+        // （例如另一个用户的光标）
         next_active_pane.render_full_viewport();
 
         self.focus_pane(next_index, client_id);
@@ -2190,22 +2190,22 @@ impl TiledPanes {
                 let next_index = pane_grid.next_selectable_pane_id_to_the_left(&active_pane_id);
                 match next_index {
                     Some(p) => {
-                        // render previously active pane so that its frame does not remain actively
-                        // colored
+                        // 渲染先前活动的窗格，使其边框不会保持活动
+                        // 着色
                         let previously_active_pane = self
                             .panes
                             .get_mut(self.active_panes.get(&client_id).unwrap())
                             .unwrap();
 
                         previously_active_pane.set_should_render(true);
-                        // we render the full viewport to remove any ui elements that might have been
-                        // there before (eg. another user's cursor)
+                        // 我们渲染完整视口以移除可能之前存在的任何 ui 元素
+                        // （例如另一个用户的光标）
                         previously_active_pane.render_full_viewport();
 
                         let next_active_pane = self.panes.get_mut(&p).unwrap();
                         next_active_pane.set_should_render(true);
-                        // we render the full viewport to remove any ui elements that might have been
-                        // there before (eg. another user's cursor)
+                        // 我们渲染完整视口以移除可能之前存在的任何 ui 元素
+                        // （例如另一个用户的光标）
                         next_active_pane.render_full_viewport();
 
                         self.focus_pane(p, client_id);
@@ -2233,31 +2233,31 @@ impl TiledPanes {
                     .or_else(|| pane_grid.progress_stack_down_if_in_stack(&active_pane_id));
                 match next_index {
                     Some(p) => {
-                        // render previously active pane so that its frame does not remain actively
-                        // colored
+                        // 渲染先前活动的窗格，使其边框不会保持活动
+                        // 着色
                         let previously_active_pane = self
                             .panes
                             .get_mut(self.active_panes.get(&client_id).unwrap())
                             .unwrap();
 
                         previously_active_pane.set_should_render(true);
-                        // we render the full viewport to remove any ui elements that might have been
-                        // there before (eg. another user's cursor)
+                        // 我们渲染完整视口以移除可能之前存在的任何 ui 元素
+                        // （例如另一个用户的光标）
                         previously_active_pane.render_full_viewport();
 
                         let next_active_pane = self.panes.get_mut(&p).unwrap();
                         let next_active_pane_stack_id = next_active_pane.current_geom().stacked;
                         next_active_pane.set_should_render(true);
-                        // we render the full viewport to remove any ui elements that might have been
-                        // there before (eg. another user's cursor)
+                        // 我们渲染完整视口以移除可能之前存在的任何 ui 元素
+                        // （例如另一个用户的光标）
                         next_active_pane.render_full_viewport();
 
                         self.focus_pane(p, client_id);
                         self.set_pane_active_at(p);
                         if let Some(stack_id) = next_active_pane_stack_id {
-                            // we do this because a stack pane focus change also changes its
-                            // geometry and we need to let the pty know about this (like in a
-                            // normal size change)
+                            // 我们这样做是因为堆叠窗格焦点改变也会改变其
+                            // 几何形状，我们需要让 pty 知道这一点（就像在
+                            // 正常大小改变中一样）
                             self.focus_pane_for_all_clients_in_stack(p, stack_id);
                             self.reapply_pane_frames();
                         }
@@ -2284,31 +2284,31 @@ impl TiledPanes {
                     .or_else(|| pane_grid.progress_stack_up_if_in_stack(&active_pane_id));
                 match next_index {
                     Some(p) => {
-                        // render previously active pane so that its frame does not remain actively
-                        // colored
+                        // 渲染先前活动的窗格，使其边框不会保持活动
+                        // 着色
                         let previously_active_pane = self
                             .panes
                             .get_mut(self.active_panes.get(&client_id).unwrap())
                             .unwrap();
 
                         previously_active_pane.set_should_render(true);
-                        // we render the full viewport to remove any ui elements that might have been
-                        // there before (eg. another user's cursor)
+                        // 我们渲染完整视口以移除可能之前存在的任何 ui 元素
+                        // （例如另一个用户的光标）
                         previously_active_pane.render_full_viewport();
 
                         let next_active_pane = self.panes.get_mut(&p).unwrap();
                         let next_active_pane_stack_id = next_active_pane.current_geom().stacked;
                         next_active_pane.set_should_render(true);
-                        // we render the full viewport to remove any ui elements that might have been
-                        // there before (eg. another user's cursor)
+                        // 我们渲染完整视口以移除可能之前存在的任何 ui 元素
+                        // （例如另一个用户的光标）
                         next_active_pane.render_full_viewport();
 
                         self.focus_pane(p, client_id);
                         self.set_pane_active_at(p);
                         if let Some(stack_id) = next_active_pane_stack_id {
-                            // we do this because a stack pane focus change also changes its
-                            // geometry and we need to let the pty know about this (like in a
-                            // normal size change)
+                            // 我们这样做是因为堆叠窗格焦点改变也会改变其
+                            // 几何形状，我们需要让 pty 知道这一点（就像在
+                            // 正常大小改变中一样）
                             self.focus_pane_for_all_clients_in_stack(p, stack_id);
                             self.reapply_pane_frames();
                         }
@@ -2333,22 +2333,22 @@ impl TiledPanes {
                 let next_index = pane_grid.next_selectable_pane_id_to_the_right(&active_pane_id);
                 match next_index {
                     Some(p) => {
-                        // render previously active pane so that its frame does not remain actively
-                        // colored
+                        // 渲染先前活动的窗格，使其边框不会保持活动
+                        // 着色
                         let previously_active_pane = self
                             .panes
                             .get_mut(self.active_panes.get(&client_id).unwrap())
                             .unwrap();
 
                         previously_active_pane.set_should_render(true);
-                        // we render the full viewport to remove any ui elements that might have been
-                        // there before (eg. another user's cursor)
+                        // 我们渲染完整视口以移除可能之前存在的任何 ui 元素
+                        // （例如另一个用户的光标）
                         previously_active_pane.render_full_viewport();
 
                         let next_active_pane = self.panes.get_mut(&p).unwrap();
                         next_active_pane.set_should_render(true);
-                        // we render the full viewport to remove any ui elements that might have been
-                        // there before (eg. another user's cursor)
+                        // 我们渲染完整视口以移除可能之前存在的任何 ui 元素
+                        // （例如另一个用户的光标）
                         next_active_pane.render_full_viewport();
 
                         self.focus_pane(p, client_id);
@@ -2365,9 +2365,9 @@ impl TiledPanes {
     pub fn switch_active_pane_with(&mut self, pane_id: PaneId) {
         if let Some(active_pane_id) = self.first_active_pane_id() {
             if let PaneId::Plugin(_) = active_pane_id {
-                // we do not implicitly change the location of plugin panes
-                // TODO: we might want to make this configurable through a layout property or a
-                // plugin API
+                // 我们不隐式改变插件窗格的位置
+                // TODO: 我们可能希望通过布局属性或
+                // 插件 API 使其可配置
                 return;
             }
             let current_position = self.panes.get(&active_pane_id).unwrap();
@@ -2691,7 +2691,7 @@ impl TiledPanes {
             return;
         }
 
-        // find the most recently active pane
+        // 找到最近活动的窗格
         let mut next_active_pane_candidates: Vec<(&PaneId, &Box<dyn Pane>)> = self
             .panes
             .iter()
@@ -2745,7 +2745,7 @@ impl TiledPanes {
             *self.viewport.borrow(),
         );
         if pane_grid.fill_space_over_pane(pane_id) {
-            // successfully filled space over pane
+            // 成功填充了窗格上方的空间
             let closed_pane = self.panes.remove(&pane_id);
             self.move_clients_out_of_pane(pane_id);
             self.set_pane_frames(self.pane_frame_style);
@@ -2757,8 +2757,8 @@ impl TiledPanes {
                 .map(|p| p.selectable())
                 .unwrap_or(false)
             {
-                // this is a bit of a roundabout way to say: this is the last pane and so the tab
-                // should be destroyed
+                // 这有点迂回地说：这是最后一个窗格，因此标签页
+                // 应该被销毁
                 self.active_panes.clear(&mut self.panes);
             }
             closed_pane

@@ -52,16 +52,16 @@ impl HyperlinkTracker {
         link_handler: &mut LinkHandler,
     ) {
         if ch == ' ' && cursor.x == 0 {
-            // skip carriage return
+            // 跳过回车
             return;
         }
 
         let current_pos = HyperlinkPosition::from_cursor(cursor);
 
-        // Check if cursor moved non-contiguously
+        // 检查光标是否非连续移动
         if self.should_reset_due_to_cursor_jump(&current_pos) {
             if self.is_currently_tracking() {
-                // Finalize the current URL before resetting
+                // 在重置之前完成当前 URL
                 self.finalize_and_apply(viewport, lines_above, link_handler);
             } else {
                 self.clear();
@@ -87,9 +87,9 @@ impl HyperlinkTracker {
     }
 
     pub fn offset_cursor_lines_in_range(&mut self, top: isize, bottom: isize, offset: isize) {
-        // Offset only positions inside the given row range (a scroll region),
-        // used when a scroll region that does not start at the top of the
-        // screen scrolls: rows outside it do not move
+        // 仅偏移给定行范围（滚动区域）内的位置，
+        // 用于当一个不从屏幕顶部开始的滚动区域滚动时：
+        // 其外的行不会移动
         for pos in &mut self.cursor_positions {
             if pos.y >= top && pos.y <= bottom {
                 pos.y -= offset;
@@ -108,7 +108,7 @@ impl HyperlinkTracker {
     }
 
     pub fn offset_cursor_lines(&mut self, offset: isize) {
-        // Offset all stored cursor positions
+        // 偏移所有存储的光标位置
         for pos in &mut self.cursor_positions {
             pos.y -= offset;
         }
@@ -124,13 +124,13 @@ impl HyperlinkTracker {
 
     fn should_reset_due_to_cursor_jump(&self, current_pos: &HyperlinkPosition) -> bool {
         if let Some(last_pos) = &self.last_cursor {
-            // Check if cursor moved non-contiguously
+            // 检查光标是否非连续移动
             let is_contiguous =
-                // Same line, next column
+                // 同一行，下一列
                 (current_pos.y == last_pos.y && current_pos.x == last_pos.x + 1) ||
-                // Next line, first column (line wrap)
+                // 下一行，第一列（换行）
                 (current_pos.y == last_pos.y + 1 && current_pos.x == 0) ||
-                // Same position (overwrite)
+                // 同一位置（覆盖）
                 (current_pos.y == last_pos.y && current_pos.x == last_pos.x);
 
             !is_contiguous
@@ -174,15 +174,15 @@ impl HyperlinkTracker {
         let trimmed_len = trimmed_url.chars().count();
 
         if self.is_valid_url(&trimmed_url) {
-            // Calculate how many characters we trimmed
+            // 计算我们裁剪了多少个字符
             let chars_trimmed = original_len.saturating_sub(trimmed_len);
 
-            // Find the end position by walking back from the last position
+            // 通过从最后一个位置往回走来找到结束位置
             let end_position = if chars_trimmed > 0 && trimmed_len > 0 {
-                // Use the position of the last character that's actually in the trimmed URL
+                // 使用实际在裁剪后 URL 中的最后一个字符的位置
                 self.cursor_positions.get(trimmed_len.saturating_sub(1))
             } else {
-                // No trimming occurred, use the last position
+                // 没有发生裁剪，使用最后一个位置
                 self.cursor_positions.last()
             };
             let Some(end_position) = end_position.copied() else {
@@ -215,14 +215,14 @@ impl HyperlinkTracker {
 
         for y in start_pos.y..=end_pos.y {
             let row = if y < 0 {
-                // Row is in lines_above
+                // 行在 lines_above 中
                 let lines_above_index = (lines_above.len() as isize + y) as usize;
                 lines_above.get_mut(lines_above_index)
             } else if (y as usize) < viewport.len() {
-                // Row is in viewport
+                // 行在视口中
                 viewport.get_mut(y as usize)
             } else {
-                // Row is beyond bounds, skip
+                // 行超出边界，跳过
                 None
             };
 
@@ -238,7 +238,7 @@ impl HyperlinkTracker {
                     row.width()
                 };
 
-                // Convert width-based positions to character indices
+                // 将基于宽度的位置转换为字符索引
                 let start_char_index = row.absolute_character_index(start_x);
                 let end_char_index = row.absolute_character_index(end_x.min(row.width()));
 
@@ -248,13 +248,13 @@ impl HyperlinkTracker {
                     if let Some(character) = row.columns.get_mut(char_index) {
                         character.styles.update(|styles| {
                             if y == start_pos.y && char_index == start_char_index {
-                                // First character gets the start anchor
+                                // 第一个字符获取起始锚点
                                 styles.link_anchor = Some(link_anchor_start.clone());
                             } else if y == end_pos.y && char_index == end_char_index {
-                                // Last character gets the end anchor
+                                // 最后一个字符获取结束锚点
                                 styles.link_anchor = Some(LinkAnchor::End);
                             } else {
-                                // Middle characters get the same start anchor
+                                // 中间字符获取相同的起始锚点
                                 styles.link_anchor = Some(link_anchor_start.clone());
                             }
                         });
@@ -307,7 +307,7 @@ impl HyperlinkTracker {
         self.buffer.clear();
         self.cursor_positions.clear();
         self.start_position = None;
-        // Don't clear last_cursor here - we need it for jump detection
+        // 不要在这里清除 last_cursor——我们需要它来进行跳转检测
     }
 }
 
