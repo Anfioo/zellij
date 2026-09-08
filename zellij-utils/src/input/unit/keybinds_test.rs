@@ -179,7 +179,7 @@ fn can_override_keybindings() {
 #[test]
 fn can_add_to_default_keybindings() {
     // this test just makes sure keybindings defined in a custom config are added to different
-    // keybindings defined in the default config
+    // 默认配置中定义的快捷键绑定
     let default_config_contents = r#"
         keybinds {
             pane {

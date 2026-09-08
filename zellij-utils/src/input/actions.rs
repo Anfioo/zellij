@@ -141,10 +141,10 @@ impl FromStr for SearchOption {
     }
 }
 
-// As these actions are bound to the default config, please
-// do take care when refactoring - or renaming.
-// They might need to be adjusted in the default config
-// as well `../../assets/config/default.yaml`
+// 由于这些操作绑定到默认配置，请
+// 重构或重命名时请小心。
+// 它们可能需要在默认配置中调整
+// 以及 `../../assets/config/default.yaml`
 /// Actions that can be bound to keys.
 #[derive(
     Clone,
@@ -422,7 +422,7 @@ pub enum Action {
     SwitchSession {
         name: String,
         tab_position: Option<usize>,
-        pane_id: Option<(u32, bool)>, // (id, is_plugin)
+        pane_id: Option<(u32, bool)>, //（id, is_plugin）
         layout: Option<LayoutInfo>,
         cwd: Option<PathBuf>,
     },
@@ -627,7 +627,7 @@ pub enum Action {
     },
     TogglePaneInGroup,
     ToggleGroupMarking,
-    // Pane-targeting CLI-only variants
+    // 以窗格为目标的仅 CLI 变体
     ScrollUpByPaneId {
         pane_id: PaneId,
     },
@@ -696,7 +696,7 @@ pub enum Action {
     FocusPaneByPaneId {
         pane_id: PaneId,
     },
-    // Tab-targeting CLI-only variants
+    // 以标签页为目标的仅 CLI 变体
     UndoRenameTabByTabId {
         id: u64,
     },
@@ -1131,8 +1131,8 @@ impl Action {
                     None => None,
                 };
                 let current_dir = get_current_dir();
-                // cwd should only be specified in a plugin alias if it was explicitly given to us,
-                // otherwise the current_dir might override a cwd defined in the alias itself
+                // cwd 只应在明确提供给我们时才在插件别名中指定，
+                // 否则 current_dir 可能会覆盖 alias 本身定义的 cwd
                 let alias_cwd = cwd.clone().map(|cwd| current_dir.join(cwd));
                 let cwd = cwd
                     .map(|cwd| current_dir.join(cwd))
@@ -1149,7 +1149,7 @@ impl Action {
                     }
                 });
                 if blocking || unblock_condition.is_some() {
-                    // For blocking panes, we don't support plugins
+                    // 对于阻塞窗格，我们不支持插件
                     if plugin.is_some() {
                         return Err("Blocking panes do not support plugin variants".to_string());
                     }
@@ -1246,14 +1246,14 @@ impl Action {
                             tab_id,
                         }])
                     } else {
-                        // it is intentional that a new tiled plugin pane cannot include a
-                        // direction
+                        // 新的平铺插件窗格不能包含
+                        // 方向
                         // this is because the cli client opening a tiled plugin pane is a
-                        // different client than the one opening the pane, and this can potentially
-                        // create very confusing races if the client changes focus while the plugin
-                        // is being loaded
+                        // 与打开窗格的客户端不同的客户端，这可能会
+                        // 如果客户端在插件加载时改变焦点，会造成非常混乱的竞态
+                        // 正在加载
                         // this is not the case with terminal panes for historical reasons of
-                        // backwards compatibility to a time before we had auto layouts
+                        // 向后兼容到我们有自动布局之前的时代
                         Ok(vec![Action::NewTiledPluginPane {
                             plugin,
                             pane_name: name,
@@ -1511,7 +1511,7 @@ impl Action {
                     .map(|cwd| current_dir.join(cwd))
                     .or_else(|| Some(current_dir.clone()));
 
-                // Map CLI flags to UnblockCondition
+                // 将 CLI 标志映射到 UnblockCondition
                 let first_pane_unblock_condition = if block_until_exit_success {
                     Some(UnblockCondition::OnExitSuccess)
                 } else if block_until_exit_failure {
@@ -1767,12 +1767,12 @@ impl Action {
                 retain_existing_plugin_panes,
                 apply_only_to_active_tab,
             } => {
-                // Determine layout_dir: CLI arg > config > default
+                // 确定 layout_dir：CLI 参数 > 配置 > 默认
                 let layout_dir = layout_dir
                     .or_else(|| config.and_then(|c| c.options.layout_dir))
                     .or_else(|| get_layout_dir(find_default_config_dir()));
 
-                // Load layout from string, URL, or file path
+                // 从字符串、URL 或文件路径加载布局
                 let layout_source_name;
                 let (path_to_raw_layout, raw_layout, swap_layouts) = if let Some(raw) =
                     layout_string
@@ -1807,7 +1807,7 @@ impl Action {
                     return Err("Either layout or layout-string must be provided".to_string());
                 };
 
-                // Parse KDL layout
+                // 解析 KDL 布局
                 let layout = Layout::from_str(
                     &raw_layout,
                     path_to_raw_layout,
@@ -1831,7 +1831,7 @@ impl Action {
                     stringified_error
                 })?;
 
-                // Convert all tabs to Vec<TabLayoutInfo>
+                // 将所有标签页转换为 Vec<TabLayoutInfo>
                 let tabs: Vec<TabLayoutInfo> = layout
                     .tabs
                     .iter()
@@ -1846,7 +1846,7 @@ impl Action {
                     })
                     .collect();
 
-                // If no tabs, create default tab
+                // 如果没有标签页，创建默认标签页
                 let tabs = if tabs.is_empty() {
                     let (tiled, floating) = layout.new_tab();
                     vec![TabLayoutInfo {
@@ -1960,9 +1960,9 @@ impl Action {
                     pipe_id,
                     name,
                     payload,
-                    args: args.map(|a| a.inner().clone()), // TODO: no clone somehow
+                    args: args.map(|a| a.inner().clone()), // TODO: 以某种方式不需要 clone
                     plugin,
-                    configuration: plugin_configuration.map(|a| a.inner().clone()), // TODO: no clone
+                    configuration: plugin_configuration.map(|a| a.inner().clone()), // TODO: 不需要 clone
                     // somehow
                     launch_new: force_launch_plugin,
                     floating: floating_plugin,
@@ -2489,7 +2489,7 @@ mod tests {
     }
 
     // =============================================
-    // Category 1: Pane-targeting tests
+    // 类别 1：以窗格为目标的测试
     // =============================================
 
     // 1. ScrollUp
@@ -3095,7 +3095,7 @@ mod tests {
         assert!(matches!(actions[0], Action::TogglePanePinned));
     }
 
-    // Extra pane tests
+    // 额外的窗格测试
     #[test]
     fn test_scroll_up_with_plugin_pane_id() {
         let cli_action = CliAction::ScrollUp {
@@ -3142,7 +3142,7 @@ mod tests {
     }
 
     // =============================================
-    // Category 1: Tab-targeting tests
+    // 类别 1：以标签页为目标的测试
     // =============================================
 
     // 20. CloseTab
@@ -3409,7 +3409,7 @@ mod tests {
         }
     }
 
-    // 28. ANSI flag tests
+    // 28. ANSI 标志测试
 
     #[test]
     fn test_edit_scrollback_with_ansi_flag() {
@@ -3578,7 +3578,7 @@ mod tests {
             } => {
                 assert!(tiled_layout.is_some());
                 let layout = tiled_layout.as_ref().unwrap();
-                // layout { pane; pane } produces a layout with 2 children
+                // layout { pane; pane } 产生一个有 2 个子项的布局
                 assert_eq!(layout.children.len(), 2);
                 assert!(floating_layouts.is_empty());
             },
@@ -3670,7 +3670,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Tab-targeting for pane creation commands
+    // 窗格创建命令的标签页目标
 
     #[test]
     fn test_new_pane_tiled_with_tab_id() {

@@ -171,8 +171,8 @@ pub fn shortcut_for_action(
 }
 
 // we need to do this because [10] in standard STDIN, [10] is both Enter (without a carriage
-// return) and ctrl-j - so here, if ctrl-j is bound we return its bound action, and otherwise we
-// just write the raw bytes to the terminal and let whichever program is there decide what they are
+// return）和 ctrl-j — 所以在这里，如果 ctrl-j 被绑定，我们返回其绑定的操作，否则我们
+// 只需将原始字节写入终端，让那里的程序决定它们是什么
 fn handle_ctrl_j(
     mode_keybindings: &HashMap<KeyWithModifier, Vec<Action>>,
     raw_bytes: &[u8],
@@ -190,7 +190,7 @@ fn handle_ctrl_j(
     }
 }
 
-// The unit test location.
+// 单元测试位置。
 #[cfg(test)]
 #[path = "./unit/keybinds_test.rs"]
 mod keybinds_test;

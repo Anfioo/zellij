@@ -56,7 +56,7 @@ impl Clone for KdlError {
     fn clone(&self) -> Self {
         KdlError {
             error_message: self.error_message.clone(),
-            src: None, // NamedSource doesn't implement Clone, so we skip it
+            src: None, // NamedSource 不实现 Clone，所以我们跳过它
             offset: self.offset,
             len: self.len,
             help_message: self.help_message.clone(),
@@ -66,7 +66,7 @@ impl Clone for KdlError {
 
 impl PartialEq for KdlError {
     fn eq(&self, other: &Self) -> bool {
-        // Compare everything except src (which doesn't implement PartialEq)
+        // 比较除 src（不实现 PartialEq）之外的所有内容
         self.error_message == other.error_message
             && self.offset == other.offset
             && self.len == other.len
@@ -115,20 +115,20 @@ impl Diagnostic for KdlError {
 
 #[derive(Error, Debug, Diagnostic)]
 pub enum ConfigError {
-    // Deserialization error
+    // 反序列化错误
     #[error("Deserialization error: {0}")]
     KdlDeserializationError(#[from] kdl::KdlError),
     #[error("KdlDeserialization error: {0}")]
-    KdlError(KdlError), // TODO: consolidate these
+    KdlError(KdlError), // TODO: 合并这些
     #[error("Config error: {0}")]
     Std(#[from] Box<dyn std::error::Error>),
-    // Io error with path context
+    // 带路径上下文的 IO 错误
     #[error("IoError: {0}, File: {1}")]
     IoPath(io::Error, PathBuf),
-    // Internal Deserialization Error
+    // 内部反序列化错误
     #[error("FromUtf8Error: {0}")]
     FromUtf8(#[from] std::string::FromUtf8Error),
-    // Plugins have a semantic error, usually trying to parse two of the same tag
+    // 插件有语义错误，通常是尝试解析两个相同的标签
     #[error("PluginsError: {0}")]
     PluginsError(#[from] PluginsConfigError),
     #[error("{0}")]
@@ -290,7 +290,7 @@ impl Config {
         config: String,
         config_file_path: &PathBuf,
     ) -> Result<Config, Option<PathBuf>> {
-        // if we fail, try to return the PathBuf of the file we were not able to write to
+        // 如果失败，尝试返回我们无法写入的文件的 PathBuf
         let config_file_path = config_file_path.clone();
         Config::from_kdl(&config, None)
             .map_err(|e| {
@@ -330,7 +330,7 @@ impl Config {
                 }
             })
     }
-    // returns true if the config was not previouly written to disk and we successfully wrote it
+    // 如果配置之前未写入磁盘且我们成功写入，则返回 true
     pub fn write_config_to_disk_if_it_does_not_exist(
         config: String,
         config_file_path: &Option<PathBuf>,
@@ -397,7 +397,7 @@ impl Config {
     fn backup_current_config(
         config_file_path: &PathBuf,
     ) -> Result<Option<PathBuf>, Option<PathBuf>> {
-        // if we fail, try to return the PathBuf of the file we were not able to write to
+        // 如果失败，尝试返回我们无法写入的文件的 PathBuf
         // if let Some(config_file_path) = Config::config_file_path(&opts) {
         match std::fs::read_to_string(&config_file_path) {
             Ok(current_config) => {
@@ -449,16 +449,16 @@ pub async fn watch_config_file_changes<F, Fut>(
     F: Fn(Config) -> Fut + Send + 'static,
     Fut: std::future::Future<Output = ()> + Send,
 {
-    // in a gist, what we do here is fire the `on_config_change` function whenever there is a
-    // change in the config file or the configured theme directory, we do this by:
-    // 1. Trying to watch the provided config file for changes
-    // 2. If the file is deleted or does not exist, we periodically poll for it (manually, not
-    //    through filesystem events)
-    // 3. Once it exists, we start watching it for changes again
+    // 简而言之，我们在这里做的是每当有
+    // 配置文件或配置的主题目录中的更改，我们通过以下方式做到：
+    // 1. 尝试监视提供的配置文件的更改
+    // 2. 如果文件被删除或不存在，我们定期轮询它（手动，而不是
+    //    通过文件系统事件）
+    // 3. 一旦它存在，我们再次开始监视它的更改
     //
     // we do this because the alternative is to watch its parent folder and this might cause the
-    // classic "too many open files" issue if there are a lot of files there and/or lots of Zellij
-    // instances
+    // 经典的 "打开文件过多" 问题，如果那里有很多文件和/或很多 Zellij
+    // 实例
     use crate::setup::Setup;
     use notify::{self, Config as WatcherConfig, Event, PollWatcher, RecursiveMode, Watcher};
     use std::time::Duration;
@@ -692,7 +692,7 @@ mod config_test {
 
     #[test]
     fn try_from_cli_args_with_config() {
-        // makes sure loading a config file with --config tries to load the config
+        // 确保使用 --config 加载配置文件时尝试加载配置
         let arbitrary_config = PathBuf::from("nonexistent.yaml");
         let opts = CliArgs {
             config: Some(arbitrary_config),
@@ -705,7 +705,7 @@ mod config_test {
 
     #[test]
     fn try_from_cli_args_with_option_clean() {
-        // makes sure --clean works... TODO: how can this actually fail now?
+        // 确保 --clean 有效... TODO：现在这怎么可能失败？
         use crate::setup::Setup;
         let opts = CliArgs {
             command: Some(Command::Setup(Setup {

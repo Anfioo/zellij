@@ -10,7 +10,7 @@ pub struct MouseEvent {
     /// Future events could consider double-click and triple-click.
     pub event_type: MouseEventType,
 
-    // Mouse buttons associated with this event.
+    // 与此事件关联的鼠标按钮。
     pub left: bool,
     pub right: bool,
     pub middle: bool,
@@ -21,12 +21,12 @@ pub struct MouseEvent {
     #[serde(default)]
     pub wheel_right: bool,
 
-    // Keyboard modifier flags can be encoded with events too.  They
-    // are not often passed on the wire (instead used for
-    // selection/copy-paste and changing terminal properties
-    // on-the-fly at the user-facing terminal), but alt-mouseclick
+    // 键盘修饰键标志也可以与事件一起编码。它们
+    // 不常在网络上传递（而是用于
+    // 选择/复制粘贴和更改终端属性
+    // 在用户终端上即时），但 alt-mouseclick
     // usually passes through and is testable on vttest.  termwiz
-    // already exposes them too.
+    // 也已经暴露了它们。
     pub shift: bool,
     pub alt: bool,
     pub ctrl: bool,

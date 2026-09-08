@@ -40,7 +40,7 @@ impl WebClientTheme {
         let mut theme = WebClientTheme::default();
         let colors = kdl_children_or_error!(kdl, "empty theme");
 
-        // Helper function to extract colors
+        // 提取颜色的辅助函数
         let extract_color = |name: &str| -> Result<Option<String>, ConfigError> {
             if colors.get(name).is_some() {
                 let color = PaletteColor::try_from((name, colors))?;
@@ -250,7 +250,7 @@ impl Default for WebClientConfig {
             cursor_blink: false,
             cursor_inactive_style: None,
             cursor_style: None,
-            mac_option_is_meta: true, // TODO: yes? no?
+            mac_option_is_meta: true, // TODO: 是？否？
             base_url: None,
             font_size: None,
         }

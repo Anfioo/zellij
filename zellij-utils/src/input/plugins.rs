@@ -103,7 +103,7 @@ impl PluginConfig {
         let err_context =
             |err: std::io::Error, path: &PathBuf| format!("{}: '{}'", err, path.display());
 
-        // Locations we check for valid plugins
+        // 我们检查有效插件的位置
         #[allow(unused_mut)]
         let mut paths: Vec<PathBuf> = vec![
             self.path.clone(),
@@ -117,19 +117,19 @@ impl PluginConfig {
                 .join(&self.path)
                 .with_extension("wasm"),
         );
-        // Throw out dupes, because it's confusing to read that zellij checked the same plugin
-        // location multiple times. Do NOT sort the vector here, because it will break the lookup!
+        // 去重，因为读到 zellij 多次检查同一个插件会令人困惑
+        // 位置多次。不要在这里对向量排序，因为这会破坏查找！
         paths.dedup();
 
-        // This looks weird and usually we would handle errors like this differently, but in this
-        // case it's helpful for users and developers alike. This way we preserve all the lookup
-        // errors and can report all of them back. We must initialize `last_err` with something,
-        // and since the user will only get to see it when loading a plugin failed, we may as well
+        // 这看起来很奇怪，通常我们会以不同方式处理这样的错误，但在这种
+        // 情况下它对用户和开发者都有帮助。这样我们保留所有查找
+        // 错误并可以全部报告回来。我们必须用某些东西初始化 `last_err`，
+        // 而且由于用户只有在加载插件失败时才会看到它，我们不妨
         // spell it out right here.
         let mut last_err: Result<Vec<u8>> = Err(anyhow!("failed to load plugin from disk"));
         for path in paths {
-            // Check if the plugin path matches an entry in the asset map. If so, load it directly
-            // from memory, don't bother with the disk.
+            // 检查插件路径是否与资源映射表中的条目匹配。如果是，直接从内存加载，
+            // 从内存，不用麻烦磁盘。
             #[cfg(not(target_family = "wasm"))]
             if !cfg!(feature = "disable_automatic_asset_installation") && self.is_builtin() {
                 let asset_path = PathBuf::from("plugins").join(&path);
@@ -148,7 +148,7 @@ impl PluginConfig {
                 }
             }
 
-            // Try to read from disk
+            // 尝试从磁盘读取
             match fs::read(&path) {
                 Ok(val) => {
                     log::debug!("Loaded plugin '{}' from disk", path.display());
@@ -160,10 +160,10 @@ impl PluginConfig {
             }
         }
 
-        // Not reached if a plugin is found!
+        // 如果找到插件则不会到达！
         #[cfg(not(target_family = "wasm"))]
         if self.is_builtin() {
-            // Layout requested a builtin plugin that wasn't found
+            // 布局请求了一个未找到的内置插件
             let plugin_path = self.path.with_extension("wasm");
 
             if cfg!(feature = "disable_automatic_asset_installation") && self.is_builtin_name() {

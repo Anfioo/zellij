@@ -38,7 +38,7 @@ pub struct CliAssets {
     pub config_file_path: Option<PathBuf>,
     pub config_dir: Option<PathBuf>,
     pub should_ignore_config: bool,
-    pub configuration_options: Option<Options>, // merged from everywhere: there are the source of truth
+    pub configuration_options: Option<Options>, // 从各处合并：这些是真实来源
     pub layout: Option<LayoutInfo>,
     pub terminal_window_size: Size,
     pub data_dir: Option<PathBuf>,

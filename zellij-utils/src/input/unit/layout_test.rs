@@ -8,8 +8,8 @@ fn normalize_layout_debug(s: String) -> String {
 
 #[cfg(windows)]
 fn normalize_layout_debug(s: String) -> String {
-    // On Windows, PathBuf's Debug output uses `\\` (escaped backslash).
-    // Replace `\\\\` (two escaped backslashes in Debug repr) with `/`
+    // 在 Windows 上，PathBuf 的 Debug 输出使用 `\\`（转义反斜杠）。
+    // 将 `\\\\`（Debug 表示中的两个转义反斜杠）替换为 `/`
     // so that snapshots match Unix-recorded baselines.
     s.replace("\\\\", "/")
 }
@@ -363,7 +363,7 @@ fn layout_with_nested_differing_tabs() {
                     ],
                     ..Default::default()
                 },
-                vec![], // floating panes
+                vec![], // 浮动窗格
             ),
             (
                 None,
@@ -372,7 +372,7 @@ fn layout_with_nested_differing_tabs() {
                     children: vec![TiledPaneLayout::default(), TiledPaneLayout::default()],
                     ..Default::default()
                 },
-                vec![], // floating panes
+                vec![], // 浮动窗格
             ),
         ],
         template: Some((TiledPaneLayout::default(), vec![])),
@@ -691,7 +691,7 @@ fn layout_with_tab_names() {
                     children: vec![],
                     ..Default::default()
                 },
-                vec![], // floating panes
+                vec![], // 浮动窗格
             ),
             (
                 Some("my cool tab name 2".into()),
@@ -699,7 +699,7 @@ fn layout_with_tab_names() {
                     children: vec![],
                     ..Default::default()
                 },
-                vec![], // floating panes
+                vec![], // 浮动窗格
             ),
         ],
         template: Some((TiledPaneLayout::default(), vec![])),
@@ -769,7 +769,7 @@ fn layout_with_tab_templates() {
                     ],
                     ..Default::default()
                 },
-                vec![], // floating panes
+                vec![], // 浮动窗格
             ),
             (
                 Some("my second tab".into()),
@@ -786,7 +786,7 @@ fn layout_with_tab_templates() {
                     ],
                     ..Default::default()
                 },
-                vec![], // floating panes
+                vec![], // 浮动窗格
             ),
             (
                 None,
@@ -799,7 +799,7 @@ fn layout_with_tab_templates() {
                     ],
                     ..Default::default()
                 },
-                vec![], // floating panes
+                vec![], // 浮动窗格
             ),
         ],
         template: Some((TiledPaneLayout::default(), vec![])),
@@ -1568,7 +1568,7 @@ fn pane_template_command_with_cwd_overriden_by_its_consumers_command_cwd() {
             tail command="pwd" {
                 cwd "foo"
             }
-            // pane should have /tmp/foo and not /tmp/bar as cwd
+            // 窗格应该有 /tmp/foo 而不是 /tmp/bar 作为 cwd
         }
     "#;
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
@@ -1585,7 +1585,7 @@ fn pane_template_command_with_cwd_remains_when_its_consumer_command_does_not_hav
                 cwd "bar"
             }
             tail command="pwd"
-            // pane should have /tmp/bar as its cwd with the pwd command
+            // 窗格应该有 /tmp/bar 作为其 cwd，使用 pwd 命令
         }
     "#;
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
@@ -1603,7 +1603,7 @@ fn pane_template_command_without_cwd_is_overriden_by_its_consumers_cwd() {
             tail command="pwd" {
                 cwd "bar"
             }
-            // pane should have /tmp/bar as its cwd with the pwd command
+            // 窗格应该有 /tmp/bar 作为其 cwd，使用 pwd 命令
         }
     "#;
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
@@ -1622,7 +1622,7 @@ fn pane_template_command_with_cwd_is_overriden_by_its_consumers_bare_cwd() {
             tail {
                 cwd "bar"
             }
-            // pane should have /tmp/bar as its cwd with the tail command
+            // 窗格应该有 /tmp/bar 作为其 cwd，使用 tail 命令
         }
     "#;
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
@@ -1640,7 +1640,7 @@ fn pane_template_command_without_cwd_receives_its_consumers_bare_cwd() {
             tail {
                 cwd "bar"
             }
-            // pane should have /tmp/bar as its cwd with the tail command
+            // 窗格应该有 /tmp/bar 作为其 cwd，使用 tail 命令
         }
     "#;
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
@@ -1658,7 +1658,7 @@ fn pane_template_with_bare_cwd_overriden_by_its_consumers_bare_cwd() {
             tail {
                 cwd "bar"
             }
-            // pane should have /tmp/foo without a command
+            // 窗格应该有 /tmp/foo，没有命令
         }
     "#;
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
@@ -1674,7 +1674,7 @@ fn pane_template_with_bare_propagated_to_its_consumer_command_without_cwd() {
                 cwd "foo"
             }
             tail command="tail"
-            // pane should have /tmp/foo with the tail command
+            // 窗格应该有 /tmp/foo，使用 tail 命令
         }
     "#;
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
@@ -1692,7 +1692,7 @@ fn pane_template_with_bare_propagated_to_its_consumer_command_with_cwd() {
             tail command="tail" {
                 cwd "bar"
             }
-            // pane should have /tmp/bar with the tail command
+            // 窗格应该有 /tmp/bar，使用 tail 命令
         }
     "#;
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
@@ -1708,7 +1708,7 @@ fn pane_template_with_bare_propagated_to_its_consumer_edit() {
                 cwd "foo"
             }
             tail edit="bar"
-            // pane should have /tmp/foo/bar with the edit file variant
+            // 窗格应该有 /tmp/foo/bar，使用编辑文件变体
         }
     "#;
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
@@ -1724,7 +1724,7 @@ fn pane_template_with_command_propagated_to_its_consumer_edit() {
                 cwd "foo"
             }
             tail edit="bar"
-            // pane should have /tmp/foo/bar with the edit file variant
+            // 窗格应该有 /tmp/foo/bar，使用编辑文件变体
         }
     "#;
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
@@ -1738,7 +1738,7 @@ fn global_cwd_given_to_panes_without_cwd() {
             cwd "/tmp"
             pane
             pane command="tail"
-            // both should have the /tmp cwd
+            // 两者都应该有 /tmp cwd
         }
     "#;
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
@@ -1750,8 +1750,8 @@ fn global_cwd_prepended_to_panes_with_cwd() {
     let kdl_layout = r#"
         layout {
             cwd "/tmp"
-            pane cwd="foo" // should be /tmp/foo
-            pane command="tail" cwd="/home/foo" // should be /home/foo because its an absolute path
+            pane cwd="foo" // 应该是 /tmp/foo
+            pane command="tail" cwd="/home/foo" // 应该是 /home/foo，因为它是绝对路径
         }
     "#;
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
@@ -1765,7 +1765,7 @@ fn global_cwd_passed_from_layout_constructor() {
         layout {
             pane
             pane command="tail"
-            // both should have the /tmp cwd
+            // 两者都应该有 /tmp cwd
         }
     "#;
     let layout = Layout::from_kdl(
@@ -1786,7 +1786,7 @@ fn global_cwd_passed_from_layout_constructor_overrides_global_cwd_in_layout_file
             cwd "/home"
             pane
             pane command="tail"
-            // both should have the /tmp cwd
+            // 两者都应该有 /tmp cwd
         }
     "#;
     let layout = Layout::from_kdl(
@@ -1808,7 +1808,7 @@ fn global_cwd_with_tab_cwd_given_to_panes_without_cwd() {
                 pane
                 pane command="tail"
             }
-            // both should have the /tmp/foo cwd
+            // 两者都应该有 /tmp/foo cwd
         }
     "#;
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
@@ -1823,7 +1823,7 @@ fn tab_cwd_given_to_panes_without_cwd() {
                 pane
                 pane command="tail"
             }
-            // both should have the /tmp cwd
+            // 两者都应该有 /tmp cwd
         }
     "#;
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
@@ -1838,7 +1838,7 @@ fn tab_cwd_prepended_to_panes_with_cwd() {
                 pane cwd="./foo"
                 pane command="tail" cwd="./foo"
             }
-            // both should have the /tmp/foo cwd
+            // 两者都应该有 /tmp/foo cwd
         }
     "#;
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
@@ -1904,8 +1904,8 @@ fn global_cwd_and_tab_cwd_prepended_to_panes_with_and_without_cwd_in_tab_templat
 fn can_load_swap_layouts_from_a_different_file() {
     let kdl_layout = r#"
         layout {
-            // here we define a tab_template in the main layout and later make sure we can sue it
-            // in the swap layouts
+            // 这里我们在主布局中定义一个 tab_template，稍后确保我们可以使用它
+            // 在交换布局中
             tab_template name="ui" {
                pane size=1 borderless=true {
                    plugin location="zellij:tab-bar"
@@ -2204,7 +2204,7 @@ fn run_plugin_location_parsing() {
 fn env_var_expansion() {
     let raw_layout = r#"
         layout {
-            // cwd tests + composition
+            // cwd 测试 + 组合
             cwd "$TEST_GLOBAL_CWD"
             pane cwd="relative"  // -> /abs/path/relative
             pane cwd="/another/abs"  // -> /another/abs
@@ -2214,7 +2214,7 @@ fn env_var_expansion() {
             pane edit="file.rs" cwd="$TEST_ABSOLUTE"  // -> /somewhere/file.rs
             pane edit="file.rs" cwd="~/backup"  // -> /home/aram/backup/file.rs
 
-            // other paths
+            // 其他路径
             pane command="~/backup/executable"  // -> /home/aram/backup/executable
             pane edit="~/backup/foo.txt"  // -> /home/aram/backup/foo.txt
         }
@@ -2227,13 +2227,13 @@ fn env_var_expansion() {
         ("HOME", "/home/aram"),
     ];
     let mut old_vars = Vec::new();
-    // set environment variables for test, keeping track of existing values.
+    // 为测试设置环境变量，跟踪现有值。
     for (key, value) in env_vars {
         old_vars.push((key, std::env::var(key).ok()));
         std::env::set_var(key, value);
     }
     let layout = Layout::from_kdl(raw_layout, Some("layout_file_name".into()), None, None);
-    // restore environment.
+    // 恢复环境。
     for (key, opt) in old_vars {
         match opt {
             Some(value) => std::env::set_var(key, &value),
@@ -2311,9 +2311,9 @@ fn layout_node_with_cwd() {
 
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
 
-    // Verify cwd was applied - check the first pane's run property
+    // 验证 cwd 已应用 — 检查第一个窗格的 run 属性
     assert!(layout.tabs.len() > 0);
-    // The cwd should be propagated to children
+    // cwd 应该传播给子项
     if let Some(Run::Cwd(path)) = &layout.tabs[0].1.children[0].run {
         assert_eq!(path.to_str(), Some("/tmp"));
     } else {
@@ -2409,7 +2409,7 @@ fn layout_node_with_name_and_only_floating_panes() {
 
     let layout = Layout::from_kdl(kdl_layout, Some("layout_file_name".into()), None, None).unwrap();
 
-    // Verify the tab name was applied
+    // 验证标签页名称已应用
     assert_eq!(layout.tabs.len(), 1);
     assert_eq!(layout.tabs[0].0, Some("floating-only".to_string()));
 }
@@ -2527,11 +2527,11 @@ fn tiled_pane_still_rejects_zero_percent() {
     use crate::input::layout::SplitSize;
     use std::str::FromStr;
 
-    // Verify SplitSize::from_str still rejects 0%
+    // 验证 SplitSize::from_str 仍然拒绝 0%
     let result = SplitSize::from_str("0%");
     assert!(result.is_err());
 
-    // But 1% should work
+    // 但 1% 应该可以
     let result = SplitSize::from_str("1%");
     assert!(result.is_ok());
 }

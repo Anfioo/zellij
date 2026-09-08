@@ -398,7 +398,7 @@ pub struct Options {
     pub host_notification_protocol: Option<HostNotificationProtocol>,
 
     // these are intentionally excluded from the CLI options as they must be specified in the
-    // configuration file
+    // 配置文件
     pub web_server_ip: Option<IpAddr>,
     pub web_server_port: Option<u16>,
     pub web_server_cert: Option<PathBuf>,
@@ -509,7 +509,7 @@ impl Options {
     }
     /// Merges two [`Options`] structs, a `Some` in `other`
     /// will supersede a `Some` in `self`
-    // TODO: Maybe a good candidate for a macro?
+    // TODO: 也许是宏的好候选？
     pub fn merge(&self, other: Options) -> Options {
         let mouse_mode = other.mouse_mode.or(self.mouse_mode);
         let pane_frames = other.pane_frames.or(self.pane_frames);
@@ -669,7 +669,7 @@ impl Options {
     /// Merges two [`Options`] structs,
     /// - `Some` in `other` will supersede a `Some` in `self`
     /// - `Some(bool)` in `other` will toggle a `Some(bool)` in `self`
-    // TODO: Maybe a good candidate for a macro?
+    // TODO: 也许是宏的好候选？
     pub fn merge_from_cli(&self, other: Options) -> Options {
         let merge_bool = |opt_other: Option<bool>, opt_self: Option<bool>| {
             if opt_other.is_some() ^ opt_self.is_some() {

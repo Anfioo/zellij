@@ -84,8 +84,8 @@ mod not_wasm {
             .map_or(false, |actions| !actions.is_empty())
     }
 
-    // FIXME: This is an absolutely cursed function that should be destroyed as soon
-    // as an alternative that doesn't touch zellij-tile can be developed...
+    // FIXME: 这是一个绝对糟糕的函数，应该尽快销毁
+    // 作为不接触 zellij-tile 的替代方案可以开发...
     pub fn cast_termwiz_key(
         event: KeyEvent,
         raw_bytes: &[u8],
@@ -93,7 +93,7 @@ mod not_wasm {
     ) -> KeyWithModifier {
         let termwiz_modifiers = event.modifiers;
 
-        // *** THIS IS WHERE WE SHOULD WORK AROUND ISSUES WITH TERMWIZ ***
+        // *** 这是我们应该解决 TERMWIZ 问题的地方 ***
         if raw_bytes == [8] {
             return KeyWithModifier::new(BareKey::Char('h')).with_ctrl_modifier();
         };
@@ -120,7 +120,7 @@ mod not_wasm {
         match event.key {
             KeyCode::Char(c) => {
                 if c == '\0' {
-                    // NUL character, probably ctrl-space
+                    // NUL 字符，可能是 ctrl-space
                     KeyWithModifier::new(BareKey::Char(' ')).with_ctrl_modifier()
                 } else {
                     KeyWithModifier::new_with_modifiers(BareKey::Char(c), modifiers)
@@ -359,17 +359,17 @@ mod not_wasm {
 
         let (bare_key, raw_bytes) = match event.code {
             CKeyCode::Char(c) => {
-                // On Windows, the console reports physical modifier flags alongside
+                // 在 Windows 上，控制台报告物理修饰键标志以及
                 // the already-translated character. For example, on French AZERTY:
                 //   Shift+ù → Char('%') + SHIFT
-                //   AltGr+_ → Char('\\') + CTRL+ALT  (AltGr = Ctrl+Alt on Windows)
+                //   AltGr+_ → Char('\\') + CTRL+ALT（AltGr 在 Windows 上 = Ctrl+Alt）
                 //
-                // Strip modifiers that "produced" the character so the resulting
-                // KeyWithModifier matches what Unix terminals report (just the
-                // character, no redundant modifiers):
-                //   - Shift is always redundant for Char events
-                //   - Ctrl+Alt together indicates AltGr; strip both when the
-                //     character is printable (not a control code)
+                // 去除 "产生" 字符的修饰键，以便结果
+                // KeyWithModifier 匹配 Unix 终端报告的内容（只是
+                // 字符，无冗余修饰键）：
+                //   - Shift 对于 Char 事件总是冗余的
+                //   - Ctrl+Alt 一起表示 AltGr；当
+                //     字符是可打印的（不是控制码）
                 modifiers.remove(&KeyModifier::Shift);
                 let is_altgr = has_ctrl && has_alt && !c.is_ascii_control();
                 if is_altgr {
@@ -444,15 +444,15 @@ mod not_wasm {
                     vec![0x00],
                 ));
             },
-            // Media keys, bare modifier presses, KeypadBegin — skip
+            // 媒体键、裸修饰键按下、KeypadBegin — 跳过
             _ => return None,
         };
 
-        // Encode modifiers in VT raw bytes for non-Char keys.
+        // 为非 Char 键在 VT 原始字节中编码修饰键。
         //
-        // On the native console path (Windows), crossterm captures modifier
-        // flags from INPUT_RECORD but the raw bytes don't include them.
-        // Without encoding, the inner application never sees the modifiers.
+        // 在原生控制台路径（Windows）上，crossterm 捕获修饰键
+        // 来自 INPUT_RECORD 的标志，但原始字节不包含它们。
+        // 如果不编码，内部应用程序永远看不到修饰键。
         let has_shift = modifiers.contains(&KeyModifier::Shift);
         let has_any_modifier = has_alt || has_ctrl || has_shift;
         let is_char_key = matches!(bare_key, BareKey::Char(_));
@@ -467,7 +467,7 @@ mod not_wasm {
             let last = raw_bytes.last().copied();
             match (first, second, third, last) {
                 // Simple keys (Enter=0x0d, Tab=0x09, Backspace=0x7f):
-                // ALT only uses ESC prefix, other modifiers use CSI u.
+                // ALT 仅使用 ESC 前缀，其他修饰键使用 CSI u。
                 (Some(b), _, _, _) if b != 0x1b => {
                     if modifier_code == 3 {
                         let mut alt_bytes = vec![0x1b];
@@ -477,19 +477,19 @@ mod not_wasm {
                         format!("\x1b[{};{}u", b as u32, modifier_code).into_bytes()
                     }
                 },
-                // CSI letter-final (\x1b[A, \x1b[D, \x1b[H, \x1b[F):
+                // CSI letter-final（\x1b[A, \x1b[D, \x1b[H, \x1b[F）：
                 // → \x1b[1;{mod}A
                 (Some(0x1b), Some(b'['), Some(final_byte), _) if raw_bytes.len() == 3 => {
                     format!("\x1b[1;{}{}", modifier_code, final_byte as char).into_bytes()
                 },
-                // CSI tilde (\x1b[5~, \x1b[3~, \x1b[15~):
+                // CSI tilde（\x1b[5~, \x1b[3~, \x1b[15~）：
                 // → \x1b[5;{mod}~
                 (Some(0x1b), Some(b'['), _, Some(b'~')) if raw_bytes.len() >= 4 => {
                     let num_part = &raw_bytes[2..raw_bytes.len() - 1];
                     let num_str = std::str::from_utf8(num_part).unwrap_or("1");
                     format!("\x1b[{};{}~", num_str, modifier_code).into_bytes()
                 },
-                // SS3 (\x1bOP, \x1bOQ, etc. for F1-F4):
+                // SS3（\x1bOP, \x1bOQ 等，用于 F1-F4）：
                 // → \x1b[1;{mod}P
                 (Some(0x1b), Some(b'O'), Some(final_byte), _) if raw_bytes.len() == 3 => {
                     format!("\x1b[1;{}{}", modifier_code, final_byte as char).into_bytes()

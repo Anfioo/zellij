@@ -1,13 +1,13 @@
 //! The layout system.
-//  Layouts have been moved from [`zellij-server`] to
-//  [`zellij-utils`] in order to provide more helpful
-//  error messages to the user until a more general
-//  logging system is in place.
-//  In case there is a logging system in place evaluate,
-//  if [`zellij-utils`], or [`zellij-server`] is a proper
-//  place.
-//  If plugins should be able to depend on the layout system
-//  then [`zellij-utils`] could be a proper place.
+//  布局已从 [`zellij-server`] 移至
+//  [`zellij-utils`]，以便提供更有帮助的
+//  错误消息给用户，直到有更通用的
+//  日志系统就位。
+//  如果有日志系统，评估
+//  如果 [`zellij-utils`] 或 [`zellij-server`] 是合适的
+//  地方。
+//  如果插件应该能够依赖布局系统
+//  那么 [`zellij-utils`] 可能是合适的地方。
 #[cfg(not(target_family = "wasm"))]
 use crate::downloader::Downloader;
 use crate::{
@@ -66,9 +66,9 @@ impl From<Direction> for SplitDirection {
 #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
 pub enum SplitSize {
     #[serde(alias = "percent")]
-    Percent(usize), // 1 to 100
+    Percent(usize), // 1 到 100
     #[serde(alias = "fixed")]
-    Fixed(usize), // An absolute number of columns or rows
+    Fixed(usize), // 绝对的列数或行数
 }
 
 impl From<PercentOrFixed> for SplitSize {
@@ -134,7 +134,7 @@ impl RunPluginOrAlias {
                             .as_ref()
                             .map(|c| c.inner().clone()),
                     );
-                    // if the alias has its own cwd, it should always override the alias
+                    // 如果 alias 有自己的 cwd，它应该总是覆盖 alias
                     // value's cwd
                     if run_plugin_alias.initial_cwd.is_some() {
                         merged_run_plugin.initial_cwd = run_plugin_alias.initial_cwd.clone();
@@ -199,12 +199,12 @@ impl RunPluginOrAlias {
                         .configuration
                         .as_ref()
                         // we do the is_empty() checks because an empty configuration is the same as no
-                        // configuration (i.e. None)
+                        // 配置（即 None）
                         .and_then(|c| if c.inner().is_empty() { None } else { Some(c) })
                         == run_alias.configuration.as_ref().and_then(|c| {
                             let mut to_compare = c.inner().clone();
-                            // caller_cwd is a special attribute given to alias and should not be
-                            // considered when weighing configuration equivalency
+                            // caller_cwd 是给 alias 的特殊属性，不应该
+                            // 在权衡配置等效性时考虑
                             to_compare.remove("caller_cwd");
                             if to_compare.is_empty() {
                                 None
@@ -264,10 +264,10 @@ pub enum Run {
 
 impl Run {
     pub fn merge(base: &Option<Run>, other: &Option<Run>) -> Option<Run> {
-        // This method is necessary to merge between pane_templates and their consumers
-        // TODO: reconsider the way we parse command/edit/plugin pane_templates from layouts to prevent this
-        // madness
-        // TODO: handle Plugin variants once there's a need
+        // 这个方法对于在 pane_templates 及其消费者之间合并是必要的
+        // TODO: 重新考虑我们从布局中解析 command/edit/plugin pane_templates 的方式以防止这种情况
+        // 疯狂
+        // TODO: 有需要时处理 Plugin 变体
         match (base, other) {
             (Some(Run::Command(base_run_command)), Some(Run::Command(other_run_command))) => {
                 let mut merged = other_run_command.clone();
@@ -350,8 +350,8 @@ impl Run {
         }
     }
     pub fn add_args(&mut self, args: Option<Vec<String>>) {
-        // overrides the args of a Run::Command if they are Some
-        // and not empty
+        // 如果 Some 则覆盖 Run::Command 的 args
+        // 且不为空
         if let Some(args) = args {
             if let Run::Command(run_command) = self {
                 if !args.is_empty() {
@@ -361,8 +361,8 @@ impl Run {
         }
     }
     pub fn add_close_on_exit(&mut self, close_on_exit: Option<bool>) {
-        // overrides the hold_on_close of a Run::Command if it is Some
-        // and not empty
+        // 如果 Some 则覆盖 Run::Command 的 hold_on_close
+        // 且不为空
         if let Some(close_on_exit) = close_on_exit {
             if let Run::Command(run_command) = self {
                 run_command.hold_on_close = !close_on_exit;
@@ -370,8 +370,8 @@ impl Run {
         }
     }
     pub fn add_start_suspended(&mut self, start_suspended: Option<bool>) {
-        // overrides the hold_on_start of a Run::Command if they are Some
-        // and not empty
+        // 如果 Some 则覆盖 Run::Command 的 hold_on_start
+        // 且不为空
         if let Some(start_suspended) = start_suspended {
             if let Run::Command(run_command) = self {
                 run_command.hold_on_start = start_suspended;
@@ -395,7 +395,7 @@ impl Run {
     }
     pub fn get_cwd(&self) -> Option<PathBuf> {
         match self {
-            Run::Plugin(_) => None, // TBD
+            Run::Plugin(_) => None, // 待定
             Run::Command(run_command) => run_command.cwd.clone(),
             Run::EditFile(_file, _line_num, cwd) => cwd.clone(),
             Run::Cwd(cwd) => Some(cwd.clone()),
@@ -464,14 +464,14 @@ pub struct PluginAlias {
 
 impl PartialEq for PluginAlias {
     fn eq(&self, other: &Self) -> bool {
-        // NOTE: Keep this in sync with what the `Hash` trait impl does.
+        // 注意：保持与 `Hash` trait 实现的同步。
         self.name == other.name && self.configuration == other.configuration
     }
 }
 
 impl std::hash::Hash for PluginAlias {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        // NOTE: Keep this in sync with what the `PartiqlEq` trait impl does.
+        // 注意：保持与 `PartiqlEq` trait 实现的同步。
         self.name.hash(state);
         self.configuration.hash(state);
     }
@@ -494,11 +494,11 @@ impl PluginAlias {
     }
     pub fn set_caller_cwd_if_not_set(&mut self, caller_cwd: Option<PathBuf>) {
         // we do this only for an alias because in all other cases this will be handled by the
-        // "cwd" configuration key above
-        // for an alias we might have cases where the cwd is defined on the alias but we still
+        // 上面的 "cwd" 配置键
+        // 对于 alias，我们可能会遇到 cwd 定义在 alias 上但我们仍然
         // want to pass the "caller" cwd for the plugin the alias resolves into (eg. a
-        // filepicker that has access to the whole filesystem but wants to start in a specific
-        // folder)
+        // 可以访问整个文件系统但希望从特定
+        // 文件夹）
         if let Some(caller_cwd) = caller_cwd {
             if self
                 .configuration
@@ -518,7 +518,7 @@ impl PluginAlias {
 #[allow(clippy::derive_hash_xor_eq)]
 impl PartialEq for RunPlugin {
     fn eq(&self, other: &Self) -> bool {
-        // TODO: normalize paths here if the location is a file so that relative/absolute paths
+        // TODO: 如果位置是文件，在这里规范化路径，以便相对/绝对路径
         // will work properly
         (&self.location, &self.configuration) == (&other.location, &other.configuration)
     }
@@ -530,7 +530,7 @@ pub struct PluginUserConfiguration(BTreeMap<String, String>);
 
 impl PluginUserConfiguration {
     pub fn new(mut configuration: BTreeMap<String, String>) -> Self {
-        // reserved words
+        // 保留字
         configuration.remove("hold_on_close");
         configuration.remove("hold_on_start");
         configuration.remove("cwd");
@@ -599,18 +599,18 @@ impl RunPluginLocation {
             "zellij" => Ok(Self::Zellij(PluginTag::new(decoded_path))),
             "file" => {
                 let path = if location.starts_with("file:/") {
-                    // Path is absolute, its safe to use URL path.
+                    // 路径是绝对路径，使用 URL 路径是安全的。
                     //
-                    // This is the case if the scheme and : delimiter are followed by a / slash
+                    // 如果 scheme 和 : 分隔符后面跟着 / 斜杠，就是这种情况
                     PathBuf::from(decoded_path.as_ref())
                 } else if location.starts_with("file:~") {
-                    // Unwrap is safe here since location is a valid URL
+                    // 这里 Unwrap 是安全的，因为 location 是有效的 URL
                     PathBuf::from(location.strip_prefix("file:").unwrap())
                 } else {
-                    // URL dep doesn't handle relative paths with `file` schema properly,
-                    // it always makes them absolute. Use raw location string instead.
+                    // URL 依赖不能正确处理带有 `file` schema 的相对路径，
+                    // 它总是使它们成为绝对路径。改用原始位置字符串。
                     //
-                    // Unwrap is safe here since location is a valid URL
+                    // 这里 Unwrap 是安全的，因为 location 是有效的 URL
                     let stripped = location.strip_prefix("file:").unwrap();
                     match cwd {
                         Some(cwd) => cwd.join(stripped),
@@ -686,11 +686,11 @@ impl Display for LayoutConstraint {
     }
 }
 
-pub type SwapTiledLayout = (BTreeMap<LayoutConstraint, TiledPaneLayout>, Option<String>); // Option<String> is the swap layout name
+pub type SwapTiledLayout = (BTreeMap<LayoutConstraint, TiledPaneLayout>, Option<String>); // Option<String> 是交换布局名称
 pub type SwapFloatingLayout = (
     BTreeMap<LayoutConstraint, Vec<FloatingPaneLayout>>,
     Option<String>,
-); // Option<String> is the swap layout name
+); // Option<String> 是交换布局名称
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Default)]
 pub struct Layout {
@@ -715,8 +715,8 @@ pub struct TabLayoutInfo {
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
 pub enum PercentOrFixed {
-    Percent(usize), // 1 to 100
-    Fixed(usize),   // An absolute number of columns or rows
+    Percent(usize), // 1 到 100
+    Fixed(usize),   // 绝对的列数或行数
 }
 
 impl From<Dimension> for PercentOrFixed {
@@ -857,7 +857,7 @@ pub struct TiledPaneLayout {
     pub is_expanded_in_stack: bool,
     pub exclude_from_sync: Option<bool>,
     pub run_instructions_to_ignore: Vec<Option<Run>>,
-    pub hide_floating_panes: bool, // only relevant if this is the base layout
+    pub hide_floating_panes: bool, // 仅在这是基础布局时相关
     pub pane_initial_contents: Option<String>,
     pub default_fg: Option<String>,
     pub default_bg: Option<String>,
@@ -868,7 +868,7 @@ impl TiledPaneLayout {
         &mut self,
         children_layout: &mut TiledPaneLayout,
     ) -> Result<bool, ConfigError> {
-        // returns true if successfully inserted and false otherwise
+        // 如果成功插入则返回 true，否则返回 false
         match self.external_children_index {
             Some(external_children_index) => {
                 self.children
@@ -890,7 +890,7 @@ impl TiledPaneLayout {
         &mut self,
         children_nodes: &mut Vec<TiledPaneLayout>,
     ) -> Result<bool, ConfigError> {
-        // returns true if successfully inserted and false otherwise
+        // 如果成功插入则返回 true，否则返回 false
         match self.external_children_index {
             Some(external_children_index) => {
                 children_nodes.reverse();
@@ -944,9 +944,9 @@ impl TiledPaneLayout {
                 let pane_count_in_layout = layout_to_split.pane_count();
                 if max_panes > pane_count_in_layout {
                     // the + 1 here is because this was previously an "actual" pane and will now
-                    // become just a container, so we need to account for it too
-                    // TODO: make sure this works when the `children` node has sibling nodes,
-                    // because we really should support that
+                    // 变成只是一个容器，所以我们也需要考虑它
+                    // TODO: 确保当 `children` 节点有兄弟节点时这能正常工作，
+                    // 因为我们真的应该支持那个
                     let children_count = (max_panes - pane_count_in_layout) + 1;
                     let mut extra_children = vec![TiledPaneLayout::default(); children_count];
                     if !layout_to_split.has_focused_node() && focus_layout_if_not_focused {
@@ -991,7 +991,7 @@ impl TiledPaneLayout {
     }
     pub fn extract_run_instructions(&self) -> Vec<Option<Run>> {
         // the order of these run instructions is significant and needs to be the same
-        // as the order of the "flattened" layout panes received from eg. position_panes_in_space
+        // 作为从例如 position_panes_in_space 接收的 "扁平化" 布局窗格的顺序
         let mut run_instructions = vec![];
         if self.children.is_empty() {
             run_instructions.push(self.run.clone());
@@ -999,8 +999,8 @@ impl TiledPaneLayout {
         let mut run_instructions_of_children = vec![];
         for child in &self.children {
             let mut child_run_instructions = child.extract_run_instructions();
-            // add the only first child to run_instructions only adding the others after all the
-            // childfree panes have been added so that the returned vec will be sorted breadth-first
+            // 仅将第一个子项添加到 run_instructions，在所有
+            // 无子窗格已添加，以便返回的 vec 将按广度优先排序
             if !child_run_instructions.is_empty() {
                 run_instructions.push(child_run_instructions.remove(0));
             }
@@ -1018,9 +1018,9 @@ impl TiledPaneLayout {
             }
         }
         // we need to do this because if we have an ignored instruction that does not match any
-        // running instruction, we'll have an extra pane and our state will be messed up and we'll
-        // crash (this can happen for example when breaking a plugin pane into a new tab that does
-        // not have room for it but has a terminal instead)
+        // 运行指令，我们会有一个额外的窗格，我们的状态会混乱，我们会
+        // 崩溃（例如，当将插件窗格拆分为一个没有空间容纳它但有终端的新标签页时可能发生）
+        // 没有空间容纳它但有终端）
         if successfully_ignored < self.run_instructions_to_ignore.len() {
             for _ in 0..self
                 .run_instructions_to_ignore
@@ -1030,8 +1030,8 @@ impl TiledPaneLayout {
                 if let Some(position) = run_instructions.iter().position(|i| {
                     match i {
                         // this is because a bare CWD instruction should be overidden by a terminal
-                        // in run_instructions_to_ignore (for cases where the cwd for example comes
-                        // from a global layout cwd and the pane is actually just a bare pane that
+                        // 在 run_instructions_to_ignore 中（例如 cwd 来自
+                        // 来自全局布局 cwd，而窗格实际上只是一个裸窗格，
                         // wants to be overidden)
                         Some(Run::Cwd(_)) | None => true,
                         _ => false,
@@ -1044,12 +1044,12 @@ impl TiledPaneLayout {
         run_instructions
     }
     pub fn replace_next_empty_slot_with_run(&mut self, run_to_insert: Run) -> bool {
-        // Replaces the first empty slot (None or Run::Cwd) with the given Run instruction.
-        // Returns true if a replacement was made, false if no empty slot was found.
-        // Traversal order matches extract_run_instructions (breadth-first).
+        // 将第一个空槽（None 或 Run::Cwd）替换为给定的 Run 指令。
+        // 如果进行了替换则返回 true，如果未找到空槽则返回 false。
+        // 遍历顺序与 extract_run_instructions 匹配（广度优先）。
 
         if self.children.is_empty() {
-            // This is a leaf node - check if it's an empty slot
+            // 这是一个叶节点 — 检查它是否是空槽
             match &self.run {
                 None | Some(Run::Cwd(_)) => {
                     self.run = Some(run_to_insert);
@@ -1059,7 +1059,7 @@ impl TiledPaneLayout {
             }
         }
 
-        // Check first child of each child (breadth-first first level)
+        // 检查每个子项的第一个子项（广度优先第一层）
         for child in self.children.iter_mut() {
             if child.children.is_empty() {
                 match &child.run {
@@ -1072,7 +1072,7 @@ impl TiledPaneLayout {
             }
         }
 
-        // Recursively check deeper levels (breadth-first continuation)
+        // 递归检查更深层级（广度优先继续）
         for child in self.children.iter_mut() {
             if child.replace_next_empty_slot_with_run(run_to_insert.clone()) {
                 return true;
@@ -1141,14 +1141,14 @@ impl TiledPaneLayout {
         }
     }
     pub fn truncate(&mut self, max_panes: usize) -> usize {
-        // returns remaining children length
-        // if max_panes is 1, it means there's only enough panes for this node,
-        // if max_panes is 0, this is probably the root layout being called with 0 max panes
+        // 返回剩余子项长度
+        // 如果 max_panes 为 1，意味着只有足够的窗格给这个节点，
+        // 如果 max_panes 为 0，这可能是根布局以 0 max_panes 被调用
         if max_panes <= 1 {
             while !self.children.is_empty() {
                 // this is a special case: we're truncating a pane that was previously a logical
-                // container but now should be an actual pane - so here we'd like to use its
-                // deepest "non-logical" child in order to get all its attributes (eg. borderless)
+                // 容器但现在应该是一个实际窗格 — 所以这里我们想使用它的
+                // 最深的 "非逻辑" 子项，以获取其所有属性（例如 borderless）
                 let first_child = self.children.remove(0);
                 drop(std::mem::replace(self, first_child));
             }
@@ -1175,7 +1175,7 @@ impl TiledPaneLayout {
         if self.children.len() > 0 {
             self.children.len()
         } else {
-            1 // just me
+            1 // 只有我
         }
     }
     pub fn has_focused_node(&self) -> bool {
@@ -1201,7 +1201,7 @@ impl TiledPaneLayout {
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub enum LayoutParts {
-    Tabs(Vec<(Option<String>, Layout)>), // String is the tab name
+    Tabs(Vec<(Option<String>, Layout)>), // String 是标签页名称
     Panes(Vec<Layout>),
 }
 
@@ -1265,10 +1265,10 @@ impl Layout {
                                 Some(layout_dir.clone()),
                             ) {
                                 Ok(_layout) => {
-                                    let file_path = layout_dir.join(file.path()); // TODO: do we
-                                                                                  // need
+                                    let file_path = layout_dir.join(file.path()); // TODO: 我们是否
+                                                                                  // 需要
                                                                                   // file_stem()
-                                                                                  // here too?
+                                                                                  // 这里也？
                                     available_layouts.push(LayoutInfo::File(
                                         layout_name,
                                         LayoutMetadata::from(&file_path),
@@ -1413,17 +1413,17 @@ impl Layout {
         layout_path: Option<&PathBuf>,
         layout_dir: Option<PathBuf>,
     ) -> Result<(String, String, Option<(String, String)>), ConfigError> {
-        // (path_to_layout as String, stringified_layout, Option<path_to_swap_layout as String, stringified_swap_layout>)
+        //（path_to_layout as String, stringified_layout, Option<path_to_swap_layout as String, stringified_swap_layout>）
         match layout_path {
             Some(layout_path) => {
-                // The way we determine where to look for the layout is similar to
-                // how a path would look for an executable.
+                // 我们确定在哪里查找布局的方式类似于
+                // 可执行文件的路径会是什么样子。
                 // See the gh issue for more: https://github.com/zellij-org/zellij/issues/1412#issuecomment-1131559720
                 if layout_path.extension().is_some() || layout_path.components().count() > 1 {
-                    // We look localy!
+                    // 我们在本地查找！
                     Layout::stringified_from_path(layout_path)
                 } else {
-                    // We look in the default dir
+                    // 我们在默认目录中查找
                     Layout::stringified_from_dir(layout_path, layout_dir.as_ref())
                 }
             },
@@ -1445,7 +1445,7 @@ impl Layout {
         Ok(raw_layout)
     }
     pub fn from_path_without_config(layout_path: &PathBuf) -> Result<Layout, ConfigError> {
-        // (path_to_layout as String, stringified_layout, Option<path_to_swap_layout as String, stringified_swap_layout>)
+        //（path_to_layout as String, stringified_layout, Option<path_to_swap_layout as String, stringified_swap_layout>）
         let (path_to_layout, raw_layout, raw_swap_layouts) =
             Layout::stringified_from_path(layout_path)?;
         Layout::from_kdl(
@@ -1558,7 +1558,7 @@ impl Layout {
         layout: &PathBuf,
         layout_dir: Option<&PathBuf>,
     ) -> Result<(String, String, Option<(String, String)>), ConfigError> {
-        // (path_to_layout as String, stringified_layout, Option<path_to_swap_layout as String, stringified_swap_layout>)
+        //（path_to_layout as String, stringified_layout, Option<path_to_swap_layout as String, stringified_swap_layout>）
         match layout_dir {
             Some(dir) => {
                 let layout_path = &dir.join(layout);
@@ -1582,7 +1582,7 @@ impl Layout {
     pub fn stringified_from_path(
         layout_path: &Path,
     ) -> Result<(String, String, Option<(String, String)>), ConfigError> {
-        // (path_to_layout as String, stringified_layout, Option<path_to_swap_layout as String, stringified_swap_layout>)
+        //（path_to_layout as String, stringified_layout, Option<path_to_swap_layout as String, stringified_swap_layout>）
         let mut layout_file = File::open(&layout_path)
             .or_else(|_| File::open(&layout_path.with_extension("kdl")))
             .map_err(|e| ConfigError::IoPath(e, layout_path.into()))?;
@@ -1602,10 +1602,10 @@ impl Layout {
     pub fn stringified_from_default_assets(
         path: &Path,
     ) -> Result<(String, String, Option<(String, String)>), ConfigError> {
-        // (path_to_layout as String, stringified_layout, Option<path_to_swap_layout as String, stringified_swap_layout>)
-        // TODO: ideally these should not be hard-coded
+        //（path_to_layout as String, stringified_layout, Option<path_to_swap_layout as String, stringified_swap_layout>）
+        // TODO: 理想情况下这些不应该硬编码
         // we should load layouts by name from the config
-        // and load them from a hashmap or some such
+        // 并从 hashmap 或类似结构中加载它们
         match path.to_str() {
             Some("default") => Ok((
                 "Default layout".into(),
@@ -1699,13 +1699,13 @@ impl Layout {
     pub fn is_empty(&self) -> bool {
         !self.tabs.is_empty()
     }
-    // TODO: do we need both of these?
+    // TODO: 我们需要这两个吗？
     pub fn has_tabs(&self) -> bool {
         !self.tabs.is_empty()
     }
 
     pub fn tabs(&self) -> Vec<(Option<String>, TiledPaneLayout, Vec<FloatingPaneLayout>)> {
-        // String is the tab name
+        // String 是标签页名称
         self.tabs.clone()
     }
 
@@ -1843,7 +1843,7 @@ fn split_space(
             *last_size = None;
         }
         if sizes.len() > space_to_split.rows.as_usize().saturating_sub(3) {
-            // 4 is MIN_TERMINAL_HEIGHT, minus 1 because sizes also includes the expanded pane in
+            // 4 是 MIN_TERMINAL_HEIGHT，减 1 因为 sizes 还包括展开的窗格
             // the stack
             return Err("Not enough room for stacked panes in this layout");
         }
@@ -1883,11 +1883,11 @@ fn split_space(
     };
 
     let min_size_for_panes = sizes.iter().fold(0, |acc, size| match size {
-        Some(SplitSize::Percent(_)) | None => acc + 1, // TODO: minimum height/width as relevant here
+        Some(SplitSize::Percent(_)) | None => acc + 1, // TODO: 这里相关的最小高度/宽度
         Some(SplitSize::Fixed(fixed)) => acc + fixed,
     });
     if min_size_for_panes > split_dimension_space.as_usize() {
-        return Err("Not enough room for panes"); // TODO: use error infra
+        return Err("Not enough room for panes"); // TODO: 使用错误基础设施
     }
 
     let flex_parts = sizes.iter().filter(|s| s.is_none()).count();
@@ -1975,8 +1975,8 @@ fn split_space(
                 ignore_percent_split_sizes,
                 next_stack_id,
             )?;
-            // add the only first child to pane_positions only adding the others after all the
-            // childfree panes have been added so that the returned vec will be sorted breadth-first
+            // 仅将第一个子项添加到 pane_positions，在所有
+            // 无子窗格已添加，以便返回的 vec 将按广度优先排序
             if !part_positions.is_empty() {
                 pane_positions.push(part_positions.remove(0));
             }
@@ -2001,7 +2001,7 @@ fn adjust_geoms_for_rounding_errors(
     children_split_direction: SplitDirection,
 ) {
     if total_pane_size < split_dimension_space.as_usize() {
-        // add extra space from rounding errors to the last pane
+        // 将舍入误差的额外空间添加到最后一个窗格
 
         let increase_by = split_dimension_space
             .as_usize()
@@ -2032,7 +2032,7 @@ fn adjust_geoms_for_rounding_errors(
                 }
             });
     } else if total_pane_size > split_dimension_space.as_usize() {
-        // remove extra space from rounding errors to the last pane
+        // 从最后一个窗格中移除舍入误差的额外空间
         let decrease_by = total_pane_size - split_dimension_space.as_usize();
         let position_of_last_flexible_geom = split_geoms
             .iter()
@@ -2097,7 +2097,7 @@ impl FromStr for SplitSize {
     }
 }
 
-// The unit test location.
+// 单元测试位置。
 #[path = "./unit/layout_test.rs"]
 #[cfg(test)]
 mod layout_test;
