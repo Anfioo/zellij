@@ -32,7 +32,7 @@ impl ResurrectableSessions {
         }
         let search_indication =
             Text::new(format!("Search: {}_", self.search_term)).color_range(2, ..7);
-        let table_rows = rows.saturating_sub(5); // search row, toggle row and some padding
+        let table_rows = rows.saturating_sub(5); // 搜索行、切换行和一些内边距
         let table_columns = columns;
         let table = if self.is_searching {
             self.render_search_results(table_rows, columns)
@@ -43,7 +43,7 @@ impl ResurrectableSessions {
         print_table_with_coordinates(table, x, y + 3, Some(table_columns), Some(table_rows));
     }
     fn render_search_results(&self, table_rows: usize, _table_columns: usize) -> Table {
-        let mut table = Table::new().add_row(vec![" ", " ", " "]); // skip the title row
+        let mut table = Table::new().add_row(vec![" ", " ", " "]); // 跳过标题行
         let (first_row_index_to_render, last_row_index_to_render) = self.range_to_render(
             table_rows,
             self.search_results.len(),
@@ -75,7 +75,7 @@ impl ResurrectableSessions {
         table
     }
     fn render_all_entries(&self, table_rows: usize, _table_columns: usize) -> Table {
-        let mut table = Table::new().add_row(vec![" ", " ", " "]); // skip the title row
+        let mut table = Table::new().add_row(vec![" ", " ", " "]); // 跳过标题行
         let (first_row_index_to_render, last_row_index_to_render) = self.range_to_render(
             table_rows,
             self.all_resurrectable_sessions.len(),
@@ -140,7 +140,7 @@ impl ResurrectableSessions {
         selected_index: Option<usize>,
     ) -> (usize, usize) {
         if table_rows <= results_len {
-            let row_count_to_render = table_rows.saturating_sub(1); // 1 for the title
+            let row_count_to_render = table_rows.saturating_sub(1); //  1 用于标题
             let first_row_index_to_render = selected_index
                 .unwrap_or(0)
                 .saturating_sub(row_count_to_render / 2);
@@ -268,7 +268,7 @@ impl ResurrectableSessions {
             }
         } else if let Some(session_name_and_creation_time) = self.selected_index.and_then(|i| {
             if self.all_resurrectable_sessions.len() > i {
-                // optimistic update
+                // 乐观更新
                 if i == 0 {
                     self.selected_index = None;
                 } else if i == self.all_resurrectable_sessions.len().saturating_sub(1) {
@@ -283,7 +283,7 @@ impl ResurrectableSessions {
         }
     }
     fn delete_all_sessions(&mut self) {
-        // optimistic update
+        // 乐观更新
         self.all_resurrectable_sessions = vec![];
         self.delete_all_dead_sessions_warning = false;
         let _ = delete_all_dead_sessions();

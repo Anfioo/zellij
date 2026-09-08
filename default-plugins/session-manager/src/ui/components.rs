@@ -9,28 +9,28 @@ use crate::single_screen::UnifiedSearchResult;
 use crate::ui::{PaneUiInfo, SessionUiInfo, TabUiInfo};
 use crate::{ActiveScreen, NewSessionInfo};
 
-// ---------------------------------------------------------------
-// Render cache for unified results
-// ---------------------------------------------------------------
+//  ---------------------------------------------------------------
+// 统一结果的渲染缓存
+//  ---------------------------------------------------------------
 
-/// Pre-computed data for a single visible row, independent of selection state.
+///  单个可见行的预计算数据，独立于选择状态。
 #[derive(Clone)]
 pub struct CachedRowData {
     pub session_name: String,
     pub indices: Vec<usize>,
     pub original_index: usize,
     pub kind: CachedRowKind,
-    // Pre-formatted strings (computed once, reused across renders)
+    // 预格式化字符串（计算一次，跨渲染复用）
     pub full_details: String,
     pub abbr_details: String,
     pub full_tag: &'static str,
     pub abbr_tag: &'static str,
-    // Pre-computed widths
+    // 预计算宽度
     pub name_width: usize,
     pub full_details_width: usize,
     pub abbr_details_width: usize,
     pub full_tag_width: usize,
-    // Color range data for details cell
+    //  详情单元格的颜色范围数据
     pub details_color_ranges: DetailsColorRanges,
     pub abbr_details_color_ranges: DetailsColorRanges,
 }
@@ -41,22 +41,22 @@ pub enum CachedRowKind {
     Resurrectable,
 }
 
-/// Byte-offset ranges for coloring details cells.
+///  用于为详情单元格着色的字节偏移范围。
 #[derive(Clone, Default)]
 pub struct DetailsColorRanges {
-    pub ranges: Vec<(usize, std::ops::Range<usize>)>, // (color_index, range)
+    pub ranges: Vec<(usize, std::ops::Range<usize>)>, //  (color_index, range)
 }
 
-/// Cached intermediate representation of the unified results table.
+///  统一结果表的缓存中间表示。
 ///
-/// Stored on `SingleScreenState` and rebuilt only when `unified_results`
-/// changes (via `update_search_term` / `SessionUpdate`). Selection changes
-/// and timer re-renders reuse the cached data.
+///存储在 `SingleScreenState` 上，仅在 `unified_results`
+///  更改时（通过 `update_search_term` / `SessionUpdate`）重建。选择更改
+///  和计时器重新渲染复用缓存数据。
 #[derive(Default)]
 pub struct UnifiedResultsRenderCache {
-    /// Filtered rows (current session excluded), with pre-formatted strings.
+    ///  过滤后的行（不包括当前会话），带有预格式化的字符串。
     pub rows: Vec<CachedRowData>,
-    /// Max column widths across all cached rows.
+    ///  所有缓存行中的最大列宽。
     pub full_name_width: usize,
     pub full_details_width: usize,
     pub abbr_details_width: usize,
@@ -64,7 +64,7 @@ pub struct UnifiedResultsRenderCache {
 }
 
 impl UnifiedResultsRenderCache {
-    /// Rebuild the cache from the current `unified_results`.
+    ///从当前的 `unified_results` 重建缓存。
     pub fn rebuild(&mut self, results: &[UnifiedSearchResult]) {
         self.rows.clear();
         self.full_name_width = 0;
@@ -103,7 +103,7 @@ impl UnifiedResultsRenderCache {
                     let pane_str = format!("{}", pane_count);
                     let conn_str = format!("{}", connected_users);
 
-                    // Full details
+                    //  完整详情
                     let full_details = format!(
                         "{} tabs, {} panes, {} {}",
                         tab_str, pane_str, conn_str, client_word
@@ -123,7 +123,7 @@ impl UnifiedResultsRenderCache {
                         }
                     };
 
-                    // Abbreviated details
+                    //  缩写详情
                     let abbr_details = format!("{}t, {}p, {}c", tab_str, pane_str, conn_str);
                     let abbr_details_ranges = {
                         let tab_end = tab_str.len();
@@ -221,7 +221,7 @@ impl UnifiedResultsRenderCache {
                 },
             };
 
-            // Update max widths
+            // 更新最大宽度
             if row.name_width > self.full_name_width {
                 self.full_name_width = row.name_width;
             }
@@ -402,7 +402,7 @@ impl UiSpan {
     }
 }
 
-#[allow(dead_code)] // in the future this will be moved to be its own component
+#[allow(dead_code)] // 将来这将被移至其自己的组件
 #[derive(Debug)]
 pub enum SpanStyle {
     None,
@@ -490,7 +490,7 @@ impl TruncatableUiSpan {
         match indices {
             Some((index_style, indices)) => {
                 for (i, character) in truncated.chars().enumerate() {
-                    // TODO: optimize this by splitting the string up by its indices and only pushing those
+                    // TODO：通过按索引拆分字符串并仅推送那些来优化此操作
                     // chu8nks
                     if indices.contains(&i) {
                         rendered.push_str(&index_style.style_string(&character.to_string()));
@@ -755,13 +755,13 @@ pub fn minimize_lines(
     line_count_to_remove: usize,
     selected_index: Option<usize>,
 ) -> (usize, usize, usize, usize) {
-    // returns: (start_index, anchor_index, end_index, lines_left_to_remove)
+    // 返回：(start_index, anchor_index, end_index, lines_left_to_remove)
     let (count_to_render, line_count_to_remove) = if line_count_to_remove > total_count {
         (1, line_count_to_remove.saturating_sub(total_count) + 1)
     } else {
         (total_count.saturating_sub(line_count_to_remove), 0)
     };
-    let anchor_index = selected_index.unwrap_or(0); // 5
+    let anchor_index = selected_index.unwrap_or(0); //  5
     let mut start_index = anchor_index.saturating_sub(count_to_render / 2);
     let mut end_index = start_index + count_to_render;
     if end_index > total_count {
@@ -822,13 +822,13 @@ pub fn render_unified_results(
         return;
     }
 
-    // Map selected_index (from original results) to filtered/cached position
+    // 将 selected_index（从原始结果）映射到过滤/缓存位置
     let filtered_selected =
         selected_index.and_then(|sel| cache.rows.iter().position(|r| r.original_index == sel));
 
-    // Calculate viewport range over the cached (already filtered) list
+    //  计算缓存（已过滤）列表上的视口范围
     let total = cache.rows.len();
-    let data_rows = max_rows.saturating_sub(1); // 1 for the empty header
+    let data_rows = max_rows.saturating_sub(1); //  1 用于空表头
     let (start, end) = if data_rows >= total {
         (0, total)
     } else {
@@ -843,7 +843,7 @@ pub fn render_unified_results(
         (s, e)
     };
 
-    // Hidden-item counts (single pass over two slices)
+    // 隐藏项计数（对两个切片的单次遍历）
     let (above_active, above_resurrectable) = count_by_kind(&cache.rows[..start]);
     let (below_active, below_resurrectable) = count_by_kind(&cache.rows[end..]);
 
@@ -851,7 +851,7 @@ pub fn render_unified_results(
     let has_hidden_below = below_active > 0 || below_resurrectable > 0;
     let has_hidden = has_hidden_above || has_hidden_below;
 
-    // 4th column content strings
+    //  第 4 列内容字符串
     let tab_header_full = "<TAB> Complete";
     let tab_header_short = "<TAB>";
 
@@ -924,7 +924,7 @@ pub fn render_unified_results(
         },
     );
 
-    // Use pre-computed widths from cache — no format!() allocations needed
+    // 使用缓存中的预计算宽度 — 无需 format!() 分配
     let (abbreviate_details, abbreviate_tags, abbreviate_fourth_col, name_max_width) =
         compute_reduction_tier(
             cache.full_name_width,
@@ -936,10 +936,10 @@ pub fn render_unified_results(
             max_cols,
         );
 
-    // Build table from cached data
+    //  从缓存数据构建表格
     let mut table = Table::new();
 
-    // Empty header row
+    // 空表头行
     table = table.add_styled_row(vec![
         Text::new(" "),
         Text::new(" "),
@@ -951,7 +951,7 @@ pub fn render_unified_results(
     for (row_index, row) in cache.rows[start..end].iter().enumerate() {
         let is_selected = filtered_selected == Some(start + row_index);
 
-        // Name cell — use cached string, only truncate if needed
+        // 名称单元格 — 使用缓存字符串，仅在需要时截断
         let display_name = match name_max_width {
             Some(max_w) => truncate_to_width(&row.session_name, max_w),
             None => row.session_name.clone(),
@@ -969,7 +969,7 @@ pub fn render_unified_results(
             name_cell = name_cell.color_indices(3, display_indices);
         }
 
-        // Details and tag cells — use cached pre-formatted strings
+        // 详情和标签单元格 — 使用缓存的预格式化字符串
         let color_ranges = if abbreviate_details {
             &row.abbr_details_color_ranges
         } else {
@@ -992,7 +992,7 @@ pub fn render_unified_results(
         };
         let tag_cell = Text::new(tag_text).color_range(0, ..);
 
-        // 4th column
+        //  第 4 列
         let fourth_cell = if row_index == 0 && has_hidden_above {
             let (summary_text, active_count, resurrectable_count) = if abbreviate_fourth_col {
                 (&above_summary_short, above_active, above_resurrectable)
@@ -1083,7 +1083,7 @@ pub fn render_screen_toggle(
             exited_sessions_text = exited_sessions_text.selected();
         },
         ActiveScreen::SingleScreen => {
-            // SingleScreen does not use the tab toggle; this arm exists for exhaustiveness
+            //  SingleScreen 不使用标签页切换；此分支存在是为了穷尽性
             return;
         },
     }
@@ -1514,19 +1514,19 @@ pub fn render_controls_line(
             let kill = colors.shortcuts("<Del>");
             let kill_text = colors.bold("Kill/Delete");
 
-            // Full: "Help: <Ctrl r> - Rename, <Ctrl x> - Disconnect others, <Del> - Kill/Delete" = 76 chars
+            //  完整："Help: <Ctrl r> - Rename, <Ctrl x> - Disconnect others, <Del> - Kill/Delete" = 76 字符
             if max_cols > 76 {
                 print!(
                     "\u{1b}[m\u{1b}[{y};{x}HHelp: {rename} - {rename_text}, {disconnect} - {disconnect_full_text}, {kill} - {kill_text}"
                 );
                 true
-            // Medium: "Help: <Ctrl r> - Rename, <Ctrl x> - Disconnect, <Del> - Kill/Delete" = 69 chars
+            //  中等："Help: <Ctrl r> - Rename, <Ctrl x> - Disconnect, <Del> - Kill/Delete" = 69 字符
             } else if max_cols > 69 {
                 print!(
                     "\u{1b}[m\u{1b}[{y};{x}HHelp: {rename} - {rename_text}, {disconnect} - {disconnect_short_text}, {kill} - {kill_text}"
                 );
                 true
-            // Compact: "<Ctrl r>/<Ctrl x>/<Del>" = 23 chars
+            //  紧凑："<Ctrl r>/<Ctrl x>/<Del>" = 23 字符
             } else if max_cols >= 23 {
                 print!("\u{1b}[m\u{1b}[{y};{x}H{rename}/{disconnect}/{kill}");
                 false
@@ -1544,10 +1544,10 @@ pub fn render_controls_line(
 }
 
 fn format_elapsed_time(elapsed_millis: u64) -> String {
-    // Convert elapsed milliseconds to Duration
+    //  将经过的毫秒数转换为 Duration
     let elapsed_duration = Duration::from_millis(elapsed_millis);
 
-    // Use humantime to format the duration, same as in resurrectable_sessions.rs
+    //  使用 humantime 格式化持续时间，与 resurrectable_sessions.rs 中相同
     let duration_str = format_duration(elapsed_duration).to_string();
     let duration_parts = duration_str.split_whitespace();
     let mut formatted_duration = String::new();
@@ -1572,7 +1572,7 @@ pub fn render_unsaved_changes_line(
     y: usize,
     last_saved_timestamp: Option<u64>,
 ) {
-    // Declare all text components
+    //  声明所有文本组件
     let shortcut_text = "<Ctrl a>";
     let full_action_text = "Save current session for resurrection";
     let medium_action_text = "Save session";
@@ -1588,14 +1588,14 @@ pub fn render_unsaved_changes_line(
         None => "(not saved)".to_string(),
     };
 
-    // Calculate component widths
+    //  计算组件宽度
     let shortcut_width = shortcut_text.width();
     let separator_width = separator.width();
     let space_width = space.width();
     let time_width = time_text.width();
 
-    // Calculate total widths for each display mode
-    // Format: "{shortcut}{separator}{action}{space}{time}"
+    //  计算每种显示模式的总宽度
+    //  格式："{shortcut}{separator}{action}{space}{time}"
     let full_width =
         shortcut_width + separator_width + full_action_text.width() + space_width + time_width;
     let medium_width =
@@ -1604,7 +1604,7 @@ pub fn render_unsaved_changes_line(
         shortcut_width + separator_width + short_action_text.width() + space_width + time_width;
     let minimal_width = shortcut_width + space_width + time_width;
 
-    // Select appropriate message based on available width
+    //  根据可用宽度选择适当的消息
     let msg = if max_cols >= full_width {
         format!(
             "{}{}{}{}{}",
@@ -1623,7 +1623,7 @@ pub fn render_unsaved_changes_line(
     } else if max_cols >= minimal_width {
         format!("{}{}{}", shortcut_text, space, time_text)
     } else {
-        return; // Not enough space to render
+        return; //  没有足够空间渲染
     };
 
     let text = Text::new(&msg)
@@ -1632,12 +1632,12 @@ pub fn render_unsaved_changes_line(
     print_text_with_coordinates(text, x, y, None, None);
 }
 
-// Maps the various prompts and UI elements to the colors to present them with
+// 将各种提示和界面元素映射到呈现它们的颜色
 //
-// Since this plugin predates the UI components, this is a developer
-// convenience to keep the coloration of dialogs organized by descriptive names
+// 由于此插件早于 UI 组件，这是一个开发者
+// 方便地按描述性名称组织对话框的着色
 //
-// It will be obviated once everything is migrated to UI components from zellij-tile
+// 一旦所有内容都从 zellij-tile 迁移到 UI 组件，这将被淘汰
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Colors {
     pub palette: Styling,
@@ -1694,14 +1694,14 @@ impl Colors {
     }
 }
 
-/// Computes the width reduction tier for the unified results table.
+///  计算统一结果表的宽度缩减层级。
 ///
-/// Returns `(abbreviate_details, abbreviate_tags, abbreviate_fourth_col, name_max_width)`.
-/// - Tier 0: everything fits at full size
-/// - Tier 1: abbreviate details only
-/// - Tier 2: abbreviate details + tags
-/// - Tier 3: abbreviate details + tags + 4th column
-/// - Tier 4: abbreviate all + truncate session names
+///  返回 `(abbreviate_details, abbreviate_tags, abbreviate_fourth_col, name_max_width)`。
+/// - 第 0 级：所有内容都能以完整大小显示
+/// - 第 1 级：仅缩写详情
+/// - 第 2 级：缩写详情 + 标签
+/// - 第 3 级：缩写详情 + 标签 + 第 4 列
+/// - 第 4 级：全部缩写 + 截断会话名称
 pub fn compute_reduction_tier(
     full_name_width: usize,
     full_details_width: usize,
@@ -1714,23 +1714,23 @@ pub fn compute_reduction_tier(
     let full_total =
         full_name_width + full_details_width + full_tag_width + full_fourth_col_width + 4;
     if full_total <= max_cols {
-        // Everything fits at full size
+        //  所有内容都能以完整大小显示
         (false, false, false, None)
     } else {
-        // Reduction 1: abbreviate details
+        //  缩减 1：缩写详情
         let total_after_details =
             full_name_width + abbr_details_width + full_tag_width + full_fourth_col_width + 4;
         if total_after_details <= max_cols {
             (true, false, false, None)
         } else {
-            // Reduction 2: abbreviate tags
-            let abbr_tag_width = 3; // "[A]" or "[R]"
+            //  缩减 2：缩写标签
+            let abbr_tag_width = 3; //  "[A]" 或 "[R]"
             let total_after_tags =
                 full_name_width + abbr_details_width + abbr_tag_width + full_fourth_col_width + 4;
             if total_after_tags <= max_cols {
                 (true, true, false, None)
             } else {
-                // Reduction 3: abbreviate 4th column
+                //  缩减 3：缩写第 4 列
                 let total_after_fourth = full_name_width
                     + abbr_details_width
                     + abbr_tag_width
@@ -1739,7 +1739,7 @@ pub fn compute_reduction_tier(
                 if total_after_fourth <= max_cols {
                     (true, true, true, None)
                 } else {
-                    // Reduction 4: truncate session names
+                    //  缩减 4：截断会话名称
                     let available_for_name = max_cols.saturating_sub(
                         abbr_details_width + abbr_tag_width + short_fourth_col_width + 4,
                     );
@@ -1776,13 +1776,13 @@ fn truncate_path(path: PathBuf, mut char_count_to_remove: usize) -> String {
 mod tests {
     use super::*;
 
-    // ---------------------------------------------------------------
-    // Section 8: Width Responsiveness (compute_reduction_tier)
-    // ---------------------------------------------------------------
+    //  ---------------------------------------------------------------
+    //  第 8 节：宽度响应式（compute_reduction_tier）
+    //  ---------------------------------------------------------------
 
     #[test]
     fn test_8_1_tier_0_full_width_everything_fits() {
-        // full_total = 20 + 30 + 11 + 15 + 4 = 80, max_cols = 120
+        //  full_total = 20 + 30 + 11 + 15 + 4 = 80，max_cols = 120
         let (abbr_details, abbr_tags, abbr_fourth, name_max) =
             compute_reduction_tier(20, 30, 11, 15, 10, 5, 120);
         assert_eq!(
@@ -1793,9 +1793,9 @@ mod tests {
 
     #[test]
     fn test_8_2_tier_1_abbreviate_details_only() {
-        // full_total = 20 + 30 + 11 + 15 + 4 = 80
-        // after abbr details: 20 + 10 + 11 + 15 + 4 = 60
-        // max_cols = 70: full doesn't fit (80 > 70), but abbr details fits (60 <= 70)
+        //  full_total = 20 + 30 + 11 + 15 + 4 = 80
+        //  缩写详情后：20 + 10 + 11 + 15 + 4 = 60
+        //  max_cols = 70：完整不适用（80 > 70），但缩写详情适用（60 <= 70）
         let (abbr_details, abbr_tags, abbr_fourth, name_max) =
             compute_reduction_tier(20, 30, 11, 15, 10, 5, 70);
         assert_eq!(
@@ -1806,10 +1806,10 @@ mod tests {
 
     #[test]
     fn test_8_3_tier_2_abbreviate_details_and_tags() {
-        // full_total = 20 + 30 + 11 + 15 + 4 = 80
-        // after abbr details: 20 + 10 + 11 + 15 + 4 = 60
-        // after abbr tags: 20 + 10 + 3 + 15 + 4 = 52
-        // max_cols = 55: abbr details doesn't fit (60 > 55), abbr tags fits (52 <= 55)
+        //  full_total = 20 + 30 + 11 + 15 + 4 = 80
+        //  缩写详情后：20 + 10 + 11 + 15 + 4 = 60
+        //  缩写标签后：20 + 10 + 3 + 15 + 4 = 52
+        //  max_cols = 55：缩写详情不适用（60 > 55），缩写标签适用（52 <= 55）
         let (abbr_details, abbr_tags, abbr_fourth, name_max) =
             compute_reduction_tier(20, 30, 11, 15, 10, 5, 55);
         assert_eq!(
@@ -1820,11 +1820,11 @@ mod tests {
 
     #[test]
     fn test_8_4_tier_3_abbreviate_details_tags_and_fourth_col() {
-        // full_total = 20 + 30 + 11 + 15 + 4 = 80
-        // after abbr details: 20 + 10 + 11 + 15 + 4 = 60
-        // after abbr tags: 20 + 10 + 3 + 15 + 4 = 52
-        // after abbr fourth: 20 + 10 + 3 + 5 + 4 = 42
-        // max_cols = 45: abbr tags doesn't fit (52 > 45), abbr fourth fits (42 <= 45)
+        //  full_total = 20 + 30 + 11 + 15 + 4 = 80
+        //  缩写详情后：20 + 10 + 11 + 15 + 4 = 60
+        //  缩写标签后：20 + 10 + 3 + 15 + 4 = 52
+        //  缩写第四列后：20 + 10 + 3 + 5 + 4 = 42
+        //  max_cols = 45：缩写标签不适用（52 > 45），缩写第四列适用（42 <= 45）
         let (abbr_details, abbr_tags, abbr_fourth, name_max) =
             compute_reduction_tier(20, 30, 11, 15, 10, 5, 45);
         assert_eq!(
@@ -1835,13 +1835,13 @@ mod tests {
 
     #[test]
     fn test_8_5_tier_4_truncate_session_names() {
-        // full_total = 20 + 30 + 11 + 15 + 4 = 80
-        // after abbr fourth: 20 + 10 + 3 + 5 + 4 = 42
-        // max_cols = 30: doesn't fit at tier 3 (42 > 30)
-        // available_for_name = 30 - (10 + 3 + 5 + 4) = 8
+        //  full_total = 20 + 30 + 11 + 15 + 4 = 80
+        //  缩写第四列后：20 + 10 + 3 + 5 + 4 = 42
+        //  max_cols = 30：在第 3 级不适用（42 > 30）
+        //  available_for_name = 30 - (10 + 3 + 5 + 4) = 8
         let (abbr_details, abbr_tags, abbr_fourth, name_max) =
             compute_reduction_tier(20, 30, 11, 15, 10, 5, 30);
         assert_eq!((abbr_details, abbr_tags, abbr_fourth), (true, true, true));
-        assert_eq!(name_max, Some(8)); // 30 - (10 + 3 + 5 + 4) = 8
+        assert_eq!(name_max, Some(8)); //  30 - (10 + 3 + 5 + 4) = 8
     }
 }

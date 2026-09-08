@@ -108,14 +108,14 @@ pub fn render_welcome_boundaries(rows: usize, cols: usize) {
                     "\u{1b}[m\u{1b}[{};{}H│\u{1b}[K",
                     i + 1,
                     right_boundary_x + 1
-                ); // this includes some
-                   // ANSI magic to delete
-                   // everything after this
-                   // boundary in order to
-                   // fix some rendering
-                   // bugs in the legacy
-                   // components of this
-                   // plugin
+                ); //  这包括一些
+                   //  用于删除的 ANSI 魔法
+                   //  在此之后的所有内容
+                   //  边界以便
+                   //  修复一些渲染
+                   //  旧版中的 bug
+                   //  此组件的
+                   //  插件
             }
         }
     }

@@ -39,10 +39,10 @@ pub enum UnifiedSearchResult {
     },
 }
 
-/// Which kind of entry was under the cursor when the user pressed `Delete`.
-/// Carries the session name so the host code can issue the right shim call
-/// (`kill_sessions` vs `delete_dead_session`) without re-borrowing the
-/// underlying `UnifiedSearchResult`.
+///  用户按 `Delete` 时光标下是哪种类型的条目。
+///  携带会话名称，以便主机代码可以发出正确的 shim 调用
+/// （`kill_sessions` 对比 `delete_dead_session`）无需重新借用
+///  底层的 `UnifiedSearchResult`。
 #[derive(Debug, Clone)]
 pub enum DeleteTarget {
     Active(String),
@@ -72,8 +72,8 @@ impl UnifiedSearchResult {
             UnifiedSearchResult::ResurrectableSession { score, .. } => *score,
         }
     }
-    /// Ordering by type (active before resurrectable), then by creation time ascending
-    /// (smaller elapsed duration = more recently created = appears first).
+    ///  按类型排序（活动的在可恢复的之前），然后按创建时间升序
+    /// （经过时间越短 = 创建越近 = 越靠前）。
     fn cmp_by_type_then_recency(&self, other: &Self) -> std::cmp::Ordering {
         match (self, other) {
             (
@@ -171,11 +171,11 @@ impl SingleScreenState {
         }
     }
 
-    /// After deleting an entry, ensure the cursor stays on a sensible row.
-    /// `update_search_term` already keeps the selection on the same entry by
-    /// name if it still exists; this method picks up the case where the
-    /// deleted entry **was** the selected one, by falling back to the same
-    /// numeric row clamped to the new `unified_results` length.
+    ///  删除条目后，确保光标停留在合理的行上。
+    ///`update_search_term` 已经通过以下方式保持选择在同一条目上
+    ///  名称（如果它仍然存在）；此方法处理以下情况：
+    ///  被删除的条目**是**选中的条目，通过回退到相同的
+    ///  数字行被限制为新的 `unified_results` 长度。
     pub fn restore_selection_after_delete(&mut self, previous_index: Option<usize>) {
         if self.selected_index.is_some() {
             return;
@@ -388,9 +388,9 @@ mod tests {
         (name.to_string(), Duration::from_secs(ctime_secs))
     }
 
-    // ---------------------------------------------------------------
-    // Section 1: Session Display and Sorting
-    // ---------------------------------------------------------------
+    //  ---------------------------------------------------------------
+    // 第 1 节：会话显示和排序
+    //  ---------------------------------------------------------------
 
     #[test]
     fn test_1_1_active_sessions_sorted_by_recency() {
@@ -403,7 +403,7 @@ mod tests {
         ];
         state.update_search_term(&active, &[]);
         assert_eq!(state.unified_results.len(), 3);
-        // Ascending creation_time: 100, 200, 300 (most recent first)
+        //  升序 creation_time：100, 200, 300（最新的在前）
         assert_eq!(state.unified_results[0].session_name(), "sess-100");
         assert_eq!(state.unified_results[1].session_name(), "sess-200");
         assert_eq!(state.unified_results[2].session_name(), "sess-300");
@@ -464,7 +464,7 @@ mod tests {
         ];
         state.update_search_term(&active, &[]);
         assert_eq!(state.unified_results.len(), 2);
-        // Current session should be present (filtering is done in renderer)
+        // 当前会话应存在（过滤在渲染器中完成）
         let has_current = state.unified_results.iter().any(|r| match r {
             UnifiedSearchResult::ActiveSession {
                 is_current_session, ..
@@ -502,9 +502,9 @@ mod tests {
         assert!(state.unified_results.is_empty());
     }
 
-    // ---------------------------------------------------------------
-    // Section 2: Search and Fuzzy Matching
-    // ---------------------------------------------------------------
+    //  ---------------------------------------------------------------
+    // 第 2 节：搜索和模糊匹配
+    //  ---------------------------------------------------------------
 
     #[test]
     fn test_2_1_empty_search_term_shows_all() {
@@ -550,7 +550,7 @@ mod tests {
         ];
         state.search_term = "mprj".to_string();
         state.update_search_term(&active, &[]);
-        // At least "my-project" should match (m, p, r, j fuzzy)
+        //  至少 "my-project" 应该匹配（m, p, r, j 模糊匹配）
         let has_my_project = state
             .unified_results
             .iter()
@@ -569,9 +569,9 @@ mod tests {
         state.search_term = "abc".to_string();
         state.update_search_term(&active, &[]);
         assert!(!state.unified_results.is_empty());
-        // "abc" (exact match) should have the highest score and appear first
+        //  "abc"（精确匹配）应该有最高分数并出现在最前面
         assert_eq!(state.unified_results[0].session_name(), "abc");
-        // Verify descending score order
+        // 验证降序分数顺序
         let scores: Vec<i64> = state
             .unified_results
             .iter()
@@ -593,7 +593,7 @@ mod tests {
         state.search_term = "test".to_string();
         state.update_search_term(&active, &resurrectable);
         assert!(state.unified_results.len() >= 2);
-        // Find positions of active and resurrectable with the same name
+        // 查找具有相同名称的活动和可恢复会话的位置
         let active_pos = state
             .unified_results
             .iter()
@@ -618,7 +618,7 @@ mod tests {
         ];
         state.search_term = "test".to_string();
         state.update_search_term(&active, &[]);
-        // At equal scores, ascending creation_time places test-b (50s) before test-a (100s)
+        //  在分数相同时，升序 creation_time 将 test-b（50秒）放在 test-a（100秒）之前
         let pos_a = state
             .unified_results
             .iter()
@@ -628,7 +628,7 @@ mod tests {
             .iter()
             .position(|r| r.session_name() == "test-b");
         if let (Some(a), Some(b)) = (pos_a, pos_b) {
-            // If scores are equal, test-b should come first (more recent)
+            // 如果分数相等，test-b 应该排在前面（更新）
             let score_a = match &state.unified_results[a] {
                 UnifiedSearchResult::ActiveSession { score, .. } => *score,
                 _ => 0,
@@ -666,21 +666,21 @@ mod tests {
             make_active_session("beta", 1, 1, 1, false, 200),
             make_active_session("gamma", 1, 1, 1, false, 300),
         ];
-        // Step 1: empty search, populate results
+        // 步骤 1：空搜索，填充结果
         state.search_term = String::new();
         state.update_search_term(&active, &[]);
-        // Step 2: select "beta" (find its index)
+        // 步骤 2：选择 "beta"（找到其索引）
         let beta_idx = state
             .unified_results
             .iter()
             .position(|r| r.session_name() == "beta")
             .unwrap();
         state.selected_index = Some(beta_idx);
-        // Step 3: search for "a" — beta does not match
+        // 步骤 3：搜索 "a" — beta 不匹配
         state.search_term = "a".to_string();
         state.update_search_term(&active, &[]);
-        // "beta" does not contain "a" in a way that fuzzy matches well.
-        // Check: if beta is not in results, selected_index should be None
+        //  "beta" 不包含能很好模糊匹配的 "a"。
+        //  检查：如果 beta 不在结果中，selected_index 应该为 None
         let beta_still_present = state
             .unified_results
             .iter()
@@ -688,7 +688,7 @@ mod tests {
         if !beta_still_present {
             assert_eq!(state.selected_index, None);
         } else {
-            // If beta still matches, selected_index should point to its new position
+            // 如果 beta 仍然匹配，selected_index 应该指向其新位置
             let new_beta_idx = state
                 .unified_results
                 .iter()
@@ -698,12 +698,12 @@ mod tests {
         }
     }
 
-    // ---------------------------------------------------------------
-    // Section 3: Selection and Navigation
-    // ---------------------------------------------------------------
+    //  ---------------------------------------------------------------
+    // 第 3 节：选择和导航
+    //  ---------------------------------------------------------------
 
     fn setup_results_with_current(state: &mut SingleScreenState, names: &[(&str, bool)]) {
-        // Directly populate unified_results for navigation tests
+        // 直接填充 unified_results 用于导航测试
         state.unified_results = names
             .iter()
             .enumerate()
@@ -741,9 +741,9 @@ mod tests {
             &mut state,
             &[("other-a", false), ("current", true), ("other-b", false)],
         );
-        state.selected_index = Some(2); // other-b, the last
+        state.selected_index = Some(2); // other-b，最后一个
         state.move_selection_down();
-        assert_eq!(state.selected_index, Some(0)); // wraps, skips current at 1
+        assert_eq!(state.selected_index, Some(0)); // 换行，在位置 1 跳过当前
     }
 
     #[test]
@@ -767,7 +767,7 @@ mod tests {
         );
         state.selected_index = Some(0);
         state.move_selection_up();
-        assert_eq!(state.selected_index, Some(2)); // wraps, skips current
+        assert_eq!(state.selected_index, Some(2)); // 换行，跳过当前
     }
 
     #[test]
@@ -807,15 +807,15 @@ mod tests {
         );
         state.selected_index = None;
         state.move_selection_down();
-        assert_eq!(state.selected_index, Some(0)); // "a"
+        assert_eq!(state.selected_index, Some(0)); //  "a"
         state.move_selection_down();
-        assert_eq!(state.selected_index, Some(2)); // "b", skip current at 1
+        assert_eq!(state.selected_index, Some(2)); //  "b"，在位置 1 跳过当前
         state.move_selection_down();
-        assert_eq!(state.selected_index, Some(3)); // "c"
+        assert_eq!(state.selected_index, Some(3)); //  "c"
         state.move_selection_down();
-        assert_eq!(state.selected_index, Some(4)); // "d"
+        assert_eq!(state.selected_index, Some(4)); //  "d"
         state.move_selection_down();
-        assert_eq!(state.selected_index, Some(0)); // "a", wrapped
+        assert_eq!(state.selected_index, Some(0)); //  "a"，已换行
     }
 
     #[test]
@@ -833,15 +833,15 @@ mod tests {
         );
         state.selected_index = None;
         state.move_selection_up();
-        assert_eq!(state.selected_index, Some(4)); // "d"
+        assert_eq!(state.selected_index, Some(4)); //  "d"
         state.move_selection_up();
-        assert_eq!(state.selected_index, Some(3)); // "c"
+        assert_eq!(state.selected_index, Some(3)); //  "c"
         state.move_selection_up();
-        assert_eq!(state.selected_index, Some(2)); // "b"
+        assert_eq!(state.selected_index, Some(2)); //  "b"
         state.move_selection_up();
-        assert_eq!(state.selected_index, Some(0)); // "a", skip current at 1
+        assert_eq!(state.selected_index, Some(0)); //  "a"，在位置 1 跳过当前
         state.move_selection_up();
-        assert_eq!(state.selected_index, Some(4)); // "d", wrapped
+        assert_eq!(state.selected_index, Some(4)); //  "d"，已换行
     }
 
     #[test]
@@ -862,9 +862,9 @@ mod tests {
         assert!(state.get_selected_result().is_none());
     }
 
-    // ---------------------------------------------------------------
-    // Section 4: Tab Completion
-    // ---------------------------------------------------------------
+    //  ---------------------------------------------------------------
+    // 第 4 节：标签页补全
+    //  ---------------------------------------------------------------
 
     #[test]
     fn test_4_1_basic_tab_completion() {
@@ -877,9 +877,9 @@ mod tests {
         state.search_term = String::new();
         state.update_search_term(&active, &[]);
         state.tab_complete(&active, &[]);
-        // First non-current in sorted results should be "alpha" or whichever is first
-        // With empty search, sorted by creation_time ascending: mine(100), alpha(200), beta(300)
-        // First non-current is "alpha"
+        // 排序结果中第一个非当前的应该是 "alpha" 或排在最前的那个
+        // 空搜索时，按 creation_time 升序排序：mine(100), alpha(200), beta(300)
+        // 第一个非当前的是 "alpha"
         assert_eq!(state.search_term, "alpha");
     }
 
@@ -928,15 +928,15 @@ mod tests {
         ];
         state.search_term = "zzz".to_string();
         state.update_search_term(&active, &[]);
-        // Results should be empty — no matches
+        // 结果应为空 — 无匹配
         assert!(state.unified_results.is_empty());
         state.tab_complete(&active, &[]);
-        assert_eq!(state.search_term, "zzz"); // unchanged
+        assert_eq!(state.search_term, "zzz"); // 未更改
     }
 
-    // ---------------------------------------------------------------
-    // Section 5: Mode Transitions
-    // ---------------------------------------------------------------
+    //  ---------------------------------------------------------------
+    // 第 5 节：模式转换
+    //  ---------------------------------------------------------------
 
     #[test]
     fn test_5_1_transition_to_layout_selection() {
@@ -945,7 +945,7 @@ mod tests {
         state.search_term = "my-session".to_string();
         state.transition_to_layout_selection();
         assert_eq!(state.mode, SingleScreenMode::SelectingLayout);
-        assert_eq!(state.search_term, "my-session"); // preserved
+        assert_eq!(state.search_term, "my-session"); // 已保留
     }
 
     #[test]

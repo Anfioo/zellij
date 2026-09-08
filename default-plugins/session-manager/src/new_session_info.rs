@@ -120,8 +120,8 @@ impl NewSessionInfo {
                 self.layout_list.clear_selection();
                 if switched_session {
                     if self.is_welcome_screen {
-                        // the welcome screen has done its job and now we need to quit this temporary
-                        // session so as not to leave garbage sessions behind
+                        //  欢迎屏幕已完成其工作，现在我们需要退出这个临时
+                        //  会话，以免留下垃圾会话
                         quit_zellij();
                     } else {
                         close_self();
@@ -139,7 +139,7 @@ impl NewSessionInfo {
         self.layout_list.update_layout_list(layout_info);
     }
     pub fn layout_list(&self, max_rows: usize) -> Vec<(LayoutInfo, bool)> {
-        // bool - is_selected
+        //  bool - is_selected
         let rtr = range_to_render(
             max_rows,
             self.layout_count(),
@@ -155,9 +155,9 @@ impl NewSessionInfo {
             .collect()
     }
     pub fn layouts_to_render(&self, max_rows: usize) -> Vec<(LayoutInfo, Vec<usize>, bool)> {
-        // (layout_info,
-        // search_indices,
-        // is_selected)
+        //  (layout_info,
+        //  search_indices,
+        //  is_selected)
         if self.is_searching() {
             self.layout_search_results(max_rows)
                 .into_iter()
@@ -177,7 +177,7 @@ impl NewSessionInfo {
         }
     }
     pub fn layout_search_results(&self, max_rows: usize) -> Vec<(LayoutSearchResult, bool)> {
-        // bool - is_selected
+        //  bool - is_selected
         let rtr = range_to_render(
             max_rows,
             self.layout_list.layout_search_results.len(),
@@ -228,7 +228,7 @@ impl LayoutList {
         let old_layout_length = self.layout_list.len();
         self.layout_list = layout_list;
         if old_layout_length != self.layout_list.len() {
-            // honestly, this is just the UX choice that sucks the least...
+            // 说实话，这只是最不糟糕的 UX 选择...
             self.clear_selection();
         }
     }
@@ -342,7 +342,7 @@ pub fn range_to_render(
     selected_index: Option<usize>,
 ) -> (usize, usize) {
     if table_rows <= results_len {
-        let row_count_to_render = table_rows.saturating_sub(1); // 1 for the title
+        let row_count_to_render = table_rows.saturating_sub(1); //  1 用于标题
         let first_row_index_to_render = selected_index
             .unwrap_or(0)
             .saturating_sub(row_count_to_render / 2);
@@ -376,9 +376,9 @@ mod tests {
         ll
     }
 
-    // ---------------------------------------------------------------
-    // Section 6: Layout List Navigation
-    // ---------------------------------------------------------------
+    //  ---------------------------------------------------------------
+    // 第 6 节：布局列表导航
+    //  ---------------------------------------------------------------
 
     #[test]
     fn test_6_1_layout_navigation_wraps_down() {
@@ -401,18 +401,18 @@ mod tests {
         let mut ll = make_layout_list(&["default", "compact", "development"]);
         ll.layout_search_term = "dev".to_string();
         ll.update_search_term();
-        // "development" should match
+        //  "development" 应该匹配
         let matched_names: Vec<&str> = ll
             .layout_search_results
             .iter()
             .map(|r| r.layout_info.name())
             .collect();
         assert!(matched_names.contains(&"development"));
-        // "default" and "compact" should not match "dev" well enough
-        // (though "default" starts with "de" so it might fuzzy-match — check)
-        // The key assertion is that "development" is present and is the best match.
-        // With SkimMatcherV2, "default" may also match "dev" (d, e from "default").
-        // So we just verify "development" is the top result.
+        //  "default" 和 "compact" 不应该足够好地匹配 "dev"
+        // （虽然 "default" 以 "de" 开头，所以可能模糊匹配 — 检查）
+        // 关键断言是 "development" 存在且是最佳匹配。
+        // 使用 SkimMatcherV2，"default" 也可能匹配 "dev"（来自 "default" 的 d, e）。
+        // 所以我们只验证 "development" 是最佳结果。
         assert_eq!(
             ll.layout_search_results[0].layout_info.name(),
             "development"
@@ -422,7 +422,7 @@ mod tests {
     #[test]
     fn test_6_4_selected_layout_info_returns_correct_layout() {
         let ll = make_layout_list(&["a", "b", "c"]);
-        // selected_layout_index defaults to 0, set to 1
+        // selected_layout_index 默认为 0，设置为 1
         let mut ll = ll;
         ll.selected_layout_index = 1;
         let info = ll.selected_layout_info();
@@ -438,20 +438,20 @@ mod tests {
         ]);
         ll.selected_layout_index = 5;
         let rendered = ll.layouts_to_render(5);
-        // Should return at most 5-1=4 entries (range_to_render subtracts 1 for title)
+        // 最多应返回 5-1=4 个条目（range_to_render 为标题减去 1）
         assert!(rendered.len() <= 5);
-        // The selected layout should be within the visible window
+        // 选中的布局应在可见窗口内
         let selected_visible = rendered.iter().any(|(_, _, is_selected)| *is_selected);
         assert!(selected_visible);
     }
 
-    // ---------------------------------------------------------------
-    // Section 7: Viewport Scrolling (range_to_render tests)
-    // ---------------------------------------------------------------
+    //  ---------------------------------------------------------------
+    // 第 7 节：视口滚动（range_to_render 测试）
+    //  ---------------------------------------------------------------
 
     #[test]
     fn test_7_1_all_results_fit_in_viewport() {
-        // When table_rows > results_len, all results are shown
+        // 当 table_rows > results_len 时，显示所有结果
         let (start, end) = range_to_render(10, 5, None);
         assert_eq!(start, 0);
         assert_eq!(end, 5);
@@ -472,8 +472,8 @@ mod tests {
         // table_rows=6, results_len=20, selected=19
         // row_count_to_render = 5, half = 2
         // first = 19-2 = 17, last = 17+5 = 22 > 20
-        // Note: range_to_render does NOT clamp — it returns (17, 22)
-        // The actual clamping happens in the caller via .take().skip()
+        // 注意：range_to_render 不进行限制 — 它返回 (17, 22)
+        // 实际的限制通过调用者的 .take().skip() 进行
         let (start, end) = range_to_render(6, 20, Some(19));
         assert_eq!(start, 17);
         assert_eq!(end, 22);

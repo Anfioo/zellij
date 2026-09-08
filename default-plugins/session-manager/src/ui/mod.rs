@@ -34,7 +34,7 @@ macro_rules! render_assets {
                 selected_asset.make_selected(true);
                 selected_asset.add_truncated_results(truncated_result_count_above);
                 if anchor_asset_index + 1 >= end_index {
-                    // no more results below, let's add the more indication if we need to
+                    // 下面没有更多结果了，如果需要的话我们添加更多指示
                     selected_asset.add_truncated_results(truncated_result_count_below);
                 }
                 current_index += 1;
@@ -81,7 +81,7 @@ impl SessionList {
                     let mut render_arrows = true;
                     for line_to_render in result_lines.iter_mut() {
                         line_to_render.make_selected_as_search(render_arrows);
-                        render_arrows = false; // only render arrows on the first search result
+                        render_arrows = false; // 仅在第一个搜索结果上渲染箭头
                     }
                 }
                 lines_to_render.append(&mut result_lines);
@@ -254,8 +254,8 @@ impl SessionUiInfo {
                 .map(|t| t.line_count(&selected_index))
             {
                 Some(line_count_of_selected_tab) => {
-                    // we add the line count in the selected tab minus 1 because we will account
-                    // for the selected tab line itself in self.tabs.len() below
+                    // 我们添加选中标签页中的行数减 1，因为我们将在下面的
+                    // self.tabs.len() 中计算选中标签页行本身
                     line_count += line_count_of_selected_tab.saturating_sub(1);
                     line_count += self.tabs.len();
                 },

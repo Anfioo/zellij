@@ -142,7 +142,7 @@ impl SessionList {
         }
     }
     pub fn get_selected_pane_id(&self) -> Option<(u32, bool)> {
-        // (pane_id, is_plugin)
+        //  (pane_id, is_plugin)
         if self.is_searching {
             self.selected_search_index
                 .and_then(|i| self.search_results.get(i))
@@ -276,7 +276,7 @@ impl SessionList {
         self.session_ui_infos.get(index)
     }
     pub fn result_expand(&mut self) {
-        // we can't move this to SelectedIndex because the borrow checker is mean
+        // 我们不能将其移到 SelectedIndex，因为借用检查器很严格
         match self.selected_index {
             SelectedIndex(Some(selected_session), None, None) => {
                 let selected_session_has_tabs = self
@@ -321,12 +321,12 @@ impl SessionList {
     pub fn reset_selected_index(&mut self) {
         self.selected_index.reset();
     }
-    /// After deleting one or more entries (and re-running `update_search_term`
-    /// to rebuild `search_results`), put the cursor back on a sensible
-    /// neighbour at the same numeric row -- the entry that took the deleted
-    /// row's slot, or the last entry if the deleted row was at the end. The
-    /// caller passes the indices captured **before** the deletion so this
-    /// method can clamp them to the new list/search lengths.
+    ///删除一个或多个条目后（并重新运行 `update_search_term`
+    ///以重建 `search_results`），将光标放回合理的
+    ///  相同数字行的相邻条目 -- 占据了被删除
+    ///  行位置的条目，或者如果被删除行在末尾则是最后一个条目。
+    ///  调用者传递在删除**之前**捕获的索引，因此此
+    ///  方法可以将它们限制为新的列表/搜索长度。
     pub fn restore_selection_after_delete(
         &mut self,
         was_searching: bool,
@@ -337,9 +337,9 @@ impl SessionList {
             let len = self.search_results.len();
             self.selected_search_index = clamp_index_after_delete(prev_search_idx, len);
         } else {
-            // Tab / pane subselectors point into a session that has just
-            // shifted in the list; clear them so the top-level index alone
-            // describes the new selection.
+            // 标签页/窗格子选择器指向一个刚刚
+            // 在列表中移动的会话；清除它们，以便仅顶层索引
+            // 描述新的选择。
             self.selected_index.1 = None;
             self.selected_index.2 = None;
             self.selected_index.0 =
@@ -374,10 +374,10 @@ impl SessionList {
     }
 }
 
-/// Clamp a pre-delete index to a post-delete length. Returns the same
-/// numeric row when it still exists (so the cursor lands on whatever entry
-/// took the deleted row's slot), the last index when the deletion happened
-/// at the tail, or `None` when the list is now empty.
+///  将删除前索引限制为删除后长度。返回相同的
+///  数字行（当它仍然存在时，这样光标会落在任何条目上
+///  占据了被删除行的位置），删除发生时的最后一个索引
+///在末尾，或列表现在为空时为 `None`。
 pub fn clamp_index_after_delete(prev_index: Option<usize>, new_len: usize) -> Option<usize> {
     if new_len == 0 {
         return None;

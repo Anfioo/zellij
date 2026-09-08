@@ -241,7 +241,7 @@ impl ZellijPlugin for State {
                     self.sessions.update_rows(room_for_list);
                     let list =
                         self.sessions
-                            .render(room_for_list, width.saturating_sub(7), self.colors); // 7 for various ui
+                            .render(room_for_list, width.saturating_sub(7), self.colors); //  7 用于各种界面
                     for (i, line) in list.iter().enumerate() {
                         print!("\u{1b}[{};{}H{}", y + i + 5, x, line.render());
                     }
@@ -258,16 +258,16 @@ impl ZellijPlugin for State {
                         } else if self.show_kill_all_sessions_warning {
                             self.render_kill_all_sessions_warning(height, width, x, y);
                         } else {
-                            // Use max_table_rows as fixed content height so the
-                            // prompt position stays stable regardless of result count
+                            // 使用 max_table_rows 作为固定内容高度，这样
+                            // 提示位置无论结果数量如何都保持稳定
                             let max_table_rows = height.saturating_sub(5);
-                            let content_height = 2 + max_table_rows; // prompt + header + max data rows
-                                                                     // Available space above help lines (2 help rows at bottom)
+                            let content_height = 2 + max_table_rows; // 提示 + 表头 + 最大数据行
+                                                                     //  帮助行上方的可用空间（底部 2 行帮助）
                             let available = height.saturating_sub(3);
                             let y_offset = y + available.saturating_sub(content_height) / 2;
 
-                            // Horizontal centering: cap content block and center
-                            // within the full pane width
+                            // 水平居中：限制内容块并居中
+                            // 在整个窗格宽度内
                             let content_width = std::cmp::min(width, 90);
                             let x_centered = x + (width.saturating_sub(content_width)) / 2;
 
@@ -327,7 +327,7 @@ impl ZellijPlugin for State {
                             esc,
                         );
 
-                        // Render layout selection
+                        // 渲染布局选择
                         let layout_search_term =
                             &self.single_screen_state.layout_list.layout_search_term;
                         let search_term_len = layout_search_term.len();
@@ -388,7 +388,7 @@ impl ZellijPlugin for State {
                         }
                         print_table_with_coordinates(table, x, y + 4, None, None);
 
-                        // Render folder prompt
+                        // 渲染文件夹提示
                         self.render_single_screen_folder_prompt(
                             x,
                             (y + height).saturating_sub(3),
@@ -429,8 +429,8 @@ impl ZellijPlugin for State {
             let _ = render_controls_line(self.active_screen, width, self.colors, x, rows);
         }
         if self.is_welcome_screen {
-            render_welcome_boundaries(rows, cols); // explicitly done in the end to override some
-                                                   // stuff, see comment in function
+            render_welcome_boundaries(rows, cols); // 明确在最后执行以覆盖一些
+                                                   // 内容，参见函数中的注释
         }
     }
 }
@@ -491,10 +491,10 @@ impl State {
                 let mut config = BTreeMap::new();
                 let mut args = BTreeMap::new();
                 self.request_ids.push(request_id.to_string());
-                // we insert this into the config so that a new plugin will be opened (the plugin's
-                // uniqueness is determined by its name/url as well as its config)
+                // 我们将其插入配置中，以便打开一个新插件（插件的
+                // 唯一性由其名称/url 以及配置决定）
                 config.insert("request_id".to_owned(), request_id.to_string());
-                // we also insert this into the args so that the plugin will have an easier access to
+                // 我们还将其插入 args 中，以便插件可以更轻松地访问
                 // it
                 args.insert("request_id".to_owned(), request_id.to_string());
                 pipe_message_to_plugin(
@@ -681,7 +681,7 @@ impl State {
                 },
                 BareKey::Char('a') if key.has_modifiers(&[KeyModifier::Ctrl]) => {
                     if !self.is_welcome_screen {
-                        // we don't want to save welcome screen sessions
+                        // 我们不想保存欢迎屏幕会话
                         if let Err(e) = save_session() {
                             self.show_error(&format!("Couldn't save session: {}", e));
                         }
@@ -754,7 +754,7 @@ impl State {
     fn handle_single_screen_search_key(&mut self, key: KeyWithModifier) -> bool {
         let mut should_render = false;
 
-        // Handle kill-all warning overlay first
+        // 首先处理 kill-all 警告覆盖层
         if self.show_kill_all_sessions_warning {
             match key.bare_key {
                 BareKey::Char('y') if key.has_no_modifiers() => {
@@ -792,7 +792,7 @@ impl State {
             return should_render;
         }
 
-        // Handle rename overlay
+        // 处理重命名覆盖层
         if self.renaming_session_name.is_some() {
             match key.bare_key {
                 BareKey::Enter if key.has_no_modifiers() => {
@@ -1016,10 +1016,10 @@ impl State {
         match self.active_screen {
             ActiveScreen::NewSession => {
                 if self.new_session_info.name().len() >= 108 {
-                    // this is due to socket path limitations
-                    // TODO: get this from Zellij (for reference: this is part of the interprocess
-                    // package, we should get if from there if possible because it's configurable
-                    // through the package)
+                    //  这是由于套接字路径限制
+                    //  TODO: 从 Zellij 获取（参考：这是 interprocess 的一部分
+                    //  包，如果可能的话我们应该从那里获取，因为它是可配置的
+                    //  通过包）
                     self.show_error("Session name must be shorter than 108 bytes");
                     return;
                 } else if self.new_session_info.name().contains('/') {
@@ -1038,19 +1038,19 @@ impl State {
                 if let Some(renaming_session_name) = &self.renaming_session_name.take() {
                     if renaming_session_name.is_empty() {
                         self.show_error("New name must not be empty.");
-                        return; // so that we don't hide self
+                        return; //  这样我们就不会隐藏自己
                     } else if self.session_name.as_ref() == Some(renaming_session_name) {
-                        // noop - we're already called that!
-                        return; // so that we don't hide self
+                        //  空操作 - 我们已经调用过了！
+                        return; //  这样我们就不会隐藏自己
                     } else if self.sessions.has_session(&renaming_session_name) {
                         self.show_error("A session by this name already exists.");
-                        return; // so that we don't hide self
+                        return; //  这样我们就不会隐藏自己
                     } else if self
                         .resurrectable_sessions
                         .has_session(&renaming_session_name)
                     {
                         self.show_error("A resurrectable session by this name already exists.");
-                        return; // s that we don't hide self
+                        return; //  这样我们就不会隐藏自己
                     } else {
                         if renaming_session_name.contains('/') {
                             self.show_error("Session names cannot contain '/'");
@@ -1058,7 +1058,7 @@ impl State {
                         }
                         self.update_current_session_name_in_ui(&renaming_session_name);
                         rename_session(&renaming_session_name);
-                        return; // s that we don't hide self
+                        return; //  这样我们就不会隐藏自己
                     }
                 }
                 let mut switched_session = false;
@@ -1092,8 +1092,8 @@ impl State {
                 self.sessions
                     .update_search_term(&self.search_term, &self.colors);
                 if self.is_welcome_screen {
-                    // the welcome screen has done its job and now we need to quit this temporary
-                    // session so as not to leave garbage sessions behind
+                    //  欢迎屏幕已完成其工作，现在我们需要退出这个临时
+                    //  会话，以免留下垃圾会话
                     quit_zellij();
                 } else if switched_session {
                     close_self();
@@ -1107,8 +1107,8 @@ impl State {
                 {
                     switch_session(Some(&session_name_to_resurrect));
                     if self.is_welcome_screen {
-                        // the welcome screen has done its job and now we need to quit this temporary
-                        // session so as not to leave garbage sessions behind
+                        //  欢迎屏幕已完成其工作，现在我们需要退出这个临时
+                        //  会话，以免留下垃圾会话
                         quit_zellij();
                     } else {
                         close_self();
@@ -1116,7 +1116,7 @@ impl State {
                 }
             },
             ActiveScreen::SingleScreen => {
-                // Handle rename
+                //  处理重命名
                 if let Some(renaming_session_name) = &self.renaming_session_name.take() {
                     if renaming_session_name.is_empty() {
                         self.show_error("New name must not be empty.");
@@ -1146,7 +1146,7 @@ impl State {
                 match self.single_screen_state.mode {
                     SingleScreenMode::SearchAndSelect => {
                         if let Some(result) = self.single_screen_state.get_selected_result() {
-                            // User navigated to a specific result
+                            //  用户导航到了特定结果
                             let session_name = result.session_name().to_owned();
                             let mut switched_session = false;
                             match result {
@@ -1175,10 +1175,10 @@ impl State {
                                 hide_self();
                             }
                         } else {
-                            // No navigation - use typed name
+                            //  无导航 - 使用输入的名称
                             let typed_name = self.single_screen_state.search_term.clone();
 
-                            // Validate name
+                            //  验证名称
                             if typed_name.len() >= 108 {
                                 self.show_error("Session name must be shorter than 108 bytes");
                                 return;
@@ -1194,7 +1194,7 @@ impl State {
                                 return;
                             }
 
-                            // Check exact match against active sessions
+                            //  检查与活动会话的精确匹配
                             if self.sessions.has_session(&typed_name) {
                                 if self.session_name.as_deref() == Some(&typed_name) {
                                     self.show_error("Already attached...");
@@ -1208,7 +1208,7 @@ impl State {
                                 }
                                 return;
                             }
-                            // Check exact match against resurrectable sessions
+                            //  检查与可恢复会话的精确匹配
                             if self.resurrectable_sessions.has_session(&typed_name) {
                                 switch_session(Some(&typed_name));
                                 if self.is_welcome_screen {
@@ -1218,7 +1218,7 @@ impl State {
                                 }
                                 return;
                             }
-                            // No match - transition to layout selection
+                            //  无匹配 - 转换到布局选择
                             self.single_screen_state.transition_to_layout_selection();
                         }
                     },
@@ -1262,7 +1262,7 @@ impl State {
             ActiveScreen::NewSession => ActiveScreen::AttachToSession,
             ActiveScreen::AttachToSession => ActiveScreen::ResurrectSession,
             ActiveScreen::ResurrectSession => ActiveScreen::NewSession,
-            ActiveScreen::SingleScreen => ActiveScreen::SingleScreen, // no-op
+            ActiveScreen::SingleScreen => ActiveScreen::SingleScreen, //  空操作
         };
     }
     fn show_error(&mut self, error_text: &str) {
@@ -1323,11 +1323,11 @@ impl State {
                 if self.is_web_client && !s.web_clients_allowed {
                     None
                 } else if self.is_welcome_screen && s.is_current_session {
-                    // do not display current session if we're the welcome screen
-                    // because:
-                    // 1. attaching to the welcome screen from the welcome screen is not a thing
-                    // 2. it can cause issues on the web (since we're disconnecting and
-                    //    reconnecting to a session we just closed by disconnecting...)
+                    //  如果我们是欢迎屏幕，则不显示当前会话
+                    //  因为：
+                    //  1. 从欢迎屏幕附加到欢迎屏幕是不存在的
+                    //  2. 这可能在网页上导致问题（因为我们正在断开连接并
+                    //    重新连接到我们刚通过断开连接关闭的会话...）
                     None
                 } else {
                     Some(SessionUiInfo::from_session_info(s))
@@ -1358,7 +1358,7 @@ impl State {
             .set_sessions(session_ui_infos, forbidden_sessions);
     }
     fn main_menu_size(&self, rows: usize, cols: usize) -> (usize, usize, usize, usize) {
-        // x, y, width, height
+        //  x, y, width, height
         let width = if self.is_welcome_screen {
             std::cmp::min(cols, 101)
         } else {
