@@ -8,22 +8,23 @@ use crate::data::FloatingPaneCoordinates;
 use crate::input::layout::{PercentOrFixed, SplitDirection, SplitSize};
 use crate::position::Position;
 
-/// 包含 [`Pane`]（或更一般地，任何终端）的位置和大小，以字符行和列计量。
+/// Contains the position and size of a [`Pane`], or more generally of any terminal, measured
+/// in character rows and columns.
 #[derive(Clone, Copy, Default, Debug, Serialize, Deserialize)]
 pub struct PaneGeom {
     pub x: usize,
     pub y: usize,
     pub rows: Dimension,
     pub cols: Dimension,
-    pub stacked: Option<usize>,          // usize - 堆叠 id
-    pub is_pinned: bool,                 // 仅对浮动窗格有效
-    pub logical_position: Option<usize>, // 在布局中放置此窗格时相关
+    pub stacked: Option<usize>,          // usize - stack id
+    pub is_pinned: bool,                 // only relevant to floating panes
+    pub logical_position: Option<usize>, // relevant when placing this pane in a layout
 }
 
 impl PartialEq for PaneGeom {
     fn eq(&self, other: &Self) -> bool {
-        // 比较除 is_pinned 外的所有字段
-        // 注意：请保持与 `Hash` trait 实现的同步。
+        // compare all except is_pinned
+        // NOTE: Keep this in sync with what the `Hash` trait impl does.
         self.x == other.x
             && self.y == other.y
             && self.rows == other.rows
@@ -34,7 +35,7 @@ impl PartialEq for PaneGeom {
 
 impl std::hash::Hash for PaneGeom {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        // 注意：请保持与 `PartialEq` trait 实现的同步。
+        // NOTE: Keep this in sync with what the `PartiqlEq` trait impl does.
         self.x.hash(state);
         self.y.hash(state);
         self.rows.hash(state);
@@ -131,11 +132,12 @@ impl Dimension {
     }
 
     pub fn set_inner(&mut self, inner: usize) {
-        self.inner = inner
+        self.inner = inner;
     }
 
     pub fn adjust_inner(&mut self, full_size: usize) -> f64 {
-        // 返回四舍五入产生的余数（如果有）
+        // returns the leftover from
+        // rounding if any
         // TODO: elsewhere?
         match self.constraint {
             Constraint::Percent(percent) => {
@@ -221,9 +223,9 @@ impl Dimension {
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
 pub enum Constraint {
-    /// 将维度约束为固定的整数行/列数
+    /// Constrains the dimension to a fixed, integer number of rows / columns
     Fixed(usize),
-    /// 将维度约束为整个屏幕的灵活百分比大小
+    /// Constrains the dimension to a flexible percent size of the total screen
     Percent(f64),
 }
 
@@ -355,7 +357,8 @@ impl PaneGeom {
         }
     }
     pub fn combine_vertically_with_many(&self, geoms_below: &Vec<PaneGeom>) -> Option<Self> {
-        // 这里我们期望这些 geom 按 y 排序且是连续的（即相同的 x 和宽度，无重叠），并且在 self 下方
+        // here we expect the geoms to be sorted by their y and be contiguous (i.e. same x and
+        // width, no overlaps) and be below self
         let mut combined = self.clone();
         for geom_below in geoms_below {
             match (combined.rows.constraint, geom_below.rows.constraint) {
@@ -379,7 +382,8 @@ impl PaneGeom {
         &self,
         geoms_to_the_right: &Vec<PaneGeom>,
     ) -> Option<Self> {
-        // 这里我们期望这些 geom 按 x 排序且是连续的（即相同的 x 和宽度，无重叠），并且在 self 右侧
+        // here we expect the geoms to be sorted by their x and be contiguous (i.e. same x and
+        // width, no overlaps) and be right of self
         let mut combined = self.clone();
         for geom_to_the_right in geoms_to_the_right {
             match (combined.cols.constraint, geom_to_the_right.cols.constraint) {
@@ -454,7 +458,8 @@ impl Offset {
         }
     }
 
-    // FIXME: 这应该是 top 和 left，而不是 bottom 和 right，但 `boundaries.rs` 需要做一些修改
+    // FIXME: This should be top and left, not bottom and right, but `boundaries.rs` would need
+    // some changing
     pub fn shift(bottom: usize, right: usize) -> Self {
         Self {
             bottom,

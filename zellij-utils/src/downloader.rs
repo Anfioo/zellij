@@ -32,8 +32,9 @@ pub enum DownloaderError {
 pub struct Downloader {
     client: Option<HttpClient>,
     location: PathBuf,
-    // 整个结构是一个 Arc/Mutex，以便 Downloader 是线程安全的，
-    // 而 HashMap 中各个值也是 Arc/Mutex（Mutexi?），表示各个下载不应并发进行
+    // the whole thing is an Arc/Mutex so that Downloader is thread safe, and the individual values of
+    // the HashMap are Arc/Mutexes (Mutexi?) to represent that individual downloads should not
+    // happen concurrently
     download_locks: Arc<Mutex<HashMap<String, Arc<Mutex<()>>>>>,
 }
 
@@ -78,10 +79,11 @@ impl Downloader {
             None => self.parse_name(url)?,
         };
 
-        // 我们这样做是为了确保同一时间只有一个特定 url 的下载在进行，
-        // 否则下载会互相损坏（并且我们会浪费大量系统资源）
+        // we do this to make sure only one download of a specific url is happening at a time
+        // otherwise the downloads corrupt each other (and we waste lots of system resources)
         let download_lock = self.acquire_download_lock(&file_name).await;
-        // 重要的是 _lock 要保持在作用域内，否则它会被丢弃，锁会在下载完成前被释放
+        // it's important that _lock remains in scope, otherwise it gets dropped and the lock is
+        // released before the download is complete
         let _lock = download_lock.lock().await;
 
         let file_path = self.location.join(file_name.as_str());
@@ -165,22 +167,24 @@ impl Downloader {
         Ok(stringified)
     }
 
-    /// 下载 URL 的内容并阻塞等待结果。
+    /// Download the content of a URL and block for the result.
     ///
-    /// 封装对 [`download_without_cache`] 的 `async` 调用，使其可以从同步代码中使用。
-    /// 实现方式为以下两种之一：
+    /// Wraps the `async` call to [`download_without_cache`] such that it can be used from sync
+    /// code. This is achieved by either:
     ///
-    /// 1. 如果当前线程中存在异步运行时，则复用现有的异步运行时，或者
-    /// 2. 在当前线程上生成一个新的异步运行时
+    /// 1. Reusing an existing async runtime in case one is present in the current thread, or
+    /// 2. Spawning a new async runtime on the current thread
     ///
-    /// 如果两者都不可行，则返回错误。
+    /// If neither of these works, an error is returned instead.
     ///
-    /// # 注意
+    /// # Note
     ///
-    /// 目前，此函数仅用于弥合异步 [`Downloader`] 实现与最终调用此函数的同步 [`Layout`] 代码之间的差距。
-    /// 这是必要的，因为 Layout 代码无法在不进行大量重构的情况下轻易变为 `async`，
-    /// 而 Downloader 在许多其他地方与异步代码一起使用，无法合理地变为同步。
-    /// 也许将来，当这里周围的更多代码变为异步时，我们可以移除这个函数。
+    /// At the moment, this function is only here to bridge the gap between the async
+    /// [`Downloader`] impl and the sync [`Layout`] code that ultimately calls this function. This
+    /// is needed since the Layout code can't trivially be turned `async` without a lot of
+    /// refactoring, while the Downloader is used in many other places with async code and can't
+    /// sensibly be sync. Maybe in the future, when more code around here is async, we can drop
+    /// this function.
     pub fn download_without_cache_blocking(url: &str) -> Result<String, DownloaderError> {
         let runtime_handle = match tokio::runtime::Handle::try_current() {
             Ok(handle) => handle.clone(),
@@ -190,13 +194,13 @@ impl Downloader {
                     .build()
                     .map_err(DownloaderError::Io)?;
                 runtime.handle().clone()
-            }
+            },
             _ => {
                 return Err(DownloaderError::Io(std::io::Error::new(
                     std::io::ErrorKind::Other,
                     "failed to spawn runtime for download task",
                 )))
-            }
+            },
         };
         runtime_handle.block_on(async move { Downloader::download_without_cache(url).await })
     }
