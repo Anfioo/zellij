@@ -80,7 +80,7 @@ impl PresetsScreen {
             if let Some(selected_index) = self.selected_index.take() {
                 let write_to_disk = false;
                 self.reconfigure(selected_index, write_to_disk);
-                self.notification = Some("Configuration applied to current session.".to_owned());
+                self.notification = Some("配置已应用到当前会话。".to_owned());
             } else {
                 self.reset_selected_index();
             }
@@ -89,7 +89,7 @@ impl PresetsScreen {
             if let Some(selected_index) = self.take_selected_index() {
                 let write_to_disk = true;
                 self.reconfigure(selected_index, write_to_disk);
-                self.notification = Some("Configuration applied and saved to disk.".to_owned());
+                self.notification = Some("配置已应用并保存到磁盘。".to_owned());
                 should_render = true;
             }
         } else if key.bare_key == BareKey::Char('l') && key.has_no_modifiers() {
@@ -348,8 +348,8 @@ impl PresetsScreen {
         if cols >= widths.0 {
             let title_text_1 = "Hi there! How would you like to interact with Zellij?";
             let title_text_2 = "Not sure? Press <ENTER> to choose Default.";
-            let title_text_3 = "Everything can always be changed later.";
-            let title_text_4 = "Tips appear on screen - you don't need to remember anything.";
+            let title_text_3 = "一切都可在之后随时更改。";
+            let title_text_4 = "提示会显示在屏幕上——你无需记住任何内容。";
             let left_padding = cols.saturating_sub(widths.0) / 2;
             let first_row_coords = (rows.saturating_sub(ui_size) / 2).saturating_sub(1);
             print_text_with_coordinates(
@@ -384,10 +384,10 @@ impl PresetsScreen {
                 None,
             );
         } else {
-            let title_text_1 = "Hi there! Which do you prefer?";
+            let title_text_1 = "你好！你更喜欢哪一种？";
             let title_text_2 = "Not sure? Press <ENTER>";
-            let title_text_3 = "Can be changed later. Tips appear";
-            let title_text_4 = "on screen - no need to remember";
+            let title_text_3 = "之后可更改。提示显示在屏幕上，";
+            let title_text_4 = "无需记住任何内容";
             let left_padding = if cols >= widths.1 {
                 cols.saturating_sub(widths.1) / 2
             } else {
@@ -443,7 +443,7 @@ impl PresetsScreen {
     ) {
         let widths = self.main_screen_widths(primary_modifier_key_text);
         let primary_modifier_key_text_len = primary_modifier_key_text.chars().count();
-        let default_text = "1. Default";
+        let default_text = "1. 默认";
         let (mut list_items, max_width) = if cols >= widths.0 {
             let list_items = vec![
                 NestedListItem::new(default_text).color_range(1, ..),
@@ -502,15 +502,15 @@ impl PresetsScreen {
         } else {
             let list_items = vec![
                 NestedListItem::new(default_text).color_range(1, ..),
-                NestedListItem::new("Directly, eg.:").indent(1),
-                NestedListItem::new(format!("{} p - PANE mode", primary_modifier_key_text))
+                NestedListItem::new("直接使用，例如：").indent(1),
+                NestedListItem::new(format!("{} p - 窗格模式", primary_modifier_key_text))
                     .color_range(3, ..primary_modifier_key_text_len + 3)
                     .color_range(
                         2,
                         primary_modifier_key_text_len + 5..primary_modifier_key_text_len + 10,
                     )
                     .indent(1),
-                NestedListItem::new(format!("{} t - TAB mode", primary_modifier_key_text))
+                NestedListItem::new(format!("{} t - 标签页模式", primary_modifier_key_text))
                     .color_range(3, ..primary_modifier_key_text_len + 3)
                     .color_range(
                         2,
@@ -539,7 +539,7 @@ impl PresetsScreen {
         primary_modifier_key_text: &str,
         ui_size: usize,
     ) {
-        let unlock_first_text = "2. Unlock First (non-colliding)";
+        let unlock_first_text = "2. 先解锁（无冲突）";
         let widths = self.main_screen_widths(primary_modifier_key_text);
         let primary_modifier_key_text_len = primary_modifier_key_text.chars().count();
         let (mut list_items, max_width) = if cols >= widths.0 {
@@ -622,13 +622,13 @@ impl PresetsScreen {
             (list_items, max_width)
         } else {
             let list_items = vec![
-                NestedListItem::new("2. Unlock First").color_range(1, ..),
+                NestedListItem::new("2. 先解锁").color_range(1, ..),
                 NestedListItem::new(format!(
-                    "{} g + single key, eg.:",
+                    "{} g + 单个按键，例如：",
                     primary_modifier_key_text
                 ))
                 .indent(1),
-                NestedListItem::new(format!("{} g + p PANE mode", primary_modifier_key_text))
+                NestedListItem::new(format!("{} g + p 窗格模式", primary_modifier_key_text))
                     .color_range(3, ..primary_modifier_key_text_len + 3)
                     .color_range(
                         3,
@@ -639,7 +639,7 @@ impl PresetsScreen {
                         primary_modifier_key_text_len + 7..primary_modifier_key_text_len + 11,
                     )
                     .indent(1),
-                NestedListItem::new(format!("{} g + t TAB mode", primary_modifier_key_text))
+                NestedListItem::new(format!("{} g + t 标签页模式", primary_modifier_key_text))
                     .color_range(3, ..primary_modifier_key_text_len + 3)
                     .color_range(
                         3,
@@ -684,7 +684,7 @@ impl PresetsScreen {
 
         if cols >= widths.0 {
             let leader_key_text = format!(
-                "Leader keys: {} - modes, {} - quicknav and shortcuts",
+                "引导键：{} - 模式，{} - 快速导航和快捷键",
                 primary_modifier_key_text, secondary_modifier_key_text
             );
             let left_padding = cols.saturating_sub(widths.0) / 2;
@@ -704,7 +704,7 @@ impl PresetsScreen {
             )
         } else {
             let leader_key_text = format!(
-                "Leaders: {}, {}",
+                "引导键：{}，{}",
                 primary_modifier_key_text, secondary_modifier_key_text
             );
             let left_padding = if cols >= widths.1 {
@@ -764,7 +764,7 @@ impl PresetsScreen {
     ) {
         let widths = self.main_screen_widths(primary_modifier_key_text);
         if cols >= widths.0 {
-            let title_text = "Override keybindings with one of the following presets:";
+            let title_text = "使用以下预设之一覆盖键位绑定：";
             let left_padding = cols.saturating_sub(widths.0) / 2;
             print_text_with_coordinates(
                 Text::new(title_text).color_range(2, ..),
@@ -774,7 +774,7 @@ impl PresetsScreen {
                 None,
             );
         } else {
-            let title_text = "Override keybindings:";
+            let title_text = "覆盖键位绑定：";
             let left_padding = if cols >= widths.1 {
                 cols.saturating_sub(widths.1) / 2
             } else {
@@ -822,17 +822,17 @@ impl PresetsScreen {
     fn warning_text(&self, max_width: usize) -> Option<String> {
         if self.needs_kitty_support() {
             if max_width >= 38 {
-                Some(String::from("Warning: requires supporting terminal."))
+                Some(String::from("警告：需要支持的终端。"))
             } else {
-                Some(String::from("Requires supporting terminal"))
+                Some(String::from("需要支持的终端"))
             }
         } else if self.primary_modifier.is_empty() && self.secondary_modifier.is_empty() {
             if max_width >= 49 {
                 Some(String::from(
-                    "Warning: no leaders defined. UI will be disabled.",
+                    "警告：未定义引导键。界面将被禁用。",
                 ))
             } else {
-                Some(String::from("No leaders. UI will be unusable."))
+                Some(String::from("没有引导键。界面将不可用。"))
             }
         } else {
             None
