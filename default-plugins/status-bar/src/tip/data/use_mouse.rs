@@ -22,8 +22,8 @@ macro_rules! strings {
 }
 
 pub fn use_mouse_full(help: &ModeInfo) -> LinePart {
-    // Tip: Use the mouse to switch pane focus, scroll through the pane
-    // scrollbuffer, switch or scroll through tabs
+    // 提示：使用鼠标切换窗格焦点、滚动窗格
+    // 回滚缓冲区、切换或滚动标签页
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_2);
 
     strings!(&[
@@ -34,8 +34,8 @@ pub fn use_mouse_full(help: &ModeInfo) -> LinePart {
 }
 
 pub fn use_mouse_medium(help: &ModeInfo) -> LinePart {
-    // Tip: Use the mouse to switch panes/tabs or scroll through the pane
-    // scrollbuffer
+    // 提示：使用鼠标切换窗格/标签页或滚动窗格
+    // 回滚缓冲区
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_2);
 
     strings!(&[
@@ -46,7 +46,7 @@ pub fn use_mouse_medium(help: &ModeInfo) -> LinePart {
 }
 
 pub fn use_mouse_short(help: &ModeInfo) -> LinePart {
-    // Tip: Use the mouse to switch panes/tabs or scroll
+    // 提示：使用鼠标切换窗格/标签页或滚动
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_2);
 
     strings!(&[

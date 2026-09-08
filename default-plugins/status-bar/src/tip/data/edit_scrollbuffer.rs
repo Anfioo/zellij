@@ -22,8 +22,8 @@ macro_rules! strings {
 }
 
 pub fn edit_scrollbuffer_full(help: &ModeInfo) -> LinePart {
-    // Tip: Search through the scrollbuffer using your default $EDITOR with
-    // Ctrl + <s> + <e>
+    // 提示：使用默认的 $EDITOR 搜索回滚缓冲区，快捷键为
+    //  Ctrl + <s> + <e>
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     let mut bits = vec![
@@ -37,8 +37,8 @@ pub fn edit_scrollbuffer_full(help: &ModeInfo) -> LinePart {
 }
 
 pub fn edit_scrollbuffer_medium(help: &ModeInfo) -> LinePart {
-    // Tip: Search the scrollbuffer using your $EDITOR with
-    // Ctrl + <s> + <e>
+    // 提示：使用你的 $EDITOR 搜索回滚缓冲区，快捷键为
+    //  Ctrl + <s> + <e>
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     let mut bits = vec![
@@ -52,8 +52,8 @@ pub fn edit_scrollbuffer_medium(help: &ModeInfo) -> LinePart {
 }
 
 pub fn edit_scrollbuffer_short(help: &ModeInfo) -> LinePart {
-    // Search using $EDITOR with
-    // Ctrl + <s> + <e>
+    // 使用 $EDITOR 搜索，快捷键为
+    //  Ctrl + <s> + <e>
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     let mut bits = vec![

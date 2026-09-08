@@ -17,7 +17,7 @@ macro_rules! strings {
 }
 
 pub fn move_focus_hjkl_tab_switch_full(help: &ModeInfo) -> LinePart {
-    // Tip: When changing focus with Alt + <←↓↑→> moving off screen left/right focuses the next tab.
+    // 提示：使用 Alt + <←↓↑→> 改变焦点时，移出屏幕左/右边缘会聚焦下一个标签页。
     let mut bits = vec![
         Style::new().paint(" Tip: "),
         Style::new().paint("When changing focus with "),
@@ -28,7 +28,7 @@ pub fn move_focus_hjkl_tab_switch_full(help: &ModeInfo) -> LinePart {
 }
 
 pub fn move_focus_hjkl_tab_switch_medium(help: &ModeInfo) -> LinePart {
-    // Tip: Changing focus with Alt + <←↓↑→> off screen focuses the next tab.
+    // 提示：使用 Alt + <←↓↑→> 改变焦点时移出屏幕会聚焦下一个标签页。
     let mut bits = vec![
         Style::new().paint(" Tip: "),
         Style::new().paint("Changing focus with "),
@@ -39,7 +39,7 @@ pub fn move_focus_hjkl_tab_switch_medium(help: &ModeInfo) -> LinePart {
 }
 
 pub fn move_focus_hjkl_tab_switch_short(help: &ModeInfo) -> LinePart {
-    // Alt + <←↓↑→> off screen edge focuses next tab.
+    //  Alt + <←↓↑→> 离开屏幕边缘时聚焦下一个标签页。
     let mut bits = add_keybinds(help);
     bits.push(Style::new().paint(" off screen edge focuses next tab."));
     strings!(&bits)
@@ -59,7 +59,7 @@ fn add_keybinds<'a>(help: &'a ModeInfo) -> Vec<ANSIString<'a>> {
         ],
     );
 
-    // Let's see if we have some pretty groups in common here
+    // 让我们看看这里是否有一些共同的漂亮分组
     let mut arrows = vec![];
     let mut letters = vec![];
     for key in move_focus_keys.into_iter() {

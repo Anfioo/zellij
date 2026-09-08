@@ -739,7 +739,7 @@ fn render_common_modifiers(
     separator: &str,
 ) {
     let prefix_text = if mode_info.capabilities.arrow_fonts {
-        // Add extra space in simplified ui
+        //  在简化界面中添加额外空格
         format!(
             " {} + ",
             common_modifiers
@@ -787,7 +787,7 @@ fn render_secondary_info(
     let (secondary_keybinds, new_pane_range, floating_range) =
         secondary_keybinds(&help, tab_info, max_len, new_pane_hovered, floating_hovered);
     secondary_info.append(&secondary_keybinds);
-    let remaining_space = max_len.saturating_sub(secondary_info.len).saturating_sub(1); // 1 for the end padding of the line
+    let remaining_space = max_len.saturating_sub(secondary_info.len).saturating_sub(1); //  1 用于行的末端内边距
     let mut padding = String::new();
     let mut padding_len = 0;
     for _ in 0..remaining_space {
@@ -830,7 +830,7 @@ fn secondary_keybinds(
     let mut floating_range;
     let binds = &help.get_mode_keybinds();
     let should_show_focus_and_resize_shortcuts = should_show_focus_and_resize_shortcuts(tab_info);
-    // New Pane
+    // 新窗格
     let new_pane_action_key = action_key(
         binds,
         &[Action::NewPane {
@@ -850,7 +850,7 @@ fn secondary_keybinds(
             vec![]
         };
 
-    // Resize
+    // 调整大小
     let resize_increase_action_key = action_key(
         binds,
         &[Action::Resize {
@@ -881,10 +881,10 @@ fn secondary_keybinds(
         resize_shortcuts.push(resize_decrease_key.clone());
     }
 
-    // Move focus
+    // 移动焦点
     let mut move_focus_shortcuts: Vec<KeyWithModifier> = vec![];
 
-    // Left
+    // 左
     let move_focus_left_action_key = action_key(
         binds,
         &[Action::MoveFocusOrTab {
@@ -898,7 +898,7 @@ fn secondary_keybinds(
     if let Some(move_focus_left_key) = move_focus_left_key {
         move_focus_shortcuts.push(move_focus_left_key.clone());
     }
-    // Down
+    // 下
     let move_focus_left_action_key = action_key(
         binds,
         &[Action::MoveFocus {
@@ -912,7 +912,7 @@ fn secondary_keybinds(
     if let Some(move_focus_left_key) = move_focus_left_key {
         move_focus_shortcuts.push(move_focus_left_key.clone());
     }
-    // Up
+    // 上
     let move_focus_left_action_key = action_key(
         binds,
         &[Action::MoveFocus {
@@ -926,7 +926,7 @@ fn secondary_keybinds(
     if let Some(move_focus_left_key) = move_focus_left_key {
         move_focus_shortcuts.push(move_focus_left_key.clone());
     }
-    // Right
+    // 右
     let move_focus_left_action_key = action_key(
         binds,
         &[Action::MoveFocusOrTab {
@@ -1401,7 +1401,7 @@ fn add_shortcut(
         return ret;
     }
 
-    ret.append(&style_key_with_modifier(&keys, key_color_index, dimmed)); // TODO: alternate
+    ret.append(&style_key_with_modifier(&keys, key_color_index, dimmed)); //  TODO: 交替
                                                                           //
     let ribbon = if dimmed {
         serialize_ribbon(&Text::new(format!("{}", text)).disabled())
@@ -1413,9 +1413,9 @@ fn add_shortcut(
     ret.part = format!("{}{}", ret.part, ribbon);
     let supports_arrow_fonts = !help.capabilities.arrow_fonts;
     ret.len += if supports_arrow_fonts {
-        text.width() + 4 // padding and arrow fonts
+        text.width() + 4 //  内边距和箭头字体
     } else {
-        text.width() + 2 // padding
+        text.width() + 2 //  内边距
     };
     ret
 }
@@ -1475,9 +1475,9 @@ fn add_shortcut_with_inline_key(
     ret.part = ribbon;
     let supports_arrow_fonts = !capabilities.arrow_fonts;
     ret.len += if supports_arrow_fonts {
-        text.width() + key_string.width() + 7 // padding, group boundaries and arrow fonts
+        text.width() + key_string.width() + 7 //  内边距、组边界和箭头字体
     } else {
-        text.width() + key_string.width() + 5 // padding and group boundaries
+        text.width() + key_string.width() + 5 //  内边距和组边界
     };
 
     ret
@@ -1515,9 +1515,9 @@ fn add_shortcut_with_key_only(
     ret.part = ribbon;
     let supports_arrow_fonts = !help.capabilities.arrow_fonts;
     ret.len += if supports_arrow_fonts {
-        key_string.width() + 4 // 4 => arrow fonts + padding
+        key_string.width() + 4 //  4 => 箭头字体 + 内边距
     } else {
-        key_string.width() + 2 // 2 => padding
+        key_string.width() + 2 //  2 => 内边距
     };
     ret
 }
@@ -1582,7 +1582,7 @@ fn add_keygroup_separator(help: &ModeInfo, max_len: usize) -> Option<LinePart> {
                 .bold()
                 .paint(format!(" {} ", mode_help_text)),
         );
-        ret.len += mode_help_text.width() + 2; // 2 => padding
+        ret.len += mode_help_text.width() + 2; //  2 => 内边距
     }
     bits.push(
         Style::new()
@@ -1606,7 +1606,7 @@ fn add_keygroup_separator(help: &ModeInfo, max_len: usize) -> Option<LinePart> {
             .paint(format!("{}", separator)),
     );
     ret.part = format!("{}{}", ret.part, ANSIStrings(&bits));
-    ret.len += 3; // padding and arrow fonts
+    ret.len += 3; //  内边距和箭头字体
 
     if ret.len <= max_len {
         Some(ret)
@@ -1644,27 +1644,27 @@ fn get_keys_and_hints(mi: &ModeInfo) -> Vec<(String, String, Vec<KeyWithModifier
     let mut old_keymap = mi.get_mode_keybinds();
     let s = |string: &str| string.to_string();
 
-    // Find a keybinding to get back to "Normal" input mode. In this case we prefer '\n' over other
-    // choices. Do it here before we dedupe the keymap below!
+    //  查找返回 "Normal" 输入模式的快捷键绑定。在这种情况下，我们优先选择 '\n' 而非其他
+    //  选项。在下面对 keymap 去重之前在此处执行！
     let base_mode = mi.base_mode;
     let to_basemode_keys = base_mode.map(|b| action_key(&old_keymap, &[to_base_mode(b)])).unwrap_or_else(|| action_key(&old_keymap, &[TO_NORMAL]));
     let to_basemode_key = if to_basemode_keys.contains(&KeyWithModifier::new(BareKey::Enter)) {
         vec![KeyWithModifier::new(BareKey::Enter)]
     } else {
-        // Yield `vec![key]` if `to_normal_keys` has at least one key, or an empty vec otherwise.
+        //  如果 `to_normal_keys` 至少有一个按键，则产生 `vec![key]`，否则产生空 vec。
         to_basemode_keys.into_iter().take(1).collect()
     };
 
-    // Sort and deduplicate the keybindings first. We sort after the `Key`s, and deduplicate by
-    // their `Action` vectors. An unstable sort is fine here because if the user maps anything to
-    // the same key again, anything will happen...
+    //  首先对快捷键绑定进行排序和去重。我们按 `Key` 排序，并按
+    //  其 `Action` 向量去重。这里不稳定排序是可以的，因为如果用户将任何内容再次映射到
+    //  同一个键，什么都可能发生...
     old_keymap.sort_unstable_by(|(keya, _), (keyb, _)| keya.partial_cmp(keyb).unwrap());
 
     let mut known_actions: Vec<Vec<Action>> = vec![];
     let mut km = vec![];
     for (key, acvec) in old_keymap {
         if known_actions.contains(&acvec) {
-            // This action is known already
+            //  此操作已知
             continue;
         } else {
             known_actions.push(acvec.to_vec());
@@ -1689,12 +1689,12 @@ fn get_keys_and_hints(mi: &ModeInfo) -> Vec<(String, String, Vec<KeyWithModifier
         (s("Stack"), s("Stack"), single_action_key(&km, &[A::NewStackedPane{command: None, pane_name: None, near_current_pane: false, no_focus: false, tab_id: None}, TO_NORMAL])),
         (s("Select pane"), s("Select"), to_basemode_key),
     ]} else if mi.mode == IM::Tab {
-        // With the default bindings, "Move focus" for tabs is tricky: It binds all the arrow keys
-        // to moving tabs focus (left/up go left, right/down go right). Since we sort the keys
-        // above and then dedpulicate based on the actions, we will end up with LeftArrow for
-        // "left" and DownArrow for "right". What we really expect is to see LeftArrow and
+        // 使用默认绑定时，标签页的 "Move focus" 很棘手：它绑定所有方向键
+        // 到移动标签页焦点（左/上向左，右/下向右）。由于我们对按键排序
+        // 然后根据操作去重，我们最终会得到 LeftArrow 用于
+        // "left" 和 DownArrow 用于 "right"。我们真正期望看到的是 LeftArrow 和
         // RightArrow.
-        // FIXME: So for lack of a better idea we just check this case manually here.
+        //  FIXME: 由于没有更好的办法，我们在这里手动检查这种情况。
         let old_keymap = mi.get_mode_keybinds();
         let focus_keys_full: Vec<KeyWithModifier> = action_key_group(&old_keymap,
             &[&[A::GoToPreviousTab], &[A::GoToNextTab]]);
@@ -2007,7 +2007,7 @@ fn style_key_with_modifier(
         .collect::<Vec<_>>()
         .join("-");
 
-    // Prints the keys
+    //  打印按键
     let key = keyvec
         .iter()
         .map(|key| {
@@ -2019,7 +2019,7 @@ fn style_key_with_modifier(
         })
         .collect::<Vec<String>>();
 
-    // Special handling of some pre-defined keygroups
+    //  对某些预定义按键组的特殊处理
     let key_string = key.join("");
     let key_separator = match &key_string[..] {
         "HJKL" => "",

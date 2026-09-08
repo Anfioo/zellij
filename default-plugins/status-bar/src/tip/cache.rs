@@ -24,13 +24,13 @@ pub type LocalCacheResult = Result<LocalCache, LocalCacheError>;
 
 #[derive(Error, Debug)]
 pub enum LocalCacheError {
-    // Io error
+    //  Io 错误
     #[error("IoError: {0}")]
     Io(#[from] io::Error),
-    // Io error with path context
+    //  带路径上下文的 Io 错误
     #[error("IoError: {0}, File: {1}")]
     IoPath(io::Error, PathBuf),
-    // Deserialization error
+    //  反序列化错误
     #[error("Deserialization error: {0}")]
     Serde(#[from] serde_json::Error),
 }

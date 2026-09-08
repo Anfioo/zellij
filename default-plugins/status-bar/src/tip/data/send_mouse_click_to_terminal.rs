@@ -22,7 +22,7 @@ macro_rules! strings {
 }
 
 pub fn mouse_click_to_terminal_full(help: &ModeInfo) -> LinePart {
-    // Tip: SHIFT + <mouse-click> bypasses Zellij and sends the mouse click directly to the terminal
+    // 提示：SHIFT + <鼠标点击> 绕过 Zellij，直接将鼠标点击发送到终端
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_2);
     let orange_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
@@ -36,7 +36,7 @@ pub fn mouse_click_to_terminal_full(help: &ModeInfo) -> LinePart {
 }
 
 pub fn mouse_click_to_terminal_medium(help: &ModeInfo) -> LinePart {
-    // Tip: SHIFT + <mouse-click> sends the click directly to the terminal
+    // 提示：SHIFT + <鼠标点击> 直接将点击发送到终端
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_2);
     let orange_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
     strings!(&[
@@ -49,7 +49,7 @@ pub fn mouse_click_to_terminal_medium(help: &ModeInfo) -> LinePart {
 }
 
 pub fn mouse_click_to_terminal_short(help: &ModeInfo) -> LinePart {
-    // Tip: SHIFT + <mouse-click>  => sends click to terminal.
+    // 提示：SHIFT + <鼠标点击> => 将点击发送到终端。
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_2);
     let orange_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 

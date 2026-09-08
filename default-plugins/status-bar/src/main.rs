@@ -24,10 +24,10 @@ use second_line::{
 };
 use tip::utils::get_cached_tip_name;
 
-// for more of these, copy paste from: https://en.wikipedia.org/wiki/Box-drawing_character
+//  更多此类字符，请从以下地址复制：https://en.wikipedia.org/wiki/Box-drawing_character
 static ARROW_SEPARATOR: &str = "";
 static MORE_MSG: &str = " ... ";
-/// Shorthand for `Action::SwitchToMode{input_mode: InputMode::Normal}`.
+///  `Action::SwitchToMode{input_mode: InputMode::Normal}` 的简写。
 const TO_NORMAL: Action = Action::SwitchToMode {
     input_mode: InputMode::Normal,
 };
@@ -75,7 +75,7 @@ pub struct ColoredElements {
     pub unselected: SegmentStyle,
     pub unselected_alternate: SegmentStyle,
     pub disabled: SegmentStyle,
-    // superkey
+    //  超级键
     pub superkey_prefix: Style,
     pub superkey_suffix_separator: Style,
 }
@@ -90,10 +90,10 @@ pub struct SegmentStyle {
     pub suffix_separator: Style,
 }
 
-// I really hate this, but I can't come up with a good solution for this,
-// we need different colors from palette for the default theme
-// plus here we can add new sources in the future, like Theme
-// that can be defined in the config perhaps
+//  我真的很讨厌这样，但我想不出一个好的解决方案，
+//  我们需要从调色板中为默认主题获取不同的颜色
+//  此外，将来我们可以在这里添加新的来源，比如 Theme
+//  也许可以在配置中定义
 fn color_elements(
     palette: Styling,
     different_color_alternates: bool,
@@ -231,7 +231,7 @@ fn col_in_range(range: Option<(usize, usize)>, col: usize) -> bool {
 
 impl ZellijPlugin for State {
     fn load(&mut self, configuration: BTreeMap<String, String>) {
-        // TODO: Should be able to choose whether to use the cache through config.
+        //  TODO: 应该能够通过配置选择是否使用缓存。
         self.tip_name = get_cached_tip_name();
         self.classic_ui = configuration
             .get("classic")
@@ -366,15 +366,15 @@ impl ZellijPlugin for State {
         self.new_pane_ribbon_range = None;
         self.floating_ribbon_range = None;
 
-        //TODO: Switch to UI components here
+        //TODO: 在这里切换到 UI 组件
         let active_tab = self.tabs.iter().find(|t| t.active);
         let first_line = first_line(&self.mode_info, active_tab, cols, separator);
         let second_line = self.second_line(cols);
         let show_nested_session_hint = self.mode_info.session_dimmed.unwrap_or(false)
             || self.mode_info.session_ascended.unwrap_or(false);
 
-        // [48;5;238m is white background, [0K is so that it fills the rest of the line
-        // [m is background reset, [0K is so that it clears the rest of the line
+        //  [48;5;238m 是白色背景，[0K 用于填充行的其余部分
+        //  [m 是背景重置，[0K 用于清除行的其余部分
         match background {
             PaletteColor::Rgb((r, g, b)) => {
                 if rows > 1 {
@@ -468,12 +468,12 @@ pub fn get_common_modifiers(mut keyvec: Vec<&KeyWithModifier>) -> Vec<KeyModifie
     common_modifiers.into_iter().collect()
 }
 
-/// Get key from action pattern(s).
+///  从操作模式中获取按键。
 ///
-/// This function takes as arguments a `keymap` that is a `Vec<(Key, Vec<Action>)>` and contains
-/// all keybindings for the current mode and one or more `p` patterns which match a sequence of
-/// actions to search for. If within the keymap a sequence of actions matching `p` is found, all
-/// keys that trigger the action pattern are returned as vector of `Vec<Key>`.
+///此函数接受一个 `keymap`（即 `Vec<(Key, Vec<Action>)>`）作为参数，其中包含
+///当前模式的所有快捷键绑定以及一个或多个匹配操作序列的 `p` 模式
+///要搜索的操作。如果在 keymap 中找到匹配 `p` 的操作序列，所有
+///触发该操作模式的按键将作为 `Vec<Key>` 向量返回。
 pub fn action_key(
     keymap: &[(KeyWithModifier, Vec<Action>)],
     action: &[Action],
@@ -496,9 +496,9 @@ pub fn action_key(
         .collect::<Vec<KeyWithModifier>>()
 }
 
-/// Get multiple keys for multiple actions.
+///  为多个操作获取多个按键。
 ///
-/// An extension of [`action_key`] that iterates over all action tuples and collects the results.
+///  [`action_key`] 的扩展，遍历所有操作元组并收集结果。
 pub fn action_key_group(
     keymap: &[(KeyWithModifier, Vec<Action>)],
     actions: &[&[Action]],
@@ -510,25 +510,25 @@ pub fn action_key_group(
     ret
 }
 
-/// Style a vector of [`Key`]s with the given [`Palette`].
+///使用给定的 [`Palette`] 为 [`Key`] 向量设置样式。
 ///
-/// Creates a line segment of style `<KEYS>`, with correct theming applied: The brackets have the
-/// regular text color, the enclosed keys are painted green and bold. If the keys share a common
-/// modifier (See [`get_common_modifier`]), it is printed in front of the keys, painted green and
-/// bold, separated with a `+`: `MOD + <KEYS>`.
+///创建一个样式为 `<KEYS>` 的线段，应用正确的主题：括号具有
+///常规文本颜色，包裹的按键被涂成绿色并加粗。如果按键共享一个通用
+///修饰键（参见 [`get_common_modifier`]），则将其打印在按键前面，涂成绿色并
+///加粗，用 `+` 分隔：`MOD + <KEYS>`。
 ///
-/// If multiple [`Key`]s are given, the individual keys are separated with a `|` char. This does
-/// not apply to the following groups of keys which are treated specially and don't have a
-/// separator between them:
+///如果给出多个 [`Key`]，各个按键用 `|` 字符分隔。这不适
+///用于以下特殊处理的按键组，它们之间没有
+///分隔符：
 ///
-/// - "hjkl"
-/// - "HJKL"
-/// - "←↓↑→"
-/// - "←→"
-/// - "↓↑"
+///- "hjkl"
+///- "HJKL"
+///- "←↓↑→"
+///- "←→"
+///- "↓↑"
 ///
-/// The returned Vector of [`ANSIString`] is suitable for transformation into an [`ANSIStrings`]
-/// type.
+///返回的 [`ANSIString`] 向量适合转换为 [`ANSIStrings`]
+///类型。
 pub fn style_key_with_modifier(
     keyvec: &[KeyWithModifier],
     palette: &Styling,
@@ -567,7 +567,7 @@ pub fn style_key_with_modifier(
     };
     ret.push(painted_modifier);
 
-    // Prints key group start
+    //  打印按键组开始
     let group_start_str = if no_common_modifier { "<" } else { " + <" };
     if let Some(background) = background {
         let background = palette_match!(background);
@@ -581,7 +581,7 @@ pub fn style_key_with_modifier(
         ret.push(Style::new().fg(text_color).paint(group_start_str));
     }
 
-    // Prints the keys
+    //  打印按键
     let key = keyvec
         .iter()
         .map(|key| {
@@ -604,7 +604,7 @@ pub fn style_key_with_modifier(
         })
         .collect::<Vec<String>>();
 
-    // Special handling of some pre-defined keygroups
+    //  对某些预定义按键组的特殊处理
     let key_string = key.join("");
     let key_separator = match &key_string[..] {
         "HJKL" => "",
@@ -728,7 +728,7 @@ pub mod tests {
             KeyWithModifier::new(BareKey::Char('z')).with_alt_modifier(),
         ];
         let ret = get_common_modifiers(keyvec.iter().collect());
-        assert_eq!(ret, vec![]); // no common modifiers
+        assert_eq!(ret, vec![]); //  没有通用修饰键
     }
 
     #[test]
@@ -739,7 +739,7 @@ pub mod tests {
             KeyWithModifier::new(BareKey::Char('z')).with_alt_modifier(),
         ];
         let ret = get_common_modifiers(keyvec.iter().collect());
-        assert_eq!(ret, vec![]); // no common modifiers
+        assert_eq!(ret, vec![]); //  没有通用修饰键
     }
 
     #[test]
@@ -791,7 +791,7 @@ pub mod tests {
     fn action_key_group_two_patterns() {
         let keymap = big_keymap();
         let ret = action_key_group(&keymap, &[&[Action::ScrollDown], &[Action::ScrollUp]]);
-        // Mind the order!
+        //  注意顺序！
         assert_eq!(
             ret,
             vec![

@@ -23,8 +23,8 @@ macro_rules! strings {
 }
 
 pub fn move_tabs_full(help: &ModeInfo) -> LinePart {
-    // Tip: Wrong order of tabs? You can move them to left and right with:
-    // Alt + i (left) and Alt + o (right)
+    // 提示：标签页顺序不对？你可以使用以下方式左右移动它们：
+    //  Alt + i（左）和 Alt + o（右）
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_2);
 
     let bits = vec![
@@ -39,8 +39,8 @@ pub fn move_tabs_full(help: &ModeInfo) -> LinePart {
 }
 
 pub fn move_tabs_medium(help: &ModeInfo) -> LinePart {
-    // Tip: You can move tabs to left and right with:
-    // Alt + i (left) and Alt + o (right)
+    // 提示：你可以使用以下方式左右移动标签页：
+    //  Alt + i（左）和 Alt + o（右）
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_2);
 
     let bits = vec![
@@ -55,7 +55,7 @@ pub fn move_tabs_medium(help: &ModeInfo) -> LinePart {
 }
 
 pub fn move_tabs_short(help: &ModeInfo) -> LinePart {
-    // Move tabs with: Alt + i (left) and Alt + o (right)
+    // 移动标签页：Alt + i（左）和 Alt + o（右）
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_2);
 
     let bits = vec![

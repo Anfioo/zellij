@@ -81,29 +81,29 @@ fn full_shortcut_list_nonstandard_mode(help: &ModeInfo) -> LinePart {
     line_part
 }
 
-/// Collect all relevant keybindings and hints to display.
+///  收集所有要显示的相关快捷键绑定和提示。
 ///
-/// Creates a vector with tuples containing the following entries:
+///创建一个包含以下条目的元组向量：
 ///
-/// - A String to display for this keybinding when there are no size restrictions,
-/// - A shortened String (where sensible) to display if the whole second line becomes too long,
-/// - A `Vec<Key>` of the keys that map to this keyhint
+///- 当没有大小限制时，为此快捷键绑定显示的 String，
+///- 如果整个第二行变得太长时显示的缩短 String（在合理情况下），
+///- 映射到此按键提示的按键的 `Vec<Key>`
 ///
-/// This vector is created by iterating over the keybindings for the current [`InputMode`] and
-/// storing all Keybindings that match pre-defined patterns of `Action`s. For example, the
-/// `InputMode::Pane` input mode determines which keys to display for the "Move focus" hint by
-/// searching the keybindings for anything that matches the `Action::MoveFocus(_)` action. Since by
-/// default multiple keybindings map to some action patterns (e.g. `Action::MoveFocus(_)` is bound
-/// to "hjkl", the arrow keys and "Alt + <hjkl>"), we deduplicate the vector of all keybindings
-/// before processing it.
+///此向量通过遍历当前 [`InputMode`] 的快捷键绑定并
+///存储所有匹配预定义 `Action` 模式的快捷键绑定。例如，
+///`InputMode::Pane` 输入模式通过以下方式确定为 "Move focus" 提示显示哪些按键：
+///在快捷键绑定中搜索匹配 `Action::MoveFocus(_)` 操作的内容。由于默认
+///默认情况下多个快捷键绑定映射到某些操作模式（例如 `Action::MoveFocus(_)` 绑定到
+///"hjkl"、方向键和 "Alt + <hjkl>"），我们对所有快捷键绑定的向量进行去重
+///在处理之前。
 ///
-/// Therefore we sort it by the [`Key`]s of the current keymap and deduplicate the resulting sorted
-/// vector by the `Vec<Action>` action vectors bound to the keys. As such, when multiple keys map
-/// to the same sequence of actions, the keys that appear first in the [`Key`] structure will be
-/// displayed.
-// Please don't let rustfmt play with the formatting. It will stretch out the function to about
-// three times the length and all the keybinding vectors we generate become virtually unreadable
-// for humans.
+///因此，我们按当前 keymap 的 [`Key`] 排序，并通过绑定到按键的 `Vec<Action>` 操作向量对生成的排序
+///向量去重。这样，当多个按键映射
+///到相同的操作序列时，将显示在 [`Key`] 结构中首先出现的按键
+///显示。
+//  请不要让 rustfmt 调整格式。它会将函数拉伸到大约
+//  三倍的长度，我们生成的所有快捷键绑定向量将变得几乎不可读
+//  对人类来说。
 #[rustfmt::skip]
 fn get_keys_and_hints(mi: &ModeInfo) -> Vec<(String, String, Vec<KeyWithModifier>)> {
     use Action as A;
@@ -115,26 +115,26 @@ fn get_keys_and_hints(mi: &ModeInfo) -> Vec<(String, String, Vec<KeyWithModifier
     let mut old_keymap = mi.get_mode_keybinds();
     let s = |string: &str| string.to_string();
 
-    // Find a keybinding to get back to "Normal" input mode. In this case we prefer '\n' over other
-    // choices. Do it here before we dedupe the keymap below!
+    //  查找返回 "Normal" 输入模式的快捷键绑定。在这种情况下，我们优先选择 '\n' 而非其他
+    //  选项。在下面对 keymap 去重之前在此处执行！
     let to_normal_keys = action_key(&old_keymap, &[TO_NORMAL]);
     let to_normal_key = if to_normal_keys.contains(&KeyWithModifier::new(BareKey::Enter)) {
         vec![KeyWithModifier::new(BareKey::Enter)]
     } else {
-        // Yield `vec![key]` if `to_normal_keys` has at least one key, or an empty vec otherwise.
+        //  如果 `to_normal_keys` 至少有一个按键，则产生 `vec![key]`，否则产生空 vec。
         to_normal_keys.into_iter().take(1).collect()
     };
 
-    // Sort and deduplicate the keybindings first. We sort after the `Key`s, and deduplicate by
-    // their `Action` vectors. An unstable sort is fine here because if the user maps anything to
-    // the same key again, anything will happen...
+    //  首先对快捷键绑定进行排序和去重。我们按 `Key` 排序，并按
+    //  其 `Action` 向量去重。这里不稳定排序是可以的，因为如果用户将任何内容再次映射到
+    //  同一个键，什么都可能发生...
     old_keymap.sort_unstable_by(|(keya, _), (keyb, _)| keya.partial_cmp(keyb).unwrap());
 
     let mut known_actions: Vec<Vec<Action>> = vec![];
     let mut km = vec![];
     for (key, acvec) in old_keymap {
         if known_actions.contains(&acvec) {
-            // This action is known already
+            //  此操作已知
             continue;
         } else {
             known_actions.push(acvec.to_vec());
@@ -156,12 +156,12 @@ fn get_keys_and_hints(mi: &ModeInfo) -> Vec<(String, String, Vec<KeyWithModifier
         (s("Toggle Embed"), s("Embed"), action_key(&km, &[A::TogglePaneEmbedOrFloating, TO_NORMAL])),
         (s("Select pane"), s("Select"), to_normal_key),
     ]} else if mi.mode == IM::Tab {
-        // With the default bindings, "Move focus" for tabs is tricky: It binds all the arrow keys
-        // to moving tabs focus (left/up go left, right/down go right). Since we sort the keys
-        // above and then dedpulicate based on the actions, we will end up with LeftArrow for
-        // "left" and DownArrow for "right". What we really expect is to see LeftArrow and
+        // 使用默认绑定时，标签页的 "Move focus" 很棘手：它绑定所有方向键
+        // 到移动标签页焦点（左/上向左，右/下向右）。由于我们对按键排序
+        // 然后根据操作去重，我们最终会得到 LeftArrow 用于
+        // "left" 和 DownArrow 用于 "right"。我们真正期望看到的是 LeftArrow 和
         // RightArrow.
-        // FIXME: So for lack of a better idea we just check this case manually here.
+        //  FIXME: 由于没有更好的办法，我们在这里手动检查这种情况。
         let old_keymap = mi.get_mode_keybinds();
         let focus_keys_full: Vec<KeyWithModifier> = action_key_group(&old_keymap,
             &[&[A::GoToPreviousTab], &[A::GoToNextTab]]);
@@ -254,7 +254,7 @@ fn get_keys_and_hints(mi: &ModeInfo) -> Vec<(String, String, Vec<KeyWithModifier
             action_key(&km, &[A::SearchToggleOption{option: SOpt::WholeWord}])),
     ]} else if mi.mode == IM::Session { vec![
         (s("Detach"), s("Detach"), action_key(&km, &[Action::Detach])),
-        (s("Session Manager"), s("Manager"), action_key(&km, &[A::LaunchOrFocusPlugin{plugin: Default::default(), should_float: true, move_to_focused_tab: true, should_open_in_place: false, close_replaced_pane: false, skip_cache: false, tab_id: None}, TO_NORMAL])), // not entirely accurate
+        (s("Session Manager"), s("Manager"), action_key(&km, &[A::LaunchOrFocusPlugin{plugin: Default::default(), should_float: true, move_to_focused_tab: true, should_open_in_place: false, close_replaced_pane: false, skip_cache: false, tab_id: None}, TO_NORMAL])), //  不完全准确
         (s("Select pane"), s("Select"), to_normal_key),
     ]} else if mi.mode == IM::Tmux { vec![
         (s("Move focus"), s("Move"), action_key_group(&km, &[
@@ -352,7 +352,7 @@ fn best_effort_shortcut_list(help: &ModeInfo, tip: TipFn, max_len: usize) -> Lin
 }
 
 pub fn keybinds(help: &ModeInfo, tip_name: &str, max_width: usize) -> LinePart {
-    // It is assumed that there is at least one TIP data in the TIPS HasMap.
+    //  假设 TIPS HashMap 中至少有一个 TIP 数据。
     let tip_body = TIPS
         .get(tip_name)
         .unwrap_or_else(|| TIPS.get("quicknav").unwrap());
@@ -427,7 +427,7 @@ pub fn text_copied_hint(copy_destination: CopyDestination) -> LinePart {
         CopyDestination::Command => "Text piped to external command",
         #[cfg(not(target_os = "macos"))]
         CopyDestination::Primary => "Text copied to system primary selection",
-        #[cfg(target_os = "macos")] // primary selection does not exist on macos
+        #[cfg(target_os = "macos")] //  macOS 上不存在主选区
         CopyDestination::Primary => "Text copied to system clipboard",
         CopyDestination::System => "Text copied to system clipboard",
     };
@@ -460,7 +460,7 @@ pub fn fullscreen_panes_to_hide(palette: &Styling, panes_to_hide: usize) -> Line
         + puls.chars().count()
         + panes.chars().count()
         + hide.chars().count()
-        + 5; // 3 for ():'s around shortcut, 2 for the space
+        + 5; //  3 用于快捷键周围的 ():，2 用于空格
     LinePart {
         part: format!(
             "{}{}{}{}{}{}",
@@ -518,7 +518,7 @@ pub fn floating_panes_are_visible(mode_info: &ModeInfo) -> LinePart {
         + p.chars().count()
         + p_right_separator.chars().count()
         + to_hide.chars().count()
-        + 5; // 3 for ():'s around floating_panes, 2 for the space
+        + 5; //  3 用于 floating_panes 周围的 ():，2 用于空格
     LinePart {
         part: format!(
             "{}{}{}{}{}{}{}{}{}{}",
@@ -553,7 +553,7 @@ pub fn locked_fullscreen_panes_to_hide(palette: &Styling, panes_to_hide: usize) 
         + puls.chars().count()
         + panes.chars().count()
         + hide.chars().count()
-        + 5; // 3 for ():'s around shortcut, 2 for the space
+        + 5; //  3 用于快捷键周围的 ():，2 用于空格
     LinePart {
         part: format!(
             "{}{}{}{}{}{}{}",
@@ -591,16 +591,16 @@ pub fn locked_floating_panes_are_visible(palette: &Styling) -> LinePart {
 }
 
 #[cfg(test)]
-/// Unit tests.
+///  单元测试。
 ///
-/// Note that we cheat a little here, because the number of things one may want to test is endless,
-/// and creating a Mockup of [`ModeInfo`] by hand for all these testcases is nothing less than
-/// torture. Hence, we test the most atomic unit thoroughly ([`full_length_shortcut`] and then test
-/// the public API ([`keybinds`]) to ensure correct operation.
+///注意我们在这里取了一点巧，因为可能想要测试的东西数量是无穷无尽的，
+///而为所有这些测试用例手动创建 [`ModeInfo`] 的 Mockup 简直是
+///一种折磨。因此，我们彻底测试最原子的单元（[`full_length_shortcut`]），然后测试
+///公共 API（[`keybinds`]）以确保正确运行。
 mod tests {
     use super::*;
 
-    // Strip style information from `LinePart` and return a raw String instead
+    //  从 `LinePart` 中剥离样式信息并返回原始 String
     fn unstyle(line_part: LinePart) -> String {
         let string = line_part.to_string();
 
@@ -633,7 +633,7 @@ mod tests {
     }
 
     #[test]
-    // When there is no binding, we print no shortcut either
+    //  当没有绑定时，我们也不打印快捷方式
     fn full_length_shortcut_without_key() {
         let keyvec = vec![];
         let palette = Styling::default();
@@ -735,7 +735,7 @@ mod tests {
     //pub fn keybinds(help: &ModeInfo, tip_name: &str, max_width: usize) -> LinePart {
 
     #[test]
-    // Note how it leaves out elements that don't exist!
+    //  注意它如何省略不存在的元素！
     fn keybinds_wide() {
         let mode_info = ModeInfo {
             mode: InputMode::Pane,
@@ -800,7 +800,7 @@ mod tests {
     }
 
     #[test]
-    // Note how "Move focus" becomes "Move"
+    //  注意 "Move focus" 如何变成 "Move"
     fn keybinds_tight_width() {
         let mode_info = ModeInfo {
             mode: InputMode::Pane,

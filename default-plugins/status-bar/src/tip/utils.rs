@@ -35,7 +35,7 @@ pub fn get_random_tip_name() -> String {
 
 pub fn get_cached_tip_name() -> String {
     let mut local_cache = match LocalCache::new(PathBuf::from(DEFAULT_CACHE_FILE_PATH)) {
-        // TODO: it might be a good to leave an log with warn later, if possible.
+        // TODO：如果可能的话，以后最好留下一个 warn 日志。
         Err(_) => return String::from("quicknav"),
         Ok(cache) => cache,
     };

@@ -116,25 +116,25 @@ impl KeyShortcut {
     }
 }
 
-/// Generate long mode shortcut tile.
+///  生成长模式快捷方式块。
 ///
-/// A long mode shortcut tile consists of a leading and trailing `separator`, a keybinding enclosed
-/// in `<>` brackets and the name of the mode displayed in capitalized letters next to it. For
-/// example, the default long mode shortcut tile for "Locked" mode is: ` <g> LOCK `.
+///长模式快捷方式块由前导和尾随 `separator`、包裹在
+///`<>` 中以及旁边以大写字母显示的模式名称组成。例如，
+///例如，"Locked" 模式的默认长模式快捷方式块为：` <g> LOCK `。
 ///
-/// # Arguments
+///# 参数
 ///
-/// - `key`: A [`KeyShortcut`] that defines how the tile is displayed (active/disabled/...), what
-///   action it belongs to (roughly equivalent to [`InputMode`]s) and the keybinding to trigger
-///   this action.
-/// - `palette`: A structure holding styling information.
-/// - `separator`: The separator printed before and after the mode shortcut tile. The default is an
-///   arrow head-like separator.
-/// - `shared_super`: If set to true, all mode shortcut keybindings share a common modifier (see
-///   [`get_common_modifier`]) and the modifier belonging to the keybinding is **not** printed in
-///   the shortcut tile.
-/// - `first_tile`: If set to true, the leading separator for this tile will be omitted so no gap
-///   appears on the screen.
+///- `key`：一个 [`KeyShortcut`]，定义块的显示方式（激活/禁用/...）、所属
+///操作（大致等同于 [`InputMode`]）以及触发此操作的快捷键绑定。
+///此操作。
+///- `palette`：保存样式信息的结构。
+///- `separator`：在模式快捷方式块前后打印的分隔符。默认为
+///箭头形状的分隔符。
+///- `shared_super`：如果设为 true，所有模式快捷方式快捷键绑定共享一个通用修饰键（参见
+///[`get_common_modifier`]），并且属于该快捷键绑定的修饰键**不会**打印在
+///快捷方式块中。
+///- `first_tile`：如果设为 true，将省略此块的前导分隔符，这样屏幕上不会出现间隙
+///出现在屏幕上。
 fn long_mode_shortcut(
     key: &KeyShortcut,
     palette: ColoredElements,
@@ -177,13 +177,13 @@ fn long_mode_shortcut(
             suffix_separator,
         ])
         .to_string(),
-        len: start_separator.chars().count() // Separator
-            + 2                              // " <"
-            + key_binding.chars().count()    // Key binding
-            + 2                              // "> "
-            + key_hint.chars().count()       // Key hint (mode)
-            + 1                              // " "
-            + separator.chars().count(), // Separator
+        len: start_separator.chars().count() //  分隔符
+            + 2                              //  " <"
+            + key_binding.chars().count()    //  快捷键绑定
+            + 2                              //  "> "
+            + key_hint.chars().count()       //  按键提示（模式）
+            + 1                              //  " "
+            + separator.chars().count(), //  分隔符
     }
 }
 
@@ -229,34 +229,34 @@ fn shortened_modifier_shortcut(
             suffix_separator,
         ])
         .to_string(),
-        len: start_separator.chars().count() // Separator
-            + 2                              // " <"
-            + key_binding.chars().count()    // Key binding
-            + 2                              // "> "
-            + key_hint.chars().count()       // Key hint (mode)
-            + 1                              // " "
-            + separator.chars().count(), // Separator
+        len: start_separator.chars().count() //  分隔符
+            + 2                              //  " <"
+            + key_binding.chars().count()    //  快捷键绑定
+            + 2                              //  "> "
+            + key_hint.chars().count()       //  按键提示（模式）
+            + 1                              //  " "
+            + separator.chars().count(), //  分隔符
     }
 }
 
-/// Generate short mode shortcut tile.
+///  生成短模式快捷方式块。
 ///
-/// A short mode shortcut tile consists of a leading and trailing `separator` and a keybinding. For
-/// example, the default short mode shortcut tile for "Locked" mode is: ` g `.
+///短模式快捷方式块由前导和尾随 `separator` 以及一个快捷键绑定组成。
+///例如，"Locked" 模式的默认短模式快捷方式块为：` g `。
 ///
-/// # Arguments
+///# 参数
 ///
-/// - `key`: A [`KeyShortcut`] that defines how the tile is displayed (active/disabled/...), what
-///   action it belongs to (roughly equivalent to [`InputMode`]s) and the keybinding to trigger
-///   this action.
-/// - `palette`: A structure holding styling information.
-/// - `separator`: The separator printed before and after the mode shortcut tile. The default is an
-///   arrow head-like separator.
-/// - `shared_super`: If set to true, all mode shortcut keybindings share a common modifier (see
-///   [`get_common_modifier`]) and the modifier belonging to the keybinding is **not** printed in
-///   the shortcut tile.
-/// - `first_tile`: If set to true, the leading separator for this tile will be omitted so no gap
-///   appears on the screen.
+///- `key`：一个 [`KeyShortcut`]，定义块的显示方式（激活/禁用/...）、所属
+///操作（大致等同于 [`InputMode`]）以及触发此操作的快捷键绑定。
+///此操作。
+///- `palette`：保存样式信息的结构。
+///- `separator`：在模式快捷方式块前后打印的分隔符。默认为
+///箭头形状的分隔符。
+///- `shared_super`：如果设为 true，所有模式快捷方式快捷键绑定共享一个通用修饰键（参见
+///[`get_common_modifier`]），并且属于该快捷键绑定的修饰键**不会**打印在
+///快捷方式块中。
+///- `first_tile`：如果设为 true，将省略此块的前导分隔符，这样屏幕上不会出现间隙
+///出现在屏幕上。
 fn short_mode_shortcut(
     key: &KeyShortcut,
     palette: ColoredElements,
@@ -287,11 +287,11 @@ fn short_mode_shortcut(
     let suffix_separator = colors.suffix_separator.paint(separator);
     LinePart {
         part: ANSIStrings(&[prefix_separator, char_shortcut, suffix_separator]).to_string(),
-        len: separator.chars().count()      // Separator
-            + 1                             // " "
-            + key_binding.chars().count()   // Key binding
-            + 1                             // " "
-            + separator.chars().count(), // Separator
+        len: separator.chars().count()      //  分隔符
+            + 1                             //  " "
+            + key_binding.chars().count()   //  快捷键绑定
+            + 1                             //  " "
+            + separator.chars().count(), //  分隔符
     }
 }
 
@@ -302,7 +302,7 @@ fn key_indicators(
     separator: &str,
     mode_info: &ModeInfo,
 ) -> LinePart {
-    // Print full-width hints
+    //  打印全宽提示
     let (shared_modifiers, mut line_part) = superkey(palette, separator, mode_info);
     for key in keys {
         let line_empty = line_part.len == 0;
@@ -314,7 +314,7 @@ fn key_indicators(
         return line_part;
     }
 
-    // Full-width doesn't fit, try shortened modifiers (eg. "^C" instead of "Ctrl")
+    //  全宽不适用，尝试缩短修饰键（例如用 "^C" 代替 "Ctrl"）
     line_part = superkey(palette, separator, mode_info).1;
     for key in keys {
         let line_empty = line_part.len == 0;
@@ -327,7 +327,7 @@ fn key_indicators(
         return line_part;
     }
 
-    // Full-width doesn't fit, try shortened hints (just keybindings, no meanings/actions)
+    //  全宽不适用，尝试缩短提示（仅快捷键绑定，无含义/操作）
     line_part = superkey(palette, separator, mode_info).1;
     for key in keys {
         let line_empty = line_part.len == 0;
@@ -339,7 +339,7 @@ fn key_indicators(
         return line_part;
     }
 
-    // Shortened doesn't fit, print nothing
+    //  缩短版也不适用，不打印任何内容
     line_part = LinePart::default();
     line_part
 }
@@ -374,7 +374,7 @@ fn swap_layout_status(
             let mut swap_layout_name = format!(" {} ", swap_layout_name);
             swap_layout_name.make_ascii_uppercase();
             let keycode = swap_layout_keycode(mode_info);
-            let swap_layout_name_len = swap_layout_name.len() + 3; // 2 for the arrow separators, one for the screen end buffer
+            let swap_layout_name_len = swap_layout_name.len() + 3; //  2 用于箭头分隔符，1 用于屏幕末端缓冲区
                                                                    //
             macro_rules! style_swap_layout_indicator {
                 ($style_name:ident) => {{
@@ -409,7 +409,7 @@ fn swap_layout_status(
             let (part, full_len) = if mode_info.mode == InputMode::Locked {
                 (
                     format!("{}", swap_layout_indicator),
-                    swap_layout_name_len, // 1 is the space between
+                    swap_layout_name_len, //  1 是之间的空格
                 )
             } else {
                 (
@@ -420,10 +420,10 @@ fn swap_layout_status(
                         swap_layout_indicator,
                         colored_elements.superkey_prefix.paint(" ")
                     ),
-                    keycode.len + swap_layout_name_len + 1, // 1 is the space between
+                    keycode.len + swap_layout_name_len + 1, //  1 是之间的空格
                 )
             };
-            let short_len = swap_layout_name_len + 1; // 1 is the space between
+            let short_len = swap_layout_name_len + 1; //  1 是之间的空格
             if full_len <= max_len {
                 Some(LinePart {
                     part,
@@ -442,29 +442,29 @@ fn swap_layout_status(
     }
 }
 
-/// Get the keybindings for switching `InputMode`s and `Quit` visible in status bar.
+///  获取状态栏中可见的切换 `InputMode` 和 `Quit` 的快捷键绑定。
 ///
-/// Return a Vector of `Key`s where each `Key` is a shortcut to switch to some `InputMode` or Quit
-/// zellij. Given the vast amount of things a user can configure in their zellij config, this
-/// function has some limitations to keep in mind:
+///返回一个 `Key` 向量，其中每个 `Key` 是切换到某个 `InputMode` 或退出的快捷方式
+///zellij。鉴于用户可以在 zellij 配置中配置大量内容，此
+///函数有一些需要注意的限制：
 ///
-/// - The vector is not deduplicated: If switching to a certain `InputMode` is bound to multiple
-///   `Key`s, all of these bindings will be part of the returned vector. There is also no
-///   guaranteed sort order. Which key ends up in the status bar in such a situation isn't defined.
-/// - The vector will **not** contain the ' ', '\n' and 'Esc' keys: These are the default bindings
-///   to get back to normal mode from any input mode, but they aren't of interest when searching
-///   for the super key. If for any input mode the user has bound only these keys to switching back
-///   to `InputMode::Normal`, a '?' will be displayed as keybinding instead.
+///- 向量不会去重：如果切换到某个 `InputMode` 绑定了多个
+///`Key`，所有这些绑定都将成为返回向量的一部分。也没有
+///保证的排序顺序。在这种情况下，哪个键最终出现在状态栏中是未定义的。
+///- 向量**不会**包含 ' '、'\n' 和 'Esc' 键：这些是默认绑定
+///从任何输入模式返回普通模式，但在搜索时它们并不重要
+///用于超级键。如果对于任何输入模式，用户仅将这些键绑定为切换回
+///到 `InputMode::Normal`，则将显示 '?' 作为快捷键绑定。
 pub fn mode_switch_keys(mode_info: &ModeInfo) -> Vec<KeyWithModifier> {
     mode_info
         .get_mode_keybinds()
         .iter()
         .filter_map(|(key, vac)| match vac.first() {
-            // No actions defined, ignore
+            //  未定义操作，忽略
             None => None,
             Some(vac) => {
-                // We ignore certain "default" keybindings that switch back to normal InputMode.
-                // These include: ' ', '\n', 'Esc'
+                //  我们忽略某些切换回普通 InputMode 的"默认"快捷键绑定。
+                //  包括：' '、'\n'、'Esc'
                 if matches!(
                     key,
                     KeyWithModifier {
@@ -482,7 +482,7 @@ pub fn mode_switch_keys(mode_info: &ModeInfo) -> Vec<KeyWithModifier> {
                 }
                 if let actions::Action::SwitchToMode { input_mode: mode } = vac {
                     return match mode {
-                        // Store the keys that switch to displayed modes
+                        //  存储切换到显示模式的键
                         InputMode::Normal
                         | InputMode::Locked
                         | InputMode::Pane
@@ -497,7 +497,7 @@ pub fn mode_switch_keys(mode_info: &ModeInfo) -> Vec<KeyWithModifier> {
                 if let actions::Action::Quit = vac {
                     return Some(key.clone());
                 }
-                // Not a `SwitchToMode` or `Quit` action, ignore
+                //  不是 `SwitchToMode` 或 `Quit` 操作，忽略
                 None
             },
         })
@@ -509,14 +509,14 @@ pub fn superkey(
     separator: &str,
     mode_info: &ModeInfo,
 ) -> (Vec<KeyModifier>, LinePart) {
-    // Find a common modifier if any
+    //  查找通用修饰键（如果有）
     let common_modifiers = get_common_modifiers(mode_switch_keys(mode_info).iter().collect());
     if common_modifiers.is_empty() {
         return (common_modifiers, LinePart::default());
     }
 
     let prefix_text = if mode_info.capabilities.arrow_fonts {
-        // Add extra space in simplified ui
+        //  在简化界面中添加额外空格
         format!(
             " {} + ",
             common_modifiers
@@ -551,7 +551,7 @@ pub fn to_char(kv: Vec<KeyWithModifier>) -> Option<KeyWithModifier> {
     let key = kv
         .iter()
         .filter(|key| {
-            // These are general "keybindings" to get back to normal, they aren't interesting here.
+            //  这些是返回普通模式的通用"快捷键绑定"，在这里不感兴趣。
             !matches!(
                 key,
                 KeyWithModifier {
@@ -569,21 +569,21 @@ pub fn to_char(kv: Vec<KeyWithModifier>) -> Option<KeyWithModifier> {
         .collect::<Vec<&KeyWithModifier>>()
         .into_iter()
         .next();
-    // Maybe the user bound one of the ignored keys?
+    //  也许用户绑定了被忽略的键之一？
     if key.is_none() {
         return kv.first().cloned();
     }
     key.cloned()
 }
 
-/// Get the [`KeyShortcut`] for a specific [`InputMode`].
+///  获取特定 [`InputMode`] 的 [`KeyShortcut`]。
 ///
-/// Iterates over the contents of `shortcuts` to find the [`KeyShortcut`] with the [`KeyAction`]
-/// matching the [`InputMode`]. Returns a mutable reference to the entry in `shortcuts` if a match
-/// is found or `None` otherwise.
+///遍历 `shortcuts` 的内容以查找 [`KeyAction`] 匹配的 [`KeyShortcut`]
+///匹配 [`InputMode`]。如果找到匹配项，返回对 `shortcuts` 中条目的可变引用，
+///如果找到匹配项，否则为 `None`。
 ///
-/// In case multiple entries in `shortcuts` match `mode` (which shouldn't happen), the first match
-/// is returned.
+///如果 `shortcuts` 中有多个条目匹配 `mode`（这不应该发生），则返回第一个匹配项
+///被返回。
 fn get_key_shortcut_for_mode<'a>(
     shortcuts: &'a mut [KeyShortcut],
     mode: &InputMode,
@@ -615,7 +615,7 @@ pub fn first_line(
     let supports_arrow_fonts = !help.capabilities.arrow_fonts;
     let colored_elements = color_elements(help.style.colors, !supports_arrow_fonts, false);
     let binds = &help.get_mode_keybinds();
-    // Unselect all by default
+    //  默认全部取消选中
     let mut default_keys = vec![
         KeyShortcut::new(
             KeyMode::Unselected,
@@ -699,7 +699,7 @@ pub fn first_line(
         key_shortcut.key = to_char(action_key(binds, &[TO_NORMAL]));
     }
 
-    // In locked mode we must disable all other mode keybindings
+    //  在锁定模式下，我们必须禁用所有其他模式快捷键绑定
     if help.mode == InputMode::Locked {
         for key in default_keys.iter_mut().skip(1) {
             key.mode = KeyMode::Disabled;
@@ -707,7 +707,7 @@ pub fn first_line(
     }
 
     if help.mode == InputMode::Tmux {
-        // Tmux tile is hidden by default
+        //  Tmux 块默认隐藏
         default_keys.push(KeyShortcut::new(
             KeyMode::Selected,
             KeyAction::Tmux,
@@ -743,13 +743,13 @@ pub fn first_line(
 }
 
 #[cfg(test)]
-/// Unit tests.
+///  单元测试。
 ///
-/// Note that we cheat a little here, because the number of things one may want to test is endless,
-/// and creating a Mockup of [`ModeInfo`] by hand for all these testcases is nothing less than
-/// torture. Hence, we test the most atomic units thoroughly ([`long_mode_shortcut`] and
-/// [`short_mode_shortcut`]) and then test the public API ([`first_line`]) to ensure correct
-/// operation.
+///注意我们在这里取了一点巧，因为可能想要测试的东西数量是无穷无尽的，
+///而为所有这些测试用例手动创建 [`ModeInfo`] 的 Mockup 简直是
+///一种折磨。因此，我们彻底测试最原子的单元（[`long_mode_shortcut`] 和
+///[`short_mode_shortcut`]），然后测试公共 API（[`first_line`]）以确保正确
+///操作。
 mod tests {
     use super::*;
 
@@ -758,7 +758,7 @@ mod tests {
         color_elements(palette, false, false)
     }
 
-    // Strip style information from `LinePart` and return a raw String instead
+    //  从 `LinePart` 中剥离样式信息并返回原始 String
     fn unstyle(line_part: LinePart) -> String {
         let string = line_part.to_string();
 
@@ -784,7 +784,7 @@ mod tests {
     }
 
     #[test]
-    // Displayed like selected(alternate), but different styling
+    //  显示效果类似 selected(alternate)，但样式不同
     fn long_mode_shortcut_unselected_with_binding() {
         let key = KeyShortcut::new(
             KeyMode::Unselected,
@@ -800,7 +800,7 @@ mod tests {
     }
 
     #[test]
-    // Treat exactly like "unselected" variant
+    //  完全按照 "unselected" 变体处理
     fn long_mode_shortcut_unselected_alternate_with_binding() {
         let key = KeyShortcut::new(
             KeyMode::UnselectedAlternate,
@@ -816,7 +816,7 @@ mod tests {
     }
 
     #[test]
-    // KeyShortcuts without binding are only displayed when "disabled" (for locked mode indications)
+    //  没有绑定的 KeyShortcut 仅在 "disabled" 时显示（用于锁定模式指示）
     fn long_mode_shortcut_selected_without_binding() {
         let key = KeyShortcut::new(KeyMode::Selected, KeyAction::Session, None);
         let color = colored_elements();
@@ -828,7 +828,7 @@ mod tests {
     }
 
     #[test]
-    // First tile doesn't print a starting separator
+    //  第一个块不打印起始分隔符
     fn long_mode_shortcut_selected_with_binding_first_tile() {
         let key = KeyShortcut::new(
             KeyMode::Selected,
@@ -844,7 +844,7 @@ mod tests {
     }
 
     #[test]
-    // Modifier is the superkey, mustn't appear in angled brackets
+    //  修饰键是超级键，不应出现在尖括号中
     fn long_mode_shortcut_selected_with_ctrl_binding_shared_superkey() {
         let key = KeyShortcut::new(
             KeyMode::Selected,
@@ -860,7 +860,7 @@ mod tests {
     }
 
     #[test]
-    // Modifier must be in the angled brackets
+    //  修饰键必须在尖括号中
     fn long_mode_shortcut_selected_with_ctrl_binding_no_shared_superkey() {
         let key = KeyShortcut::new(
             KeyMode::Selected,
@@ -876,7 +876,7 @@ mod tests {
     }
 
     #[test]
-    // Must be displayed as usual, but it is styled to be greyed out which we don't test here
+    //  必须照常显示，但样式为灰色，我们在此不测试
     fn long_mode_shortcut_disabled_with_binding() {
         let key = KeyShortcut::new(
             KeyMode::Disabled,
@@ -892,7 +892,7 @@ mod tests {
     }
 
     #[test]
-    // Must be displayed but without keybinding
+    //  必须显示但没有快捷键绑定
     fn long_mode_shortcut_disabled_without_binding() {
         let key = KeyShortcut::new(KeyMode::Disabled, KeyAction::Session, None);
         let color = colored_elements();
@@ -904,9 +904,9 @@ mod tests {
     }
 
     #[test]
-    // Test all at once
-    // Note that when "shared_super" is true, the tile **cannot** be the first on the line, so we
-    // ignore **first** here.
+    //  一次性测试全部
+    // 注意，当 "shared_super" 为 true 时，块**不能**是行上的第一个，因此我们
+    // 在这里忽略 **first**。
     fn long_mode_shortcut_selected_with_ctrl_binding_and_shared_super_and_first_tile() {
         let key = KeyShortcut::new(
             KeyMode::Selected,
@@ -1071,7 +1071,7 @@ mod tests {
     }
 
     #[test]
-    // Observe: Modes missing in between aren't displayed!
+    //  观察：中间缺失的模式不会显示！
     fn first_line_default_layout_shared_super() {
         #[rustfmt::skip]
         let mode_info = ModeInfo{

@@ -123,7 +123,7 @@ fn add_keybinds<'a>(help: &'a ModeInfo) -> Keygroups<'a> {
             }],
         ],
     );
-    // Let's see if we have some pretty groups in common here
+    // 让我们看看这里是否有一些共同的漂亮分组
     let mut arrows = vec![];
     let mut letters = vec![];
     for key in move_focus_keys.into_iter() {

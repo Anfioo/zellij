@@ -17,7 +17,7 @@ macro_rules! strings {
 }
 
 pub fn sync_tab_full(help: &ModeInfo) -> LinePart {
-    // Tip: Sync a tab and write keyboard input to all panes with Ctrl + <t> + <s>
+    // 提示：使用 Ctrl + <t> + <s> 同步标签页并将键盘输入写入所有窗格
     let mut bits = vec![
         Style::new().paint(" Tip: "),
         Style::new().paint("Sync a tab and write keyboard input to all its panes with "),
@@ -27,7 +27,7 @@ pub fn sync_tab_full(help: &ModeInfo) -> LinePart {
 }
 
 pub fn sync_tab_medium(help: &ModeInfo) -> LinePart {
-    // Tip: Sync input to panes in a tab with Ctrl + <t> + <s>
+    // 提示：使用 Ctrl + <t> + <s> 将输入同步到标签页中的窗格
     let mut bits = vec![
         Style::new().paint(" Tip: "),
         Style::new().paint("Sync input to panes in a tab with "),
@@ -37,7 +37,7 @@ pub fn sync_tab_medium(help: &ModeInfo) -> LinePart {
 }
 
 pub fn sync_tab_short(help: &ModeInfo) -> LinePart {
-    // Sync input in a tab with Ctrl + <t> + <s>
+    // 使用 Ctrl + <t> + <s> 同步标签页中的输入
     let mut bits = vec![Style::new().paint(" Sync input in a tab with ")];
     bits.extend(add_keybinds(help));
     strings!(&bits)

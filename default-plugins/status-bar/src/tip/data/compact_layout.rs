@@ -23,8 +23,8 @@ macro_rules! strings {
 }
 
 pub fn compact_layout_full(help: &ModeInfo) -> LinePart {
-    // Tip: UI taking up too much space? Start Zellij with
-    // zellij -l compact or remove pane frames with Ctrl + <p> + <z>
+    // 提示：界面占用太多空间？使用以下方式启动 Zellij
+    // zellij -l compact 或使用 Ctrl + <p> + <z> 移除窗格边框
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     let mut bits = vec![
@@ -41,8 +41,8 @@ pub fn compact_layout_full(help: &ModeInfo) -> LinePart {
 }
 
 pub fn compact_layout_medium(help: &ModeInfo) -> LinePart {
-    // Tip: To save screen space, start Zellij with
-    // zellij -l compact or remove pane frames with Ctrl + <p> + <z>
+    // 提示：为节省屏幕空间，使用以下方式启动 Zellij
+    // zellij -l compact 或使用 Ctrl + <p> + <z> 移除窗格边框
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     let mut bits = vec![
@@ -59,8 +59,8 @@ pub fn compact_layout_medium(help: &ModeInfo) -> LinePart {
 }
 
 pub fn compact_layout_short(help: &ModeInfo) -> LinePart {
-    // Save screen space, start Zellij with
-    // zellij -l compact or remove pane frames with Ctrl + <p> + <z>
+    // 节省屏幕空间，使用以下方式启动 Zellij
+    // zellij -l compact 或使用 Ctrl + <p> + <z> 移除窗格边框
     let green_color = palette_match!(help.style.colors.text_unselected.emphasis_0);
 
     let mut bits = vec![

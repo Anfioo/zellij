@@ -17,7 +17,7 @@ macro_rules! strings {
 }
 
 pub fn floating_panes_mouse_full(help: &ModeInfo) -> LinePart {
-    // Tip: Toggle floating panes with Ctrl + <p> + <w> and move them with keyboard or mouse
+    // 提示：使用 Ctrl + <p> + <w> 切换浮动窗格，并用键盘或鼠标移动它们
     let mut bits = vec![
         Style::new().paint(" Tip: "),
         Style::new().paint("Toggle floating panes with "),
@@ -28,7 +28,7 @@ pub fn floating_panes_mouse_full(help: &ModeInfo) -> LinePart {
 }
 
 pub fn floating_panes_mouse_medium(help: &ModeInfo) -> LinePart {
-    // Tip: Toggle floating panes with Ctrl + <p> + <w>
+    // 提示：使用 Ctrl + <p> + <w> 切换浮动窗格
     let mut bits = vec![
         Style::new().paint(" Tip: "),
         Style::new().paint("Toggle floating panes with "),
@@ -38,7 +38,7 @@ pub fn floating_panes_mouse_medium(help: &ModeInfo) -> LinePart {
 }
 
 pub fn floating_panes_mouse_short(help: &ModeInfo) -> LinePart {
-    // Ctrl + <p> + <w> => floating panes
+    //  Ctrl + <p> + <w> => 浮动窗格
     let mut bits = add_keybinds(help);
     bits.push(Style::new().paint(" => floating panes"));
     strings!(&bits)
