@@ -269,7 +269,7 @@ impl App {
         self.grouped_panes_count = count;
         if let Some(own_plugin_id) = self.own_plugin_id {
             if previous_count != count {
-                rename_plugin_pane(own_plugin_id, "Multiple Pane Select".to_string());
+                rename_plugin_pane(own_plugin_id, "多窗格选择".to_string());
             }
             if previous_count != 0 && count != 0 && previous_count != count {
                 if self.doherty_threshold_elapsed_since_highlight() {
@@ -561,12 +561,12 @@ fn group_controls_length(mode_info: &ModeInfo) -> usize {
     }
 
     if pane_group_bound {
-        let toggle_text = format!("<{}> Toggle", pane_group_key);
+        let toggle_text = format!("<{}> 切换", pane_group_key);
         length += toggle_text.chars().count() + 4;
     }
 
     if group_mark_bound {
-        let follow_text = format!("<{}> Follow Focus", group_mark_key);
+        let follow_text = format!("<{}> 跟随焦点", group_mark_key);
         length += follow_text.chars().count() + 4;
     }
 
@@ -667,7 +667,7 @@ fn render_follow_focus_ribbon(
     base_y: usize,
     mode_info: &ModeInfo,
 ) {
-    let follow_text = format!("<{}> Follow Focus", group_mark_key);
+    let follow_text = format!("<{}> 跟随焦点", group_mark_key);
     let key_highlight = format!("{}", group_mark_key);
 
     let mut ribbon = Text::new(&follow_text).color_substring(0, &key_highlight);
@@ -680,7 +680,7 @@ fn render_follow_focus_ribbon(
 }
 
 fn render_toggle_group_ribbon(pane_group_key: &str, base_x: usize, base_y: usize) -> usize {
-    let toggle_text = format!("<{}> Toggle", pane_group_key);
+    let toggle_text = format!("<{}> 切换", pane_group_key);
     let key_highlight = format!("{}", pane_group_key);
 
     print_ribbon_with_coordinates(

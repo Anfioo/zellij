@@ -81,7 +81,7 @@ pub fn render_search_term(search_term: &str) {
 
 pub fn render_virtual_root_header(_cols: usize) {
     let prompt = "PATH: ";
-    let title = "Computer";
+    let title = "计算机";
     let prompt_len = prompt.width();
     let path_end = prompt_len + title.width();
     let text = Text::new(format!("{}{}", prompt, title))
@@ -105,11 +105,11 @@ pub fn render_current_path(
     let current_path_len = current_path.width();
 
     let enter_tip = if handling_filepick {
-        "Select"
+        "选择"
     } else if path_is_dir {
-        "Open terminal here"
+        "在此打开终端"
     } else {
-        "Open in editor"
+        "在编辑器中打开"
     };
     if max_cols > prompt_len + current_path_len + enter_tip.width() + 13 {
         let path_end = prompt_len + current_path_len;

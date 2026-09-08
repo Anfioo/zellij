@@ -89,12 +89,12 @@ impl NewPluginScreen {
         let url_field = if self.entering_plugin_url {
             let truncated_url =
                 truncate_string_start(&self.new_plugin_url, cols.saturating_sub(19)); // 17 是提示的长度 + 2 用于内边距和光标
-            let text = format!("Enter Plugin URL: {}_", truncated_url);
+            let text = format!("输入插件 URL：{}_", truncated_url);
             Text::new(text).color_range(2, ..=16).color_range(3, 18..)
         } else {
             let truncated_url =
                 truncate_string_start(&self.new_plugin_url, cols.saturating_sub(18)); // 17 是提示的长度 + 1 用于内边距
-            let text = format!("Enter Plugin URL: {}", truncated_url);
+            let text = format!("输入插件 URL：{}", truncated_url);
             Text::new(text).color_range(2, ..=16).color_range(0, 18..)
         };
         print_text_with_coordinates(url_field, 0, 2, None, None);
@@ -272,8 +272,8 @@ impl NewPluginScreen {
             key_shortcuts_text.chars().count() + 1,
             bg_color
         );
-        let load_in_background_text = format!("Load in Background");
-        let load_in_foreground_text = format!("Load in Foreground");
+        let load_in_background_text = format!("后台加载");
+        let load_in_foreground_text = format!("前台加载");
         let (load_in_background_ribbon, load_in_foreground_ribbon) = if self.load_in_background {
             (
                 Text::new(&load_in_background_text).selected(),
@@ -510,7 +510,7 @@ impl ZellijPlugin for State {
             EventType::SessionUpdate,
         ]);
         let own_plugin_id = get_plugin_ids().plugin_id;
-        rename_plugin_pane(own_plugin_id, "Plugin Manager");
+        rename_plugin_pane(own_plugin_id, "插件管理器");
     }
     fn pipe(&mut self, pipe_message: PipeMessage) -> bool {
         if pipe_message.name == "filepicker_result" {
@@ -734,7 +734,7 @@ impl State {
             let tab_line = self.render_tab_line(plugin_id, cols);
             items.push(tab_line);
             if !plugin_info.configuration.is_empty() {
-                let config_line = NestedListItem::new(format!("Configuration:"))
+                let config_line = NestedListItem::new(format!("配置："))
                     .color_range(2, ..=13)
                     .indent(1);
                 items.push(config_line);
@@ -809,7 +809,7 @@ impl State {
             let tab_line = self.render_tab_line(plugin_id, cols);
             items.push(tab_line);
             if !plugin_info.configuration.is_empty() {
-                let config_line = NestedListItem::new(format!("Configuration:"))
+                let config_line = NestedListItem::new(format!("配置："))
                     .color_range(2, ..=13)
                     .indent(1);
                 items.push(config_line);
