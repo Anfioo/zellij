@@ -14,7 +14,7 @@ pub fn table(
     coordinates: Option<Coordinates>,
 ) -> Vec<u8> {
     let mut stringified = String::new();
-    // we first arrange the data by columns so that we can pad them by the widest one
+    // we first arrange the data by 列 so that we can pad them by the widest one
     let stringified_columns = stringify_table_columns(contents, columns);
     let stringified_rows = stringify_table_rows(stringified_columns, &coordinates);
     for (row_index, (_, row)) in stringified_rows.into_iter().enumerate() {
@@ -40,18 +40,18 @@ pub fn table(
                 CharacterStyles::from(declaration)
             };
 
-            // Default: bold
+            // 默认: bold
             let text_style = text_style.bold(Some(AnsiCode::On));
 
-            // here we intentionally don't pass our coordinates even if we have them, because
-            // these cells have already been padded and truncated
+            // here we intentionally don't pass our 坐标 even if we have them, because
+            // these 单元格 have already been padded and 截断的
             let (text, _text_width) =
                 stringify_text(&cell, None, &None, &declaration, &style.colors, text_style);
             if cell_index == cell_count.saturating_sub(1) {
-                // do not add padding between columns for the last cell
+                // do not add 内边距 between 列 for the last 单元格
                 stringified.push_str(&format!("{}{}{}", text_style, text, RESET_STYLES));
             } else {
-                // add padding between columns
+                // add 内边距 between 列
                 stringified.push_str(&format!("{}{} {}", text_style, text, RESET_STYLES));
             }
         }

@@ -615,12 +615,12 @@ impl Boundaries {
     ) -> usize {
         let pane_is_stacked = rect.current_geom().is_stacked();
         let horizontal_frame_offset = if pane_is_stacked_under {
-            // these panes - panes that are in a stack below the flexible pane - need to have their
-            // content offset taken into account when rendering them (i.e. they are rendered
-            // one line above their actual y coordinates, since they are only 1 line)
-            // as opposed to panes that are in a stack above the flexible pane who do not because
-            // they are rendered in place (the content offset of the stack is "absorbed" by the
-            // flexible pane below them)
+            // these 窗格 - 窗格 that are in a 栈 below the flexible 窗格 - need to have their
+            // content 偏移 taken into account when 渲染 them (i.e. they are 渲染的
+            // one line above their actual y 坐标, since they are only 1 line)
+            // as opposed to 窗格 that are in a 栈 above the flexible 窗格 who do not because
+            // they are 渲染的 in place (the content 偏移 of the 栈 is "absorbed" by the
+            // flexible 窗格 below them)
             content_offset.bottom
         } else if pane_is_stacked {
             0

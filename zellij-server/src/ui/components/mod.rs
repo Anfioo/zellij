@@ -48,19 +48,16 @@ impl<'a> UiComponentParser<'a> {
         }
     }
     pub fn parse(&mut self, bytes: Vec<u8>) -> Result<()> {
-        // The stages of parsing:
-        // 1. We decode the bytes to utf8 and get something like (as a String): `component_name;111;222;333`
-        // 2. We split this string by `;` to get at the parameters themselves
-        // 3. We extract the component name, and then behave according to the component
-        // 4. Some components interpret their parameters as bytes, and so have another layer of
-        //    utf8 decoding, others would take them verbatim, some will act depending on their
-        //    placement (eg. the `table` component treats the first two parameters as integers for
-        //    the columns/rows of the table, and then treats the rest of the component as utf8
-        //    encoded bytes, each one representing one cell in the table)
-        // 5. Each component parses its parameters, creating a String of ANSI instructions of its
-        //    own representing instructions to create the component
-        // 6. Finally, we take this string, encode it back into bytes and pass it back through the ANSI
-        //    parser (our `Grid`) in order to create a representation of it on screen
+        // 解析的阶段：
+        // 1. 我们将字节解码为utf8，得到类似（作为String）的内容：`component_name;111;222;333`
+        // 2. 我们用`;`分割这个字符串以获取参数本身
+        // 3. 我们提取组件名称，然后根据组件进行相应处理
+        // 4. 某些组件将其参数解释为字节，因此还有另一层utf8解码，其他组件则直接使用，
+        //    有些组件会根据它们的位置来执行操作（例如`table`组件将前两个参数视为整数，
+        //    用于表格的列/行，然后将组件的其余部分视为utf8编码的字节，每个字节代表表格中的一个单元格）
+        // 5. 每个组件解析其参数，创建一个自己的ANSI指令字符串，表示创建组件的指令
+        // 6. 最后，我们获取这个字符串，将其编码回字节，并通过ANSI解析器（我们的`Grid`）传回，
+        //    以便在屏幕上创建它的表示
         let mut params: Vec<String> = String::from_utf8_lossy(&bytes)
             .to_string()
             .split(';')
@@ -71,12 +68,12 @@ impl<'a> UiComponentParser<'a> {
             .next()
             .with_context(|| format!("ui component must have a name"))?;
 
-        // parse coordinates
+        // 解析坐标
         let mut component_coordinates = None;
         if let Some(coordinates) = params_iter.peek() {
             component_coordinates = self.parse_coordinates(coordinates)?;
             if component_coordinates.is_some() {
-                let _ = params_iter.next(); // we just peeked, let's consume the coords now
+                let _ = params_iter.next(); // 我们刚刚peek了，现在让我们消费坐标
             }
         }
 

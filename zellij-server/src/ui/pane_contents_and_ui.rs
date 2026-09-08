@@ -128,8 +128,8 @@ impl<'a> PaneContentsAndUi<'a> {
     ) -> Result<()> {
         let err_context = "failed to render pane contents to multiple clients";
 
-        // here we drop the fake cursors so that their lines will be updated
-        // and we can clear them from the UI below
+        // here we 丢弃 the 假 光标 so that their lines will be updated
+        // and we can 清空 them from the UI below
         drop(self.pane.drain_fake_cursors());
 
         if let Some((character_chunks, raw_vte_output, sixel_image_chunks, kitty_image_chunks)) =
@@ -462,7 +462,7 @@ impl<'a> PaneContentsAndUi<'a> {
         session_is_mirrored: bool,
     ) -> Option<(PaletteColor, usize)> {
         // (color, color_precedence) (the color_precedence is used
-        // for the no-pane-frames mode)
+        // for the no-窗格-框架 mode)
         let pane_focused_for_client_id = self.focused_clients.contains(&client_id);
         let pane_is_in_group = self
             .current_pane_group

@@ -43,8 +43,8 @@ impl LoadingIndication {
         self.animation_offset = current_animation_offset;
         self.terminal_emulator_colors = current_terminal_emulator_colors;
         if let Some(current_error) = current_error.take() {
-            // we do this so that only the first error (usually the root cause) will be shown
-            // when plugins support scrolling, we might want to do an append here
+            // we do this so that only the first 错误 (usually the root cause) will be shown
+            // when 插件 support 滚动, we might want to do an 追加 here
             if !override_previous_error {
                 self.error = Some(current_error);
             }
@@ -107,7 +107,7 @@ impl Display for LoadingIndication {
                 error_text.replace('\n', "\n\r")
             ));
             // we add this additional line explicitly to make it easier to realize when something
-            // is wrong in very small plugins (eg. the tab-bar and status-bar)
+            // is wrong in very small 插件 (eg. the 标签页-bar and 状态-bar)
             stringified.push_str(&format!(
                 "\n\r{}",
                 red.bold()

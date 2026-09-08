@@ -44,7 +44,7 @@ pub fn text(content: Text, style: &Style, component_coordinates: Option<Coordina
         style.colors.text_unselected
     };
 
-    // Start with base style from declaration
+    // 从声明中获取基础样式开始
     let base_text_style = CharacterStyles::from(declaration).bold(Some(AnsiCode::On));
 
     let (text, _text_width) = stringify_text(
@@ -93,8 +93,7 @@ pub fn stringify_text(
         text_width += character_width;
 
         if text.selected || text.opaque {
-            // we do this so that selected text will appear selected
-            // even if it does not have color indices
+            // 我们这样做是为了让选中的文本即使没有颜色索引也显示为选中状态
             stringified.push_str(&format!("{}", base_text_style));
         }
 
@@ -113,8 +112,7 @@ pub fn stringify_text(
             let background_padding_length =
                 coordinates_width.saturating_sub(text_width_with_left_padding);
             if text_width_with_left_padding < coordinates_width {
-                // here we pad the string with whitespace until the end so that the background
-                // style will apply the whole length of the coordinates
+                // 这里我们用空白填充字符串直到末尾，以便背景样式将应用于坐标的整个长度
                 stringified.push_str(&format!(
                     "{:width$}",
                     " ",
@@ -141,22 +139,20 @@ pub fn color_index_character(
         .map(|foreground_style| base_text_style.foreground(Some(foreground_style.into())))
         .unwrap_or(base_text_style);
 
-    // Apply dim and unbold per-character based on index levels 4 and 5
+    // 根据索引级别4和5对每个字符应用变暗和取消粗体
     if text.is_unbold_at(index) {
-        // Remove bold for this character
+        // 移除此字符的粗体
         character_style = character_style.bold(Some(AnsiCode::Reset));
     } else if text.is_dimmed_at(index) {
-        // Apply dim for this character
+        // 对此字符应用变暗
         character_style = character_style
-            .foreground(Some(AnsiCode::Reset)) // some terminals (eg. alacritty) do not support dimming non 16
-            // colors, so we have to defer to the terminal's default here
+            .foreground(Some(AnsiCode::Reset)) // 某些终端（例如 alacritty）不支持对非16种颜色进行变暗处理，
+            // 所以我们这里必须使用终端的默认值
             .dim(Some(AnsiCode::On));
     } else {
         character_style = character_style
             .bold(Some(AnsiCode::On))
-            .dim(Some(AnsiCode::Reset)); // default, to reset any
-                                         // possible dim/bold values
-                                         // from previous indices
+            .dim(Some(AnsiCode::Reset)); // 默认值，用于重置之前索引中可能的变暗/粗体值
     }
 
     format!("{}{}{}", character_style, character, base_text_style)
@@ -230,21 +226,21 @@ impl Text {
         const ERROR_COLOR_LEVEL: usize = 6;
         const SUCCESS_COLOR_LEVEL: usize = 7;
 
-        // Check error color first (highest precedence)
+        // 首先检查错误颜色（最高优先级）
         if let Some(indices) = self.indices.get(ERROR_COLOR_LEVEL) {
             if indices.contains(&index) {
                 return Some(styling.exit_code_error.base);
             }
         }
 
-        // Check success color (second highest precedence)
+        // 检查成功颜色（第二高优先级）
         if let Some(indices) = self.indices.get(SUCCESS_COLOR_LEVEL) {
             if indices.contains(&index) {
                 return Some(styling.exit_code_success.base);
             }
         }
 
-        // Check regular emphasis levels (existing code)
+        // 检查常规强调级别（现有代码）
         let index_variant_styles = [
             style.emphasis_0,
             style.emphasis_1,
@@ -252,8 +248,7 @@ impl Text {
             style.emphasis_3,
         ];
         for i in (0..=3).rev() {
-            // we do this in reverse to give precedence to the last applied
-            // style
+            // 我们反向执行此操作，以便优先考虑最后应用的样式
             if let Some(indices) = self.indices.get(i) {
                 if indices.contains(&index) {
                     return Some(index_variant_styles[i]);

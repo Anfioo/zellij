@@ -232,12 +232,12 @@ impl PaneFrame {
         // string and length because of color
         let has_scroll = self.scroll_position.0 > 0 || self.scroll_position.1 > 0;
         if has_scroll && self.is_selectable {
-            // TODO: don't show SCROLL at all for plugins
+            // TODO: don't show 滚动 at all for 插件
             let pin_indication = if self.is_floating && self.is_selectable {
                 self.render_pinned_indication(max_length)
             } else {
                 None
-            }; // no pin indication for tiled panes
+            }; // no pin indication for 平铺 窗格
             let space_for_scroll_indication = pin_indication
                 .as_ref()
                 .map(|(_, length)| max_length.saturating_sub(*length + 1))
@@ -319,7 +319,7 @@ impl PaneFrame {
         full_indication.append(&mut foreground_color(full_indication_text, self.color));
         full_indication.push(EMPTY_TERMINAL_CHARACTER);
         full_indication.append(&mut right_separator);
-        let full_indication_len = full_indication_text.width() + 4; // 2 for separators 2 for padding
+        let full_indication_len = full_indication_text.width() + 4; // 2 for 分隔符 2 for 内边距
         let short_indication_text = "ME";
         let mut short_indication = vec![];
         short_indication.append(&mut left_separator);
@@ -327,7 +327,7 @@ impl PaneFrame {
         short_indication.append(&mut foreground_color(short_indication_text, self.color));
         short_indication.push(EMPTY_TERMINAL_CHARACTER);
         short_indication.append(&mut right_separator);
-        let short_indication_len = short_indication_text.width() + 4; // 2 for separators 2 for padding
+        let short_indication_len = short_indication_text.width() + 4; // 2 for 分隔符 2 for 内边距
         if full_indication_len <= max_length {
             Some((full_indication, full_indication_len))
         } else if short_indication_len <= max_length {
@@ -358,7 +358,7 @@ impl PaneFrame {
             short_indication.append(&mut text);
         }
         if full_indication_len + 4 <= max_length {
-            // 2 for separators, 2 for padding
+            // 2 for 分隔符, 2 for 内边距
             let mut ret = vec![];
             ret.append(&mut left_separator);
             ret.push(EMPTY_TERMINAL_CHARACTER);
@@ -367,7 +367,7 @@ impl PaneFrame {
             ret.append(&mut right_separator);
             Some((ret, full_indication_len + 4))
         } else if short_indication_len + 4 <= max_length {
-            // 2 for separators, 2 for padding
+            // 2 for 分隔符, 2 for 内边距
             let mut ret = vec![];
             ret.append(&mut left_separator);
             ret.push(EMPTY_TERMINAL_CHARACTER);
@@ -410,7 +410,7 @@ impl PaneFrame {
             short_indication.append(&mut text);
         }
         if full_indication_len + 4 <= max_length {
-            // 2 for separators, 2 for padding
+            // 2 for 分隔符, 2 for 内边距
             let mut ret = vec![];
             ret.append(&mut left_separator);
             ret.push(EMPTY_TERMINAL_CHARACTER);
@@ -419,7 +419,7 @@ impl PaneFrame {
             ret.append(&mut right_separator);
             Some((ret, full_indication_len + 4))
         } else if middle_indication_len + 4 <= max_length {
-            // 2 for separators, 2 for padding
+            // 2 for 分隔符, 2 for 内边距
             let mut ret = vec![];
             ret.append(&mut left_separator);
             ret.push(EMPTY_TERMINAL_CHARACTER);
@@ -428,7 +428,7 @@ impl PaneFrame {
             ret.append(&mut right_separator);
             Some((ret, middle_indication_len + 4))
         } else if short_indication_len + 3 <= max_length {
-            // 2 for separators, 1 for padding
+            // 2 for 分隔符, 1 for 内边距
             let mut ret = vec![];
             ret.append(&mut left_separator);
             ret.push(EMPTY_TERMINAL_CHARACTER);
@@ -740,7 +740,7 @@ impl PaneFrame {
         let total_title_length = self.geom.cols.saturating_sub(2); // 2 for the left and right corners
         let left_side = self.render_title_left_side(total_title_length);
         let right_side = left_side.as_ref().and_then(|(_left_side, left_side_len)| {
-            let space_left = total_title_length.saturating_sub(*left_side_len + 1); // 1 for a middle separator
+            let space_left = total_title_length.saturating_sub(*left_side_len + 1); // 1 for a middle 分隔符
             self.render_title_right_side(space_left)
         });
         match (left_side, right_side) {
@@ -1114,7 +1114,7 @@ impl PaneFrame {
         let mut right_boundary =
             foreground_color(self.get_corner(boundary_type::BOTTOM_RIGHT), self.color);
 
-        // Try different versions of the help text from longest to shortest
+        // 尝试 different versions of the help text from longest to shortest
         let (mut help_text_characters, help_text_len) = if let Some((chars, len)) =
             self.help_text_version_full(max_undertitle_length)
         {
@@ -1180,7 +1180,7 @@ impl PaneFrame {
             let (mut second_part, second_part_len) = self.second_held_title_part_full();
             let full_text_len = first_part_len + second_part_len;
             if full_text_len <= max_undertitle_length {
-                // render exit status and tips
+                // 渲染 退出 状态 and tips
                 let mut padding = String::new();
                 for _ in full_text_len..max_undertitle_length {
                     padding.push_str(boundary_type::HORIZONTAL);
@@ -1193,7 +1193,7 @@ impl PaneFrame {
                 ret.append(&mut right_boundary);
                 ret
             } else if first_part_len <= max_undertitle_length {
-                // render only exit status
+                // 渲染 only 退出 状态
                 let mut padding = String::new();
                 for _ in first_part_len..max_undertitle_length {
                     padding.push_str(boundary_type::HORIZONTAL);
@@ -1209,7 +1209,7 @@ impl PaneFrame {
             }
         } else {
             if first_part_len <= max_undertitle_length {
-                // render first part
+                // 渲染 first part
                 let full_text_len = first_part_len;
                 let mut padding = String::new();
                 for _ in full_text_len..max_undertitle_length {
@@ -1238,7 +1238,7 @@ impl PaneFrame {
         } else {
             let (mut hover_shortcuts, hover_shortcuts_len) = self.hover_shortcuts_part_full();
             if hover_shortcuts_len <= max_undertitle_length {
-                // render exit status and tips
+                // 渲染 退出 状态 and tips
                 let mut padding = String::new();
                 for _ in hover_shortcuts_len..max_undertitle_length {
                     padding.push_str(boundary_type::HORIZONTAL);
@@ -1286,21 +1286,21 @@ impl PaneFrame {
             return Ok((character_chunks, None));
         }
         if self.geom.rows == 1 || !self.should_draw_pane_frames {
-            // we do this explicitly when not drawing pane frames because this should only happen
-            // if this is a stacked pane with pane frames off (and it doesn't necessarily have only
-            // 1 row because it could also be a flexible stacked pane)
-            // in this case we should always draw the pane title line, and only the title line
+            // we do this explicitly when not drawing 窗格 框架 because this should only happen
+            // if this is a 堆叠 窗格 with 窗格 框架 off (and it doesn't necessarily have only
+            // 1 行 because it could also be a flexible 堆叠 窗格)
+            // in this case we should always draw the 窗格 标题 line, and only the 标题 line
             let mut one_line_title = self.render_one_line_title().with_context(err_context)?;
 
             if self.content_offset.right != 0 && !self.should_draw_pane_frames {
-                // here what happens is that the title should be offset to the right
-                // in order to give room to the boundaries between the panes to be drawn
+                // here what happens is that the 标题 should be 偏移 to the right
+                // in order to give room to the boundaries between the 窗格 to be drawn
                 one_line_title.pop();
             }
             let y_coords_of_title = if self.pane_is_stacked_under && !self.should_draw_pane_frames {
-                // we only want to use the bottom offset in this case because panes that are
-                // stacked above the flexible pane should actually appear exactly where they are on
-                // screen, the content offset being "absorbed" by the flexible pane below them
+                // we only want to use the bottom 偏移 in this case because 窗格 that are
+                // 堆叠 above the flexible 窗格 should actually appear exactly where they are on
+                // 屏幕, the content 偏移 being "absorbed" by the flexible 窗格 below them
                 self.geom.y.saturating_sub(self.content_offset.bottom)
             } else {
                 self.geom.y
@@ -1314,13 +1314,13 @@ impl PaneFrame {
         } else {
             for row in 0..self.geom.rows {
                 if row == 0 {
-                    // top row
+                    // top 行
                     let title = self.render_title().with_context(err_context)?;
                     let x = self.geom.x;
                     let y = self.geom.y + row;
                     character_chunks.push(CharacterChunk::new(title, x, y));
                 } else if row == self.geom.rows - 1 {
-                    // bottom row
+                    // bottom 行
                     if self.highlight_tooltip.is_some() && self.is_main_client {
                         let x = self.geom.x;
                         let y = self.geom.y + row;
