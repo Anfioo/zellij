@@ -60,8 +60,8 @@ impl<'a> KdlLayoutParser<'a> {
         }
     }
     fn is_a_reserved_word(&self, word: &str) -> bool {
-        // note that it's important that none of these words happens to also be a config property,
-        // otherwise they might collide
+        // 注意，这些词中没有一个恰好也是配置属性，这很重要，
+        // 否则它们可能会冲突
         word == "pane"
             || word == "layout"
             || word == "pane_template"
@@ -356,8 +356,8 @@ impl<'a> KdlLayoutParser<'a> {
                 }
                 configuration.insert(name, value.to_string());
             }
-            // we ignore "bare" (eg. `plugin i_am_a_bare_true_argument { arg_one 1; }`) entries
-            // to prevent diverging behaviour with the keybindings config
+            // 我们忽略 "bare"（例如 `plugin i_am_a_bare_true_argument { arg_one 1; }`）条目
+            // 防止与快捷键绑定配置产生分歧行为
         }
         if let Some(user_config) = kdl_children_nodes!(plugin_block) {
             for user_configuration_entry in user_config {
@@ -758,8 +758,8 @@ impl<'a> KdlLayoutParser<'a> {
                 )?;
                 pane_template.run = Run::merge(&pane_template.run, &run);
                 if let Some(pane_template_run_command) = pane_template.run.as_mut() {
-                    // we need to do this because panes consuming a pane_template
-                    // can have bare args without a command
+                    // 我们需要这样做，因为消费 pane_template 的窗格
+                    // 可以有不带命令的裸参数
                     pane_template_run_command.add_args(args);
                     pane_template_run_command.add_close_on_exit(close_on_exit);
                     pane_template_run_command.add_start_suspended(start_suspended);
@@ -850,8 +850,8 @@ impl<'a> KdlLayoutParser<'a> {
                 )?;
                 pane_template.run = Run::merge(&pane_template.run, &run);
                 if let Some(pane_template_run_command) = pane_template.run.as_mut() {
-                    // we need to do this because panes consuming a pane_template
-                    // can have bare args without a command
+                    // 我们需要这样做，因为消费 pane_template 的窗格
+                    // 可以有不带命令的裸参数
                     pane_template_run_command.add_args(args);
                     pane_template_run_command.add_close_on_exit(close_on_exit);
                     pane_template_run_command.add_start_suspended(start_suspended);
@@ -904,8 +904,8 @@ impl<'a> KdlLayoutParser<'a> {
                 )?;
                 pane_template.run = Run::merge(&pane_template.run, &run);
                 if let Some(pane_template_run_command) = pane_template.run.as_mut() {
-                    // we need to do this because panes consuming a pane_template
-                    // can have bare args without a command
+                    // 我们需要这样做，因为消费 pane_template 的窗格
+                    // 可以有不带命令的裸参数
                     pane_template_run_command.add_args(args);
                     pane_template_run_command.add_close_on_exit(close_on_exit);
                     pane_template_run_command.add_start_suspended(start_suspended);
@@ -960,7 +960,7 @@ impl<'a> KdlLayoutParser<'a> {
         &self,
         kdl_node: &KdlNode,
     ) -> Result<bool, ConfigError> {
-        // pane properties
+        // 窗格属性
         let borderless = kdl_get_bool_property_or_child_value_with_error!(kdl_node, "borderless");
         let children_are_stacked =
             kdl_get_bool_property_or_child_value_with_error!(kdl_node, "stacked");
@@ -971,7 +971,7 @@ impl<'a> KdlLayoutParser<'a> {
             kdl_get_string_property_or_child_value_with_error!(kdl_node, "split_direction");
         let has_children_nodes = self.has_child_nodes(kdl_node);
 
-        // floating pane properties
+        // 浮动窗格属性
         let height = self.parse_percent_or_fixed(kdl_node, "height", false)?;
         let width = self.parse_percent_or_fixed(kdl_node, "width", false)?;
         let x = self.parse_percent_or_fixed(kdl_node, "x", true)?;
@@ -996,9 +996,9 @@ impl<'a> KdlLayoutParser<'a> {
         &self,
         kdl_node: &KdlNode,
     ) -> Result<bool, ConfigError> {
-        // returns true if it's a floating_pane template, false if not
+        // 如果是 floating_pane 模板则返回 true，否则返回 false
 
-        // pane properties
+        // 窗格属性
         let borderless = kdl_get_bool_property_or_child_value_with_error!(kdl_node, "borderless");
         let children_are_stacked =
             kdl_get_bool_property_or_child_value_with_error!(kdl_node, "stacked");
@@ -1009,7 +1009,7 @@ impl<'a> KdlLayoutParser<'a> {
             kdl_get_string_property_or_child_value_with_error!(kdl_node, "split_direction");
         let has_children_nodes = self.has_child_nodes(kdl_node);
 
-        // floating pane properties
+        // 浮动窗格属性
         let height = self.parse_percent_or_fixed(kdl_node, "height", false)?;
         let width = self.parse_percent_or_fixed(kdl_node, "width", false)?;
         let x = self.parse_percent_or_fixed(kdl_node, "x", true)?;
@@ -1107,7 +1107,7 @@ impl<'a> KdlLayoutParser<'a> {
             );
         } else if is_floating {
             self.assert_valid_floating_pane_properties(kdl_node)?;
-            // floating pane properties
+            // 浮动窗格属性
             let height = self.parse_percent_or_fixed(kdl_node, "height", false)?;
             let width = self.parse_percent_or_fixed(kdl_node, "width", false)?;
             let x = self.parse_percent_or_fixed(kdl_node, "x", true)?;
@@ -1131,7 +1131,7 @@ impl<'a> KdlLayoutParser<'a> {
             );
         } else {
             self.assert_valid_pane_properties(kdl_node)?;
-            // pane properties
+            // 窗格属性
             let borderless =
                 kdl_get_bool_property_or_child_value_with_error!(kdl_node, "borderless");
             let children_are_stacked =
@@ -1183,7 +1183,7 @@ impl<'a> KdlLayoutParser<'a> {
         ),
         ConfigError,
     > {
-        // (is_focused, Option<tab_name>, PaneLayout, Vec<FloatingPaneLayout>)
+        //（is_focused, Option<tab_name>, PaneLayout, Vec<FloatingPaneLayout>）
         self.assert_valid_tab_properties(kdl_node)?;
         let tab_name =
             kdl_get_string_property_or_child_value!(kdl_node, "name").map(|s| s.to_string());
@@ -1264,7 +1264,7 @@ impl<'a> KdlLayoutParser<'a> {
         children: &[KdlNode],
         is_part_of_stack: bool,
     ) -> Result<(Option<usize>, Vec<TiledPaneLayout>), ConfigError> {
-        // usize is external_children_index
+        // usize 是 external_children_index
         let mut external_children_index = None;
         let mut nodes = vec![];
         for (i, child) in children.iter().enumerate() {
@@ -1586,7 +1586,7 @@ impl<'a> KdlLayoutParser<'a> {
         ),
         ConfigError,
     > {
-        // (is_focused, Option<tab_name>, PaneLayout, Vec<FloatingPaneLayout>)
+        //（is_focused, Option<tab_name>, PaneLayout, Vec<FloatingPaneLayout>）
         let tab_name =
             kdl_get_string_property_or_child_value!(kdl_node, "name").map(|s| s.to_string());
         let tab_cwd = self.parse_path(kdl_node, "cwd")?;
@@ -1829,7 +1829,7 @@ impl<'a> KdlLayoutParser<'a> {
         Ok(())
     }
     fn populate_global_cwd(&mut self, layout_node: &KdlNode) -> Result<(), ConfigError> {
-        // we only populate global cwd from the layout file if another wasn't explicitly passed to us
+        // 只有在没有显式传递给我们另一个 cwd 时，我们才从布局文件填充全局 cwd
         if self.global_cwd.is_none() {
             self.global_cwd = self.parse_path(layout_node, "cwd")?;
         }
@@ -1843,8 +1843,8 @@ impl<'a> KdlLayoutParser<'a> {
         let mut pane_template_dependency_tree =
             self.get_pane_template_dependency_tree(layout_children)?;
         let mut pane_template_names_to_parse: Vec<&str> = vec![];
-        // toposort the dependency tree so that we parse the pane_templates before their
-        // dependencies
+        // 对依赖树进行拓扑排序，以便我们在 pane_templates 的
+        // 依赖
         while !pane_template_dependency_tree.is_empty() {
             let mut candidates: Vec<&str> = vec![];
             for (pane_tempalte, dependencies) in pane_template_dependency_tree.iter() {
@@ -1867,7 +1867,7 @@ impl<'a> KdlLayoutParser<'a> {
                 pane_template_names_to_parse.push(candidate_to_remove);
             }
         }
-        // once we've toposorted, parse the sorted list in order
+        // 一旦我们进行了拓扑排序，按顺序解析排序后的列表
         for pane_template_name in pane_template_names_to_parse {
             self.parse_pane_template_by_name(pane_template_name, &layout_children)?;
         }
@@ -2086,7 +2086,7 @@ impl<'a> KdlLayoutParser<'a> {
         let layout = self.parse_tab_node_with_template(
             layout_node,
             tab_template,
-            vec![], // no floating_panes in swap tiled node
+            vec![], // 交换平铺节点中没有 floating_panes
             should_mark_external_children_index,
             &tab_template_kdl_node,
         )?;
@@ -2173,7 +2173,7 @@ impl<'a> KdlLayoutParser<'a> {
             }
         }
         let default_template = self.default_template()?;
-        // Check if any tab properties are specified that would require creating an explicit tab
+        // 检查是否指定了需要创建显式标签页的标签页属性
         let has_tab_properties = tab_name.is_some()
             || split_direction != SplitDirection::default()
             || hide_floating_panes != false
@@ -2181,8 +2181,8 @@ impl<'a> KdlLayoutParser<'a> {
         let tabs =
             if default_template.is_none() && self.new_tab_template.is_none() && !has_tab_properties
             {
-                // in this case, the layout will be created as the default template and we don't need
-                // to explicitly place it in the first tab
+                // 在这种情况下，布局将作为默认模板创建，我们不需要
+                // 显式地将其放在第一个标签页中
                 vec![]
             } else {
                 vec![(tab_name, main_tab_layout.clone(), floating_panes.clone())]
@@ -2191,7 +2191,7 @@ impl<'a> KdlLayoutParser<'a> {
             .map(|tiled_panes_template| (tiled_panes_template, floating_panes.clone()))
             .or_else(|| self.new_tab_template.clone())
             .unwrap_or_else(|| (main_tab_layout.clone(), floating_panes.clone()));
-        // create a layout with one tab that has these child panes
+        // 创建一个有一个标签页且包含这些子窗格的布局
         Ok(Layout {
             tabs,
             template: Some(template),
@@ -2233,13 +2233,13 @@ impl<'a> KdlLayoutParser<'a> {
                 child_floating_panes.clone(),
             ))
         };
-        // Check if any tab properties are specified that would require creating an explicit tab
+        // 检查是否指定了需要创建显式标签页的标签页属性
         let has_tab_properties = tab_name.is_some()
             || split_direction != SplitDirection::default()
             || hide_floating_panes != false
             || tab_cwd.is_some();
         let tabs = if has_tab_properties {
-            // If we have tab properties, we need to create a tab with those properties
+            // 如果我们有标签页属性，我们需要创建一个具有这些属性的标签页
             if let Some((ref tiled_layout, ref floating_panes)) = template {
                 vec![(tab_name, tiled_layout.clone(), floating_panes.clone())]
             } else {
@@ -2498,7 +2498,7 @@ impl<'a> KdlLayoutParser<'a> {
             }
         }
         if !child_tabs.is_empty() {
-            // Check if layout_node has tab properties when there are explicit tabs
+            // 当有显式标签页时，检查 layout_node 是否有标签页属性
             let layout_has_tab_name =
                 kdl_get_string_property_or_child_value!(layout_node, "name").is_some();
             let layout_has_split_direction =
@@ -2560,7 +2560,7 @@ impl<'a> KdlLayoutParser<'a> {
                 swap_floating_layouts,
             )
         } else if !child_panes.is_empty() {
-            // Extract tab properties from layout_node
+            // 从 layout_node 提取标签页属性
             let tab_name =
                 kdl_get_string_property_or_child_value!(layout_node, "name").map(|s| s.to_string());
             let split_direction = self.parse_split_direction(layout_node)?;
@@ -2580,7 +2580,7 @@ impl<'a> KdlLayoutParser<'a> {
                 tab_cwd,
             )
         } else {
-            // Extract tab properties for layout_with_one_pane case
+            // 为 layout_with_one_pane 情况提取标签页属性
             let tab_name =
                 kdl_get_string_property_or_child_value!(layout_node, "name").map(|s| s.to_string());
             let split_direction = self.parse_split_direction(layout_node)?;

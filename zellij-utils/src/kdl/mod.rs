@@ -1288,13 +1288,13 @@ impl Action {
             Action::KeybindPipe {
                 name,
                 payload,
-                args: _, // currently unsupported
+                args: _, // 当前不支持
                 plugin,
                 configuration,
                 launch_new,
                 skip_cache,
                 floating,
-                in_place: _, // currently unsupported
+                in_place: _, // 当前不支持
                 cwd,
                 pane_title,
                 plugin_id,
@@ -1344,8 +1344,8 @@ impl Action {
                     node_children.nodes_mut().push(title_node);
                 }
                 if let Some(configuration) = configuration {
-                    // we do this because the constructor removes the relevant config fields from
-                    // above, otherwise we would have duplicates
+                    // 我们这样做是因为构造函数从中移除了相关的配置字段
+                    // 上面，否则我们会有重复
                     let configuration = PluginUserConfiguration::new(configuration.clone());
                     let configuration = configuration.inner();
                     for (config_key, config_value) in configuration.iter() {
@@ -1390,14 +1390,14 @@ impl TryFrom<(&str, &KdlDocument)> for PaletteColor {
         let is_rgb = || entry_count == 3;
         let is_three_digit_hex = || {
             match kdl_first_entry_as_string!(color) {
-                // 4 including the '#' character
+                // 4 包括 '#' 字符
                 Some(s) => entry_count == 1 && s.starts_with('#') && s.len() == 4,
                 None => false,
             }
         };
         let is_six_digit_hex = || {
             match kdl_first_entry_as_string!(color) {
-                // 7 including the '#' character
+                // 7 包括 '#' 字符
                 Some(s) => entry_count == 1 && s.starts_with('#') && s.len() == 7,
                 None => false,
             }
@@ -1422,7 +1422,7 @@ impl TryFrom<(&str, &KdlDocument)> for PaletteColor {
             ))? as u8;
             Ok(PaletteColor::Rgb((r, g, b)))
         } else if is_three_digit_hex() {
-            // eg. #fff (hex, will be converted to rgb)
+            // 例如 #fff（十六进制，将转换为 rgb）
             let mut s = String::from(kdl_first_entry_as_string!(color).unwrap());
             s.remove(0);
             let r = u8::from_str_radix(&s[0..1], 16).map_err(|_| {
@@ -1448,7 +1448,7 @@ impl TryFrom<(&str, &KdlDocument)> for PaletteColor {
             })? * 0x11;
             Ok(PaletteColor::Rgb((r, g, b)))
         } else if is_six_digit_hex() {
-            // eg. #ffffff (hex, will be converted to rgb)
+            // 例如 #ffffff（十六进制，将转换为 rgb）
             let mut s = String::from(kdl_first_entry_as_string!(color).unwrap());
             s.remove(0);
             let r = u8::from_str_radix(&s[0..2], 16).map_err(|_| {
@@ -1683,7 +1683,7 @@ impl TryFrom<(&KdlNode, &Options)> for Action {
                         .unwrap_or(false);
                 let pane_id_tuple = pane_id.map(|id| (id, is_plugin));
 
-                // Parse layout
+                // 解析布局
                 let layout = if let Some(layout_str) =
                     kdl_get_string_property_or_child_value!(kdl_action, "layout")
                 {
@@ -1697,7 +1697,7 @@ impl TryFrom<(&KdlNode, &Options)> for Action {
                     None
                 };
 
-                // Parse cwd
+                // 解析 cwd
                 let cwd =
                     kdl_get_string_property_or_child_value!(kdl_action, "cwd").map(PathBuf::from);
 
@@ -2225,8 +2225,8 @@ impl TryFrom<(&KdlNode, &Options)> for Action {
                     should_open_in_place,
                     close_replaced_pane,
                     skip_cache: skip_plugin_cache,
-                    cwd: None, // we explicitly do not send the current dir here so that it will be
-                    // filled from the active pane == better UX
+                    cwd: None, // 我们显式不在这里发送当前目录，以便它将
+                    // 从活动窗格填充 == 更好的用户体验
                     no_focus: false,
                     tab_id: None,
                 })
@@ -2279,22 +2279,22 @@ impl TryFrom<(&KdlNode, &Options)> for Action {
                     .map(|s| PathBuf::from(s));
 
                 let name = name
-                    // first we try to take the explicitly supplied message name
-                    // then we use the plugin, to facilitate using aliases
+                    // 首先我们尝试获取显式提供的消息名称
+                    // 然后我们使用插件，以便于使用别名
                     .or_else(|| plugin_path.clone())
-                    // then we use a uuid to at least have some sort of identifier for this message
+                    // 然后我们使用 uuid 至少为此消息提供某种标识符
                     .or_else(|| Some(Uuid::new_v4().to_string()));
 
                 Ok(Action::KeybindPipe {
                     name,
                     payload,
-                    args: None, // TODO: consider supporting this if there's a need
+                    args: None, // TODO: 有需要时考虑支持这个
                     plugin: plugin_path,
                     configuration,
                     launch_new,
                     skip_cache,
                     floating: Some(should_float),
-                    in_place: None, // TODO: support this
+                    in_place: None, // TODO: 支持这个
                     cwd,
                     pane_title: title,
                     plugin_id: None,
@@ -2321,19 +2321,19 @@ impl TryFrom<(&KdlNode, &Options)> for Action {
                 let configuration = None;
 
                 let name = name
-                    // if no name is provided, we use a uuid to at least have some sort of identifier for this message
+                    // 如果没有提供名称，我们使用 uuid 至少为此消息提供某种标识符
                     .or_else(|| Some(Uuid::new_v4().to_string()));
 
                 Ok(Action::KeybindPipe {
                     name,
                     payload,
-                    args: None, // TODO: consider supporting this if there's a need
+                    args: None, // TODO: 有需要时考虑支持这个
                     plugin: None,
                     configuration,
                     launch_new,
                     skip_cache,
                     floating: None,
-                    in_place: None, // TODO: support this
+                    in_place: None, // TODO: 支持这个
                     cwd: None,
                     pane_title: None,
                     plugin_id,
@@ -4757,11 +4757,11 @@ impl Options {
     }
     fn client_async_worker_tasks_to_kdl(&self, add_comments: bool) -> Option<KdlNode> {
         let comment_text = r#"
-// Number of async worker tasks to spawn per active client.
+// 每个活动客户端要生成的异步 worker 任务数。
 //
-// Allocating few tasks may result in resource contention and lags. Small values (around 4) should
-// typically work best. Set to 0 to use the number of (physical) CPU cores.
-// Note: This only applies to web clients at the moment."#;
+// 分配过少的任务可能导致资源争用和延迟。较小的值（约 4 个）应该
+// 通常效果最好。设置为 0 以使用（物理）CPU 核心数。
+// 注意：目前这仅适用于 Web 客户端。"#;
         let create_node = |node_value: usize| -> KdlNode {
             let mut node = KdlNode::new("client_async_worker_tasks");
             node.push(KdlValue::Base10(node_value as i64));
@@ -5001,8 +5001,8 @@ impl Layout {
         })?;
         match raw_swap_layouts {
             Some((raw_swap_layout_filename, raw_swap_layout)) => {
-                // here we use the same parser to parse the swap layout so that we can reuse assets
-                // (eg. pane and tab templates)
+                // 这里我们使用相同的解析器来解析交换布局，以便我们可以重用资源
+                //（例如窗格和标签页模板）
                 kdl_layout_parser
                     .parse_external_swap_layouts(raw_swap_layout, layout)
                     .map_err(|e| match e {
@@ -5104,7 +5104,7 @@ impl Keybinds {
         for key_block in bind_nodes {
             Keybinds::bind_actions_for_each_key(key_block, input_mode_keybinds, config_options)?;
         }
-        // we loop a second time so that the unbinds always happen after the binds
+        // 我们循环第二次，以便解绑总是在绑定之后发生
         for key_block in unbind_nodes {
             Keybinds::unbind_keys(key_block, input_mode_keybinds)?;
         }
@@ -5250,8 +5250,8 @@ impl Keybinds {
             ))
         }
     }
-    // minimize keybind entries for serialization, so that duplicate entries will appear in
-    // "shared" nodes later rather than once per mode
+    // 最小化序列化的快捷键绑定条目，以便重复条目将出现在
+    // "shared" 节点稍后处理，而不是每种模式一次
     fn minimize_entries(
         &self,
     ) -> BTreeMap<BTreeSet<InputMode>, BTreeMap<KeyWithModifier, Vec<Action>>> {
@@ -5355,8 +5355,8 @@ impl Keybinds {
                 }
             }};
         }
-        // we do this explicitly so that the sorting order of modes in the config is more Human
-        // readable - this is actually less code (and clearer) than implementing Ord in this case
+        // 我们显式这样做，以便配置中模式的排序顺序更人性化
+        // 可读 - 在这种情况下，这实际上比实现 Ord 代码更少（且更清晰）
         encode_single_input_mode!(Normal);
         encode_single_input_mode!(Locked);
         encode_single_input_mode!(Pane);
@@ -5438,8 +5438,8 @@ impl Config {
         let config_options = Options::from_kdl(&kdl_config)?;
         config.options = config.options.merge(config_options);
 
-        // TODO: handle cases where we have more than one of these blocks (eg. two "keybinds")
-        // this should give an informative parsing error
+        // TODO: 处理我们有多个这些块的情况（例如两个 "keybinds"）
+        // 这应该给出一个信息丰富的解析错误
         if let Some(kdl_keybinds) = kdl_config.get("keybinds") {
             config.keybinds = Keybinds::from_kdl(&kdl_keybinds, config.keybinds, &config.options)?;
         }
@@ -5799,7 +5799,7 @@ impl Themes {
                 .iter()
                 .all(|n| palette_color_names.contains(n.name().value()))
             {
-                // Older palette based theme definition
+                // 较旧的基于调色板的主题定义
                 let palette = Palette {
                     fg: PaletteColor::try_from(("fg", theme_colors))?,
                     bg: PaletteColor::try_from(("bg", theme_colors))?,
@@ -5819,7 +5819,7 @@ impl Themes {
                     sourced_from_external_file,
                 }
             } else {
-                // Newer theme definition with named styles
+                // 带有命名样式的较新主题定义
                 let s = Styling {
                     text_unselected: Themes::style_declaration_from_node(
                         theme_config,
@@ -5921,7 +5921,7 @@ impl Themes {
     }
 
     pub fn from_path(path_to_theme_file: PathBuf) -> Result<Self, ConfigError> {
-        // String is the theme name
+        // String 是主题名称
         let kdl_config = std::fs::read_to_string(&path_to_theme_file)
             .map_err(|e| ConfigError::IoPath(e, path_to_theme_file.clone()))?;
         let sourced_from_external_file = true;
@@ -5955,8 +5955,8 @@ impl Themes {
         let sorted_themes: BTreeMap<String, Theme> = self.inner().clone().into_iter().collect();
         for (theme_name, theme) in sorted_themes {
             if theme.sourced_from_external_file {
-                // we do not serialize themes that have been defined in external files so as not to
-                // clog up the configuration file definitions
+                // 我们不序列化在外部文件中定义的主题，以免
+                // 堵塞配置文件定义
                 continue;
             }
             has_themes = true;
@@ -6235,7 +6235,7 @@ impl SessionInfo {
             available_layouts,
             web_client_count,
             web_clients_allowed,
-            plugins: Default::default(), // we do not serialize plugin information
+            plugins: Default::default(), // 我们不序列化插件信息
             tab_history,
             pane_history,
             creation_time,
@@ -6573,7 +6573,7 @@ impl PaneManifest {
 
 impl PaneInfo {
     pub fn decode_from_kdl(kdl_document: &KdlDocument) -> Result<(usize, Self), String> {
-        // usize is the tab position
+        // usize 是标签页位置
         macro_rules! int_node {
             ($name:expr, $type:ident) => {{
                 kdl_document
@@ -6682,7 +6682,7 @@ impl PaneInfo {
             terminal_command,
             plugin_url,
             is_selectable,
-            index_in_pane_group: Default::default(), // we don't serialize this
+            index_in_pane_group: Default::default(), // 我们不序列化这个
             default_fg: None,
             default_bg: None,
         };
@@ -6832,7 +6832,7 @@ fn serialize_and_deserialize_session_info_with_data() {
             terminal_command: Some("foo".to_owned()),
             plugin_url: None,
             is_selectable: true,
-            index_in_pane_group: Default::default(), // we don't serialize this
+            index_in_pane_group: Default::default(), // 我们不序列化这个
             default_fg: None,
             default_bg: None,
         },
@@ -6859,7 +6859,7 @@ fn serialize_and_deserialize_session_info_with_data() {
             terminal_command: None,
             plugin_url: Some("i_am_a_fake_plugin".to_owned()),
             is_selectable: true,
-            index_in_pane_group: Default::default(), // we don't serialize this
+            index_in_pane_group: Default::default(), // 我们不序列化这个
             default_fg: None,
             default_bg: None,
         },
@@ -7040,9 +7040,9 @@ fn keybinds_to_string_with_multiple_actions() {
 
 #[test]
 fn can_bind_theme_actions() {
-    // Regression test for https://github.com/zellij-org/zellij/issues/5297
-    // SetDarkTheme / SetLightTheme / ToggleTheme work via the CLI but used to be
-    // rejected by the keybinding parser with "Unsupported action".
+    // https://github.com/zellij-org/zellij/issues/5297 的回归测试
+    // SetDarkTheme / SetLightTheme / ToggleTheme 通过 CLI 工作，但过去是
+    // 被快捷键绑定解析器以 "Unsupported action" 拒绝。
     let fake_config = r#"
         keybinds {
             normal {
@@ -7073,7 +7073,7 @@ fn can_bind_theme_actions() {
         deserialized.get_actions_for_key_in_mode(&InputMode::Normal, &ctrl_l),
         Some(&vec![Action::SetLightTheme])
     );
-    // The bindings must also survive a serialize -> deserialize round-trip.
+    // 绑定还必须在序列化 -> 反序列化往返中存活。
     let serialized = Keybinds::to_kdl(&deserialized, true);
     let deserialized_from_serialized = Keybinds::from_kdl(
         serialized
@@ -7244,7 +7244,7 @@ fn keybinds_to_string_with_all_actions() {
         &Default::default(),
     )
     .unwrap();
-    // uncomment the below lines for more easily debugging a failed assertion here
+    // 取消注释以下行，以便更轻松地调试此处失败的断言
     //     for (input_mode, input_mode_keybinds) in deserialized.0 {
     //         if let Some(other_input_mode_keybinds) = deserialized_from_serialized.0.get(&input_mode) {
     //             for (keybind, action) in input_mode_keybinds {
@@ -8072,7 +8072,7 @@ fn osc8_hyperlinks_config_parsing() {
     let config = Config::from_kdl(config_with_osc8_enabled, None).unwrap();
     assert_eq!(config.options.osc8_hyperlinks, Some(true));
 
-    // Test serialization roundtrip
+    // 测试序列化往返
     let serialized = config.to_string(false);
     let deserialized = Config::from_kdl(&serialized, None).unwrap();
     assert_eq!(deserialized.options.osc8_hyperlinks, Some(true));
