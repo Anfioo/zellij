@@ -82,7 +82,7 @@ pub fn create_first_message(
 
     let is_web_client = true;
     if is_read_only {
-        // read only clients attach as watchers
+        // 只读客户端作为观察者连接
         ClientToServerMsg::AttachWatcherClient {
             terminal_size: client_attributes.size,
             is_web_client,

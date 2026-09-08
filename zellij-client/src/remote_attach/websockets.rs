@@ -8,9 +8,9 @@ use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio::net::TcpStream;
 use tokio_tungstenite::WebSocketStream;
 
-// -- MaybeTls stream enum -------------------------------------------------
+// -- MaybeTls 流枚举 -------------------------------------------------
 
-/// A TCP stream that may or may not be wrapped in TLS.
+/// 可能被 TLS 包装也可能不被 TLS 包装的 TCP 流。
 pub enum MaybeTls {
     Plain(TcpStream),
     Tls(tokio_rustls::client::TlsStream<TcpStream>),
@@ -56,7 +56,7 @@ impl AsyncWrite for MaybeTls {
     }
 }
 
-// -- NoVerifier (for --insecure mode) --------------------------------------
+// -- NoVerifier（用于 --insecure 模式）--------------------------------------
 
 #[derive(Debug)]
 struct NoVerifier;
@@ -98,7 +98,7 @@ impl rustls::client::danger::ServerCertVerifier for NoVerifier {
     }
 }
 
-// -- TLS config builder ----------------------------------------------------
+// -- TLS 配置构建器 ----------------------------------------------------
 
 fn build_tls_config(
     ca_cert: Option<&Path>,
@@ -144,7 +144,7 @@ fn build_tls_config(
     }
 }
 
-// -- WebSocket connection helpers ------------------------------------------
+// -- WebSocket 连接辅助函数 ------------------------------------------
 
 async fn connect_ws(
     request: tokio_tungstenite::tungstenite::http::Request<()>,
@@ -168,7 +168,7 @@ async fn connect_ws(
     Ok(ws_stream)
 }
 
-// -- Public API ------------------------------------------------------------
+// -- 公共 API ------------------------------------------------------------
 
 pub struct WebSocketConnections {
     pub terminal_ws: WebSocketStream<MaybeTls>,
@@ -237,7 +237,7 @@ pub async fn establish_websocket_connections(
     log::info!("Connecting to terminal WebSocket: {}", terminal_url);
     log::info!("Connecting to control WebSocket: {}", control_url);
 
-    // Build WebSocket requests with cookies
+    // 使用 cookie 构建 WebSocket 请求
     let mut terminal_request = tokio_tungstenite::tungstenite::http::Request::builder()
         .uri(&terminal_url)
         .header("Host", &base_host)
@@ -260,7 +260,7 @@ pub async fn establish_websocket_connections(
         )
         .header("Sec-WebSocket-Version", "13");
 
-    // Add cookies if available
+    // 如果可用，添加 cookie
     if let Some(cookie_header) = http_client.get_cookie_header() {
         terminal_request = terminal_request.header("Cookie", &cookie_header);
         control_request = control_request.header("Cookie", &cookie_header);
@@ -269,14 +269,14 @@ pub async fn establish_websocket_connections(
     let terminal_request = terminal_request.body(())?;
     let control_request = control_request.body(())?;
 
-    // Build TLS config (only for wss://)
+    // 构建 TLS 配置（仅用于 wss://）
     let tls_config = if is_tls {
         Some(build_tls_config(ca_cert, insecure)?)
     } else {
         None
     };
 
-    // Connect to both WebSockets
+    // 连接到两个 WebSocket
     let terminal_ws = connect_ws(terminal_request, &host, port, tls_config.clone()).await?;
     let control_ws = connect_ws(control_request, &host, port, tls_config).await?;
 

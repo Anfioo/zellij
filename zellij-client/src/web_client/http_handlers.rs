@@ -47,7 +47,7 @@ pub async fn login_handler(
         Ok(session_token) => {
             let is_https = state.is_https;
             let cookie = if login_request.remember_me.unwrap_or(false) {
-                // Persistent cookie for remember_me
+                // remember_me 的持久 cookie
                 Cookie::build(("session_token", session_token))
                     .http_only(true)
                     .secure(is_https)
@@ -56,7 +56,7 @@ pub async fn login_handler(
                     .max_age(time::Duration::weeks(4))
                     .build()
             } else {
-                // Session cookie - NO max_age means it expires when browser closes/refreshes
+                // 会话 cookie - 没有 max_age 意味着它在浏览器关闭/刷新时过期
                 Cookie::build(("session_token", session_token))
                     .http_only(true)
                     .secure(is_https)
@@ -93,7 +93,7 @@ pub async fn create_new_client(
     Query(params): Query<SessionQuery>,
     request: axum::extract::Request,
 ) -> Result<Json<CreateClientIdResponse>, (StatusCode, impl IntoResponse)> {
-    // Extract is_read_only from request extensions (set by auth middleware)
+    // 从请求扩展中提取 is_read_only（由认证中间件设置）
     let is_read_only = request
         .extensions()
         .get::<IsReadOnly>()

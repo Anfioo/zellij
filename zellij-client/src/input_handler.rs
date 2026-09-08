@@ -1,4 +1,4 @@
-//! Main input logic.
+//! 主要输入逻辑。
 use crate::{
     nested_reannounce::NestedReannounce, os_input_output::ClientOsApi,
     stdin_ansi_parser::AnsiStdinInstruction, ClientId, ClientInstruction, CommandIsExecuting,
@@ -23,10 +23,9 @@ use zellij_utils::{
     },
 };
 
-/// Handles the dispatching of [`Action`]s according to the current
-/// [`InputMode`], and keep tracks of the current [`InputMode`].
+/// 根据当前的 [InputMode] 处理 [Action] 的分发，并跟踪当前的 [InputMode]。
 struct InputHandler {
-    /// The current input mode
+    /// 当前输入模式
     mode: InputMode,
     os_input: Box<dyn ClientOsApi>,
     config: Config,
@@ -61,16 +60,12 @@ fn termwiz_mouse_convert(original_event: &mut MouseEvent, event: &TermwizMouseEv
 }
 
 pub fn from_termwiz(old_event: &mut MouseEvent, event: TermwizMouseEvent) -> MouseEvent {
-    // We use the state of old_event vs new_event to determine if this
-    // event is a Press, Release, or Motion.  This is an unfortunate
-    // side effect of the pre-SGR-encoded X10 mouse protocol design in
-    // which release events don't carry information about WHICH
-    // button(s) were released, so we have to maintain a wee bit of
-    // state in between events.
+    // 我们使用 old_event 与 new_event 的状态来确定此事件是 Press、Release 还是 Motion。
+    // 这是 pre-SGR-encoded X10 鼠标协议设计的一个不幸副作用，在该设计中 release 事件
+    // 不携带关于释放了哪个按钮的信息，因此我们必须在事件之间维护一点状态。
     //
-    // Note that only Left, Right, and Middle are saved in between
-    // calls.  WheelUp/WheelDown typically do not generate Release
-    // events.
+    // 请注意，只有 Left、Right 和 Middle 会在调用之间保存。WheelUp/WheelDown 通常
+    // 不会生成 Release 事件。
     let mut new_event = MouseEvent::new();
     termwiz_mouse_convert(&mut new_event, &event);
     new_event.position = Position::new(event.y.saturating_sub(1) as i32, event.x.saturating_sub(1));
@@ -83,28 +78,26 @@ pub fn from_termwiz(old_event: &mut MouseEvent, event: TermwizMouseEvent) -> Mou
         || new_event.wheel_left
         || new_event.wheel_right
     {
-        // This is a mouse Press event.
+        // 这是一个鼠标 Press 事件。
         new_event.event_type = MouseEventType::Press;
 
-        // Hang onto the button state.
+        // 保留按钮状态。
         *old_event = new_event;
     } else if event.mouse_buttons.is_empty()
         && !old_event.left
         && !old_event.right
         && !old_event.middle
     {
-        // This is a mouse Motion event (no buttons are down).
+        // 这是一个鼠标 Motion 事件（没有按钮按下）。
         new_event.event_type = MouseEventType::Motion;
 
-        // Hang onto the button state.
+        // 保留按钮状态。
         *old_event = new_event;
     } else if event.mouse_buttons.is_empty()
         && (old_event.left || old_event.right || old_event.middle)
     {
-        // This is a mouse Release event.  Note that we set
-        // old_event.{button} to false (to release), but set ONLY the
-        // new_event that were released to true before sending the
-        // event up.
+        // 这是一个鼠标 Release 事件。请注意，我们将 old_event.{button} 设置为 false
+        // （以释放），但在向上发送事件之前，仅将被释放的 new_event 设置为 true。
         if old_event.left {
             old_event.left = false;
             new_event.left = true;
@@ -119,8 +112,7 @@ pub fn from_termwiz(old_event: &mut MouseEvent, event: TermwizMouseEvent) -> Mou
         }
         new_event.event_type = MouseEventType::Release;
     } else {
-        // Dragging with some button down.  Return it as a Motion
-        // event, and hang on to the button state.
+        // 按住某个按钮拖动。将其作为 Motion 事件返回，并保留按钮状态。
         new_event.event_type = MouseEventType::Motion;
         *old_event = new_event;
     }
@@ -129,15 +121,14 @@ pub fn from_termwiz(old_event: &mut MouseEvent, event: TermwizMouseEvent) -> Mou
 }
 
 impl InputHandler {
-    /// Returns a new [`InputHandler`] with the attributes specified as arguments.
+    /// 返回一个具有指定参数属性的新 [InputHandler]。
     fn new(
         os_input: Box<dyn ClientOsApi>,
         command_is_executing: CommandIsExecuting,
         config: Config,
         options: Options,
         send_client_instructions: SenderWithContext<ClientInstruction>,
-        mode: InputMode, // TODO: we can probably get rid of this now that we're tracking it on the
-        // server instead
+        mode: InputMode, // TODO: 既然我们在服务端跟踪它，现在可能可以去掉这个了
         receive_input_instructions: Receiver<(InputInstruction, ErrorContext)>,
         nested_reannounce: NestedReannounce,
     ) -> Self {
@@ -156,8 +147,7 @@ impl InputHandler {
         }
     }
 
-    /// Main input event loop. Interprets the terminal Event
-    /// as [`Action`]s according to the current [`InputMode`], and dispatches those actions.
+    /// 主要输入事件循环。根据当前的 [InputMode] 将终端事件解释为 [Action]，并分发这些操作。
     fn handle_input(&mut self) {
         let mut err_ctx = OPENCALLS.with(|ctx| *ctx.borrow());
         err_ctx.add_call(ContextType::StdinHandler);
@@ -307,8 +297,7 @@ impl InputHandler {
         raw_bytes: Vec<u8>,
         is_kitty_keyboard_protocol: bool,
     ) {
-        // we interpret the keys into actions on the server side so that we can change the
-        // keybinds at runtime
+        // 我们在服务端将按键解释为操作，这样我们就可以在运行时更改快捷键绑定
         self.os_input.send_to_server(ClientToServerMsg::Key {
             key: key.clone(),
             raw_bytes,
@@ -391,17 +380,14 @@ impl InputHandler {
             None,
         );
     }
-    /// Dispatches an [`Action`].
+    /// 分发一个 [Action]。
     ///
-    /// This function's body dictates what each [`Action`] actually does when
-    /// dispatched.
+    /// 此函数的主体决定了每个 [Action] 在分发时实际执行的操作。
     ///
-    /// # Return value
-    /// Currently, this function returns a boolean that indicates whether
-    /// [`Self::handle_input()`] should break after this action is dispatched.
-    /// This is a temporary measure that is only necessary due to the way that the
-    /// framework works, and shouldn't be necessary anymore once the test framework
-    /// is revised. See [issue#183](https://github.com/zellij-org/zellij/issues/183).
+    /// # 返回值
+    /// 目前，此函数返回一个布尔值，指示在分发此操作后 [Self::handle_input()] 是否应该中断。
+    /// 这是一个临时措施，仅由于框架的工作方式而必要，一旦测试框架修订后就不再需要了。
+    /// 参见 issue#183 (https://github.com/zellij-org/zellij/issues/183)。
     fn dispatch_action(&mut self, action: Action, client_id: Option<ClientId>) -> bool {
         let mut should_break = false;
 
@@ -485,8 +471,7 @@ impl InputHandler {
         should_break
     }
 
-    /// Routine to be called when the input handler exits (at the moment this is the
-    /// same as quitting Zellij).
+    /// 输入处理器退出时要调用的例程（目前这与退出 Zellij 相同）。
     fn exit(&mut self, reason: ExitReason) {
         self.send_client_instructions
             .send(ClientInstruction::Exit(reason))
@@ -494,8 +479,7 @@ impl InputHandler {
     }
 }
 
-/// Entry point to the module. Instantiates an [`InputHandler`] and starts
-/// its [`InputHandler::handle_input()`] loop.
+/// 模块的入口点。实例化一个 [InputHandler] 并启动其 [InputHandler::handle_input()] 循环。
 pub(crate) fn input_loop(
     os_input: Box<dyn ClientOsApi>,
     config: Config,

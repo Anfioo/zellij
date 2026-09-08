@@ -11,7 +11,7 @@ use std::io::Write;
 use std::path::Path;
 use zellij_utils::ipc::{IpcReceiverWithContext, IpcSenderWithContext};
 
-/// Async signal listener that maps Unix signals to `SignalEvent` variants.
+/// 将 Unix 信号映射到 `SignalEvent` 变体的异步信号监听器。
 pub(crate) struct AsyncSignalListener {
     sigwinch: tokio::signal::unix::Signal,
     sigterm: tokio::signal::unix::Signal,
@@ -45,8 +45,8 @@ impl crate::os_input_output::AsyncSignals for AsyncSignalListener {
     }
 }
 
-/// Blocking signal iterator that maps Unix signals to `SignalEvent` variants.
-/// Used by `handle_signals()` on a dedicated thread.
+/// 将 Unix 信号映射到 `SignalEvent` 变体的阻塞信号迭代器。
+/// 由 `handle_signals()` 在专用线程上使用。
 pub(crate) struct BlockingSignalIterator {
     signals: Signals,
 }
@@ -73,9 +73,9 @@ impl Iterator for BlockingSignalIterator {
     }
 }
 
-/// Set up client IPC channels from a connected socket.
+/// 从已连接的套接字设置客户端进程间通信通道。
 ///
-/// On Unix a single socket is cloned for both send and receive directions.
+/// 在 Unix 上，单个套接字被克隆用于发送和接收两个方向。
 pub(crate) fn setup_ipc(
     socket: interprocess::local_socket::Stream,
     _path: &Path,

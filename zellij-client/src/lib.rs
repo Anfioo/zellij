@@ -58,22 +58,19 @@ const SHOW_CURSOR: &str = "\u{1b}[?25h";
 const ENTER_KITTY_KEYBOARD_MODE: &str = "\u{1b}[>1u";
 const EXIT_KITTY_KEYBOARD_MODE: &str = "\u{1b}[<1u";
 const CLEAR_CLIENT_TERMINAL_ATTRIBUTES: &str = "\u{1b}[?1l\u{1b}=\u{1b}[r\u{1b}[?1000l\u{1b}[?1002l\u{1b}[?1003l\u{1b}[?1005l\u{1b}[?1006l\u{1b}[?12l";
-/// Subscribe to host color-palette theme notifications (CSI 2031). Hosts
-/// that support it begin emitting unsolicited DSR 997 reports on theme
-/// change after this is sent.
+/// 订阅主机调色板主题通知（CSI 2031）。支持它的主机在发送此命令后，
+/// 会在主题更改时开始发出主动的 DSR 997 报告。
 const ENABLE_HOST_THEME_NOTIFY: &str = "\u{1b}[?2031h";
-/// Cancel the CSI 2031 subscription (sent on detach / shutdown so we
-/// don't leave the host emitting DSR 997s into nothing).
+/// 取消 CSI 2031 订阅（在分离/关闭时发送，以免让主机向空处发出 DSR 997）。
 const DISABLE_HOST_THEME_NOTIFY: &str = "\u{1b}[?2031l";
-/// Actively query the current host theme (DSR 996). Reply arrives in the
-/// same `CSI ? 997 ; {1|2} n` form as unsolicited notifications, so the
-/// stdin parser handles both uniformly.
+/// 主动查询当前主机主题（DSR 996）。回复以与主动通知相同的
+/// `CSI ? 997 ; {1|2} n` 形式到达，因此标准输入解析器统一处理两者。
 const QUERY_HOST_THEME: &str = "\u{1b}[?996n";
 
-/// Spawn an async runtime for this client instance.
+/// 为此客户端实例生成一个异步运行时。
 ///
-/// The number of workers can be configured to any nonzero value. Passing zero or `None` will spawn
-/// one worker per physical CPU on the current machine.
+/// 工作线程数可以配置为任何非零值。传入零或 `None` 将为当前机器上的
+/// 每个物理 CPU 生成一个工作线程。
 #[cfg(feature = "web_server_capability")]
 pub(crate) fn async_runtime(maybe_number_of_workers: Option<usize>) -> tokio::runtime::Handle {
     match tokio::runtime::Handle::try_current() {
@@ -173,7 +170,7 @@ use zellij_utils::{
     vendored::termwiz::input::InputEvent,
 };
 
-/// Instructions related to the client-side application
+/// 与客户端应用程序相关的指令
 #[derive(Debug, Clone)]
 pub(crate) enum ClientInstruction {
     Error(String),
@@ -185,15 +182,15 @@ pub(crate) enum ClientInstruction {
     LogError(Vec<String>),
     SwitchSession(ConnectToSession),
     SetSynchronizedOutput(Option<SyncOutput>),
-    UnblockCliPipeInput(()), // String -> pipe name
-    CliPipeOutput((), ()),   // String -> pipe name, String -> output
+    UnblockCliPipeInput(()), // String -> 管道名称
+    CliPipeOutput((), ()),   // String -> 管道名称, String -> 输出
     QueryTerminalSize,
     StartWebServer,
-    #[allow(dead_code)] // we need the session name here even though we're not currently using it
-    RenamedSession(String), // String -> new session name
+    #[allow(dead_code)] // 即使我们目前没有使用会话名称，这里也需要它
+    RenamedSession(String), // String -> 新会话名称
     ConfigFileUpdated,
-    /// Server asked us to forward `query_bytes` to the host terminal and
-    /// collect the reply bytes into the window identified by `token`.
+    /// 服务端要求我们将 `query_bytes` 转发到主机终端，
+    /// 并将回复字节收集到由 `token` 标识的窗口中。
     ForwardQueryToHost {
         token: u32,
         query_bytes: Vec<u8>,
@@ -234,7 +231,7 @@ impl From<ServerToClientMsg> for ClientInstruction {
             ServerToClientMsg::EmitNestedSessionFrame { payload_bytes } => {
                 ClientInstruction::EmitNestedSessionFrame(payload_bytes)
             },
-            // Subscribe-only messages — not handled by regular interactive clients
+            // 仅订阅消息 — 常规交互式客户端不处理
             ServerToClientMsg::PaneRenderUpdate { .. } => ClientInstruction::UnblockInputThread,
             ServerToClientMsg::SubscribedPaneClosed { .. } => ClientInstruction::UnblockInputThread,
             ServerToClientMsg::SetSoftKeyboard { .. } => ClientInstruction::UnblockInputThread,
@@ -284,8 +281,8 @@ fn spawn_web_server(cli_args: &CliArgs) -> Result<String, String> {
                 config_file_path.display()
             ));
         }
-        // this is so that if Zellij itself was started with a different config file, we'll use it
-        // to start the webserver
+        // 这样做是为了如果 Zellij 本身是用不同的配置文件启动的，我们将使用它
+        // 来启动 web 服务器
         cmd.arg("--config");
         cmd.arg(format!("{}", config_file_path.display()));
     }
@@ -304,17 +301,16 @@ fn spawn_web_server(cli_args: &CliArgs) -> Result<String, String> {
     }
 }
 
-/// On Windows, cmd.output() creates pipe handles for stdout/stderr. The child
-/// (zellij web -d) spawns a grandchild (the web server) which inherits these
-/// pipe handles. cmd.output() waits for EOF on the pipes, but the long-lived
-/// grandchild keeps them open — hanging forever.
+/// 在 Windows 上，cmd.output() 为 stdout/stderr 创建管道句柄。子进程
+/// (zellij web -d) 会生成一个孙进程（web 服务器），它继承这些管道句柄。
+/// cmd.output() 等待管道上的 EOF，但长生命周期的孙进程会保持它们打开 — 永远挂起。
 ///
-/// Redirecting the grandchild's stdio to null is not sufficient: on Windows,
-/// CreateProcess with bInheritHandles=TRUE inherits ALL inheritable handles,
-/// not just the stdio handles specified in STARTUPINFO. The pipe handles leak
-/// through regardless of the grandchild's stdio configuration.
+/// 将孙进程的 stdio 重定向到 null 是不够的：在 Windows 上，
+/// bInheritHandles=TRUE 的 CreateProcess 会继承所有可继承句柄，
+/// 而不仅仅是 STARTUPINFO 中指定的 stdio 句柄。无论孙进程的 stdio 配置如何，
+/// 管道句柄都会泄漏。
 ///
-/// Use cmd.status() instead: no pipes are created, so nothing to hang on.
+/// 改用 cmd.status()：不创建管道，因此没有什么可挂起的。
 #[cfg(all(feature = "web_server_capability", windows))]
 fn spawn_web_server(cli_args: &CliArgs) -> Result<String, String> {
     let mut cmd = Command::new(current_exe().map_err(|e| e.to_string())?);
@@ -456,10 +452,10 @@ fn create_ipc_pipe(teardown: Option<TerminalTeardown>) -> PathBuf {
     sock_dir
 }
 
-/// Spawn the Zellij server process.
+/// 生成 Zellij 服务端进程。
 ///
-/// On Unix the server daemonizes (double-fork) inside start_server(), so
-/// the intermediate child exits immediately and `cmd.status()` returns.
+/// 在 Unix 上，服务端在 start_server() 内部进行守护进程化（双 fork），因此
+/// 中间子进程立即退出，`cmd.status()` 返回。
 #[cfg(not(windows))]
 pub fn spawn_server(socket_path: &Path, debug: bool) -> io::Result<()> {
     let mut cmd = Command::new(current_exe()?);
@@ -480,13 +476,12 @@ pub fn spawn_server(socket_path: &Path, debug: bool) -> io::Result<()> {
     }
 }
 
-/// Spawn the Zellij server process.
+/// 生成 Zellij 服务端进程。
 ///
-/// On Windows there is no daemonize — we launch the server as a background
-/// process with a hidden console.  We use CREATE_NO_WINDOW (not
-/// DETACHED_PROCESS) so the server gets valid standard handles;
-/// DETACHED_PROCESS leaves stdin/stdout/stderr as NULL, which breaks PTY
-/// creation, WASM plugin loading, and logging.
+/// 在 Windows 上没有守护进程化 — 我们将服务端作为带有隐藏控制台的后台进程启动。
+/// 我们使用 CREATE_NO_WINDOW（而不是 DETACHED_PROCESS），以便服务端获得有效的标准句柄；
+/// DETACHED_PROCESS 会将 stdin/stdout/stderr 保留为 NULL，这会破坏 PTY 创建、
+/// WASM 插件加载和日志记录。
 #[cfg(windows)]
 pub fn spawn_server(socket_path: &Path, debug: bool) -> io::Result<()> {
     use std::os::windows::process::CommandExt;
@@ -511,8 +506,8 @@ pub enum ClientInfo {
         Option<PathBuf>,
         Option<Vec<CommandOrPlugin>>,
     ), // PathBuf -> explicit cwd
-    Resurrect(String, PathBuf, bool, Option<PathBuf>), // (name, path_to_layout, force_run_commands, cwd)
-    Watch(String, Options),                            // Watch mode (read-only)
+    Resurrect(String, PathBuf, bool, Option<PathBuf>), // (名称, 布局路径, 强制运行命令, cwd)
+    Watch(String, Options),                            // 监视模式（只读）
 }
 
 impl ClientInfo {
@@ -549,13 +544,12 @@ impl ClientInfo {
 pub(crate) enum InputInstruction {
     KeyEvent(InputEvent, Vec<u8>),
     KeyWithModifierEvent(KeyWithModifier, Vec<u8>, bool), // bool = is_kitty_keyboard_protocol
-    #[allow(dead_code)] // constructed in stdin_handler_windows.rs (Windows-only)
+    #[allow(dead_code)] // 在 stdin_handler_windows.rs 中构造（仅 Windows）
     MouseEvent(zellij_utils::input::mouse::MouseEvent),
     AnsiStdinInstructions(Vec<AnsiStdinInstruction>),
     DesktopNotificationResponse(Vec<u8>),
-    /// The continuous host-reply parser closed a forwarding window (barrier
-    /// reply seen or timeout fired). Payload is the accumulated raw bytes
-    /// to ship to the server.
+    /// 连续的主机回复解析器关闭了一个转发窗口（看到屏障回复或触发超时）。
+    /// 有效载荷是要发送到服务端的累积原始字节。
     ForwardedReplyFromHostComplete {
         token: u32,
         reply_bytes: Vec<u8>,
@@ -595,7 +589,7 @@ pub async fn run_remote_client_terminal_loop(
         )
     };
 
-    // send size on startup
+    // 启动时发送大小
     let new_size = os_input.get_terminal_size();
     if let Err(e) = connections
         .control_ws
@@ -615,7 +609,7 @@ pub async fn run_remote_client_terminal_loop(
 
     loop {
         tokio::select! {
-            // Handle stdin input
+            // 处理标准输入
             result = async_stdin.read() => {
                 match result {
                     Ok(buf) if !buf.is_empty() => {
@@ -657,7 +651,7 @@ pub async fn run_remote_client_terminal_loop(
                         }
                     }
                     Ok(_) => {
-                        // Empty buffer means EOF
+                        // 空缓冲区意味着 EOF
                         break;
                     }
                     Err(e) => {
@@ -685,7 +679,7 @@ pub async fn run_remote_client_terminal_loop(
                 }
             }
 
-            // Handle signals
+            // 处理信号
             Some(signal) = async_signals.recv() => {
                 match signal {
                     crate::os_input_output::SignalEvent::Resize => {
@@ -701,7 +695,7 @@ pub async fn run_remote_client_terminal_loop(
                 }
             }
 
-            // Handle terminal messages
+            // 处理终端消息
             terminal_msg = connections.terminal_ws.next() => {
                 match terminal_msg {
                     Some(Ok(Message::Text(text))) => {
@@ -760,7 +754,7 @@ pub async fn run_remote_client_terminal_loop(
                             serde_json::from_str(&msg);
                         match deserialized_msg {
                             Ok(WebServerToWebClientControlMessage::SetConfig(..)) => {
-                                // no-op
+                                // 空操作
                             }
                             Ok(WebServerToWebClientControlMessage::QueryTerminalSize) => {
                                 let new_size = os_input.get_terminal_size();
@@ -779,13 +773,13 @@ pub async fn run_remote_client_terminal_loop(
                                 }
                             }
                             Ok(WebServerToWebClientControlMessage::SwitchedSession{ .. }) => {
-                                // no-op
+                                // 空操作
                             }
                             Ok(WebServerToWebClientControlMessage::SetSoftKeyboard{ .. }) => {
-                                // no-op
+                                // 空操作
                             }
                             Ok(WebServerToWebClientControlMessage::MobileState{ .. }) => {
-                                // no-op
+                                // 空操作
                             }
                             Err(e) => {
                                 log::debug!("Ignoring unrecognized control message: {}", e);
@@ -938,8 +932,8 @@ pub fn start_remote_client(
 pub fn start_client(
     mut os_input: Box<dyn ClientOsApi>,
     cli_args: CliArgs,
-    config: Config,          // saved to disk (or default?)
-    config_options: Options, // CLI options merged into (getting priority over) saved config options
+    config: Config,          // 保存到磁盘（或默认？）
+    config_options: Options, // CLI 选项合并到（优先级高于）保存的配置选项
     info: ClientInfo,
     tab_position_to_focus: Option<usize>,
     pane_id_to_focus: Option<(u32, bool)>, // (pane_id, is_plugin)
@@ -966,9 +960,8 @@ pub fn start_client(
     os_input.unset_raw_mode().unwrap();
 
     if !is_a_reconnect {
-        // we don't do this for a reconnect because our controlling terminal already has the
-        // attributes we want from it, and some terminals don't treat these atomically (looking at
-        // you Windows Terminal...)
+        // 我们不对重连执行此操作，因为我们的控制终端已经具有我们想要的属性，
+        // 而且某些终端不会原子地处理这些属性（说的就是你 Windows Terminal...）
         let mut stdout = os_input.get_stdout_writer();
         stdout.write_all(ENTER_ALTERNATE_SCREEN.as_bytes()).unwrap();
         stdout
@@ -979,10 +972,9 @@ pub fn start_client(
                 .write_all(ENTER_KITTY_KEYBOARD_MODE.as_bytes())
                 .unwrap();
         }
-        // Subscribe to host CSI 2031 theme notifications and query the
-        // current mode. Sent right after CLEAR_CLIENT_TERMINAL_ATTRIBUTES
-        // so there's no window in which the host is unsubscribed.
-        // Hosts that don't support 2031 ignore both sequences.
+        // 订阅主机 CSI 2031 主题通知并查询当前模式。
+        // 紧跟在 CLEAR_CLIENT_TERMINAL_ATTRIBUTES 之后发送，以便不存在主机未订阅的窗口。
+        // 不支持 2031 的主机会忽略这两个序列。
         stdout
             .write_all(ENABLE_HOST_THEME_NOTIFY.as_bytes())
             .unwrap();
@@ -1246,23 +1238,18 @@ pub fn start_client(
             }
         });
 
-    // Apps running inside Zellij panes can issue a whitelisted set
-    // of queries to the host terminal (bg/fg colour, palette
-    // registers, window pixel dimensions). Each query opens a
-    // "forward slot" on the client: we write the query + a
-    // Primary-DA barrier to stdout, then collect any reply bytes
-    // that arrive on stdin until the barrier reply closes the slot.
-    // The pane that asked gets the captured bytes piped to its pty.
+    // 在 Zellij 窗格内运行的应用程序可以向主机终端发出一组白名单查询
+    // （背景/前景颜色、调色板寄存器、窗口像素尺寸）。每个查询在客户端上
+    // 打开一个"转发槽"：我们将查询 + Primary-DA 屏障写入标准输出，然后收集
+    // 到达标准输入的任何回复字节，直到屏障回复关闭该槽。
+    // 发起查询的窗格会将捕获的字节通过管道传输到其 PTY。
     //
-    // If the host never answers, we must close the slot anyway so
-    // the server can dispatch the next queued forward. A per-slot
-    // timer task enforces that deadline: opening a forward spawns
-    // an async sleep on `forward_timeout_runtime()`; on wake it
-    // tries to close the slot for that specific token. If the
-    // barrier (or a later forward) closed the slot first, the
-    // timer's close call is a no-op — the token-guard makes
-    // cancellation implicit. Spawn site: the
-    // `ClientInstruction::ForwardQueryToHost` handler below.
+    // 如果主机从不回复，我们无论如何都必须关闭该槽，以便服务端可以分派
+    // 下一个排队的转发。每个槽的计时器任务强制执行该截止时间：打开转发会在
+    // `forward_timeout_runtime()` 上生成一个异步睡眠；唤醒时它会尝试关闭该特定
+    // 令牌的槽。如果屏障（或后续转发）先关闭了槽，计时器的关闭调用就是空操作 —
+    // 令牌保护使隐式取消。生成位置：下面的
+    // `ClientInstruction::ForwardQueryToHost` 处理器。
 
     let _input_thread = thread::Builder::new()
         .name("input_handler".to_string())
@@ -1527,12 +1514,10 @@ pub fn start_client(
             ClientInstruction::ForwardQueryToHost {
                 token, query_bytes, ..
             } => {
-                // 1. Open a forwarding window on the parser so any reply
-                //    events that arrive before the barrier are captured.
-                //    A slot may still be open here: the server's backstop
-                //    timeout can give up on the previous token and dispatch
-                //    this one before this client's per-slot timer got to
-                //    run. Hand that slot over instead of clobbering it.
+                // 1. 在解析器上打开一个转发窗口，以便在屏障之前到达的任何回复
+                //    事件都被捕获。这里可能仍有一个槽处于打开状态：服务端的回退
+                //    超时可能会放弃前一个令牌，并在此客户端的每槽计时器运行之前
+                //    分派此令牌。移交该槽而不是破坏它。
                 let stale_forward = {
                     let mut stdin_ansi_parser = stdin_ansi_parser.lock().unwrap();
                     let stale_forward = stdin_ansi_parser.take_active_forward();
@@ -1554,12 +1539,10 @@ pub fn start_client(
                         },
                     );
                 }
-                // 2. Spawn a per-forward timer on the dedicated async
-                //    runtime. When the deadline fires, the task closes
-                //    the slot (if it's still open for this token) and
-                //    relays `ForwardedReplyFromHostComplete` so the
-                //    server releases `forward_in_flight` and dispatches
-                //    the next queued forward.
+                // 2. 在专用异步运行时上生成每转发计时器。当截止时间触发时，
+                //    任务关闭该槽（如果它仍为此令牌打开）并中继
+                //    `ForwardedReplyFromHostComplete`，以便服务端释放
+                //    `forward_in_flight` 并分派下一个排队的转发。
                 let runtime = stdin_ansi_parser::forward_timeout_runtime();
                 let parser_for_timer = stdin_ansi_parser.clone();
                 let sender_for_timer = send_input_instructions.clone();
@@ -1574,11 +1557,9 @@ pub fn start_client(
                         );
                     },
                 );
-                // 3. Write the query + Primary-DA barrier in a single
-                //    write_all. The barrier closes the window on the
-                //    parser side when its reply arrives — the timer
-                //    task's eventual wake-up finds an empty slot for
-                //    this token and no-ops.
+                // 3. 在单个 write_all 中写入查询 + Primary-DA 屏障。
+                //    当屏障的回复到达时，它会关闭解析器端的窗口 — 计时器任务
+                //    最终唤醒时会发现此令牌的空槽并执行空操作。
                 let mut blob = query_bytes;
                 blob.extend_from_slice(b"\x1b[c");
                 let mut out = os_input.get_stdout_writer();
@@ -1660,8 +1641,8 @@ pub fn start_server_detached(
                     path_to_layout.display().to_string(),
                     LayoutMetadata::default(),
                 )),
-                terminal_window_size: Size { cols: 50, rows: 50 }, // static number until a
-                // client connects
+                terminal_window_size: Size { cols: 50, rows: 50 }, // 静态数字，直到
+                // 客户端连接
                 data_dir: cli_args.data_dir.clone(),
                 is_debug: cli_args.debug,
                 max_panes: cli_args.max_panes,
@@ -1719,8 +1700,8 @@ pub fn start_server_detached(
                             )
                         })
                 }),
-                terminal_window_size: Size { cols: 50, rows: 50 }, // static number until a
-                // client connects
+                terminal_window_size: Size { cols: 50, rows: 50 }, // 静态数字，直到
+                // 客户端连接
                 data_dir: cli_args.data_dir.clone(),
                 is_debug: cli_args.debug,
                 max_panes: cli_args.max_panes,

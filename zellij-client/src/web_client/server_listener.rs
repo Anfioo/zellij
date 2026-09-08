@@ -107,7 +107,7 @@ pub fn zellij_server_listener(
                         .unwrap()
                         .to_owned();
 
-                    // Look up read-only status from connection table
+                    // 从连接表中查找只读状态
                     let is_read_only = connection_table
                         .lock()
                         .unwrap()
@@ -146,13 +146,10 @@ pub fn zellij_server_listener(
                         });
                     }
 
-                    // Seed the server's host-terminal-query cache with web
-                    // client state derived from Config (fg/bg/palette).
-                    // Without this, OSC 10/11/4 queries from apps
-                    // stall on the 1s server forward timeout and then come
-                    // back empty. Pixel dimensions are seeded separately
-                    // via the TerminalMetrics control message once the
-                    // browser has reported them.
+                    // 用从 Config 派生的 web 客户端状态（fg/bg/palette）植入
+                    // 服务端的主机终端查询缓存。没有这个，来自应用程序的
+                    // OSC 10/11/4 查询会在 1s 服务端转发超时上停滞，然后返回空。
+                    // 像素尺寸在浏览器报告后通过 TerminalMetrics 控制消息单独植入。
                     let seeds = host_query_seed_msgs
                         .get_or_insert_with(|| build_host_query_seed_msgs(&config, &config_options));
                     for seed in seeds.iter().cloned() {
@@ -239,8 +236,8 @@ pub fn zellij_server_listener(
 
                                 if let Some(config_file_path) = &config_file_path {
                                     if let Ok(new_config) = Config::from_path(&config_file_path, Some(config.clone())) {
-                                        // Re-seed host-query cache for this client
-                                        // so OSC 10/11/4 replies follow the new theme.
+                                        // 为此客户端重新植入主机查询缓存，
+                                        // 以便 OSC 10/11/4 回复遵循新主题。
                                         for seed in build_host_query_seed_msgs(&new_config, &config_options) {
                                             os_input.send_to_server(seed);
                                         }
@@ -251,20 +248,17 @@ pub fn zellij_server_listener(
                                     }
                                 }
                             },
-                            // Subscribe-only messages — not relevant for web clients
+                            // 仅订阅消息 — 与 web 客户端无关
                             Some(ServerToClientMsg::PaneRenderUpdate { .. }) => {},
                             Some(ServerToClientMsg::SubscribedPaneClosed { .. }) => {},
                             Some(ServerToClientMsg::EmitNestedSessionFrame { .. }) => {},
                             Some(ServerToClientMsg::ForwardQueryToHost { token, .. }) => {
-                                // Reply immediately with empty reply_bytes.
-                                // This is the existing convention that signals
-                                // "no host reply available — please synthesize
-                                // from cached state". The server's
-                                // synthesize_cached_reply path will use the
-                                // pixel dimensions and colors we have already
-                                // seeded from the browser/config, returning a
-                                // real answer rather than waiting for the
-                                // 1000ms forward timeout.
+                                // 立即用空 reply_bytes 回复。
+                                // 这是现有的约定，表示"没有可用的主机回复 —
+                                // 请从缓存状态合成"。服务端的
+                                // synthesize_cached_reply 路径将使用我们已经
+                                // 从浏览器/配置植入的像素尺寸和颜色，返回
+                                // 真实答案，而不是等待 1000ms 转发超时。
                                 os_input.send_to_server(
                                     ClientToServerMsg::ForwardedReplyFromHost {
                                         token,
@@ -275,8 +269,8 @@ pub fn zellij_server_listener(
                             None => {
                                 if unknown_message_count >= 1000 {
                                     log::error!("Error: Received more than 1000 consecutive unknown server messages, disconnecting.");
-                                    // this probably means we're in an infinite loop, let's
-                                    // disconnect so as not to cause 100% CPU
+                                    // 这可能意味着我们处于无限循环中，让我们断开连接
+                                    // 以免导致 100% CPU
                                     break;
                                 }
                             },

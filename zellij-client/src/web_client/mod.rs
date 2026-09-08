@@ -198,9 +198,9 @@ pub async fn serve_web_client(
     let client_os_api_factory =
         client_os_api_factory.unwrap_or_else(|| Arc::new(RealClientOsApiFactory));
 
-    // we use a short version here to bypass macos socket path length limitations
-    // since there likely aren't going to be more than a handful of web instances on the same
-    // machine listening to the same ipc socket path, the collision risk here is extremely low
+    // 我们在这里使用短版本来绕过 macos 套接字路径长度限制
+    // 因为同一台机器上监听同一个 ipc 套接字路径的 web 实例可能不会超过几个，
+    // 这里的冲突风险极低
     let id: String = Uuid::new_v4()
         .simple()
         .to_string()

@@ -14,17 +14,15 @@ use zellij_utils::{
     vendored::termwiz::input::{InputEvent, InputParser},
 };
 
-/// Per-WebSocket-connection parsing state. Owns the Kitty and termwiz
-/// parsers so a CSI / Kitty sequence split across two WebSocket frames
-/// resolves on the second frame instead of being dropped or
-/// degraded-and-emitted as separate keys.
+/// 每个 WebSocket 连接的解析状态。拥有 Kitty 和 termwiz 解析器，
+/// 以便跨两个 WebSocket 帧拆分的 CSI / Kitty 序列在第二个帧上解析，
+/// 而不是被丢弃或降级并作为单独的键发出。
 pub struct StdinSession {
     kitty_parser: KittyKeyboardParser,
     input_parser: InputParser,
     explicitly_disable_kitty_keyboard_protocol: bool,
-    /// Set when the last frame left the termwiz parser holding an
-    /// ambiguous-but-complete event (e.g. a bare ESC). Cleared by
-    /// `finalize` when an idle timeout drains those events.
+    /// 当最后一帧让 termwiz 解析器持有一个模糊但完整的事件
+    /// （例如裸 ESC）时设置。当空闲超时排出这些事件时，由 `finalize` 清除。
     pending_finalize: bool,
 }
 
@@ -42,19 +40,16 @@ impl StdinSession {
         self.pending_finalize
     }
 
-    /// Clear the pending-finalize flag without draining events. Used
-    /// when the WebSocket loop hits an idle timeout but the client
-    /// connection has already been removed — there's nowhere to send
-    /// the drained events, and leaving the flag set would busy-loop the
-    /// idle timer.
+    /// 清除 pending-finalize 标志而不排出事件。当 WebSocket 循环遇到空闲超时，
+    /// 但客户端连接已被移除时使用 — 没有地方发送排出的事件，
+    /// 而保持标志设置会使空闲计时器忙循环。
     pub fn clear_pending_finalize(&mut self) {
         self.pending_finalize = false;
     }
 
-    /// Drain any ambiguous-but-complete events that termwiz held back
-    /// on the previous `parse_stdin` call. Called from the WebSocket
-    /// loop after an idle interval with no further frames, mirroring
-    /// `stdin_handler::finalize_events`.
+    /// 排出 termwiz 在上一次 `parse_stdin` 调用中保留的任何模糊但完整的事件。
+    /// 在没有更多帧的空闲间隔后从 WebSocket 循环调用，镜像
+    /// `stdin_handler::finalize_events`。
     pub fn finalize(&mut self, os_input: &dyn ClientOsApi, mouse_old_event: &mut MouseEvent) {
         let mut events = vec![];
         self.input_parser.parse(
@@ -71,10 +66,9 @@ impl StdinSession {
     }
 }
 
-/// Dispatch a single termwiz `InputEvent` produced by either the live
-/// path or the idle finalize path. `raw_bytes` is the byte slice that
-/// produced the event in the live path; finalize passes an empty slice
-/// because no frame is associated with the drained events.
+/// 分发由实时路径或空闲最终确定路径产生的单个 termwiz `InputEvent`。
+/// `raw_bytes` 是在实时路径中产生事件的字节切片；finalize 传递空切片，
+/// 因为没有帧与排出的事件关联。
 fn dispatch_termwiz_event(
     os_input: &dyn ClientOsApi,
     mouse_old_event: &mut MouseEvent,

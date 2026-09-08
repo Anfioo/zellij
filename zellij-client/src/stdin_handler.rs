@@ -24,21 +24,20 @@ pub(crate) fn stdin_loop(
     support_kitty_graphics_protocol: bool,
     resize_sender: Option<std::sync::mpsc::Sender<()>>,
 ) {
-    // On Windows we choose between the VT byte path (termwiz/kitty parsing)
-    // and the native-console path (crossterm INPUT_RECORDs) early, before the
-    // startup ANSI query below. See `use_vt_path()` for the trigger conditions.
+    // 在 Windows 上，我们在下面的启动 ANSI 查询之前，尽早在 VT 字节路径
+    // （termwiz/kitty 解析）和原生控制台路径（crossterm INPUT_RECORD）之间选择。
+    // 触发条件参见 `use_vt_path()`。
     #[cfg(windows)]
     let use_vt_reader = use_vt_path() && enable_vt_input();
 
-    // Send the startup host query string so the host terminal replies
-    // with its live pixel dimensions, fg/bg, sync-output support, and
-    // palette registers. These replies will be classified by the
-    // continuous parser as they arrive and routed via `InputInstruction::
-    // AnsiStdinInstructions` — no deadline, no cache, no loading gate.
+    // 发送启动主机查询字符串，以便主机终端回复其实时像素尺寸、前景/背景、
+    // 同步输出支持和调色板寄存器。这些回复将在到达时由连续解析器分类，
+    // 并通过 `InputInstruction::AnsiStdinInstructions` 路由 — 无截止时间、
+    // 无缓存、无加载门控。
     {
-        // On Windows native console, the crossterm event::read() loop
-        // reads INPUT_RECORDs via ReadConsoleInput — not raw bytes — so
-        // ANSI query responses can never be read on that path.
+        // 在 Windows 原生控制台上，crossterm event::read() 循环通过
+        // ReadConsoleInput 读取 INPUT_RECORD — 不是原始字节 — 因此
+        // ANSI 查询响应永远无法在该路径上读取。
         #[cfg(windows)]
         let can_query_terminal = use_vt_reader;
         #[cfg(not(windows))]
@@ -75,20 +74,19 @@ pub(crate) fn stdin_loop(
         return;
     }
 
-    // Drop the resize sender so the signal handler thread falls back to
-    // polling. Only the Windows native console path (above) keeps it alive;
-    // the VT reader path and Unix don't produce crossterm resize events.
+    // 丢弃调整大小发送器，以便信号处理程序线程回退到轮询。
+    // 只有 Windows 原生控制台路径（上面）保持它存活；
+    // VT 读取器路径和 Unix 不产生 crossterm 调整大小事件。
     drop(resize_sender);
 
-    // Byte reader + termwiz/kitty parser path.
-    // Used on Unix always, and on Windows inside terminal emulators (Alacritty,
-    // etc.) with ENABLE_VIRTUAL_TERMINAL_INPUT enabled so stdin delivers raw VT
-    // byte sequences.
+    // 字节读取器 + termwiz/kitty 解析器路径。
+    // 始终在 Unix 上使用，在 Windows 上的终端模拟器（Alacritty 等）中
+    // 启用 ENABLE_VIRTUAL_TERMINAL_INPUT 时使用，以便标准输入传递原始 VT
+    // 字节序列。
     let mut input_parser = InputParser::new();
-    // Kitty keyboard parser is long-lived so a Kitty CSI sequence split
-    // across stdin reads still resolves on a follow-up chunk instead of
-    // silently degrading to a legacy CSI form (and losing modifier
-    // metadata).
+    // Kitty 键盘解析器是长生命周期的，因此跨标准输入读取拆分的 Kitty CSI
+    // 序列仍能在后续数据块上解析，而不是静默降级为旧版 CSI 形式
+    // （并丢失修饰符元数据）。
     let mut kitty_parser = KittyKeyboardParser::new();
     let mut current_buffer = vec![];
     let (stdin_tx, stdin_rx) = mpsc::sync_channel(32);
@@ -99,7 +97,7 @@ pub(crate) fn stdin_loop(
                 match os_input.read_from_stdin() {
                     Ok(buf) => {
                         if stdin_tx.send(Ok(buf)).is_err() {
-                            break; // receiver dropped
+                            break; // 接收器已丢弃
                         }
                     },
                     Err(e) => {
@@ -122,9 +120,8 @@ pub(crate) fn stdin_loop(
             Ok(result) => {
                 match result {
                     Ok(buf) => {
-                        // Strip + classify any host-reply sequences
-                        // continuously. The residue is the byte stream
-                        // the keyboard parser should see.
+                        // 连续剥离 + 分类任何主机回复序列。
+                        // 残余是键盘解析器应看到的字节流。
                         let parse_output = {
                             let mut p = stdin_ansi_parser.lock().unwrap();
                             p.feed(&buf)
@@ -176,12 +173,11 @@ pub(crate) fn stdin_loop(
                         current_buffer.append(&mut residue.clone());
 
                         if !explicitly_disable_kitty_keyboard_protocol {
-                            // first we try to parse with the KittyKeyboardParser
-                            // if we fail, we try to parse normally.
-                            // Incomplete and NoMatch both fall through to the
-                            // termwiz parser below; on Incomplete the Kitty
-                            // parser keeps its state so the next chunk's
-                            // continuation completes the sequence.
+                            // 首先我们尝试用 KittyKeyboardParser 解析
+                            // 如果失败，我们尝试正常解析。
+                            // Incomplete 和 NoMatch 都回退到下面的 termwiz 解析器；
+                            // 在 Incomplete 时，Kitty 解析器保持其状态，
+                            // 以便下一个数据块的继续完成序列。
                             match kitty_parser.feed(&residue) {
                                 KittyParseOutcome::Complete(key_with_modifier) => {
                                     if send_input_instructions
@@ -206,10 +202,9 @@ pub(crate) fn stdin_loop(
                             }
                         }
 
-                        // Parse with maybe_more = true - complete events sent immediately
+                        // 使用 maybe_more = true 解析 - 完整事件立即发送
                         //
-                        // Ambiguous events (if any) will be finalized later only if 50ms
-                        // passes with no new input
+                        // 模糊事件（如果有）仅在 50ms 没有新输入时才最终确定
                         let maybe_more = true;
                         let mut events: Vec<(InputEvent, usize)> = vec![];
                         input_parser.parse_with_consumed(
@@ -220,13 +215,11 @@ pub(crate) fn stdin_loop(
                             maybe_more,
                         );
 
-                        // Residue contains no OSC or whitelisted CSI
-                        // reports — `StdinAnsiParser::feed` strips both
-                        // before the keyboard parser sees the bytes.
-                        // Every termwiz event is a key/mouse/paste/etc.
-                        // Each event is forwarded with exactly the bytes
-                        // that produced it, never bytes belonging to other
-                        // events decoded from the same read.
+                        // 残余不包含 OSC 或白名单 CSI 报告 —
+                        // `StdinAnsiParser::feed` 在键盘解析器看到字节之前剥离两者。
+                        // 每个 termwiz 事件都是键/鼠标/粘贴等。
+                        // 每个事件都以恰好产生它的字节转发，永远不会属于
+                        // 从同一次读取解码的其他事件的字节。
                         for (input_event, consumed) in events.into_iter() {
                             let take = consumed.min(current_buffer.len());
                             let raw_bytes: Vec<u8> = current_buffer.drain(..take).collect();
@@ -369,10 +362,9 @@ fn extract_focus_reports(residue: Vec<u8>) -> (Vec<u8>, Vec<bool>) {
     (remaining, focus_changes)
 }
 
-/// Trim `current_buffer` to the parser's own buffered length so it can
-/// never drift from the parser's internal state: a trailing incomplete
-/// sequence is held by the parser (and mirrored here) until the next
-/// read completes it, while bytes already decoded into events are dropped.
+/// 将 `current_buffer` 修剪为解析器自身的缓冲长度，以便它永远不会
+/// 偏离解析器的内部状态：尾随的不完整序列由解析器持有（并在此处镜像），
+/// 直到下一次读取完成它，而已解码为事件的字节被丢弃。
 fn realign_current_buffer(current_buffer: &mut Vec<u8>, input_parser: &InputParser) {
     let buffered = input_parser.buffered_len();
     let excess = current_buffer.len().saturating_sub(buffered);
@@ -381,19 +373,17 @@ fn realign_current_buffer(current_buffer: &mut Vec<u8>, input_parser: &InputPars
     }
 }
 
-/// Build the fire-and-forget host-query batch sent at client startup.
-/// The host's replies refine `Screen`'s cached state asynchronously as
-/// they arrive; the UI does not block on them.
+/// 构建客户端启动时发送的即发即忘主机查询批次。
+/// 主机的回复在到达时异步优化 `Screen` 的缓存状态；界面不会阻塞它们。
 fn build_startup_query_string(support_kitty_graphics_protocol: bool) -> String {
-    // <ESC>[14t => get text area size in pixels,
-    // <ESC>[16t => get character cell size in pixels
-    // <ESC>]11;?<ESC>\ => get background color
-    // <ESC>]10;?<ESC>\ => get foreground color
-    // <ESC>[?2026$p => get synchronised output mode
-    // <ESC>_Ga=q,...<ESC>\ => probe kitty graphics support (omitted when the
-    // protocol is disabled), answered by capable terminals only; the trailing
-    // Primary DA is the barrier that resolves the probe negatively when it
-    // goes unanswered
+    // <ESC>[14t => 获取文本区域的像素尺寸，
+    // <ESC>[16t => 获取字符单元的像素尺寸
+    // <ESC>]11;?<ESC>\ => 获取背景颜色
+    // <ESC>]10;?<ESC>\ => 获取前景颜色
+    // <ESC>[?2026$p => 获取同步输出模式
+    // <ESC>_Ga=q,...<ESC>\ => 探测 kitty 图形支持（协议禁用时省略），
+    // 仅由有能力的终端回答；尾随的主 DA 是屏障，当探测未被回答时
+    // 负面地解决它
     let kitty_graphics_probe = if support_kitty_graphics_protocol {
         "\u{1b}_Ga=q,i=31,s=1,v=1,t=d,f=24;AAAA\u{1b}\u{5c}"
     } else {

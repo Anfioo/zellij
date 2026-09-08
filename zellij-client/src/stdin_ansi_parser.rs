@@ -1,10 +1,8 @@
-//! Continuous, parser for host-terminal replies arriving on
-//! stdin.
+//! 到达标准输入的主机终端回复的连续解析器。
 //!
-//! This parser routes stdin bytes through a private `termwiz::InputParser`,
-//! classifies OSC / CSI-report events into `HostReply` variants, and lets
-//! all other bytes (keyboard input) pass through as a residue byte sequence
-//! that the caller feeds to the normal keyboard parser.
+//! 此解析器通过私有的 `termwiz::InputParser` 路由标准输入字节，
+//! 将 OSC / CSI 报告事件分类为 `HostReply` 变体，并让所有其他字节
+//! （键盘输入）作为残余字节序列通过，调用方将其馈送到普通键盘解析器。
 
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -17,7 +15,7 @@ use zellij_utils::{
     vendored::termwiz::input::{InputEvent, InputParser},
 };
 
-/// Describe the terminal implementation of synchronised output
+/// 描述同步输出的终端实现
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum SyncOutput {
     DCS,
@@ -44,14 +42,12 @@ impl SyncOutput {
     }
 }
 
-/// A classified host-terminal reply received on stdin.
+/// 在标准输入上接收的已分类主机终端回复。
 ///
-/// The variants track the reply types Zellij consumes for its own
-/// synchronous render hot-path (pixel dims, bg/fg, palette registers,
-/// sync-output support). Accumulated forwarded-query byte streams take
-/// a separate path: they ride `ParseOutput::completed_forward` through
-/// a dedicated input-instruction channel so they don't get co-mingled
-/// with semantically-typed state updates.
+/// 变体跟踪 Zellij 为其自身同步渲染热路径（像素尺寸、背景/前景、调色板寄存器、
+/// 同步输出支持）消费的回复类型。累积的转发查询字节流走单独的路径：
+/// 它们通过专用的输入指令通道承载 `ParseOutput::completed_forward`，
+/// 以便不会与语义类型化的状态更新混合在一起。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum HostReply {
     PixelDimensions(PixelDimensions),
@@ -59,30 +55,28 @@ pub enum HostReply {
     ForegroundColor(String),
     ColorRegisters(Vec<(usize, String)>),
     SynchronizedOutput(Option<SyncOutput>),
-    /// DSR 997 reply / unsolicited notification reporting the host
-    /// terminal's color-palette theme mode (CSI 2031).
+    /// DSR 997 回复 / 报告主机终端调色板主题模式的主动通知（CSI 2031）。
     HostTerminalThemeChanged(HostTerminalThemeMode),
     KittyGraphicsSupport(bool),
     SixelSupport(bool),
 }
 
-/// Retained alias for the pre-refactor type name used by other modules in
-/// the client. New code should prefer `HostReply`; the alias keeps the
-/// existing `InputInstruction::AnsiStdinInstructions(Vec<...>)` plumbing
-/// stable during the migration.
+/// 客户端中其他模块使用的重构前类型名称的保留别名。
+/// 新代码应优先使用 `HostReply`；该别名在迁移期间保持现有的
+/// `InputInstruction::AnsiStdinInstructions(Vec<...>)` 管道稳定。
 pub type AnsiStdinInstruction = HostReply;
 
 impl HostReply {
-    /// Classify an OSC payload (the bytes between the `ESC ]` prefix and
-    /// the ST/BEL terminator) into a known `HostReply`, if possible.
+    /// 将 OSC 有效载荷（`ESC ]` 前缀与 ST/BEL 终止符之间的字节）分类为
+    /// 已知的 `HostReply`（如果可能）。
     pub fn from_osc_payload(payload: &[u8]) -> Option<HostReply> {
         lazy_static! {
-            // OSC 10 (foreground) / OSC 11 (background) answer form:
-            //   OSC 10 ; <color> ST        e.g. "10;rgb:ffff/ffff/ffff"
+            // OSC 10（前景）/ OSC 11（背景）回复形式：
+            //   OSC 10 ; <color> ST        例如 "10;rgb:ffff/ffff/ffff"
             //   OSC 11 ; <color> ST
             static ref FG_RE: Regex = Regex::new(r"^10;(.*)$").unwrap();
             static ref BG_RE: Regex = Regex::new(r"^11;(.*)$").unwrap();
-            // OSC 4 ; N ; <color> — palette-register answer.
+            // OSC 4 ; N ; <color> — 调色板寄存器回复。
             static ref COLOR_REGISTER_RE: Regex = Regex::new(r"^4;(\d+);(.*)$").unwrap();
         }
         let s = std::str::from_utf8(payload).ok()?;
@@ -100,22 +94,20 @@ impl HostReply {
         None
     }
 
-    /// Classify a CSI-based report (the full raw sequence including the
-    /// leading `ESC [`) into a `HostReply`, if possible.
+    /// 将基于 CSI 的报告（包括前导 `ESC [` 的完整原始序列）分类为
+    /// `HostReply`（如果可能）。
     ///
-    /// Recognised final bytes: `t` (pixel-dims reply, `CSI 4/6 ; H ; W t`),
-    /// `y` (DECRPM reply to `CSI ?2026$p` — sync-output support
-    /// advertisement).
+    /// 识别的终止字节：`t`（像素尺寸回复，`CSI 4/6 ; H ; W t`），
+    /// `y`（对 `CSI ?2026$p` 的 DECRPM 回复 — 同步输出支持通告）。
     pub fn from_csi_report(raw: &[u8]) -> Option<HostReply> {
         let s = std::str::from_utf8(raw).ok()?;
         lazy_static! {
-            // <ESC>[4;H;Wt or <ESC>[6;H;Wt
+            // <ESC>[4;H;Wt 或 <ESC>[6;H;Wt
             static ref PIX_RE: Regex = Regex::new(r"^\u{1b}\[(\d+);(\d+);(\d+)t$").unwrap();
-            // <ESC>[?2026;Ny — DECRPM reply for sync-output (VT mode 2026)
+            // <ESC>[?2026;Ny — 同步输出的 DECRPM 回复（VT 模式 2026）
             static ref SYNC_RE: Regex = Regex::new(r"^\u{1b}\[\?2026;([0-4])\$y$").unwrap();
-            // <ESC>[?997;1n (dark) / <ESC>[?997;2n (light) — DSR 997 reply
-            // to CSI ?996n, or unsolicited host-theme notification when
-            // CSI ?2031h is enabled.
+            // <ESC>[?997;1n（深色）/ <ESC>[?997;2n（浅色）— 对 CSI ?996n 的 DSR 997 回复，
+            // 或启用 CSI ?2031h 时的主动主机主题通知。
             static ref THEME_RE: Regex = Regex::new(r"^\u{1b}\[\?997;([12])n$").unwrap();
         }
         if let Some(caps) = PIX_RE.captures(s) {
@@ -158,12 +150,11 @@ impl HostReply {
         None
     }
 
-    /// Classify a Primary Device Attributes reply (`CSI ? Ps ; Ps ... c`)
-    /// into a Sixel-capability advertisement. Attribute `4` in the reply
-    /// means the host terminal supports Sixel graphics.
+    /// 将主设备属性回复（`CSI ? Ps ; Ps ... c`）分类为 Sixel 能力通告。
+    /// 回复中的属性 `4` 表示主机终端支持 Sixel 图形。
     ///
-    /// Replies that are not a primary-DA form (eg. secondary-DA `CSI > ... c`)
-    /// yield `None` so they do not clobber the host capability state.
+    /// 不是主 DA 形式的回复（例如次 DA `CSI > ... c`）产生 `None`，
+    /// 以便它们不会破坏主机能力状态。
     pub fn sixel_support_from_primary_da(raw: &[u8]) -> Option<HostReply> {
         lazy_static! {
             static ref PRIMARY_DA_RE: Regex = Regex::new(r"^\u{1b}\[\?([0-9;]*)c$").unwrap();
@@ -175,12 +166,10 @@ impl HostReply {
     }
 }
 
-/// The "slot" tracking state for a single forwarded query currently in
-/// flight to the host terminal. The parser accumulates raw reply bytes
-/// into `reply_bytes` until it sees a Primary-DA (`c`) reply, which acts
-/// as the serializing barrier. The timer that enforces the 500 ms
-/// deadline lives on the forward-timeout runtime and owns its own
-/// wall-clock — the parser itself is deadline-agnostic.
+/// 当前正在向主机终端进行的单个转发查询的"槽"跟踪状态。
+/// 解析器将原始回复字节累积到 `reply_bytes` 中，直到看到主 DA（`c`）回复，
+/// 该回复充当序列化屏障。强制执行 500ms 截止时间的计时器位于
+/// forward-timeout 运行时上，并拥有自己的挂钟 — 解析器本身与截止时间无关。
 #[derive(Debug, Clone)]
 pub struct ForwardSlot {
     pub token: u32,
@@ -194,32 +183,27 @@ pub struct ClipboardForwardSlot {
 
 pub const CLIENT_CLIPBOARD_FORWARD_TIMEOUT_MS: u64 = 30_000;
 
-/// Return value of `feed()`.
+/// `feed()` 的返回值。
 #[derive(Debug, Clone, Default)]
 pub struct ParseOutput {
-    /// Classified host replies (zero or more).
+    /// 已分类的主机回复（零个或多个）。
     pub replies: Vec<HostReply>,
-    /// A completed forwarded reply (Primary-DA barrier seen), ready to be
-    /// sent to the server. At most one per feed call; more than one in a
-    /// single feed would indicate the host emitted two barriers, in which
-    /// case only the first is honored.
+    /// 已完成的转发回复（看到主 DA 屏障），准备发送到服务端。
+    /// 每次 feed 调用至多一个；单次 feed 中超过一个表示主机发出了两个屏障，
+    /// 在这种情况下仅遵循第一个。
     pub completed_forward: Option<(u32, Vec<u8>)>,
     pub completed_clipboard_forward: Option<(u32, Vec<u8>)>,
-    /// OSC 99 notification-response payloads (one per OSC 99 found in
-    /// the chunk). Routed by the caller as
-    /// `InputInstruction::DesktopNotificationResponse`. Lives here, not
-    /// in the keyboard-parser path, because the residue scrubber
-    /// strips all OSC bytes before the keyboard parser sees them.
+    /// OSC 99 通知响应有效载荷（在数据块中找到的每个 OSC 99 一个）。
+    /// 由调用方作为 `InputInstruction::DesktopNotificationResponse` 路由。
+    /// 位于此处，而不是键盘解析器路径，因为残余清理器在键盘解析器看到
+    /// 所有 OSC 字节之前就将其剥离。
     pub desktop_notifications: Vec<Vec<u8>>,
-    /// Residue bytes that were not classified as host replies. These are
-    /// the bytes the caller should feed to the keyboard parser.
+    /// 未被分类为主机回复的残余字节。这些是调用方应馈送到键盘解析器的字节。
     pub residue: Vec<u8>,
     pub nested_frames: Vec<Vec<u8>>,
-    /// `true` when the parser still holds buffered partial OSC/CSI
-    /// bytes that need an idle-flush to release. The caller uses this
-    /// to schedule a finalize tick even when the current chunk
-    /// produced no residue (so a lone trailing ESC isn't stranded
-    /// indefinitely). See `StdinAnsiParser::finalize`.
+    /// 当解析器仍持有缓冲的部分 OSC/CSI 字节，需要空闲刷新来释放时为 `true`。
+    /// 调用方使用它来调度完成滴答，即使当前数据块没有产生残余
+    /// （这样单独的尾随 ESC 不会无限期滞留）。参见 `StdinAnsiParser::finalize`。
     pub has_partial_state: bool,
 }
 
@@ -232,13 +216,10 @@ fn is_user_input(event: &InputEvent) -> bool {
     }
 }
 
-/// Cap on the size of an in-flight partial OSC/CSI buffer. Sized to
-/// pass legitimate OSC 52 clipboard payloads, which carry the entire
-/// clipboard base64-encoded and have no protocol-level limit (images,
-/// multi-MB text dumps, etc.). Beyond this we assume a runaway or
-/// malformed sequence and flush the buffered bytes back to residue —
-/// same observable behaviour as today for unterminated OSC, just
-/// bounded.
+/// 进行中的部分 OSC/CSI 缓冲区大小上限。大小设定为能通过合法的 OSC 52
+/// 剪贴板有效载荷，这些有效载荷携带整个剪贴板的 base64 编码，且没有协议级限制
+/// （图像、多 MB 文本转储等）。超过此限制我们假设是失控或格式错误的序列，
+/// 并将缓冲的字节刷新回残余 — 与今天对未终止 OSC 的可观察行为相同，只是有界。
 const PARTIAL_BUFFER_CAP_BYTES: usize = 100 * 1024 * 1024;
 
 const PASTE_START_MARKER: &[u8] = b"\x1b[200~";
@@ -279,20 +260,17 @@ fn marker_match(buf: &[u8], marker: &[u8]) -> MarkerMatch {
     }
 }
 
-/// Outcome of a single OSC/CSI walk over a byte buffer. Distinguishing
-/// "needs more bytes" from "malformed" is what lets the residue
-/// scrubber buffer partial sequences across `feed()` calls instead of
-/// leaking their bytes into keyboard residue.
+/// 单次 OSC/CSI 遍历字节缓冲区的结果。区分"需要更多字节"与"格式错误"
+/// 是让残余清理器跨 `feed()` 调用缓冲部分序列，而不是将其字节泄漏到
+/// 键盘残余中的关键。
 #[derive(Debug, Clone, Copy)]
 enum SeqStatus {
-    /// Sequence is complete; consume `len` bytes from the head of buf.
+    /// 序列已完成；从 buf 头部消耗 `len` 字节。
     Complete(usize),
-    /// Sequence is a valid prefix; caller should buffer these bytes
-    /// and prepend them to the next chunk.
+    /// 序列是有效的前缀；调用方应缓冲这些字节并将它们前置到下一个数据块。
     NeedMore,
-    /// Sequence is malformed (bare ESC mid-payload, non-whitelisted
-    /// final byte, length cap hit). Caller should fall through to
-    /// emitting the leading byte as residue.
+    /// 序列格式错误（有效载荷中间的裸 ESC、非白名单终止字节、达到长度上限）。
+    /// 调用方应回退到将前导字节作为残余发出。
     Malformed,
 }
 
@@ -303,17 +281,16 @@ enum StartupKittyProbe {
     Resolved,
 }
 
-/// Continuous host-reply parser. Lives for the whole client session.
+/// 连续主机回复解析器。在整个客户端会话期间存活。
 pub struct StdinAnsiParser {
     inner: InputParser,
-    /// Active forwarding slot: `Some` while a forwarded query is in
-    /// flight, `None` otherwise.
+    /// 活动转发槽：转发查询进行中时为 `Some`，否则为 `None`。
     active_forward: Option<ForwardSlot>,
     active_clipboard_forward: Option<ClipboardForwardSlot>,
-    /// Bytes of an OSC sequence whose terminator hasn't arrived yet.
-    /// Carried across feed() calls so the next chunk can complete it.
+    /// 终止符尚未到达的 OSC 序列的字节。
+    /// 跨 feed() 调用携带，以便下一个数据块可以完成它。
     partial_osc: Vec<u8>,
-    /// Same for CSI device-control reports.
+    /// CSI 设备控制报告同理。
     partial_csi: Vec<u8>,
     partial_paste: Vec<u8>,
     nested_frame_extractor: nested_session::NestedFrameExtractor,
@@ -352,19 +329,14 @@ impl StdinAnsiParser {
         self.startup_kitty_probe = StartupKittyProbe::AwaitingReply;
     }
 
-    /// Open a forwarding window for `token`. Subsequent reply events that
-    /// arrive before the Primary-DA barrier will be accumulated into the
-    /// slot's `reply_bytes`, in addition to being dispatched as normal
-    /// classified `HostReply` events.
+    /// 为 `token` 打开转发窗口。在主 DA 屏障之前到达的后续回复事件将被累积到
+    /// 槽的 `reply_bytes` 中，此外还会作为正常的已分类 `HostReply` 事件分发。
     ///
-    /// The server serializes forwarded queries globally (`forward_in_flight`
-    /// on `Screen`), but its own backstop timeout can release that slot and
-    /// dispatch the next query before this client's per-slot timer has run,
-    /// so callers hand a still-open slot over with `take_active_forward`
-    /// first. The guards below catch a caller that skipped that handover:
-    /// debug builds panic so bugs surface during testing, release builds
-    /// log and clobber the previous slot (whose accumulated bytes would
-    /// otherwise silently leak).
+    /// 服务端全局序列化转发查询（`Screen` 上的 `forward_in_flight`），但其自身的
+    /// 回退超时可能会释放该槽并在此客户端的每槽计时器运行之前分派下一个查询，
+    /// 因此调用方首先用 `take_active_forward` 移交仍打开的槽。下面的守卫捕获
+    /// 跳过该移交的调用方：调试版本会 panic 以便错误在测试期间暴露，发布版本
+    /// 记录并破坏前一个槽（其累积的字节否则会静默泄漏）。
     pub fn open_forward(&mut self, token: u32) {
         debug_assert!(
             self.active_forward.is_none(),
@@ -387,8 +359,8 @@ impl StdinAnsiParser {
         });
     }
 
-    /// Close an active forwarding window without a barrier (timeout path).
-    /// Returns the accumulated reply bytes and the token, if any.
+    /// 在没有屏障的情况下关闭活动转发窗口（超时路径）。
+    /// 返回累积的回复字节和令牌（如果有）。
     pub fn close_forward_on_timeout(&mut self, token: u32) -> Option<(u32, Vec<u8>)> {
         match &self.active_forward {
             Some(slot) if slot.token == token => {
@@ -399,10 +371,8 @@ impl StdinAnsiParser {
         }
     }
 
-    /// Close whatever forwarding window is currently open, whichever token
-    /// it belongs to, and return its token together with the bytes it
-    /// accumulated. Used to hand a slot the server has already given up on
-    /// over to the forward that replaced it, instead of clobbering it.
+    /// 关闭当前打开的任何转发窗口，无论它属于哪个令牌，并返回其令牌以及
+    /// 它累积的字节。用于将服务端已经放弃的槽移交给替换它的转发，而不是破坏它。
     pub fn take_active_forward(&mut self) -> Option<(u32, Vec<u8>)> {
         self.active_forward
             .take()
@@ -440,27 +410,24 @@ impl StdinAnsiParser {
         self.active_clipboard_forward.as_ref().map(|s| s.token)
     }
 
-    /// Currently-open slot's token, if any. Test-only inspector;
-    /// production code drives slot lifecycle through `open_forward`,
-    /// `close_forward_on_timeout`, and `feed()` directly.
+    /// 当前打开的槽的令牌（如果有）。仅测试检查器；
+    /// 生产代码直接通过 `open_forward`、`close_forward_on_timeout` 和 `feed()`
+    /// 驱动槽生命周期。
     #[cfg(test)]
     pub fn active_forward_token(&self) -> Option<u32> {
         self.active_forward.as_ref().map(|s| s.token)
     }
 
-    /// Consume a chunk of raw stdin bytes. Returns classified host replies
-    /// (to be dispatched to the server's cached-state consumers), at most
-    /// one completed forwarded reply (barrier closed the window), and the
-    /// residue bytes that were not part of any classified sequence — these
-    /// are the bytes the caller should feed to the keyboard parser.
+    /// 消费一块原始标准输入字节。返回已分类的主机回复（将分发到服务端的
+    /// 缓存状态消费者）、至多一个已完成的转发回复（屏障关闭了窗口），以及
+    /// 不属于任何已分类序列的残余字节 — 这些是调用方应馈送到键盘解析器的字节。
     pub fn feed(&mut self, bytes: &[u8]) -> ParseOutput {
         let mut out = ParseOutput::default();
         let (bytes, nested_frames) = self.nested_frame_extractor.extract(bytes);
         let bytes = &bytes[..];
         out.nested_frames = nested_frames;
         let sanitized = self.extract_kitty_probe_reply(bytes, &mut out.replies);
-        // Collect events first (borrow-splits the InputParser across the
-        // callback and the post-processing mutations).
+        // 首先收集事件（在回调和后处理突变之间借用拆分 InputParser）。
         let mut events = Vec::new();
         let mut residue = Vec::new();
         self.inner.parse(
@@ -468,17 +435,14 @@ impl StdinAnsiParser {
             |event| {
                 events.push(event);
             },
-            true, // maybe_more — typical stream usage
+            true, // maybe_more — 典型的流用法
         );
         for event in events {
             match event {
                 InputEvent::OperatingSystemCommand(payload) => {
-                    // OSC 99 (desktop-notification response) is routed
-                    // here rather than from the keyboard parser because
-                    // the residue scrubber removes all OSC bytes before
-                    // the keyboard parser runs. Other OSCs are
-                    // classified into `HostReply` for cached-state
-                    // refinement.
+                    // OSC 99（桌面通知响应）在此处路由，而不是从键盘解析器路由，
+                    // 因为残余清理器在键盘解析器运行之前移除了所有 OSC 字节。
+                    // 其他 OSC 被分类为 `HostReply` 用于缓存状态优化。
                     if payload.starts_with(b"99;") {
                         out.desktop_notifications
                             .push(payload.get(3..).unwrap_or_default().to_vec());
@@ -496,8 +460,8 @@ impl StdinAnsiParser {
                         }
                     }
                     if let Some(slot) = self.active_forward.as_mut() {
-                        // Re-serialize so the pane's pty sees a legal OSC.
-                        // Terminators vary by host; ST (ESC \) is always safe.
+                        // 重新序列化，以便窗格的 PTY 看到合法的 OSC。
+                        // 终止符因主机而异；ST（ESC \）始终安全。
                         slot.reply_bytes.extend_from_slice(b"\x1b]");
                         slot.reply_bytes.extend_from_slice(&payload);
                         slot.reply_bytes.extend_from_slice(b"\x1b\\");
@@ -518,13 +482,11 @@ impl StdinAnsiParser {
                             if let Some(reply) = HostReply::sixel_support_from_primary_da(&raw) {
                                 out.replies.push(reply);
                             }
-                            // Primary-DA — the barrier. Close the slot and
-                            // emit the completed forwarded reply if active.
+                            // 主 DA — 屏障。关闭槽并在活动时发出已完成的转发回复。
                             if let Some(slot) = self.active_forward.take() {
                                 out.completed_forward = Some((slot.token, slot.reply_bytes));
                             }
-                            // Primary-DA is NOT double-dispatched — it has
-                            // no cached-state counterpart.
+                            // 主 DA 不会被双重分发 — 它没有缓存状态对应物。
                         },
                         _ => {
                             if let Some(reply) = HostReply::from_csi_report(&raw) {
@@ -533,19 +495,16 @@ impl StdinAnsiParser {
                             if let Some(slot) = self.active_forward.as_mut() {
                                 slot.reply_bytes.extend_from_slice(&raw);
                             }
-                            // Suppress unused-variable warning for params.
+                            // 抑制 params 的未使用变量警告。
                             let _ = params;
                         },
                     }
                 },
-                // Everything else is keyboard / mouse / paste / wake input;
-                // we need those bytes to reach the keyboard parser. We can
-                // not reconstruct the exact bytes from a parsed event here,
-                // so we rely on the caller's own second pass through the
-                // keyboard parser: the residue is the concatenation of all
-                // input bytes that are NOT part of a classified reply. To
-                // produce that residue deterministically, we re-scan the
-                // buffer a second time below.
+                // 其他所有内容都是键盘 / 鼠标 / 粘贴 / 唤醒输入；
+                // 我们需要这些字节到达键盘解析器。我们无法在此处从已解析的事件
+                // 重建确切的字节，因此我们依赖调用方自己对键盘解析器的第二次遍历：
+                // 残余是所有不属于已分类回复的输入字节的串联。为了确定性地
+                // 产生该残余，我们在下面第二次重新扫描缓冲区。
                 other => {
                     if self.active_clipboard_forward.is_some()
                         && is_user_input(&other)
@@ -558,11 +517,9 @@ impl StdinAnsiParser {
                 },
             }
         }
-        // Produce the residue: replay the input through a scratch parser
-        // that strips out OSC payloads and whitelisted CSI reports. All
-        // other bytes pass through unchanged. The walk is stateful so
-        // an OSC/CSI sequence split across `feed()` calls is buffered
-        // rather than leaking into residue.
+        // 产生残余：通过临时解析器重放输入，该解析器剥离 OSC 有效载荷和
+        // 白名单 CSI 报告。所有其他字节原样通过。遍历是有状态的，因此
+        // 跨 `feed()` 调用拆分的 OSC/CSI 序列被缓冲，而不是泄漏到残余中。
         residue.extend(self.strip_replies(&sanitized));
         out.residue = residue;
         out.has_partial_state = !self.partial_osc.is_empty()
@@ -689,21 +646,16 @@ impl StdinAnsiParser {
         out
     }
 
-    /// Walk `bytes` (with any pending partial buffer prepended) and drop
-    /// any OSC/whitelisted-CSI sequences, returning the remaining bytes
-    /// verbatim (keyboard residue). This is a byte-level scrubber — it
-    /// does not produce events, only bytes.
+    /// 遍历 `bytes`（前置任何挂起的部分缓冲区）并丢弃任何 OSC/白名单 CSI
+    /// 序列，原样返回剩余字节（键盘残余）。这是一个字节级清理器 —
+    /// 它不产生事件，只产生字节。
     ///
-    /// If the chunk ends mid-sequence, the unterminated tail is held in
-    /// `self.partial_osc` or `self.partial_csi` and prepended to the
-    /// next call's input — so the corresponding bytes never reach
-    /// residue (and never appear as spurious keypresses) while waiting
-    /// for the rest of the sequence.
+    /// 如果数据块在序列中间结束，未终止的尾部保存在 `self.partial_osc`
+    /// 或 `self.partial_csi` 中，并前置到下一次调用的输入 — 因此相应的字节
+    /// 在等待序列其余部分时永远不会到达残余（也永远不会作为虚假按键出现）。
     fn strip_replies(&mut self, bytes: &[u8]) -> Vec<u8> {
-        // Prepend any pending partial. At most one of (partial_osc,
-        // partial_csi) is non-empty at any time — the previous walk
-        // either completed all sequences or stopped at exactly one
-        // unterminated tail.
+        // 前置任何挂起的部分。(partial_osc, partial_csi) 中至多一个在任何时候
+        // 非空 — 前一次遍历要么完成了所有序列，要么停在恰好一个未终止的尾部。
         let mut working: Vec<u8> = Vec::with_capacity(
             self.partial_osc.len()
                 + self.partial_csi.len()
@@ -762,10 +714,8 @@ impl StdinAnsiParser {
                     SeqStatus::NeedMore => {
                         let tail = rest.to_vec();
                         if tail.len() > PARTIAL_BUFFER_CAP_BYTES {
-                            // Cap exceeded: flush buffered bytes to
-                            // residue and reset, preserving the
-                            // semantic that unterminated bytes are not
-                            // silently swallowed.
+                            // 超过上限：将缓冲的字节刷新到残余并重置，
+                            // 保留未终止字节不被静默吞掉的语义。
                             out.extend_from_slice(&tail);
                         } else {
                             self.partial_osc = tail;
@@ -779,7 +729,7 @@ impl StdinAnsiParser {
                     },
                 }
             }
-            // Whitelisted CSI report: ESC [ <params>* <intermediates>* <final>
+            // 白名单 CSI 报告: ESC [ <params>* <intermediates>* <final>
             if rest.len() >= 2 && rest[0] == 0x1b && rest[1] == b'[' {
                 match csi_status(rest) {
                     SeqStatus::Complete(len) => {
@@ -802,10 +752,9 @@ impl StdinAnsiParser {
                     },
                 }
             }
-            // Lone trailing ESC at the tail — could be the start of
-            // either OSC or CSI; the next byte will disambiguate. Buffer
-            // it under partial_osc by convention; the next call's
-            // walker re-routes based on the actual second byte.
+            // 尾部的单独尾随 ESC — 可能是 OSC 或 CSI 的开始；下一个字节将消除歧义。
+            // 按约定将其缓冲在 partial_osc 下；下一次调用的遍历器根据实际的
+            // 第二个字节重新路由。
             if rest.len() == 1 && rest[0] == 0x1b {
                 self.partial_osc = vec![0x1b];
                 return out;
@@ -817,8 +766,7 @@ impl StdinAnsiParser {
     }
 }
 
-/// Walk an OSC sequence starting at the head of `buf`. Returns whether
-/// the sequence is complete, needs more bytes, or is malformed.
+/// 遍历从 `buf` 头部开始的 OSC 序列。返回序列是已完成、需要更多字节还是格式错误。
 fn osc_status(buf: &[u8]) -> SeqStatus {
     if buf.get(0) != Some(&0x1b) || buf.get(1) != Some(&b']') {
         return SeqStatus::Malformed;
@@ -829,11 +777,10 @@ fn osc_status(buf: &[u8]) -> SeqStatus {
             0x07 => return SeqStatus::Complete(i + 1),
             0x1b => match buf.get(i + 1) {
                 Some(&b'\\') => return SeqStatus::Complete(i + 2),
-                // Bare ESC followed by something other than `\` —
-                // malformed under the ST-only termination we accept.
+                // 后跟 `\` 以外内容的裸 ESC —
+                // 在我们接受的仅 ST 终止下格式错误。
                 Some(_) => return SeqStatus::Malformed,
-                // ESC at the very tail; the next chunk may bring `\`
-                // and finish the sequence.
+                // 最尾部的 ESC；下一个数据块可能带来 `\` 并完成序列。
                 None => return SeqStatus::NeedMore,
             },
             _ => i += 1,
@@ -864,7 +811,7 @@ fn contains_subslice(haystack: &[u8], needle: &[u8]) -> bool {
     haystack.windows(needle.len()).any(|w| w == needle)
 }
 
-/// Walk a whitelisted CSI report starting at the head of `buf`.
+/// 遍历从 `buf` 头部开始的白名单 CSI 报告。
 fn csi_status(buf: &[u8]) -> SeqStatus {
     if buf.get(0) != Some(&0x1b) || buf.get(1) != Some(&b'[') {
         return SeqStatus::Malformed;
@@ -876,14 +823,13 @@ fn csi_status(buf: &[u8]) -> SeqStatus {
         match b {
             0x30..=0x3F | 0x20..=0x2F => i += 1,
             b't' | b'y' | b'c' | b'n' => return SeqStatus::Complete(i + 1),
-            0x40..=0x7E => return SeqStatus::Malformed, // non-whitelisted final
+            0x40..=0x7E => return SeqStatus::Malformed, // 非白名单终止符
             _ => return SeqStatus::Malformed,
         }
     }
     if i >= max {
-        // CSI ran past the cap without terminating — treat as malformed
-        // so the leading byte falls through to residue and parsing
-        // resumes from the next position.
+        // CSI 超过上限而未终止 — 视为格式错误，以便前导字节回退到残余，
+        // 并从下一个位置恢复解析。
         SeqStatus::Malformed
     } else {
         SeqStatus::NeedMore
@@ -891,17 +837,16 @@ fn csi_status(buf: &[u8]) -> SeqStatus {
 }
 
 // =====================================================================
-// Forward-slot timeout infrastructure
+// 转发槽超时基础设施
 // =====================================================================
 
 use std::sync::{Arc, Mutex, OnceLock};
 
-/// Dedicated, lazily-initialised runtime for driving forward-slot
-/// timeouts. A single current-thread executor runs on its own OS
-/// thread; timer tasks are `spawn`-ed onto it from the synchronous
-/// `ClientInstruction::ForwardQueryToHost` handler. One-thread model
-/// because timer tasks do no CPU work — they just sleep and perform a
-/// millisecond-scale mutex check on wake-up.
+/// 用于驱动转发槽超时的专用、延迟初始化的运行时。
+/// 单个当前线程执行器在其自己的 OS 线程上运行；计时器任务从同步的
+/// `ClientInstruction::ForwardQueryToHost` 处理器 `spawn` 到它上面。
+/// 单线程模型是因为计时器任务不做 CPU 工作 — 它们只是睡眠并在唤醒时
+/// 执行毫秒级的互斥锁检查。
 static FORWARD_TIMEOUT_RUNTIME: OnceLock<Arc<tokio::runtime::Runtime>> = OnceLock::new();
 
 pub fn forward_timeout_runtime() -> &'static Arc<tokio::runtime::Runtime> {
@@ -912,9 +857,8 @@ pub fn forward_timeout_runtime() -> &'static Arc<tokio::runtime::Runtime> {
             .expect("failed to build forward-timeout runtime");
         let rt = Arc::new(rt);
         let rt_for_driver = rt.clone();
-        // `block_on(pending())` keeps the executor loop alive forever
-        // on this thread; spawned timer tasks are polled as they
-        // become ready (on spawn, on wake from the time driver).
+        // `block_on(pending())` 在此线程上永远保持执行器循环存活；
+        // 生成的计时器任务在它们就绪时（生成时、从时间驱动程序唤醒时）被轮询。
         std::thread::Builder::new()
             .name("zellij-client-forward-timeout".into())
             .spawn(move || {
@@ -925,17 +869,13 @@ pub fn forward_timeout_runtime() -> &'static Arc<tokio::runtime::Runtime> {
     })
 }
 
-/// Spawn a timer task that closes a forward slot after `deadline` and
-/// invokes `on_timeout(token, reply_bytes)` with whatever the slot
-/// accumulated. Token-guard idempotent: if the barrier (or a
-/// replacement forward) has already cleared the slot by the time the
-/// timer wakes, `close_forward_on_timeout(token)` returns `None` and
-/// `on_timeout` is never called — no explicit cancellation path
-/// required.
+/// 生成一个计时器任务，在 `deadline` 后关闭转发槽，并使用槽累积的任何内容
+/// 调用 `on_timeout(token, reply_bytes)`。令牌守卫幂等：如果屏障（或替换转发）
+/// 在计时器唤醒时已经清除了槽，`close_forward_on_timeout(token)` 返回 `None`，
+/// 且 `on_timeout` 永远不会被调用 — 不需要显式取消路径。
 ///
-/// Extracted as a free function so tests can drive it against a
-/// `tokio::time::pause()`-backed paused runtime without instantiating
-/// the full client.
+/// 提取为自由函数，以便测试可以针对 `tokio::time::pause()` 支持的暂停运行时
+/// 驱动它，而无需实例化完整客户端。
 pub fn schedule_forward_timeout<F>(
     runtime: &tokio::runtime::Handle,
     parser: Arc<Mutex<StdinAnsiParser>>,

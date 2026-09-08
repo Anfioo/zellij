@@ -148,7 +148,7 @@ async fn handle_ws_terminal(
     };
     let web_client_id = params.web_client_id;
 
-    // Verify the session token owns this web_client_id
+    // 验证会话令牌拥有此 web_client_id
     if !state
         .connection_table
         .lock()
@@ -232,15 +232,13 @@ async fn handle_ws_terminal(
     let _ = attachment_complete_rx.await;
 
     let mut mouse_old_event = MouseEvent::new();
-    // Per-connection parser state. Hoisted so a CSI / Kitty sequence
-    // split across two WebSocket frames resolves on the second frame.
+    // 每个连接的解析状态。提升到这里，以便跨两个 WebSocket 帧拆分的
+    // CSI / Kitty 序列在第二个帧上解析。
     let mut stdin_session = StdinSession::new(explicitly_disable_kitty_keyboard_protocol);
     let finalize_idle = std::time::Duration::from_millis(50);
     loop {
-        // When termwiz is holding ambiguous-but-complete events from
-        // the previous frame, race the next frame against an idle
-        // timeout so the held events still drain if no further frame
-        // arrives.
+        // 当 termwiz 持有来自上一帧的模糊但完整的事件时，将下一帧与
+        // 空闲超时竞争，以便如果没有更多帧到达，持有的事件仍然会被排出。
         let result = if stdin_session.pending_finalize() {
             tokio::select! {
                 msg = client_terminal_channel_rx.next() => Some(msg),
@@ -253,9 +251,8 @@ async fn handle_ws_terminal(
             Some(Some(Ok(m))) => m,
             Some(_) => break,
             None => {
-                // Idle timeout fired with `pending_finalize` set:
-                // drain any ambiguous-but-complete events termwiz held
-                // back on the previous frame.
+                // 空闲超时在 `pending_finalize` 设置时触发：
+                // 排出 termwiz 在上一帧中保留的任何模糊但完整的事件。
                 if let Some(client_connection) = state
                     .connection_table
                     .lock()
@@ -265,8 +262,8 @@ async fn handle_ws_terminal(
                 {
                     stdin_session.finalize(&*client_connection, &mut mouse_old_event);
                 } else {
-                    // No client to send drained events to — clear the
-                    // flag so we don't busy-loop the idle timer.
+                    // 没有客户端可以发送排出的事件 — 清除标志，
+                    // 以免我们使空闲计时器忙循环。
                     stdin_session.clear_pending_finalize();
                 }
                 continue;
@@ -317,7 +314,7 @@ async fn handle_ws_terminal(
                     .remove_client(&web_client_id);
                 break;
             },
-            // TODO: support Message::Binary
+            // TODO: 支持 Message::Binary
             _ => {
                 log::error!("Unsupported websocket msg type");
             },
@@ -449,9 +446,8 @@ mod tests {
 
     #[test]
     fn terminal_metrics_round_trips_through_json_payload() {
-        // The browser sends this message as JSON over the control
-        // socket. Verify that the on-wire shape deserializes into the
-        // variant we route into terminal_metrics_to_ipc.
+        // 浏览器通过控制套接字以 JSON 发送此消息。验证线上形状反序列化为
+        // 我们路由到 terminal_metrics_to_ipc 的变体。
         let raw = serde_json::json!({
             "web_client_id": "abc",
             "payload": {
@@ -476,9 +472,8 @@ mod tests {
 
     #[test]
     fn terminal_resize_still_deserializes_after_adding_variant() {
-        // Regression guard for the new enum variant: the existing
-        // TerminalResize wire shape must continue to parse unchanged
-        // (no `type` rename, no required-field changes).
+        // 新枚举变体的回归防护：现有的 TerminalResize 线上形状必须继续
+        // 不变地解析（没有 `type` 重命名，没有必填字段更改）。
         let raw = serde_json::json!({
             "web_client_id": "abc",
             "payload": {

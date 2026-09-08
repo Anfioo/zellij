@@ -12,20 +12,18 @@ use zellij_utils::channels::SenderWithContext;
 use zellij_utils::input::{cast_crossterm_key, from_crossterm_mouse};
 use zellij_utils::vendored::termwiz::input::InputEvent;
 
-/// Saved console input mode from before `enable_vt_input()` modified it.
-/// Used by `restore_vt_input()` to put the console back the way the shell
-/// left it, clearing flags like ENABLE_MOUSE_INPUT that crossterm's
-/// disable_raw_mode() does not touch.
+/// `enable_vt_input()` 修改之前保存的控制台输入模式。
+/// 由 `restore_vt_input()` 用于将控制台恢复到 shell 离开时的状态，
+/// 清除 crossterm 的 disable_raw_mode() 不会处理的 ENABLE_MOUSE_INPUT 等标志。
 static ORIGINAL_CONSOLE_MODE: OnceLock<u32> = OnceLock::new();
 
-/// Set the stdin console mode for raw VT input.
+/// 为原始 VT 输入设置标准输入控制台模式。
 ///
-/// Instead of just ORing in ENABLE_VIRTUAL_TERMINAL_INPUT on top of whatever
-/// the current mode happens to be, we explicitly set the exact mode we need.
-/// This avoids a TOCTOU race with crossterm's EnableMouseCapture (which also
-/// does GetConsoleMode/SetConsoleMode) and ensures flags like
-/// ENABLE_QUICK_EDIT_MODE are always cleared — that flag intercepts mouse
-/// events at the console level, breaking application mouse support.
+/// 我们不是简单地在当前模式之上 OR 入 ENABLE_VIRTUAL_TERMINAL_INPUT，
+/// 而是显式设置我们需要的确切模式。这避免了与 crossterm 的 EnableMouseCapture
+/// （它也执行 GetConsoleMode/SetConsoleMode）的 TOCTOU 竞态，并确保
+/// ENABLE_QUICK_EDIT_MODE 等标志始终被清除 — 该标志会在控制台级别拦截
+/// 鼠标事件，破坏应用程序的鼠标支持。
 pub(crate) fn enable_vt_input() -> bool {
     unsafe {
         let handle = GetStdHandle(STD_INPUT_HANDLE);
@@ -36,25 +34,25 @@ pub(crate) fn enable_vt_input() -> bool {
         if GetConsoleMode(handle, &mut mode) == 0 {
             return false;
         }
-        // Save the original mode so we can restore it on exit.
+        // 保存原始模式，以便我们可以在退出时恢复它。
         let _ = ORIGINAL_CONSOLE_MODE.set(mode);
-        // Explicitly set the mode we need rather than read-modify-write.
-        // This eliminates the race with crossterm's EnableMouseCapture which
-        // also calls GetConsoleMode/SetConsoleMode concurrently.
+        // 显式设置我们需要的模式，而不是读-改-写。
+        // 这消除了与 crossterm 的 EnableMouseCapture 的竞态，后者也并发调用
+        // GetConsoleMode/SetConsoleMode。
         //
-        // Flags we set:
-        //   ENABLE_WINDOW_INPUT           (0x0008) - receive window resize events
-        //   ENABLE_MOUSE_INPUT            (0x0010) - receive mouse events; on ConPTY
-        //                                            this signals the terminal emulator
-        //                                            to capture and forward mouse input
-        //   ENABLE_EXTENDED_FLAGS         (0x0080) - required to clear QUICK_EDIT
-        //   ENABLE_VIRTUAL_TERMINAL_INPUT (0x0200) - stdin returns raw VT bytes
+        // 我们设置的标志：
+        //   ENABLE_WINDOW_INPUT           (0x0008) - 接收窗口调整大小事件
+        //   ENABLE_MOUSE_INPUT            (0x0010) - 接收鼠标事件；在 ConPTY 上
+        //                                            这会通知终端模拟器捕获并转发
+        //                                            鼠标输入
+        //   ENABLE_EXTENDED_FLAGS         (0x0080) - 清除 QUICK_EDIT 所必需
+        //   ENABLE_VIRTUAL_TERMINAL_INPUT (0x0200) - 标准输入返回原始 VT 字节
         //
-        // Flags we deliberately clear:
-        //   ENABLE_PROCESSED_INPUT  (0x0001) - let VT sequences through raw
-        //   ENABLE_LINE_INPUT       (0x0002) - no line buffering
-        //   ENABLE_ECHO_INPUT       (0x0004) - no echo
-        //   ENABLE_QUICK_EDIT_MODE  (0x0040) - would intercept mouse events
+        // 我们故意清除的标志：
+        //   ENABLE_PROCESSED_INPUT  (0x0001) - 让 VT 序列原始通过
+        //   ENABLE_LINE_INPUT       (0x0002) - 无行缓冲
+        //   ENABLE_ECHO_INPUT       (0x0004) - 无回显
+        //   ENABLE_QUICK_EDIT_MODE  (0x0040) - 会拦截鼠标事件
         let new_mode = ENABLE_WINDOW_INPUT
             | ENABLE_MOUSE_INPUT
             | ENABLE_EXTENDED_FLAGS
@@ -66,13 +64,13 @@ pub(crate) fn enable_vt_input() -> bool {
     }
 }
 
-/// Restore the console input mode that was saved by `enable_vt_input()`.
+/// 恢复由 `enable_vt_input()` 保存的控制台输入模式。
 ///
-/// `crossterm::terminal::disable_raw_mode()` only adds back LINE_INPUT,
-/// ECHO_INPUT and PROCESSED_INPUT — it never clears ENABLE_MOUSE_INPUT or
-/// ENABLE_VIRTUAL_TERMINAL_INPUT.  If those flags are left set after Zellij
-/// exits, ConPTY continues to deliver mouse events as VT escape sequences
-/// into the shell's stdin, causing visible garbage like `[555;99;32M`.
+/// `crossterm::terminal::disable_raw_mode()` 仅添加回 LINE_INPUT、
+/// ECHO_INPUT 和 PROCESSED_INPUT — 它从不清除 ENABLE_MOUSE_INPUT 或
+/// ENABLE_VIRTUAL_TERMINAL_INPUT。如果 Zellij 退出后这些标志保持设置，
+/// ConPTY 会继续将鼠标事件作为 VT 转义序列传递到 shell 的标准输入，
+/// 导致可见的乱码，如 `[555;99;32M`。
 pub(crate) fn restore_vt_input() {
     if let Some(&original_mode) = ORIGINAL_CONSOLE_MODE.get() {
         unsafe {
@@ -84,13 +82,12 @@ pub(crate) fn restore_vt_input() {
     }
 }
 
-/// Windows native console event loop.
+/// Windows 原生控制台事件循环。
 ///
-/// Uses crossterm's `event::read()` which reads INPUT_RECORDs via
-/// ReadConsoleInput.  Works in cmd.exe, PowerShell, and Windows Terminal
-/// where ALT is reported as a modifier flag.
+/// 使用 crossterm 的 `event::read()`，它通过 ReadConsoleInput 读取 INPUT_RECORD。
+/// 在 cmd.exe、PowerShell 和 Windows Terminal 中工作，其中 ALT 被报告为修饰符标志。
 ///
-/// Resize events are forwarded to the signal handler thread via `resize_sender`.
+/// 调整大小事件通过 `resize_sender` 转发到信号处理程序线程。
 pub(crate) fn native_console_stdin_loop(
     send_input_instructions: SenderWithContext<InputInstruction>,
     resize_sender: Option<std::sync::mpsc::Sender<()>>,

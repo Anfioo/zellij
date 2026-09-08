@@ -13,24 +13,24 @@ use crate::RemoteClientError;
 use tokio::runtime::Handle;
 use zellij_utils::remote_session_tokens;
 
-// In tests, only attempt once (no retries) to avoid interactive prompts
-// In production, allow up to 3 attempts (initial + 2 retries)
+// 在测试中，仅尝试一次（无重试）以避免交互式提示
+// 在生产环境中，允许多达 3 次尝试（初始 + 2 次重试）
 #[cfg(test)]
 const MAX_AUTH_ATTEMPTS: u32 = 1;
 
 #[cfg(not(test))]
 const MAX_AUTH_ATTEMPTS: u32 = 3;
 
-/// Attach to a remote Zellij session via HTTP(S)
+/// 通过 HTTP(S) 连接到远程 Zellij 会话
 ///
-/// This function handles the complete authentication flow including:
-/// - URL validation
-/// - Session token management (--forget, --token flags)
-/// - Trying saved session tokens
-/// - Interactive authentication with retry logic
-/// - Saving session tokens when --remember is used
+/// 此函数处理完整的认证流程，包括：
+/// - URL 验证
+/// - 会话令牌管理（--forget、--token 标志）
+/// - 尝试保存的会话令牌
+/// - 带重试逻辑的交互式认证
+/// - 使用 --remember 时保存会话令牌
 ///
-/// Returns WebSocketConnections on success
+/// 成功时返回 WebSocketConnections
 pub fn attach_to_remote_session(
     runtime: Handle,
     _os_input: Box<dyn ClientOsApi>,
@@ -41,15 +41,15 @@ pub fn attach_to_remote_session(
     ca_cert: Option<&std::path::Path>,
     insecure: bool,
 ) -> Result<WebSocketConnections, RemoteClientError> {
-    // Extract server URL for token management
+    // 提取服务器 URL 用于令牌管理
     let server_url = extract_server_url(remote_session_url)?;
 
-    // Handle --forget flag
+    // 处理 --forget 标志
     if forget {
         let _ = remote_session_tokens::delete_session_token(&server_url);
     }
 
-    // If --token provided, delete saved session token
+    // 如果提供了 --token，删除保存的会话令牌
     if token.is_some() {
         let _ = remote_session_tokens::delete_session_token(&server_url);
     }
@@ -66,7 +66,7 @@ pub fn attach_to_remote_session(
         }
     }
 
-    // Normal auth flow with retry logic
+    // 带重试逻辑的常规认证流程
     authenticate_with_retry(
         runtime,
         remote_session_url,
@@ -77,8 +77,8 @@ pub fn attach_to_remote_session(
     )
 }
 
-/// Try to connect using a saved session token
-/// Returns Ok(Some(connections)) on success, Ok(None) if should retry with auth
+/// 尝试使用保存的会话令牌连接
+/// 成功时返回 Ok(Some(connections))，如果应使用认证重试则返回 Ok(None)
 fn try_to_connect_with_saved_session_token(
     runtime: Handle,
     remote_session_url: &str,
@@ -87,7 +87,7 @@ fn try_to_connect_with_saved_session_token(
     insecure: bool,
 ) -> Result<Option<WebSocketConnections>, RemoteClientError> {
     if let Ok(Some(saved_session_token)) = remote_session_tokens::get_session_token(server_url) {
-        // we have a saved session token, let's try to authenticate with it
+        // 我们有一个保存的会话令牌，让我们尝试用它进行认证
         let ca_cert_owned = ca_cert.map(|p| p.to_path_buf());
         match runtime.block_on(async move {
             remote_attach_with_session_token(
@@ -102,7 +102,7 @@ fn try_to_connect_with_saved_session_token(
                 return Ok(Some(connections));
             },
             Err(RemoteClientError::SessionTokenExpired) => {
-                // Session expired - delete and return to retry
+                // 会话已过期 — 删除并返回以重试
                 let _ = remote_session_tokens::delete_session_token(server_url);
                 eprintln!("Session expired, please re-authenticate");
                 return Ok(None);
@@ -157,7 +157,7 @@ fn authenticate_with_retry(
             .await
         }) {
             Ok((connections, session_token_opt)) => {
-                // Save session token if we got one
+                // 如果获得了会话令牌，保存它
                 if let Some(session_token) = session_token_opt {
                     let server_url = extract_server_url(remote_session_url)?;
                     let _ = remote_session_tokens::save_session_token(&server_url, &session_token);
@@ -271,7 +271,7 @@ pub fn extract_server_url(full_url: &str) -> Result<String, RemoteClientError> {
 fn extract_session_name(server_url: &str) -> Result<String, RemoteClientError> {
     let parsed_url = url::Url::parse(server_url)?;
     let path = parsed_url.path();
-    // Extract session name from path (everything after the first /)
+    // 从路径中提取会话名称（第一个 / 之后的所有内容）
     if path.len() > 1 && path.starts_with('/') {
         Ok(path[1..].trim_end_matches('/').to_string())
     } else {

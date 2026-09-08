@@ -1,5 +1,4 @@
-//! The `[cli_client]` is used to attach to a running server session
-//! and dispatch actions, that are specified through the command line.
+//! `[cli_client]` 用于连接到正在运行的服务端会话并分发通过命令行指定的操作。
 use std::collections::{BTreeMap, HashSet};
 use std::io::{self, BufRead, Write};
 use std::process;
@@ -98,16 +97,15 @@ fn pipe_client(
 ) {
     let mut stdin = os_input.get_stdin_reader();
     let name = name
-        // first we try to take the explicitly supplied message name
+        // 首先尝试获取显式提供的消息名称
         .take()
-        // then we use the plugin, to facilitate using aliases
+        // 然后使用 plugin，以便于使用别名
         .or_else(|| plugin.clone())
-        // then we use a uuid to at least have some sort of identifier for this message
+        // 最后使用 uuid，至少为该消息提供某种标识符
         .or_else(|| Some(Uuid::new_v4().to_string()));
     if launch_new {
-        // we do this to make sure the plugin is unique (has a unique configuration parameter) so
-        // that a new one would be launched, but we'll still send it to the same instance rather
-        // than launching a new one in every iteration of the loop
+        // 这样做是为了确保插件是唯一的（具有唯一的配置参数），以便会启动一个新插件，
+        // 但我们仍然会将其发送到同一个实例，而不是在循环的每次迭代中都启动一个新实例
         configuration
             .get_or_insert_with(BTreeMap::new)
             .insert("_zellij_id".to_owned(), Uuid::new_v4().to_string());
@@ -139,13 +137,12 @@ fn pipe_client(
             let msg = create_msg(Some(payload));
             os_input.send_to_server(msg);
         } else if !is_piped {
-            // here we send an empty message to trigger the plugin, because we don't have any more
-            // data
+            // 这里我们发送一条空消息来触发插件，因为我们没有更多数据了
             let msg = create_msg(None);
             os_input.send_to_server(msg);
         } else {
-            // we didn't get payload from the command line, meaning we listen on STDIN because this
-            // signifies the user is about to pipe more (eg. cat my-large-file | zellij pipe ...)
+            // 我们没有从命令行获取 payload，这意味着我们在监听标准输入，因为这表示用户
+            // 即将通过管道传入更多数据（例如 cat my-large-file | zellij pipe ...）
             let mut buffer = String::new();
             let _ = stdin.read_line(&mut buffer);
             if buffer.is_empty() {
@@ -153,21 +150,19 @@ fn pipe_client(
                 os_input.send_to_server(msg);
                 break;
             } else {
-                // we've got data! send it down the pipe (most common)
+                // 我们收到数据了！将其发送到管道（最常见的情况）
                 let msg = create_msg(Some(buffer));
                 os_input.send_to_server(msg);
             }
         }
         loop {
-            // wait for a response and act accordingly
+            // 等待响应并采取相应行动
             match os_input.recv_from_server() {
                 Some((ServerToClientMsg::UnblockCliPipeInput { pipe_name }, _)) => {
-                    // unblock this pipe, meaning we need to stop waiting for a response and read
-                    // once more from STDIN
+                    // 解除此管道的阻塞，意味着我们需要停止等待响应并再次从标准输入读取
                     if pipe_name == pipe_id {
                         if !is_piped {
-                            // if this client is not piped, we need to exit the process completely
-                            // rather than wait for more data
+                            // 如果此客户端未通过管道连接，我们需要完全退出进程，而不是等待更多数据
                             process::exit(0);
                         } else {
                             break;
@@ -175,7 +170,7 @@ fn pipe_client(
                     }
                 },
                 Some((ServerToClientMsg::CliPipeOutput { pipe_name, output }, _)) => {
-                    // send data to STDOUT, this *does not* mean we need to unblock the input
+                    // 将数据发送到标准输出，这*并不*意味着我们需要解除输入的阻塞
                     let err_context = "Failed to write to stdout";
                     if pipe_name == pipe_id {
                         let mut stdout = os_input.get_stdout_writer();
@@ -273,7 +268,7 @@ pub fn start_subscribe_client(
     crate::check_ipc_pipe_length(&zellij_ipc_pipe);
     os_input.connect_to_server(&*zellij_ipc_pipe);
 
-    // Parse pane IDs
+    // 解析窗格 ID
     let pane_ids: Vec<PaneId> = subscribe_cli
         .pane_id
         .iter()
@@ -285,17 +280,17 @@ pub fn start_subscribe_client(
         })
         .collect();
 
-    // Send subscribe message
+    // 发送订阅消息
     os_input.send_to_server(ClientToServerMsg::SubscribeToPaneRenders {
         pane_ids: pane_ids.clone(),
         scrollback: subscribe_cli.scrollback,
         ansi: subscribe_cli.ansi,
     });
 
-    // Track remaining panes for exit-on-all-closed
+    // 跟踪剩余窗格，以便在所有窗格关闭时退出
     let mut remaining_panes: HashSet<PaneId> = pane_ids.into_iter().collect();
 
-    // Streaming receive loop
+    // 流式接收循环
     let stdout = io::stdout();
     let mut stdout = stdout.lock();
 

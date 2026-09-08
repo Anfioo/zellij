@@ -2656,7 +2656,7 @@ mod web_client_tests {
         tokio::time::sleep(Duration::from_millis(100)).await;
     }
 
-    // ========== PWA manifest and icon tests ==========
+    // ========== PWA 清单和图标测试 ==========
 
     async fn spawn_test_server_with_config(config: Config) -> (u16, tokio::task::JoinHandle<()>) {
         let session_manager = Arc::new(MockSessionManager::new());
@@ -2756,9 +2756,9 @@ mod web_client_tests {
     #[tokio::test]
     #[serial]
     async fn test_manifest_uses_relative_urls() {
-        // Pins the relative-URL contract that lets the static manifest work under any
-        // reverse-proxy base_url. start_url, scope, and icons[*].src must all be relative
-        // to the manifest URL — never absolute paths and never absolute URLs.
+        // 固定相对 URL 契约，让静态清单在任何反向代理 base_url 下工作。
+        // start_url、scope 和 icons[*].src 都必须相对于清单 URL —
+        // 绝不能是绝对路径，也绝不能是绝对 URL。
         let _ = delete_db();
 
         let (port, server_handle) = spawn_test_server_with_config(Config::default()).await;
@@ -2932,9 +2932,9 @@ mod web_client_tests {
     #[tokio::test]
     #[serial]
     async fn test_manifest_body_invariant_under_base_url() {
-        // The server-side manifest response is identical regardless of base_url config —
-        // base_url only affects the browser-side URL composition via <base href> in
-        // serve_html. The manifest itself is a static asset.
+        // 无论 base_url 配置如何，服务端清单响应都是相同的 —
+        // base_url 仅通过 serve_html 中的 <base href> 影响浏览器端 URL 组合。
+        // 清单本身是一个静态资源。
         let _ = delete_db();
 
         let default_body = {

@@ -26,20 +26,20 @@ pub async fn create_webserver_receiver(
 pub async fn receive_webserver_instruction(
     receiver: &mut interprocess::local_socket::tokio::Stream,
 ) -> std::io::Result<InstructionForWebServer> {
-    // Read length prefix (4 bytes)
+    // 读取长度前缀（4 字节）
     let mut len_bytes = [0u8; 4];
     receiver.read_exact(&mut len_bytes).await?;
     let len = u32::from_le_bytes(len_bytes) as usize;
 
-    // Read protobuf message
+    // 读取 protobuf 消息
     let mut buffer = vec![0u8; len];
     receiver.read_exact(&mut buffer).await?;
 
-    // Decode protobuf message
+    // 解码 protobuf 消息
     let proto_instruction = ProtoInstructionForWebServer::decode(&buffer[..])
         .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
 
-    // Convert to Rust type
+    // 转换为 Rust 类型
     proto_instruction
         .try_into()
         .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))

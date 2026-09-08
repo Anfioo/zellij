@@ -47,7 +47,7 @@ impl HttpClientWithCookies {
     ) -> Result<Response<AsyncBody>, isahc::Error> {
         let mut req = request.into();
 
-        // Add cookies to request
+        // 向请求添加 cookie
         if let Ok(cookies) = self.cookies.lock() {
             if !cookies.is_empty() {
                 let cookie_header = cookies
@@ -62,7 +62,7 @@ impl HttpClientWithCookies {
 
         let response = self.client.send_async(req).await?;
 
-        // Extract and store cookies from response
+        // 从响应中提取并存储 cookie
         if let Some(set_cookie_headers) = response.headers().get_all("set-cookie").iter().next() {
             if let Ok(cookie_str) = set_cookie_headers.to_str() {
                 self.parse_and_store_cookies(cookie_str);
@@ -74,11 +74,11 @@ impl HttpClientWithCookies {
 
     fn parse_and_store_cookies(&self, cookie_header: &str) {
         if let Ok(mut cookies) = self.cookies.lock() {
-            // Simple cookie parsing - just extract name=value pairs
+            // 简单的 cookie 解析 — 仅提取 name=value 对
             for cookie_part in cookie_header.split(';') {
                 let cookie_part = cookie_part.trim();
                 if let Some((name, value)) = cookie_part.split_once('=') {
-                    // Skip cookie attributes like Path, Domain, HttpOnly, etc.
+                    // 跳过 cookie 属性，如 Path、Domain、HttpOnly 等
                     if ![
                         "path", "domain", "httponly", "secure", "samesite", "expires", "max-age",
                     ]
@@ -105,7 +105,7 @@ impl HttpClientWithCookies {
         None
     }
 
-    /// Extract a specific cookie value
+    /// 提取特定的 cookie 值
     pub fn get_cookie(&self, name: &str) -> Option<String> {
         if let Ok(cookies) = self.cookies.lock() {
             return cookies.get(name).cloned();
@@ -113,7 +113,7 @@ impl HttpClientWithCookies {
         None
     }
 
-    /// Pre-populate a cookie (for saved session tokens)
+    /// 预填充 cookie（用于保存的会话令牌）
     pub fn set_cookie(&self, name: String, value: String) {
         if let Ok(mut cookies) = self.cookies.lock() {
             cookies.insert(name, value);

@@ -1,4 +1,4 @@
-// for more info, please see: https://sw.kovidgoyal.net/kitty/keyboard-protocol
+// 更多信息，请参见：https://sw.kovidgoyal.net/kitty/keyboard-protocol
 use zellij_utils::data::KeyWithModifier;
 
 #[derive(Debug)]
@@ -11,19 +11,17 @@ enum KittyKeysParsingState {
     DoneParsingWithTilde,
 }
 
-/// Three-way outcome of `KittyKeyboardParser::feed()`. Lets a long-lived
-/// parser distinguish a finished sequence (consume + reset) from a
-/// valid prefix (keep state, wait for the next chunk) from an unrelated
-/// byte stream (reset and let a fallback parser handle it).
+/// `KittyKeyboardParser::feed()` 的三态结果。让一个长生命周期的解析器能够区分
+/// 已完成的序列（消费 + 重置）、有效的前缀（保持状态，等待下一个数据块）
+/// 以及不相关的字节流（重置并让回退解析器处理它）。
 #[derive(Debug)]
 pub enum KittyParseOutcome {
-    /// Complete sequence parsed; parser resets to Ground.
+    /// 完整序列已解析；解析器重置为 Ground。
     Complete(KeyWithModifier),
-    /// Bytes are a valid prefix; parser keeps state. Caller should let
-    /// termwiz also see them this round and call `feed()` again on the
-    /// next chunk.
+    /// 字节是有效的前缀；解析器保持状态。调用方应让 termwiz 在本轮也看到这些字节，
+    /// 并在下一个数据块上再次调用 `feed()`。
     Incomplete,
-    /// Bytes are not a Kitty sequence; parser resets to Ground.
+    /// 字节不是 Kitty 序列；解析器重置为 Ground。
     NoMatch,
 }
 
@@ -34,11 +32,10 @@ pub struct KittyKeyboardParser {
     modifier_bytes: Vec<u8>,
 }
 
-/// CSI final-byte range (0x40..=0x7E), minus `u` and `~` which trigger
-/// the explicit `DoneParsingWith{U,Tilde}` states inside the parser.
-/// A trailing letter in this range while still in
-/// `ParsingNumber`/`ParsingModifiers` indicates a complete
-/// letter-terminated sequence (e.g. `\x1b[A`, `\x1b[1;2A`).
+/// CSI 终止字节范围 (0x40..=0x7E)，减去 `u` 和 `~`，这两个会触发解析器内部
+/// 显式的 `DoneParsingWith{U,Tilde}` 状态。
+/// 当仍处于 `ParsingNumber`/`ParsingModifiers` 状态时，此范围内的尾随字母表示
+/// 一个完整的以字母结尾的序列（例如 `\x1b[A`、`\x1b[1;2A`）。
 fn is_csi_final_letter(b: u8) -> bool {
     (0x40..=0x7E).contains(&b) && b != b'u' && b != b'~'
 }
@@ -58,15 +55,12 @@ impl KittyKeyboardParser {
         self.modifier_bytes.clear();
     }
 
-    /// Stateful, cross-chunk-aware entry point. Drives the same
-    /// state machine as `parse()` but:
-    /// * resets to Ground after producing `Complete`/`NoMatch`, so the
-    ///   parser can be reused for the next sequence;
-    /// * preserves state on `Incomplete`, so a sequence split across
-    ///   chunks still resolves on a follow-up call.
+    /// 有状态的、跨数据块感知的入口点。驱动与 `parse()` 相同的状态机，但：
+    /// * 在产生 `Complete`/`NoMatch` 后重置为 Ground，以便解析器可重用于下一个序列；
+    /// * 在 `Incomplete` 时保持状态，以便跨数据块拆分的序列仍能在后续调用中解析。
     ///
-    /// The existing `parse()` wrapper is retained for the unit tests in
-    /// this file, which construct `::new()` per assertion.
+    /// 现有的 `parse()` 包装器保留给此文件中的单元测试使用，这些测试为每个断言
+    /// 构造 `::new()`。
     pub fn feed(&mut self, bytes: &[u8]) -> KittyParseOutcome {
         for byte in bytes {
             if !self.advance(*byte) {
@@ -96,9 +90,8 @@ impl KittyKeyboardParser {
                 }
             },
             KittyKeysParsingState::ParsingNumber => {
-                // ParsingNumber holds either a digit run waiting for a
-                // terminator (Incomplete) or a single letter that is
-                // itself the terminator — `\x1b[A` etc. (Complete).
+                // ParsingNumber 保存等待终止符的数字序列（Incomplete），
+                // 或者本身就是终止符的单个字母 — `\x1b[A` 等（Complete）。
                 match self.number_bytes.last().copied() {
                     Some(last) if is_csi_final_letter(last) => {
                         let result = KeyWithModifier::from_bytes_with_no_ending_byte(
@@ -115,10 +108,8 @@ impl KittyKeyboardParser {
                 }
             },
             KittyKeysParsingState::ParsingModifiers => {
-                // ParsingModifiers holds either modifier digits waiting
-                // for the terminator letter (Incomplete) or modifier
-                // digits + a trailing letter terminator
-                // — `\x1b[1;2A` etc. (Complete).
+                // ParsingModifiers 保存等待终止符字母的修饰符数字（Incomplete），
+                // 或者修饰符数字 + 尾随字母终止符 — `\x1b[1;2A` 等（Complete）。
                 match self.modifier_bytes.last().copied() {
                     Some(last) if is_csi_final_letter(last) => {
                         let last_modifier = self.modifier_bytes.pop().unwrap();
@@ -141,7 +132,7 @@ impl KittyKeyboardParser {
     }
 
     pub fn advance(&mut self, byte: u8) -> bool {
-        // returns false if we failed parsing
+        // 如果解析失败则返回 false
         match (&self.state, byte) {
             (KittyKeysParsingState::Ground, 0x1b | 0x5b) => {
                 self.state = KittyKeysParsingState::ReceivedEscapeCharacter;
@@ -150,7 +141,7 @@ impl KittyKeyboardParser {
                 self.state = KittyKeysParsingState::ParsingNumber;
             },
             (KittyKeysParsingState::ParsingNumber, 59) => {
-                // semicolon
+                // 分号
                 if &self.number_bytes == &[49] {
                     self.number_bytes.clear();
                 }
@@ -184,12 +175,10 @@ impl KittyKeyboardParser {
     }
 }
 
-/// Test helper. Drives the production `feed()` entry point on a single
-/// chunk and projects its three-way outcome onto an `Option` so the
-/// existing assertion shape (`Some(KeyWithModifier { … })`) stays
-/// readable. The full-byte tests in this file expect the input to be a
-/// single complete sequence; `Incomplete` and `NoMatch` both flatten to
-/// `None`.
+/// 测试辅助函数。在单个数据块上驱动生产环境的 `feed()` 入口点，并将其三态结果
+/// 投影到 `Option` 上，以便现有的断言形式（`Some(KeyWithModifier { … })`）保持
+/// 可读。此文件中的全字节测试期望输入是单个完整序列；`Incomplete` 和 `NoMatch`
+/// 都扁平化为 `None`。
 #[cfg(test)]
 fn parse_for_test(bytes: &[u8]) -> Option<KeyWithModifier> {
     match KittyKeyboardParser::new().feed(bytes) {

@@ -6,7 +6,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use zellij_utils::remote_session_tokens;
 
-// Mock server infrastructure
+// 模拟服务器基础设施
 #[cfg(feature = "web_server_capability")]
 mod mock_server {
     use super::*;
@@ -89,7 +89,7 @@ mod mock_server {
         }
         drop(valid_tokens);
 
-        // Always create a session token (cookie is always set)
+        // 始终创建会话令牌（始终设置 cookie）
         let session_token = Uuid::new_v4().to_string();
         let web_client_id = Uuid::new_v4().to_string();
 
@@ -156,7 +156,7 @@ mod mock_server {
         state.record_endpoint("/ws/terminal");
         state.record_query("/ws/terminal", uri.query());
 
-        // Validate session token
+        // 验证会话令牌
         let session_token = jar
             .get("session_token")
             .map(|c| c.value().to_string())
@@ -169,7 +169,7 @@ mod mock_server {
         drop(session_tokens);
 
         Ok(ws.on_upgrade(|socket| async move {
-            // Basic echo WebSocket handler
+            // 基本的回显 WebSocket 处理器
             use axum::extract::ws::Message;
             use futures_util::{SinkExt, StreamExt};
             let (mut sender, mut receiver) = socket.split();
@@ -191,7 +191,7 @@ mod mock_server {
         state.record_endpoint("/ws/control");
         state.record_query("/ws/control", uri.query());
 
-        // Validate session token
+        // 验证会话令牌
         let session_token = jar
             .get("session_token")
             .map(|c| c.value().to_string())
@@ -204,7 +204,7 @@ mod mock_server {
         drop(session_tokens);
 
         Ok(ws.on_upgrade(|socket| async move {
-            // Basic echo WebSocket handler
+            // 基本的回显 WebSocket 处理器
             use axum::extract::ws::Message;
             use futures_util::{SinkExt, StreamExt};
             let (mut sender, mut receiver) = socket.split();
@@ -235,7 +235,7 @@ mod mock_server {
             axum::serve(listener, app).await.unwrap();
         });
 
-        // Wait for server to be ready
+        // 等待服务器就绪
         tokio::time::sleep(Duration::from_millis(100)).await;
 
         (port, server_handle)
@@ -263,7 +263,7 @@ mod tls_mock_server {
     }
 
     pub fn generate_test_certs() -> TlsTestCerts {
-        // Create a CA with proper key usage
+        // 创建具有正确密钥用法的 CA
         let ca_key = rcgen::KeyPair::generate().unwrap();
         let mut ca_params = rcgen::CertificateParams::new(Vec::<String>::new()).unwrap();
         ca_params.is_ca = rcgen::IsCa::Ca(rcgen::BasicConstraints::Unconstrained);
@@ -273,7 +273,7 @@ mod tls_mock_server {
         ];
         let ca = ca_params.self_signed(&ca_key).unwrap();
 
-        // Create server cert with IP SAN only (no DNS name for IP addresses)
+        // 仅使用 IP SAN 创建服务器证书（IP 地址无 DNS 名称）
         let mut server_params = rcgen::CertificateParams::new(Vec::<String>::new()).unwrap();
         server_params.subject_alt_names = vec![rcgen::SanType::IpAddress(std::net::IpAddr::V4(
             std::net::Ipv4Addr::LOCALHOST,
@@ -283,7 +283,7 @@ mod tls_mock_server {
         let ca_issuer = rcgen::Issuer::from_params(&ca_params, &ca_key);
         let server_cert = server_params.signed_by(&server_key, &ca_issuer).unwrap();
 
-        // Write to temp files
+        // 写入临时文件
         let ca_cert_file = tempfile::NamedTempFile::new().unwrap();
         std::fs::write(ca_cert_file.path(), ca.pem()).unwrap();
 
@@ -342,7 +342,7 @@ mod tls_mock_server {
                 .unwrap();
         });
 
-        // Wait for the server to be listening (deterministic, no sleep)
+        // 等待服务器开始监听（确定性，无睡眠）
         handle.listening().await;
 
         (port, handle, server_task)
@@ -357,7 +357,7 @@ mod tls_mock_server {
     }
 }
 
-// Database test helpers
+// 数据库测试辅助函数
 fn setup_test_db(server_url: &str) {
     let _ = remote_session_tokens::delete_session_token(server_url);
 }
@@ -366,7 +366,7 @@ fn cleanup_test_db(server_url: &str) {
     let _ = remote_session_tokens::delete_session_token(server_url);
 }
 
-// Mock ClientOsApi for testing
+// 用于测试的模拟 ClientOsApi
 #[derive(Debug, Clone)]
 struct MockClientOsApi;
 
@@ -433,13 +433,13 @@ impl crate::os_input_output::ClientOsApi for MockClientOsApi {
     }
 }
 
-// Tests
+// 测试
 #[cfg(feature = "web_server_capability")]
 mod tests {
     use super::mock_server::*;
     use super::*;
 
-    // Helper function to call attach_to_remote_session from async context
+    // 从异步上下文调用 attach_to_remote_session 的辅助函数
     async fn call_attach_to_remote_session(
         remote_session_url: String,
         token: Option<String>,
@@ -457,7 +457,7 @@ mod tests {
                 remember,
                 forget,
                 None,
-                true, // insecure for tests
+                true, // 测试时使用 insecure
             )
         })
         .await
@@ -540,7 +540,7 @@ mod tests {
     #[serial]
     async fn test_failed_authentication_with_invalid_token() {
         let server_state = MockRemoteServerState::new();
-        // Don't add the token to valid tokens - server will reject it
+        // 不要将令牌添加到有效令牌中 — 服务器会拒绝它
 
         let (port, server_handle) = start_mock_server(server_state.clone()).await;
         let server_url = format!("http://127.0.0.1:{}/session-name", port);
@@ -588,7 +588,7 @@ mod tests {
 
         assert!(result.is_ok(), "Connection should succeed");
 
-        // Verify token was saved
+        // 验证令牌已保存
         let saved_token = remote_session_tokens::get_session_token(&base_url);
         assert!(saved_token.is_ok());
         assert!(
@@ -623,7 +623,7 @@ mod tests {
 
         assert!(result.is_ok(), "Connection should succeed");
 
-        // Verify token was NOT saved
+        // 验证令牌未保存
         let saved_token = remote_session_tokens::get_session_token(&base_url);
         assert!(saved_token.is_ok());
         assert!(
@@ -640,7 +640,7 @@ mod tests {
     async fn test_load_and_use_saved_session_token() {
         let server_state = MockRemoteServerState::new();
 
-        // Pre-create a session token
+        // 预创建会话令牌
         let session_token = uuid::Uuid::new_v4().to_string();
         let web_client_id = uuid::Uuid::new_v4().to_string();
         server_state
@@ -655,18 +655,18 @@ mod tests {
 
         setup_test_db(&base_url);
 
-        // Save the session token
+        // 保存会话令牌
         remote_session_tokens::save_session_token(&base_url, &session_token).unwrap();
 
         let result = call_attach_to_remote_session(
-            server_url, None, // No auth token provided
+            server_url, None, // 未提供认证令牌
             false, false,
         )
         .await;
 
         assert!(result.is_ok(), "Should successfully use saved token");
 
-        // Verify we did NOT call login endpoint (used saved token directly)
+        // 验证我们没有调用 login 端点（直接使用了保存的令牌）
         let endpoints = server_state.get_endpoints_called();
         assert!(
             !endpoints.contains(&"/command/login".to_string()),
@@ -694,12 +694,12 @@ mod tests {
 
         setup_test_db(&base_url);
 
-        // Pre-save an old token
+        // 预保存旧令牌
         remote_session_tokens::save_session_token(&base_url, "old-token").unwrap();
 
         let result = call_attach_to_remote_session(
             server_url,
-            Some(auth_token.to_string()), // Providing new token
+            Some(auth_token.to_string()), // 提供新令牌
             false,
             false,
         )
@@ -707,9 +707,9 @@ mod tests {
 
         assert!(result.is_ok(), "Should succeed with new token");
 
-        // The old token should have been deleted before using new one
-        // (New token won't be saved because remember=false)
-        // Verify by checking that session endpoint was called (not using saved token)
+        // 在使用新令牌之前，旧令牌应该已被删除
+        // （因为 remember=false，新令牌不会被保存）
+        // 通过检查 session 端点被调用（未使用保存的令牌）来验证
         let endpoints = server_state.get_endpoints_called();
         assert!(
             endpoints.contains(&"/command/login".to_string()),
@@ -748,7 +748,7 @@ mod tests {
             "Should have web_client_id"
         );
 
-        // Verify both WebSocket endpoints were called
+        // 验证两个 WebSocket 端点都被调用
         let endpoints = server_state.get_endpoints_called();
         assert!(
             endpoints.contains(&"/ws/terminal".to_string()),
@@ -765,7 +765,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_url_parsing_for_session_name() {
-        // Test various URL formats
+        // 测试各种 URL 格式
         let test_cases = vec![
             ("https://example.com/my-session", "my-session"),
             ("https://example.com/", ""),
@@ -787,7 +787,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_server_url_extraction() {
-        // Test various URL formats
+        // 测试各种 URL 格式
         let test_cases = vec![
             (
                 "https://example.com:8080/session?foo=bar",
@@ -829,24 +829,22 @@ mod tests {
         ));
     }
 
-    // -- TLS tests ------------------------------------------------------------
+    // -- TLS 测试 ------------------------------------------------------------
     //
-    // These tests exercise the rustls WebSocket TLS code paths added by the
-    // native-tls → rustls migration. They call establish_websocket_connections
-    // directly rather than going through attach_to_remote_session, because:
+    // 这些测试测试由 native-tls → rustls 迁移添加的 rustls WebSocket TLS 代码路径。
+    // 它们直接调用 establish_websocket_connections，而不是通过 attach_to_remote_session，
+    // 因为：
     //
-    // 1. The HTTP auth step (isahc/curl) uses a separate TLS stack that was
-    //    not changed by this migration — it is tested by the non-TLS tests above.
-    // 2. attach_to_remote_session opens the SQLite session-token database,
-    //    which can cause I/O contention with web_client tests that use a
-    //    different SQLite database in the same directory.
+    // 1. HTTP 认证步骤（isahc/curl）使用单独的 TLS 栈，该栈未被此迁移更改 —
+    //    它由上面的非 TLS 测试测试。
+    // 2. attach_to_remote_session 打开 SQLite 会话令牌数据库，
+    //    这可能导致与在同一目录中使用不同 SQLite 数据库的 web_client 测试的 I/O 争用。
     //
-    // Each test seeds a session directly in the mock server state and
-    // pre-populates the HTTP client cookie, then connects over wss://.
+    // 每个测试直接在模拟服务器状态中植入会话，并预填充 HTTP 客户端 cookie，
+    // 然后通过 wss:// 连接。
 
-    /// Helper: create an HTTP client with a pre-seeded session cookie and
-    /// register the session in the mock server state. Returns (web_client_id,
-    /// http_client).
+    /// 辅助函数：创建带有预植入会话 cookie 的 HTTP 客户端，
+    /// 并在模拟服务器状态中注册会话。返回 (web_client_id, http_client)。
     fn seed_mock_session(
         server_state: &MockRemoteServerState,
     ) -> (
@@ -861,9 +859,8 @@ mod tests {
             .unwrap()
             .insert(session_token.clone(), web_client_id.clone());
 
-        // The HTTP client is only used for its cookie jar (WebSocket upgrade
-        // sends the session cookie). TLS for this client is irrelevant since
-        // it never makes HTTP requests in these tests.
+        // HTTP 客户端仅用于其 cookie jar（WebSocket 升级发送会话 cookie）。
+        // 此客户端的 TLS 无关紧要，因为它在这些测试中从不发出 HTTP 请求。
         let http_client =
             crate::remote_attach::http_client::HttpClientWithCookies::new(None, true).unwrap();
         http_client.set_cookie("session_token".to_string(), session_token);

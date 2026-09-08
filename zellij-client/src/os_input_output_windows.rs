@@ -9,34 +9,30 @@ use std::io::Write;
 use std::path::Path;
 use zellij_utils::ipc::{IpcReceiverWithContext, IpcSenderWithContext};
 
-/// Whether zellij should use the VT byte path on Windows (raw stdin via
-/// `ReadFile` + termwiz/kitty parsing) instead of the native-console path
-/// (crossterm `INPUT_RECORD`s).
+/// zellij 是否应在 Windows 上使用 VT 字节路径（通过 `ReadFile` 的原始标准输入 +
+/// termwiz/kitty 解析），而不是原生控制台路径（crossterm `INPUT_RECORD`）。
 ///
-/// True when either of these environment variables is set:
+/// 当设置了以下任一环境变量时为 true：
 ///
-/// * `TERM` — set automatically by terminal emulators that expose a Unix-style
-///   environment (Alacritty, WezTerm, WSL sessions inheriting bash's env), or
-///   set manually by users who want zellij on the VT path (e.g. adding
-///   `TERM=xterm-256color` to a Windows Terminal / PowerShell profile).
-/// * `WT_SESSION` — set per-session by Windows Terminal itself. Detecting it
-///   means default WT installs land on the VT path without the user having to
-///   set `TERM`, so they get bracketed paste, kitty keyboard, SGR mouse, and
-///   the other features that depend on raw VT input.
+/// * `TERM` — 由暴露 Unix 风格环境的终端模拟器自动设置（Alacritty、WezTerm、
+///   继承 bash 环境的 WSL 会话），或由希望 zellij 使用 VT 路径的用户手动设置
+///   （例如在 Windows Terminal / PowerShell 配置文件中添加 `TERM=xterm-256color`）。
+/// * `WT_SESSION` — 由 Windows Terminal 本身按会话设置。检测到它意味着默认的 WT
+///   安装无需用户设置 `TERM` 即可使用 VT 路径，因此他们可以获得括号粘贴、kitty 键盘、
+///   SGR 鼠标以及其他依赖原始 VT 输入的功能。
 ///
-/// Every VT-path-conditional code site (stdin handler, mouse mode setup,
-/// future input-related code) should call this so the gates can't drift —
-/// when they did drift, mouse setup using `crossterm::EnableMouseCapture`
-/// clobbered the `ENABLE_VIRTUAL_TERMINAL_INPUT` flag the stdin path had
-/// just set and broke all input from WT.
+/// 每个 VT 路径条件代码站点（标准输入处理器、鼠标模式设置、未来的输入相关代码）
+/// 都应调用此函数，以便门控不会漂移 — 当它们漂移时，使用
+/// `crossterm::EnableMouseCapture` 的鼠标设置会破坏标准输入路径刚刚设置的
+/// `ENABLE_VIRTUAL_TERMINAL_INPUT` 标志，并破坏来自 WT 的所有输入。
 pub(crate) fn use_vt_path() -> bool {
     std::env::var("TERM").is_ok() || std::env::var("WT_SESSION").is_ok()
 }
 
-/// Windows async signal listener.
+/// Windows 异步信号监听器。
 ///
-/// Polls `crossterm::terminal::size()` at 100ms intervals for resize events,
-/// and listens to `tokio::signal::windows` for ctrl_c/ctrl_break/ctrl_close.
+/// 以 100ms 间隔轮询 `crossterm::terminal::size()` 以获取调整大小事件，
+/// 并监听 `tokio::signal::windows` 以获取 ctrl_c/ctrl_break/ctrl_close。
 pub(crate) struct AsyncSignalListener {
     interval: tokio::time::Interval,
     last_size: (u16, u16),
@@ -85,16 +81,14 @@ impl crate::os_input_output::AsyncSignals for AsyncSignalListener {
     }
 }
 
-/// Windows blocking signal iterator.
+/// Windows 阻塞信号迭代器。
 ///
-/// Uses `SetConsoleCtrlHandler` with an `AtomicBool` for quit signals.
-/// For resize detection, operates in two modes:
-/// - **Channel mode**: receives resize notifications forwarded from the stdin
-///   thread (which gets `Event::Resize` from crossterm). Much more responsive
-///   than polling.
-/// - **Poll fallback**: polls `crossterm::terminal::size()` at 50ms intervals.
-///   Used when no receiver is provided or when the sender is dropped (VT reader
-///   path).
+/// 将 `SetConsoleCtrlHandler` 与 `AtomicBool` 一起用于退出信号。
+/// 对于调整大小检测，以两种模式运行：
+/// - **通道模式**：接收从标准输入线程转发的调整大小通知（该线程从 crossterm 获取
+///   `Event::Resize`）。比轮询响应更快。
+/// - **轮询回退**：以 50ms 间隔轮询 `crossterm::terminal::size()`。
+///   在未提供接收器或发送器被丢弃时使用（VT 读取器路径）。
 pub(crate) struct BlockingSignalIterator {
     last_size: (u16, u16),
     resize_receiver: Option<std::sync::mpsc::Receiver<()>>,
@@ -112,9 +106,9 @@ mod win_ctrl_handler {
         match ctrl_type {
             CTRL_C_EVENT | CTRL_BREAK_EVENT | CTRL_CLOSE_EVENT => {
                 CTRL_QUIT_RECEIVED.store(true, Ordering::SeqCst);
-                1 // TRUE — handled
+                1 // TRUE — 已处理
             },
-            _ => 0, // FALSE — not handled
+            _ => 0, // FALSE — 未处理
         }
     }
 }
@@ -151,22 +145,20 @@ impl Iterator for BlockingSignalIterator {
             }
 
             if let Some(ref rx) = self.resize_receiver {
-                // Channel mode: the native console stdin loop sends resize
-                // notifications through this channel. Block with a timeout so
-                // we can periodically check the quit flag above.
+                // 通道模式：原生控制台标准输入循环通过此通道发送调整大小通知。
+                // 带超时阻塞，以便我们可以定期检查上面的退出标志。
                 match rx.recv_timeout(Duration::from_millis(100)) {
                     Ok(()) => return Some(SignalEvent::Resize),
                     Err(RecvTimeoutError::Timeout) => continue,
                     Err(RecvTimeoutError::Disconnected) => {
-                        // Sender dropped (VT reader path) — switch to poll mode.
+                        // 发送器被丢弃（VT 读取器路径）— 切换到轮询模式。
                         self.resize_receiver = None;
                         continue;
                     },
                 }
             } else {
-                // Poll mode: used on the VT reader path where crossterm's
-                // event::read() isn't used, so resize events don't come through
-                // the channel. Periodically compare the terminal size instead.
+                // 轮询模式：在 VT 读取器路径上使用，其中不使用 crossterm 的
+                // event::read()，因此调整大小事件不会通过通道传来。改为定期比较终端大小。
                 if let Ok(new_size) = crossterm::terminal::size() {
                     if new_size != self.last_size {
                         self.last_size = new_size;
@@ -179,11 +171,10 @@ impl Iterator for BlockingSignalIterator {
     }
 }
 
-/// Set up client IPC channels from a connected socket.
+/// 从已连接的套接字设置客户端进程间通信通道。
 ///
-/// On Windows we use two separate named pipes to avoid DuplicateHandle
-/// deadlock: the command pipe (socket) for client→server, and a reply pipe
-/// for server→client.
+/// 在 Windows 上，我们使用两个独立的命名管道来避免 DuplicateHandle 死锁：
+/// 命令管道（套接字）用于客户端→服务端，回复管道用于服务端→客户端。
 pub(crate) fn setup_ipc(
     socket: interprocess::local_socket::Stream,
     path: &Path,
@@ -208,26 +199,24 @@ pub(crate) fn setup_ipc(
     (sender, receiver)
 }
 
-/// Enable ENABLE_VIRTUAL_TERMINAL_PROCESSING on stdout so that ConPTY enters
-/// passthrough mode and forwards DEC private mode sequences (like mouse-enable)
-/// to the terminal emulator.  Uses crossterm's safe wrapper which handles the
-/// GetConsoleMode/SetConsoleMode internally.
+/// 在标准输出上启用 ENABLE_VIRTUAL_TERMINAL_PROCESSING，以便 ConPTY 进入
+/// 透传模式并将 DEC 私有模式序列（如鼠标启用）转发到终端模拟器。
+/// 使用 crossterm 的安全包装器，它在内部处理 GetConsoleMode/SetConsoleMode。
 fn enable_vt_processing_on_stdout() {
     crossterm::ansi_support::supports_ansi();
 }
 
-/// Enable mouse support on Windows.
+/// 在 Windows 上启用鼠标支持。
 ///
-/// When TERM is set we're on the VT input path (terminal emulator like
-/// Alacritty via ConPTY). We must NOT use crossterm's EnableMouseCapture
-/// because it does a full SetConsoleMode() that would overwrite the mode
-/// set by enable_vt_input(), clobbering ENABLE_VIRTUAL_TERMINAL_INPUT.
+/// 当设置了 TERM 时，我们在 VT 输入路径上（通过 ConPTY 的终端模拟器如 Alacritty）。
+/// 我们不能使用 crossterm 的 EnableMouseCapture，因为它会执行完整的 SetConsoleMode()，
+/// 这会覆盖 enable_vt_input() 设置的模式，破坏 ENABLE_VIRTUAL_TERMINAL_INPUT。
 ///
-/// Instead, we enable ENABLE_VIRTUAL_TERMINAL_PROCESSING on stdout so
-/// ConPTY enters passthrough mode, then write ANSI mouse-enable sequences.
+/// 相反，我们在标准输出上启用 ENABLE_VIRTUAL_TERMINAL_PROCESSING，以便 ConPTY
+/// 进入透传模式，然后写入 ANSI 鼠标启用序列。
 ///
-/// When TERM is not set we're in a native console (cmd, PowerShell,
-/// Windows Terminal) and use crossterm's Console API approach.
+/// 当未设置 TERM 时，我们在原生控制台（cmd、PowerShell、Windows Terminal）中，
+/// 使用 crossterm 的 Console API 方法。
 pub(crate) fn enable_mouse_support(stdout: &mut dyn Write) -> Result<()> {
     let err_context = "failed to enable mouse mode";
     if use_vt_path() {
@@ -237,27 +226,26 @@ pub(crate) fn enable_mouse_support(stdout: &mut dyn Write) -> Result<()> {
             .context(err_context)?;
         stdout.flush().context(err_context)?;
     } else {
-        // crossterm::execute! requires Sized, so we use std::io::stdout()
-        // directly rather than the trait-object writer.
+        // crossterm::execute! 需要 Sized，因此我们直接使用 std::io::stdout()
+        // 而不是 trait 对象写入器。
         crossterm::execute!(std::io::stdout(), crossterm::event::EnableMouseCapture)
             .context(err_context)?;
     }
     Ok(())
 }
 
-/// Restore the console input mode to its pre-Zellij state.
+/// 将控制台输入模式恢复到 Zellij 之前的状态。
 ///
-/// On the VT path, `enable_vt_input()` sets ENABLE_MOUSE_INPUT and
-/// ENABLE_VIRTUAL_TERMINAL_INPUT on the console handle, but crossterm's
-/// `disable_raw_mode()` never clears them.  This function restores the
-/// original console mode saved before those flags were set.
+/// 在 VT 路径上，`enable_vt_input()` 在控制台句柄上设置 ENABLE_MOUSE_INPUT 和
+/// ENABLE_VIRTUAL_TERMINAL_INPUT，但 crossterm 的 `disable_raw_mode()` 从不清除它们。
+/// 此函数恢复在设置这些标志之前保存的原始控制台模式。
 pub(crate) fn restore_console_mode() {
     restore_vt_input();
 }
 
-/// Disable mouse support on Windows.
+/// 在 Windows 上禁用鼠标支持。
 ///
-/// See `enable_mouse_support()` for rationale on VT vs Console API paths.
+/// 有关 VT 与 Console API 路径的基本原理，请参见 `enable_mouse_support()`。
 pub(crate) fn disable_mouse_support(stdout: &mut dyn Write) -> Result<()> {
     let err_context = "failed to disable mouse mode";
     if use_vt_path() {

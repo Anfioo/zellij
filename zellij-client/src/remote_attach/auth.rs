@@ -39,7 +39,7 @@ pub async fn authenticate(
     let http_client = HttpClientWithCookies::new(ca_cert, insecure)
         .map_err(|e| RemoteClientError::Other(Box::new(e)))?;
 
-    // Step 1: Login with auth token
+    // 步骤 1：使用认证令牌登录
     let login_url = format!("{}{}", server_base_url, LOGIN_ENDPOINT);
 
     let login_request = LoginRequest {
@@ -62,7 +62,7 @@ pub async fn authenticate(
         .await
         .map_err(|e| RemoteClientError::ConnectionFailed(e.to_string()))?;
 
-    // Handle HTTP status codes
+    // 处理 HTTP 状态码
     match response.status().as_u16() {
         401 => return Err(RemoteClientError::InvalidAuthToken),
         status if !response.status().is_success() => {
@@ -74,7 +74,7 @@ pub async fn authenticate(
         _ => {},
     }
 
-    // Step 2: Get session/client ID
+    // 步骤 2：获取会话/客户端 ID
     let session_url = session_url(server_base_url, session_name);
 
     let mut session_response = http_client
@@ -89,7 +89,7 @@ pub async fn authenticate(
         .await
         .map_err(|e| RemoteClientError::ConnectionFailed(e.to_string()))?;
 
-    // Handle session response
+    // 处理会话响应
     match session_response.status().as_u16() {
         401 => return Err(RemoteClientError::Unauthorized),
         status if !session_response.status().is_success() => {
@@ -108,7 +108,7 @@ pub async fn authenticate(
     let session_data: SessionResponse =
         serde_json::from_str(&response_body).map_err(|e| RemoteClientError::Other(Box::new(e)))?;
 
-    // Extract session_token if remember_me was true
+    // 如果 remember_me 为 true，提取 session_token
     let session_token = if remember_me {
         http_client.get_cookie("session_token")
     } else {
@@ -128,10 +128,10 @@ pub async fn validate_session_token(
     let http_client = HttpClientWithCookies::new(ca_cert, insecure)
         .map_err(|e| RemoteClientError::Other(Box::new(e)))?;
 
-    // Pre-populate the session_token cookie
+    // 预填充 session_token cookie
     http_client.set_cookie("session_token".to_string(), session_token.to_string());
 
-    // Skip /login, go directly to /session endpoint
+    // 跳过 /login，直接转到 /session 端点
     let session_url = session_url(server_base_url, session_name);
 
     let mut session_response = http_client

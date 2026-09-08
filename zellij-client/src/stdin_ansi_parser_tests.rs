@@ -1,10 +1,10 @@
-//! Unit tests for the continuous host-reply parser.
+//! 连续主机回复解析器的单元测试。
 
 use super::{schedule_forward_timeout, HostReply, PendingPartial, StdinAnsiParser};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-/// Helper: collect replies and residue from a single `feed` call.
+/// 辅助函数：从单个 `feed` 调用中收集回复和残留。
 fn feed_once(parser: &mut StdinAnsiParser, bytes: &[u8]) -> (Vec<HostReply>, Vec<u8>) {
     let out = parser.feed(bytes);
     (out.replies, out.residue)
@@ -96,8 +96,8 @@ fn synchronized_output_supported_reply() {
 
 #[test]
 fn keyboard_residue_passes_through_unchanged() {
-    // Arrow key escape sequence is NOT a whitelisted CSI report (final
-    // byte 'A'), so it must survive as keyboard residue verbatim.
+    // 箭头键转义序列不是白名单 CSI 报告（最终字节 'A'），
+    // 因此它必须原样作为键盘残留保留。
     let mut parser = StdinAnsiParser::new();
     let (replies, residue) = feed_once(&mut parser, b"\x1b[A");
     assert!(replies.is_empty());
@@ -106,8 +106,8 @@ fn keyboard_residue_passes_through_unchanged() {
 
 #[test]
 fn mixed_keyboard_and_reply_extracts_both_cleanly() {
-    // Arrow keys bracketing a pixel-dim reply — residue should be just
-    // the arrow-key bytes, reply should be classified.
+    // 箭头键包围像素尺寸回复 — 残留应该只是箭头键字节，
+    // 回复应该被分类。
     let mut parser = StdinAnsiParser::new();
     let mut input = Vec::new();
     input.extend_from_slice(b"\x1b[A");
@@ -121,11 +121,9 @@ fn mixed_keyboard_and_reply_extracts_both_cleanly() {
 
 #[test]
 fn unterminated_osc_within_single_chunk_is_buffered() {
-    // An OSC that never terminates within a chunk is held in the
-    // partial-OSC buffer for the next call to complete; nothing leaks
-    // into residue. This is the cross-chunk-aware replacement for the
-    // pre-fix behaviour where unterminated OSC bytes fell through to
-    // residue and surfaced as spurious keypresses.
+    // 在一个块内从未终止的 OSC 被保存在部分 OSC 缓冲区中，
+    // 供下一次调用完成；没有任何内容泄漏到残留中。这是跨块感知的替换，
+    // 替代了修复前的行为，即未终止的 OSC 字节落入残留并作为虚假按键出现。
     let mut parser = StdinAnsiParser::new();
     let (_replies, residue) = feed_once(&mut parser, b"\x1b]10;partial");
     assert!(
@@ -139,15 +137,13 @@ fn unterminated_osc_within_single_chunk_is_buffered() {
 fn forwarding_window_accumulates_and_barrier_closes() {
     let mut parser = StdinAnsiParser::new();
     parser.open_forward(42);
-    // Feed an OSC 11 reply, then the Primary-DA barrier. Use color
-    // bytes that do NOT contain `c` so the barrier-absence assertion
-    // below can use a simple byte search.
+    // 先输入 OSC 11 回复，然后是 Primary-DA 屏障。使用不包含 `c` 的
+    // 颜色字节，以便下面的屏障缺失断言可以使用简单的字节搜索。
     let mut chunk = Vec::new();
     chunk.extend_from_slice(b"\x1b]11;rgb:aaaa/bbbb/dddd\x1b\\");
     chunk.extend_from_slice(b"\x1b[?65;1c");
     let out = parser.feed(&chunk);
-    // OSC 11 was classified (double-dispatch), and the barrier itself
-    // advertises the host's sixel capability.
+    // OSC 11 已被分类（双重分发），屏障本身宣传主机的 sixel 能力。
     assert_eq!(out.replies.len(), 2);
     matches!(out.replies[0], HostReply::BackgroundColor(_));
     matches!(out.replies[1], HostReply::SixelSupport(false));

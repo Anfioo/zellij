@@ -23,13 +23,13 @@ pub async fn auth_middleware(request: Request, next: Next) -> Result<Response, S
 
     match validate_session_token(&session_token) {
         Ok(true) => {
-            // Check if this is a read-only token
+            // 检查这是否是只读令牌
             let is_read_only = is_session_token_read_only(&session_token).unwrap_or(true);
 
-            // Compute session token hash for client ownership verification
+            // 计算会话令牌哈希用于客户端所有权验证
             let session_token_hash = hash_token(&session_token);
 
-            // Store in request extensions for downstream handlers
+            // 存储在请求扩展中供下游处理程序使用
             let mut request = request;
             request.extensions_mut().insert(IsReadOnly(is_read_only));
             request
@@ -40,15 +40,15 @@ pub async fn auth_middleware(request: Request, next: Next) -> Result<Response, S
             Ok(response)
         },
         Ok(false) | Err(_) => {
-            // revoke session_token as if it exists it's no longer valid
+            // 撤销 session_token，因为如果它存在，它不再有效
             let mut response = Response::builder()
                 .status(StatusCode::UNAUTHORIZED)
                 .body(Body::empty())
                 .unwrap();
 
-            // Clear both secure and non-secure versions
-            // in case the user was on http before and is now on https
-            // or vice versa
+            // 清除安全和非安全版本
+            // 以防用户之前在 http 上，现在在 https 上
+            // 或反之亦然
             let clear_cookies = [
                 Cookie::build(("session_token", ""))
                     .http_only(true)
