@@ -87,7 +87,7 @@ impl ZellijPlugin for State {
             EventType::Timer,
             EventType::Visible,
         ]);
-        rename_plugin_pane(get_plugin_ids().plugin_id, "Session Manager");
+        rename_plugin_pane(get_plugin_ids().plugin_id, "会话管理器");
         self.refresh_session_list();
         if !self.is_welcome_screen {
             self.arm_refresh_timer();
@@ -275,19 +275,19 @@ impl ZellijPlugin for State {
                                 if let Some(result) = self.single_screen_state.get_selected_result()
                                 {
                                     match result {
-                                        UnifiedSearchResult::ActiveSession { .. } => Some("Attach"),
+                                        UnifiedSearchResult::ActiveSession { .. } => Some("连接"),
                                         UnifiedSearchResult::ResurrectableSession { .. } => {
-                                            Some("Resurrect")
+                                            Some("恢复")
                                         },
                                     }
                                 } else {
                                     let typed = &self.single_screen_state.search_term;
                                     if self.sessions.has_session(typed) {
-                                        Some("Attach")
+                                        Some("连接")
                                     } else if self.resurrectable_sessions.has_session(typed) {
-                                        Some("Resurrect")
+                                        Some("恢复")
                                     } else {
-                                        Some("Create new")
+                                        Some("新建")
                                     }
                                 }
                             } else {
@@ -319,10 +319,10 @@ impl ZellijPlugin for State {
                         };
                         let esc = self.colors.shortcuts("<ESC>");
                         println!(
-                            "\u{1b}[m\u{1b}[{};{}H{}: {} ({} to go back)",
+                            "\u{1b}[m\u{1b}[{};{}H{}: {}（按 {} 返回）",
                             y + 1,
                             x + 1,
-                            self.colors.session_name_prompt("New session name"),
+                            self.colors.session_name_prompt("新会话名称"),
                             self.colors.session_and_folder_entry(new_session_name),
                             esc,
                         );
@@ -333,20 +333,20 @@ impl ZellijPlugin for State {
                         let search_term_len = layout_search_term.len();
                         let layout_indication_line = if width > 73 + search_term_len {
                             Text::new(format!(
-                                "New session layout: {}_ (Search and select from list, <ENTER> when done)",
+                                "新建会话布局：{}_（从列表中选择，完成后按 <ENTER>）",
                                 layout_search_term
                             ))
-                            .color_range(2, ..20 + search_term_len)
-                            .color_range(3, 20..20 + search_term_len)
-                            .color_range(3, 52 + search_term_len..59 + search_term_len)
+                            .color_range(2, ..8 + search_term_len)
+                            .color_range(3, 8..8 + search_term_len)
+                            .color_range(3, 24 + search_term_len..31 + search_term_len)
                         } else {
                             Text::new(format!(
-                                "New session layout: {}_ <ENTER>",
+                                "新建会话布局：{}_ <ENTER>",
                                 layout_search_term
                             ))
-                            .color_range(2, ..20 + search_term_len)
-                            .color_range(3, 20..20 + search_term_len)
-                            .color_range(3, 22 + search_term_len..)
+                            .color_range(2, ..8 + search_term_len)
+                            .color_range(3, 8..8 + search_term_len)
+                            .color_range(3, 9 + search_term_len..)
                         };
                         print_text_with_coordinates(layout_indication_line, x, y + 2, None, None);
                         println!();
@@ -367,7 +367,7 @@ impl ZellijPlugin for State {
                                 break;
                             }
                             let mut layout_cell = if is_builtin {
-                                Text::new(format!("{} (built-in)", layout_name))
+                                Text::new(format!("{}（内置）", layout_name))
                                     .color_range(1, 0..layout_name_len)
                                     .color_range(0, layout_name_len + 1..)
                                     .color_indices(3, indices)
@@ -544,7 +544,7 @@ impl State {
                             );
                         },
                         Err(e) => {
-                            self.show_error(&format!("Failed to kill sessions: {}", e));
+                            self.show_error(&format!("无法终止会话：{}", e));
                         },
                     }
                     self.show_kill_all_sessions_warning = false;
@@ -635,7 +635,7 @@ impl State {
                                 );
                             },
                             Err(e) => {
-                                self.show_error(&format!("Failed to kill session: {}", e));
+                                self.show_error(&format!("无法终止会话：{}", e));
                             },
                         }
                     } else {
@@ -683,7 +683,7 @@ impl State {
                     if !self.is_welcome_screen {
                         // 我们不想保存欢迎屏幕会话
                         if let Err(e) = save_session() {
-                            self.show_error(&format!("Couldn't save session: {}", e));
+                            self.show_error(&format!("无法保存会话：{}", e));
                         }
                     }
                 },
@@ -773,7 +773,7 @@ impl State {
                                 .restore_selection_after_delete(previous_index);
                         },
                         Err(e) => {
-                            self.show_error(&format!("Failed to kill sessions: {}", e));
+                            self.show_error(&format!("无法终止会话：{}", e));
                         },
                     }
                     self.show_kill_all_sessions_warning = false;
@@ -897,7 +897,7 @@ impl State {
                                 .restore_selection_after_delete(previous_index);
                         },
                         Err(e) => {
-                            self.show_error(&format!("Failed to delete session: {}", e));
+                            self.show_error(&format!("无法删除会话：{}", e));
                         },
                     }
                 }
@@ -918,7 +918,7 @@ impl State {
             BareKey::Char('a') if key.has_modifiers(&[KeyModifier::Ctrl]) => {
                 if !self.is_welcome_screen {
                     if let Err(e) = save_session() {
-                        self.show_error(&format!("Couldn't save session: {}", e));
+                        self.show_error(&format!("无法保存会话：{}", e));
                     }
                 }
             },
@@ -1020,10 +1020,10 @@ impl State {
                     //  TODO: 从 Zellij 获取（参考：这是 interprocess 的一部分
                     //  包，如果可能的话我们应该从那里获取，因为它是可配置的
                     //  通过包）
-                    self.show_error("Session name must be shorter than 108 bytes");
+                    self.show_error("会话名称必须短于 108 字节");
                     return;
                 } else if self.new_session_info.name().contains('/') {
-                    self.show_error("Session name cannot contain '/'");
+                    self.show_error("会话名称不能包含 '/'");
                     return;
                 } else if self
                     .sessions
@@ -1053,7 +1053,7 @@ impl State {
                         return; //  这样我们就不会隐藏自己
                     } else {
                         if renaming_session_name.contains('/') {
-                            self.show_error("Session names cannot contain '/'");
+                            self.show_error("会话名称不能包含 '/'");
                             return;
                         }
                         self.update_current_session_name_in_ui(&renaming_session_name);
@@ -1134,7 +1134,7 @@ impl State {
                         return;
                     } else {
                         if renaming_session_name.contains('/') {
-                            self.show_error("Session names cannot contain '/'");
+                            self.show_error("会话名称不能包含 '/'");
                             return;
                         }
                         self.update_current_session_name_in_ui(&renaming_session_name);
@@ -1180,11 +1180,11 @@ impl State {
 
                             //  验证名称
                             if typed_name.len() >= 108 {
-                                self.show_error("Session name must be shorter than 108 bytes");
+                                self.show_error("会话名称必须短于 108 字节");
                                 return;
                             }
                             if typed_name.contains('/') {
-                                self.show_error("Session name cannot contain '/'");
+                                self.show_error("会话名称不能包含 '/'");
                                 return;
                             }
                             if self.sessions.has_forbidden_session(&typed_name) {
@@ -1380,7 +1380,7 @@ impl State {
     fn render_single_screen_folder_prompt(&self, x: usize, y: usize, max_cols: usize) {
         match self.single_screen_state.new_session_folder.as_ref() {
             Some(new_session_folder) => {
-                let folder_prompt = "New session folder:";
+                let folder_prompt = "新建会话文件夹：";
                 let new_session_folder_str = new_session_folder.display().to_string();
                 let change_folder_shortcut = self.colors.shortcuts("<Ctrl f>");
                 let reset_folder_shortcut = self.colors.shortcuts("<Ctrl c>");
@@ -1409,7 +1409,7 @@ impl State {
                 }
             },
             None => {
-                let folder_prompt = "New session folder:";
+                let folder_prompt = "新建会话文件夹：";
                 let change_folder_shortcut = self.colors.shortcuts("<Ctrl f>");
                 print!(
                     "\u{1b}[m\u{1b}[{};{}H{} ({} to set)",
@@ -1433,8 +1433,8 @@ impl State {
         }
         let session_count = self.sessions.all_other_sessions().len();
         let session_count_len = session_count.to_string().chars().count();
-        let warning_description_text = format!("This will kill {} active sessions", session_count);
-        let confirmation_text = "Are you sure? (y/n)";
+        let warning_description_text = format!("这将终止 {} 个活动会话", session_count);
+        let confirmation_text = "确定吗？(y/n)";
         let warning_y_location = y + (rows / 2).saturating_sub(1);
         let confirmation_y_location = y + (rows / 2) + 1;
         let warning_x_location =
@@ -1442,14 +1442,14 @@ impl State {
         let confirmation_x_location =
             x + columns.saturating_sub(confirmation_text.chars().count()) / 2;
         print_text_with_coordinates(
-            Text::new(warning_description_text).color_range(0, 15..16 + session_count_len),
+            Text::new(warning_description_text).color_range(0, 5..6 + session_count_len),
             warning_x_location,
             warning_y_location,
             None,
             None,
         );
         print_text_with_coordinates(
-            Text::new(confirmation_text).color_indices(2, vec![15, 17]),
+            Text::new(confirmation_text).color_indices(2, vec![5, 7]),
             confirmation_x_location,
             confirmation_y_location,
             None,

@@ -181,16 +181,16 @@ impl UnifiedResultsRenderCache {
                         formatted_duration.push_str("<1m");
                     }
 
-                    let full_details = format!("Created {} ago", formatted_duration);
+                    let full_details = format!("创建于 {} 之前", formatted_duration);
                     let full_details_ranges = {
-                        let created_len = "Created ".len();
+                        let created_len = "创建于 ".chars().count();
                         let duration_end = created_len + formatted_duration.len();
                         DetailsColorRanges {
                             ranges: vec![(2, created_len..duration_end)],
                         }
                     };
 
-                    let abbr_details = format!("{} ago", formatted_duration);
+                    let abbr_details = format!("{} 之前", formatted_duration);
                     let abbr_details_ranges = {
                         let duration_end = formatted_duration.len();
                         DetailsColorRanges {
@@ -659,8 +659,8 @@ pub fn build_session_ui_line(session_ui_info: &SessionUiInfo, colors: Colors) ->
     ]));
     let connected_users_count = UiSpan::UiSpanTelescope(UiSpanTelescope::new(vec![
         StringAndLength::new(
-            format!(" [{connected_users_styled} connected users]"),
-            2 + connected_users.width() + 17,
+            format!(" [{connected_users_styled} 个已连接用户]"),
+            2 + connected_users.width() + 8,
         ),
         StringAndLength::new(
             format!(" [{connected_users_styled}]"),
@@ -740,8 +740,8 @@ pub fn build_pane_ui_line(pane_ui_info: &PaneUiInfo, colors: Colors) -> Vec<UiSp
     if let Some(exit_code) = exit_code {
         let pane_name_span = UiSpan::UiSpanTelescope(UiSpanTelescope::new(vec![
             StringAndLength::new(
-                format!(" (EXIT CODE: {exit_code})"),
-                13 + exit_code.width() + 1,
+                format!("（退出码：{exit_code}）"),
+                5 + exit_code.width() + 1,
             ),
             StringAndLength::new(format!(" ({exit_code})"), 2 + exit_code.width() + 1),
         ]));
@@ -772,7 +772,7 @@ pub fn minimize_lines(
 }
 
 pub fn render_prompt(search_term: &str, colors: Colors, x: usize, y: usize) {
-    let prompt = colors.session_and_folder_entry(&format!("Search:"));
+    let prompt = colors.session_and_folder_entry(&format!("搜索："));
     let search_term = colors.bold(&format!("{}_", search_term));
     println!(
         "\u{1b}[{};{}H\u{1b}[0m{} {}\n",
@@ -790,7 +790,7 @@ pub fn render_single_screen_prompt(
     x: usize,
     y: usize,
 ) {
-    let prompt = colors.session_name_prompt("Session:");
+    let prompt = colors.session_name_prompt("会话：");
     let search_term_display = colors.bold(&format!("{}_", search_term));
     let enter_hint = match enter_action {
         Some(action) => {
@@ -1058,9 +1058,9 @@ pub fn render_screen_toggle(
 ) {
     let key_indication_text = "<TAB>";
     let (new_session_text, running_sessions_text, exited_sessions_text) = if max_cols > 66 {
-        ("New Session", "Attach to Session", "Resurrect Session")
+        ("新建会话", "连接到会话", "恢复会话")
     } else {
-        ("New", "Attach", "Resurrect")
+        ("新建", "连接", "恢复")
     };
     let key_indication_len = key_indication_text.chars().count() + 1;
     let first_ribbon_length = new_session_text.chars().count() + 4;
@@ -1113,7 +1113,7 @@ fn render_new_session_folder_prompt(
 ) {
     match new_session_info.new_session_folder.as_ref() {
         Some(new_session_folder) => {
-            let folder_prompt = "New session folder:";
+            let folder_prompt = "新建会话文件夹：";
             let short_folder_prompt = "Folder:";
             let new_session_path = new_session_folder.clone();
             let new_session_folder = new_session_folder.display().to_string();
@@ -1197,7 +1197,7 @@ fn render_new_session_folder_prompt(
             }
         },
         None => {
-            let folder_prompt = "New session folder:";
+            let folder_prompt = "新建会话文件夹：";
             let short_folder_prompt = "Folder:";
             let change_folder_shortcut_text = "<Ctrl f>";
             let change_folder_shortcut = colors.shortcuts(change_folder_shortcut_text);
@@ -1248,7 +1248,7 @@ pub fn render_new_session_block(
 ) {
     let enter = colors.shortcuts("<ENTER>");
     if new_session_info.entering_new_session_name() {
-        let prompt = "New session name:";
+        let prompt = "新会话名称：";
         let long_instruction = "when done, blank for random";
         let new_session_name = new_session_info.name();
         if max_cols_of_new_session_block
@@ -1294,7 +1294,7 @@ pub fn render_new_session_block(
         } else {
             new_session_info.name()
         };
-        let prompt = "New session name:";
+        let prompt = "新会话名称：";
         let long_instruction = "to correct";
         let esc = colors.shortcuts("<ESC>");
         if max_cols_of_new_session_block
@@ -1311,7 +1311,7 @@ pub fn render_new_session_block(
             println!(
                 "\u{1b}[m{}{}: {} {}",
                 format!("\u{1b}[{};{}H", y + 1, x + 1),
-                colors.session_name_prompt("New session name"),
+                colors.session_name_prompt("新会话名称"),
                 colors.session_and_folder_entry(new_session_name),
                 esc,
             );
@@ -1344,20 +1344,20 @@ pub fn render_layout_selection_list(
     let search_term_len = layout_search_term.width();
     let layout_indication_line = if max_cols_of_new_session_block > 73 + search_term_len {
         Text::new(format!(
-            "New session layout: {}_ (Search and select from list, <ENTER> when done)",
+            "新建会话布局：{}_（从列表中选择，完成后按 <ENTER>）",
             layout_search_term
         ))
-        .color_range(2, ..20 + search_term_len)
-        .color_range(3, 20..20 + search_term_len)
-        .color_range(3, 52 + search_term_len..59 + search_term_len)
+        .color_range(2, ..8 + search_term_len)
+        .color_range(3, 8..8 + search_term_len)
+        .color_range(3, 24 + search_term_len..31 + search_term_len)
     } else {
         Text::new(format!(
-            "New session layout: {}_ <ENTER>",
+            "新建会话布局：{}_ <ENTER>",
             layout_search_term
         ))
-        .color_range(2, ..20 + search_term_len)
-        .color_range(3, 20..20 + search_term_len)
-        .color_range(3, 22 + search_term_len..)
+        .color_range(2, ..8 + search_term_len)
+        .color_range(3, 8..8 + search_term_len)
+        .color_range(3, 9 + search_term_len..)
     };
     print_text_with_coordinates(layout_indication_line, x, y + 1, None, None);
     println!();
@@ -1374,7 +1374,7 @@ pub fn render_layout_selection_list(
             break;
         } else {
             let mut layout_cell = if is_builtin {
-                Text::new(format!("{} (built-in)", layout_name))
+                Text::new(format!("{}（内置）", layout_name))
                     .color_range(1, 0..layout_name_len)
                     .color_range(0, layout_name_len + 1..)
                     .color_indices(3, indices)
@@ -1467,9 +1467,9 @@ pub fn render_controls_line(
             let disconnect = colors.shortcuts("<Ctrl x>");
             let disconnect_text = colors.bold("Disconnect others");
             let kill = colors.shortcuts("<Del>");
-            let kill_text = colors.bold("Kill");
+            let kill_text = colors.bold("终止");
             let kill_all = colors.shortcuts("<Ctrl d>");
-            let kill_all_text = colors.bold("Kill all");
+            let kill_all_text = colors.bold("全部终止");
 
             if max_cols > 90 {
                 print!(
@@ -1487,11 +1487,11 @@ pub fn render_controls_line(
             let arrows = colors.shortcuts("<↓↑>");
             let navigate = colors.bold("Navigate");
             let enter = colors.shortcuts("<ENTER>");
-            let select = colors.bold("Resurrect");
+            let select = colors.bold("恢复");
             let del = colors.shortcuts("<DEL>");
-            let del_text = colors.bold("Delete");
+            let del_text = colors.bold("删除");
             let del_all = colors.shortcuts("<Ctrl d>");
-            let del_all_text = colors.bold("Delete all");
+            let del_all_text = colors.bold("全部删除");
 
             if max_cols > 83 {
                 print!(
@@ -1512,7 +1512,7 @@ pub fn render_controls_line(
             let disconnect_full_text = colors.bold("Disconnect others");
             let disconnect_short_text = colors.bold("Disconnect");
             let kill = colors.shortcuts("<Del>");
-            let kill_text = colors.bold("Kill/Delete");
+            let kill_text = colors.bold("终止/删除");
 
             //  完整："Help: <Ctrl r> - Rename, <Ctrl x> - Disconnect others, <Del> - Kill/Delete" = 76 字符
             if max_cols > 76 {
@@ -1562,7 +1562,7 @@ fn format_elapsed_time(elapsed_millis: u64) -> String {
     if formatted_duration.is_empty() {
         format!("just now")
     } else {
-        format!("{} ago", formatted_duration)
+        format!("{} 之前", formatted_duration)
     }
 }
 
@@ -1574,9 +1574,9 @@ pub fn render_unsaved_changes_line(
 ) {
     //  声明所有文本组件
     let shortcut_text = "<Ctrl a>";
-    let full_action_text = "Save current session for resurrection";
-    let medium_action_text = "Save session";
-    let short_action_text = "Save";
+    let full_action_text = "保存当前会话以便恢复";
+    let medium_action_text = "保存会话";
+    let short_action_text = "保存";
     let separator = " - ";
     let space = " ";
 

@@ -366,10 +366,10 @@ mod tests {
             name: name.to_string(),
             tabs: (0..tabs)
                 .map(|i| crate::ui::TabUiInfo {
-                    name: format!("tab-{}", i),
+                    name: format!("标签页-{}", i),
                     panes: (0..panes_per_tab)
                         .map(|j| crate::ui::PaneUiInfo {
-                            name: format!("pane-{}", j),
+                            name: format!("窗格-{}", j),
                             exit_code: None,
                             pane_id: j as u32,
                             is_plugin: false,

@@ -31,7 +31,7 @@ impl ResurrectableSessions {
             return;
         }
         let search_indication =
-            Text::new(format!("Search: {}_", self.search_term)).color_range(2, ..7);
+            Text::new(format!("搜索：{}_", self.search_term)).color_range(2, ..5);
         let table_rows = rows.saturating_sub(5); // 搜索行、切换行和一些内边距
         let table_columns = columns;
         let table = if self.is_searching {
@@ -110,8 +110,8 @@ impl ResurrectableSessions {
         let session_count = self.all_resurrectable_sessions.len();
         let session_count_len = session_count.to_string().chars().count();
         let warning_description_text =
-            format!("This will delete {} resurrectable sessions", session_count,);
-        let confirmation_text = "Are you sure? (y/n)";
+            format!("这将删除 {} 个可恢复会话", session_count,);
+        let confirmation_text = "确定吗？(y/n)";
         let warning_y_location = y + (rows / 2).saturating_sub(1);
         let confirmation_y_location = y + (rows / 2) + 1;
         let warning_x_location =
@@ -119,14 +119,14 @@ impl ResurrectableSessions {
         let confirmation_x_location =
             x + columns.saturating_sub(confirmation_text.chars().count()) / 2;
         print_text_with_coordinates(
-            Text::new(warning_description_text).color_range(0, 17..18 + session_count_len),
+            Text::new(warning_description_text).color_range(0, 5..6 + session_count_len),
             warning_x_location,
             warning_y_location,
             None,
             None,
         );
         print_text_with_coordinates(
-            Text::new(confirmation_text).color_indices(2, vec![15, 17]),
+            Text::new(confirmation_text).color_indices(2, vec![5, 7]),
             confirmation_x_location,
             confirmation_y_location,
             None,
@@ -175,7 +175,7 @@ impl ResurrectableSessions {
             formatted_duration.push_str("<1m");
         }
         let duration_len = formatted_duration.chars().count();
-        Text::new(format!("Created {} ago", formatted_duration)).color_range(2, 8..9 + duration_len)
+        Text::new(format!("创建于 {} 之前", formatted_duration)).color_range(2, 4..5 + duration_len)
     }
     fn render_more_indication_or_enter_as_needed(
         &self,
@@ -188,12 +188,12 @@ impl ResurrectableSessions {
         if is_selected {
             Text::new(format!("<ENTER> - Resurrect Session")).color_range(3, 0..7)
         } else if i == first_row_index_to_render && i > 0 {
-            Text::new(format!("+ {} more", first_row_index_to_render)).color_range(1, ..)
+            Text::new(format!("+ 还有 {} 个", first_row_index_to_render)).color_range(1, ..)
         } else if i == last_row_index_to_render.saturating_sub(1)
             && last_row_index_to_render < results_len
         {
             Text::new(format!(
-                "+ {} more",
+                "+ 还有 {} 个",
                 results_len.saturating_sub(last_row_index_to_render)
             ))
             .color_range(1, ..)
