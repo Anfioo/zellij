@@ -300,7 +300,7 @@ impl State {
             let path = Platform::normalize(&path);
             entries.push(FsEntry::Dir(path));
         }
-        // Drive letters first (e.g. "C:/"), then WSL distros (e.g. "//wsl.localhost/...")
+        // 盘符优先（如 "C:/"），然后是 WSL 发行版（如 "//wsl.localhost/..."）
         entries.sort_unstable_by(|a, b| {
             let a_is_drive = !a.get_full_pathbuf().to_string_lossy().starts_with("//");
             let b_is_drive = !b.get_full_pathbuf().to_string_lossy().starts_with("//");
@@ -361,7 +361,7 @@ impl State {
                 close_self();
             },
             #[allow(unused_variables)]
-            // pipe_id is used inside #[cfg(target_family = "wasm")] blocks
+            // pipe_id 在 #[cfg(target_family = "wasm")] 块中使用
             Some((PipeSource::Cli(pipe_id), _args)) => {
                 #[cfg(target_family = "wasm")]
                 cli_pipe_output(pipe_id, &host_path);

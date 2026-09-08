@@ -160,13 +160,13 @@ impl ZellijPlugin for State {
                 .map(|v| v == "true")
                 .unwrap_or(false);
             if open_directly {
-                // Standalone mode: selecting a file opens it directly,
-                // then the plugin closes itself.
+                // 独立模式：选择文件后直接打开，
+                // 然后插件自行关闭。
                 self.close_on_selection = true;
             } else {
-                // Filepicker callback mode: send result back to caller.
+                // 文件选择器回调模式：将结果发送回调用方。
                 #[allow(unused_variables)]
-                // pipe_id is used inside #[cfg(target_family = "wasm")] block
+                // pipe_id 在 #[cfg(target_family = "wasm")] 块中使用
                 if let PipeSource::Cli(pipe_id) = &pipe_message.source {
                     #[cfg(target_family = "wasm")]
                     block_cli_pipe_input(pipe_id);

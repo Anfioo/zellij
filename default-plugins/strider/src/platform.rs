@@ -13,11 +13,11 @@ impl Default for Platform {
 }
 
 impl Platform {
-    /// Detect the host platform from the initial_cwd string.
-    /// Checks for drive letter (e.g. `C:\` or `C:/`) or UNC path (`\\server\`).
+    /// 从 initial_cwd 字符串检测主机平台。
+    /// 检查盘符（如 `C:\` 或 `C:/`）或 UNC 路径（`\\server\`）。
     pub fn detect(initial_cwd: &str) -> Self {
         let bytes = initial_cwd.as_bytes();
-        // Drive letter: X:\ or X:/
+        // 盘符：X:\ 或 X:/
         let is_drive_letter = matches!(
             (bytes.get(0), bytes.get(1), bytes.get(2)),
             (Some(c), Some(b':'), Some(b'\\' | b'/')) if c.is_ascii_alphabetic()
@@ -25,7 +25,7 @@ impl Platform {
         if is_drive_letter {
             return Platform::Windows;
         }
-        // UNC path: \\server\share
+        // UNC 路径：\\server\share
         let is_unc_path = matches!((bytes.get(0), bytes.get(1)), (Some(b'\\'), Some(b'\\')));
         if is_unc_path {
             return Platform::Windows;
@@ -33,8 +33,8 @@ impl Platform {
         Platform::Unix
     }
 
-    /// Replace `\` with `/` so WASM PathBuf can parse the path correctly.
-    /// No-op for paths that don't contain backslashes.
+    /// 将 `\` 替换为 `/`，以便 WASM PathBuf 能正确解析路径。
+    /// 对于不包含反斜杠的路径不做任何操作。
     pub fn normalize(path: &Path) -> PathBuf {
         let s = path.to_string_lossy();
         if s.contains('\\') {
@@ -44,8 +44,8 @@ impl Platform {
         }
     }
 
-    /// Convert internal forward-slash path back to native backslashes for Windows display.
-    /// Identity on Unix.
+    /// 将内部的正斜杠路径转换回 Windows 显示用的原生反斜杠。
+    /// 在 Unix 上保持不变。
     pub fn to_host_display(path: &Path, platform: Platform) -> String {
         let s = path.to_string_lossy();
         match platform {
@@ -54,7 +54,7 @@ impl Platform {
         }
     }
 
-    /// Path separator character for the host platform.
+    /// 主机平台的路径分隔符字符。
     pub fn separator(self) -> char {
         match self {
             Platform::Windows => '\\',
@@ -62,9 +62,9 @@ impl Platform {
         }
     }
 
-    /// Ensure bare drive letters like `C:` become `C:/`.
-    /// WASM PathBuf's `parent()` strips the trailing slash, but on Windows
-    /// `C:` means "current directory on drive C", not the drive root.
+    /// 确保像 `C:` 这样的裸盘符变为 `C:/`。
+    /// WASM PathBuf 的 `parent()` 会去掉尾部斜杠，但在 Windows 上
+    /// `C:` 表示 "C 盘上的当前目录"，而不是盘符根目录。
     pub fn ensure_drive_root(path: PathBuf, platform: Platform) -> PathBuf {
         if platform == Platform::Windows {
             let s = path.to_string_lossy();
@@ -79,8 +79,8 @@ impl Platform {
         path
     }
 
-    /// Display name for a virtual root entry.
-    /// `C:/` → `C:\`, `//wsl.localhost/Ubuntu/` → `Ubuntu (WSL)`, `/` → `/`.
+    /// 虚拟根目录条目的显示名称。
+    /// `C:/` → `C:\`，`//wsl.localhost/Ubuntu/` → `Ubuntu (WSL)`，`/` → `/`。
     pub fn virtual_root_display_name(path: &Path, platform: Platform) -> String {
         let s = path.to_string_lossy();
         match platform {
@@ -96,16 +96,16 @@ impl Platform {
         }
     }
 
-    /// Check if a path is a filesystem root.
-    /// Unix: `/` or empty.
-    /// Windows: `X:/` or `X:` (drive root), or `//server/share` (UNC root with <= 4 components).
+    /// 检查路径是否为文件系统根目录。
+    /// Unix：`/` 或空。
+    /// Windows：`X:/` 或 `X:`（盘符根），或 `//server/share`（组件数 <= 4 的 UNC 根）。
     pub fn is_root(path: &Path, platform: Platform) -> bool {
         let s = path.to_string_lossy();
         match platform {
             Platform::Unix => s == "/" || s.is_empty(),
             Platform::Windows => {
                 let bytes = s.as_bytes();
-                // Drive root: "C:/" or "C:"
+                // 盘符根："C:/" 或 "C:"
                 let is_drive_root_slash = s.len() == 3
                     && matches!(bytes.get(0), Some(c) if c.is_ascii_alphabetic())
                     && matches!(bytes.get(1), Some(b':'))
@@ -119,7 +119,7 @@ impl Platform {
                 if is_bare_drive {
                     return true;
                 }
-                // UNC root: //server/share (at most 4 path components)
+                // UNC 根：//server/share（最多 4 个路径组件）
                 if s.starts_with("//") {
                     let without_prefix = &s[2..];
                     let parts: Vec<&str> = without_prefix

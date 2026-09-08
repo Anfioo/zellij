@@ -80,7 +80,7 @@ impl SearchView {
                     );
                     format!("{}{}{}", search_result_text, padding, size)
                 } else {
-                    // drop the size, no room for it
+                    // 丢弃大小，没有空间显示它
                     let padding = " ".repeat(cols.saturating_sub(search_result_text_width));
                     format!("{}{}", search_result_text, padding)
                 };
