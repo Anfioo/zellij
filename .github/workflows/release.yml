@@ -12,19 +12,22 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' ]; then
-            if ! gh release view main >/dev/null 2>&1; then
-              gh release create main --draft --generate-notes
+            if ! gh release view main --repo ${{ github.repository }} >/dev/null 2>&1; then
+              gh release create main --repo ${{ github.repository }} --draft --generate-notes
             else
-              gh release edit main --draft
+              gh release edit main --repo ${{ github.repository }} --draft
             fi
           else
             TAG="${GITHUB_REF#refs/tags/}"
-            gh release create "$TAG" --draft --generate-notes
+            gh release create "$TAG" --repo ${{ github.repository }} --draft --generate-notes
           fi
 
   build-release-normal:
@@ -83,7 +86,7 @@ jobs:
           }
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v2
@@ -273,7 +276,7 @@ jobs:
           }
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v2
