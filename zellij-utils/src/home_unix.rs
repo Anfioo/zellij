@@ -16,7 +16,7 @@ pub(crate) fn try_create_home_config_dir() {
     }
 }
 
-/// System-wide data directory (e.g. `/usr/share/zellij` from distro packages).
+/// 系统级数据目录（例如发行版包安装的 `/usr/share/zellij`）。
 pub(crate) fn system_data_dir() -> PathBuf {
     use crate::consts::SYSTEM_DEFAULT_DATA_DIR_PREFIX;
     std::path::Path::new(SYSTEM_DEFAULT_DATA_DIR_PREFIX).join("share/zellij")

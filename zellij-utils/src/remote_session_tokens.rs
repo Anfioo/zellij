@@ -59,11 +59,11 @@ fn init_db(conn: &Connection) -> Result<()> {
     Ok(())
 }
 
-/// Save session token for a server (upsert)
+/// 保存某个服务端的会话令牌（upsert）
 pub fn save_session_token(server_url: &str, session_token: &str) -> Result<()> {
     let db_path = get_db_path()?;
 
-    // Set file permissions to 0600 if creating new file
+    // 如果创建新文件，将文件权限设置为 0600
     let is_new = !db_path.exists();
 
     let conn = Connection::open(&db_path)?;
@@ -82,7 +82,7 @@ pub fn save_session_token(server_url: &str, session_token: &str) -> Result<()> {
     Ok(())
 }
 
-/// Get session token for a server, update last_used_at
+/// 获取某个服务端的会话令牌，更新 last_used_at
 pub fn get_session_token(server_url: &str) -> Result<Option<String>> {
     let db_path = get_db_path()?;
 
@@ -104,7 +104,7 @@ pub fn get_session_token(server_url: &str) -> Result<Option<String>> {
     };
 
     if token.is_some() {
-        // Update last_used_at
+        // 更新 last_used_at
         conn.execute(
             "UPDATE remote_sessions SET last_used_at = CURRENT_TIMESTAMP WHERE server_url = ?1",
             [server_url],
@@ -114,7 +114,7 @@ pub fn get_session_token(server_url: &str) -> Result<Option<String>> {
     Ok(token)
 }
 
-/// Delete session token for a server
+/// 删除某个服务端的会话令牌
 pub fn delete_session_token(server_url: &str) -> Result<bool> {
     let db_path = get_db_path()?;
 

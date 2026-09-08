@@ -1,4 +1,4 @@
-//! Zellij program-wide constants.
+//! Zellij 程序级常量。
 
 use crate::home::find_default_config_dir;
 use directories::ProjectDirs;
@@ -46,8 +46,8 @@ pub fn create_config_and_cache_folders() {
             log::error!("Failed to create config dir: {:?}", e);
         }
     }
-    // while session_info is a child of cache currently, it won't necessarily always be this way,
-    // and so it's explicitly created here
+    // 虽然 session_info 目前是 cache 的子目录，但将来不一定总是如此，
+    // 因此在这里显式创建它
     if let Err(e) = std::fs::create_dir_all(&ZELLIJ_SESSION_INFO_CACHE_DIR.as_path()) {
         log::error!("Failed to create session_info cache dir: {:?}", e);
     }
@@ -140,17 +140,17 @@ mod not_wasm {
     use std::collections::HashMap;
     use std::path::PathBuf;
 
-    // Convenience macro to add plugins to the asset map (see `ASSET_MAP`)
+    // 用于将插件添加到资源映射表的便捷宏（参见 `ASSET_MAP`）
     //
-    // Plugins are taken from:
+    // 插件取自：
     //
-    // - `zellij-utils/assets/plugins`: When building in release mode OR when the
-    //   `plugins_from_target` feature IS NOT set
-    // - `zellij-utils/../target/wasm32-wasip1/debug`: When building in debug mode AND the
-    //   `plugins_from_target` feature IS set
+    // - `zellij-utils/assets/plugins`：在 release 模式下构建，或者未设置
+    //   `plugins_from_target` 特性时
+    // - `zellij-utils/../target/wasm32-wasip1/debug`：在 debug 模式下构建，且设置了
+    //   `plugins_from_target` 特性时
     //
-    // When the `disable_automatic_asset_installation` feature is set, no plugins are embedded at
-    // all and `ASSET_MAP` is empty. Builtin plugins must then be provided in the plugin directory.
+    // 当设置了 `disable_automatic_asset_installation` 特性时，不会嵌入任何插件，
+    // `ASSET_MAP` 为空。内置插件必须随后在插件目录中提供。
     #[cfg(not(feature = "disable_automatic_asset_installation"))]
     macro_rules! add_plugin {
         ($assets:expr, $plugin:literal) => {
@@ -175,7 +175,7 @@ mod not_wasm {
     }
 
     lazy_static! {
-        // Zellij asset map
+        // Zellij 资源映射表
         pub static ref ASSET_MAP: HashMap<PathBuf, Vec<u8>> = {
             #[allow(unused_mut)]
             let mut assets: HashMap<PathBuf, Vec<u8>> = std::collections::HashMap::new();
@@ -322,7 +322,7 @@ mod unix_only {
     use nix::unistd::Uid;
     use std::env::temp_dir;
 
-    // Maximum sockaddr_un.sun_path length: 104 on macOS/BSD, 108 on Linux/Android/Solaris.
+    // sockaddr_un.sun_path 的最大长度：macOS/BSD 上为 104，Linux/Android/Solaris 上为 108。
     #[cfg(target_os = "macos")]
     pub const ZELLIJ_SOCK_MAX_LENGTH: usize = 104;
     #[cfg(not(target_os = "macos"))]

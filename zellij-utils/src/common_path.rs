@@ -1,6 +1,6 @@
-// The following license refers to code in this file and this file only.
-// We chose to vendor this dependency rather than depend on it through crates.io in order to facilitate
-// packaging. This license was copied verbatim from: https://docs.rs/crate/common-path/1.0.0/source/LICENSE-MIT
+// 以下许可证仅适用于本文件中的代码。
+// 我们选择将此依赖内置（vendor）而非通过 crates.io 依赖，以便于打包。
+// 此许可证逐字复制自：https://docs.rs/crate/common-path/1.0.0/source/LICENSE-MIT
 //
 // MIT License
 //
@@ -26,9 +26,9 @@
 
 use std::path::{Path, PathBuf};
 
-/// Find the common prefix, if any, between any number of paths
+/// 查找任意数量路径之间的公共前缀（如果存在）
 ///
-/// # Example
+/// # 示例
 ///
 /// ```rust
 /// use std::path::{PathBuf, Path};
@@ -55,9 +55,9 @@ pub fn common_path_all<'a>(paths: impl IntoIterator<Item = &'a Path>) -> Option<
     Some(result.to_path_buf())
 }
 
-/// Find the common prefix, if any, between 2 paths
+/// 查找两个路径之间的公共前缀（如果存在）
 ///
-/// # Example
+/// # 示例
 ///
 /// ```rust
 /// use std::path::{PathBuf, Path};

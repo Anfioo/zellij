@@ -1,4 +1,4 @@
-//! Some general utility functions.
+//! 一些通用工具函数。
 
 use std::net::{IpAddr, Ipv4Addr};
 use std::{iter, str::from_utf8};
@@ -41,10 +41,10 @@ pub fn clean_string_from_control_and_linebreak(input: &str) -> String {
         .chars()
         .filter(|c| {
             !c.is_control() &&
-            *c != '\n' &&      // line feed
-            *c != '\r' &&      // carriage return
-            *c != '\u{2028}' && // line separator
-            *c != '\u{2029}' // paragraph separator
+            *c != '\n' &&      // 换行符
+            *c != '\r' &&      // 回车符
+            *c != '\u{2028}' && // 行分隔符
+            *c != '\u{2029}' // 段落分隔符
         })
         .collect()
 }
@@ -81,7 +81,7 @@ pub fn make_terminal_title(pane_title: &str) -> String {
     )
 }
 
-// Colors
+// 颜色
 pub mod colors {
     pub const WHITE: u8 = 255;
     pub const GREEN: u8 = 154;
@@ -135,11 +135,11 @@ pub fn default_palette() -> Palette {
     }
 }
 
-// Dark magic
+// 黑魔法
 pub fn detect_theme_hue(bg: PaletteColor) -> ThemeHue {
     match bg {
         PaletteColor::Rgb((r, g, b)) => {
-            // HSP, P stands for perceived brightness
+            // HSP，P 代表感知亮度
             let hsp: f64 = (0.299 * (r as f64 * r as f64)
                 + 0.587 * (g as f64 * g as f64)
                 + 0.114 * (b as f64 * b as f64))
@@ -153,11 +153,10 @@ pub fn detect_theme_hue(bg: PaletteColor) -> ThemeHue {
     }
 }
 
-// (this was shamelessly copied from alacritty)
+// （这是从 alacritty 无耻复制来的）
 //
-// This returns the current terminal version as a unique number based on the
-// semver version. The different versions are padded to ensure that a higher semver version will
-// always report a higher version number.
+// 这将当前终端版本作为基于 semver 版本的唯一数字返回。
+// 不同版本会被填充，以确保更高的 semver 版本始终报告更高的版本号。
 pub fn version_number(mut version: &str) -> usize {
     if let Some(separator) = version.rfind('-') {
         version = &version[..separator];

@@ -1,25 +1,22 @@
-// false positive: thiserror's derive macro triggers unused_assignments on struct-style enum variant fields
+// 误报：thiserror 的 derive 宏会在结构体风格的枚举变体字段上触发 unused_assignments
 #![allow(unused_assignments)]
-//! Error context system based on a thread-local representation of the call stack, itself based on
-//! the instructions that are sent between threads.
+//! 基于线程局部调用栈表示的错误上下文系统，该调用栈本身基于在线程之间发送的指令。
 //!
-//! # Help wanted
+//! # 寻求帮助
 //!
-//! There is an ongoing endeavor to improve the state of error handling in zellij. Currently, many
-//! functions rely on [`unwrap`]ing [`Result`]s rather than returning and hence propagating
-//! potential errors. If you're interested in helping to add error handling to zellij, don't
-//! hesitate to get in touch with us. Additional information can be found in [the docs about error
-//! handling](https://github.com/zellij-org/zellij/tree/main/docs/ERROR_HANDLING.md).
+//! 目前正在进行一项改进 zellij 错误处理状态的工作。目前，许多函数依赖于对 [`Result`] 进行 [`unwrap`]，
+//! 而不是返回并因此传播潜在的错误。如果您有兴趣帮助为 zellij 添加错误处理，请随时与我们联系。
+//! 更多信息可以在 [关于错误处理的文档](https://github.com/zellij-org/zellij/tree/main/docs/ERROR_HANDLING.md) 中找到。
 
 use anyhow::Context;
 use colored::*;
-#[allow(unused_imports)] // used in set_panic_handler; may appear unused under wasm target
+#[allow(unused_imports)] // 在 set_panic_handler 中使用；在 wasm 目标下可能显示为未使用
 use log::error;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Error, Formatter};
 use std::path::PathBuf;
 
-/// Re-exports of common error-handling code.
+/// 常见错误处理代码的重新导出。
 pub mod prelude {
     pub use super::FatalError;
     pub use super::LoggableError;
@@ -37,19 +34,17 @@ pub trait ErrorInstruction {
     fn error(err: String) -> Self;
 }
 
-/// Helper trait to easily log error types.
+/// 用于轻松记录错误类型的辅助 trait。
 ///
-/// The `print_error` function takes a closure which takes a `&str` and fares with it as necessary
-/// to log the error to some usable location. For convenience, logging to stdout, stderr and
-/// `log::error!` is already implemented.
+/// `print_error` 函数接受一个闭包，该闭包接受一个 `&str` 并根据需要处理它，
+/// 以将错误记录到某个可用的位置。为方便起见，已经实现了记录到 stdout、stderr 和
+/// `log::error!`。
 ///
-/// Note that the trait functions pass the error through unmodified, so they can be chained with
-/// the usual handling of [`std::result::Result`] types.
+/// 注意，trait 函数会原样传递错误，因此它们可以与通常的 [`std::result::Result`] 类型处理链接使用。
 pub trait LoggableError<T>: Sized {
-    /// Gives a formatted error message derived from `self` to the closure `fun` for
-    /// printing/logging as appropriate.
+    /// 将从 `self` 派生的格式化错误消息传递给闭包 `fun`，以便适当地打印/记录。
     ///
-    /// # Examples
+    /// # 示例
     ///
     /// ```should_panic
     /// use anyhow;
@@ -63,23 +58,20 @@ pub trait LoggableError<T>: Sized {
     #[track_caller]
     fn print_error<F: Fn(&str)>(self, fun: F) -> Self;
 
-    /// Convenienve function, calls `print_error` and logs the result as error.
+    /// 便捷函数，调用 `print_error` 并将结果记录为错误。
     ///
-    /// This is not a wrapper around `log::error!`, because the `log` crate uses a lot of compile
-    /// time macros from `std` to determine caller locations/module names etc. Since these are
-    /// resolved at compile time in the location they are written, they would always resolve to the
-    /// location in this function where `log::error!` is called, masking the real caller location.
-    /// Hence, we build the log message ourselves. This means that we lose the information about
-    /// the calling module (Because it can only be resolved at compile time), however the callers
-    /// file and line number are preserved.
+    /// 这不是 `log::error!` 的包装器，因为 `log` crate 使用了大量来自 `std` 的编译时宏
+    /// 来确定调用者位置/模块名称等。由于这些是在编写它们的位置在编译时解析的，
+    /// 它们将始终解析到此函数中调用 `log::error!` 的位置，从而掩盖了真正的调用者位置。
+    /// 因此，我们自己构建日志消息。这意味着我们丢失了关于调用模块的信息
+    /// （因为它只能在编译时解析），但是调用者的文件和行号被保留了。
     #[track_caller]
     fn to_log(self) -> Self {
         let caller = std::panic::Location::caller();
         self.print_error(|msg| {
-            // Build the log entry manually
-            // NOTE: The log entry has no module path associated with it. This is because `log`
-            // gets the module path from the `std::module_path!()` macro, which is replaced at
-            // compile time in the location it is written!
+            // 手动构建日志条目
+            // 注意：日志条目没有关联的模块路径。这是因为 `log`
+            // 从 `std::module_path!()` 宏获取模块路径，该宏在编写它的位置在编译时被替换！
             log::logger().log(
                 &log::Record::builder()
                     .level(log::Level::Error)
@@ -92,12 +84,12 @@ pub trait LoggableError<T>: Sized {
         })
     }
 
-    /// Convenienve function, calls `print_error` with the closure `|msg| eprintln!("{}", msg)`.
+    /// 便捷函数，使用闭包 `|msg| eprintln!("{}", msg)` 调用 `print_error`。
     fn to_stderr(self) -> Self {
         self.print_error(|msg| eprintln!("{}", msg))
     }
 
-    /// Convenienve function, calls `print_error` with the closure `|msg| println!("{}", msg)`.
+    /// 便捷函数，使用闭包 `|msg| println!("{}", msg)` 调用 `print_error`。
     fn to_stdout(self) -> Self {
         self.print_error(|msg| println!("{}", msg))
     }
@@ -112,37 +104,35 @@ impl<T> LoggableError<T> for anyhow::Result<T> {
     }
 }
 
-/// Special trait to mark fatal/non-fatal errors.
+/// 用于标记致命/非致命错误的特殊 trait。
 ///
-/// This works in tandem with `LoggableError` above and is meant to make reading code easier with
-/// regard to whether an error is fatal or not (i.e. can be ignored, or at least doesn't make the
-/// application crash).
+/// 这与上面的 `LoggableError` 协同工作，旨在使阅读代码时更容易判断错误是否致命
+/// （即可以忽略，或者至少不会使应用程序崩溃）。
 ///
-/// This essentially degrades any `std::result::Result<(), _>` to a simple `()`.
+/// 这实质上是将任何 `std::result::Result<(), _>` 降级为简单的 `()`。
 pub trait FatalError<T> {
-    /// Mark results as being non-fatal.
+    /// 将结果标记为非致命。
     ///
-    /// If the result is an `Err` variant, this will [print the error to the log][`to_log`].
-    /// Discards the result type afterwards.
+    /// 如果结果是 `Err` 变体，这将 [将错误打印到日志][`to_log`]。
+    /// 之后丢弃结果类型。
     ///
     /// [`to_log`]: LoggableError::to_log
     #[track_caller]
     fn non_fatal(self);
 
-    /// Mark results as being fatal.
+    /// 将结果标记为致命。
     ///
-    /// If the result is an `Err` variant, this will unwrap the error and panic the application.
-    /// If the result is an `Ok` variant, the inner value is unwrapped and returned instead.
+    /// 如果结果是 `Err` 变体，这将 unwrap 错误并使应用程序 panic。
+    /// 如果结果是 `Ok` 变体，则 unwrap 内部值并返回它。
     ///
     /// # Panics
     ///
-    /// If the given result is an `Err` variant.
+    /// 如果给定结果是 `Err` 变体。
     #[track_caller]
     fn fatal(self) -> T;
 }
 
-/// Helper function to silence `#[warn(unused_must_use)]` cargo warnings. Used exclusively in
-/// `FatalError::non_fatal`!
+/// 用于消除 `#[warn(unused_must_use)]` cargo 警告的辅助函数。仅在 `FatalError::non_fatal` 中使用！
 fn discard_result<T>(_arg: anyhow::Result<T>) {}
 
 impl<T> FatalError<T> for anyhow::Result<T> {
@@ -162,29 +152,28 @@ impl<T> FatalError<T> for anyhow::Result<T> {
     }
 }
 
-/// Different types of calls that form an [`ErrorContext`] call stack.
+/// 构成 [`ErrorContext`] 调用栈的不同类型的调用。
 ///
-/// Complex variants store a variant of a related enum, whose variants can be built from
-/// the corresponding Zellij MSPC instruction enum variants ([`ScreenInstruction`],
-/// [`PtyInstruction`], [`ClientInstruction`], etc).
+/// 复杂变体存储相关枚举的一个变体，其变体可以从对应的 Zellij MSPC 指令枚举变体
+/// （[`ScreenInstruction`]、[`PtyInstruction`]、[`ClientInstruction`] 等）构建。
 #[derive(Copy, Clone, PartialEq, Serialize, Deserialize, Debug)]
 pub enum ContextType {
-    /// A screen-related call.
+    /// 与屏幕相关的调用。
     Screen(ScreenContext),
-    /// A PTY-related call.
+    /// 与 PTY 相关的调用。
     Pty(PtyContext),
-    /// A plugin-related call.
+    /// 与插件相关的调用。
     Plugin(PluginContext),
-    /// An app-related call.
+    /// 与应用相关的调用。
     Client(ClientContext),
-    /// A server-related call.
+    /// 与服务端相关的调用。
     IPCServer(ServerContext),
     StdinHandler,
     AsyncTask,
     PtyWrite(PtyWriteContext),
     BackgroundJob(BackgroundJobContext),
-    /// An empty, placeholder call. This should be thought of as representing no call at all.
-    /// A call stack representation filled with these is the representation of an empty call stack.
+    /// 一个空的占位调用。这应该被认为表示根本没有调用。
+    /// 填充了这些的调用栈表示是空调用栈的表示。
     Empty,
 }
 
@@ -209,8 +198,8 @@ impl Display for ContextType {
     }
 }
 
-// FIXME: Just deriving EnumDiscriminants from strum will remove the need for any of this!!!
-/// Stack call representations corresponding to the different types of [`ScreenInstruction`]s.
+// FIXME: 只需从 strum 派生 EnumDiscriminants 就可以消除对这些的任何需求！！！
+/// 对应于不同类型 [`ScreenInstruction`] 的栈调用表示。
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum ScreenContext {
     HandlePtyBytes,
@@ -449,7 +438,7 @@ pub enum ScreenContext {
     DesktopNotificationResponse,
     SubscribeToPaneRenders,
     NotifyPaneClosedToSubscribers,
-    // Pane-targeting CLI variants
+    // 以窗格为目标的 CLI 变体
     ScrollUpWithPaneId,
     ScrollDownWithPaneId,
     ScrollToTopWithPaneId,
@@ -470,7 +459,7 @@ pub enum ScreenContext {
     RenamePaneWithPaneId,
     UndoRenamePaneWithPaneId,
     TogglePanePinnedWithPaneId,
-    // Tab-targeting CLI variants
+    // 以标签页为目标的 CLI 变体
     UndoRenameTabWithTabId,
     ToggleActiveSyncTabWithTabId,
     ToggleFloatingPanesWithTabId,
@@ -486,7 +475,7 @@ pub enum ScreenContext {
     ToggleHostFullscreen,
 }
 
-/// Stack call representations corresponding to the different types of [`PtyInstruction`]s.
+/// 对应于不同类型 [`PtyInstruction`] 的栈调用表示。
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum PtyContext {
     SpawnTerminal,
@@ -521,7 +510,7 @@ pub enum PtyContext {
     Exit,
 }
 
-/// Stack call representations corresponding to the different types of [`PluginInstruction`]s.
+/// 对应于不同类型 [`PluginInstruction`] 的栈调用表示。
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum PluginContext {
     Load,
@@ -570,7 +559,7 @@ pub enum PluginContext {
     HighlightClicked,
 }
 
-/// Stack call representations corresponding to the different types of [`ClientInstruction`]s.
+/// 对应于不同类型 [`ClientInstruction`] 的栈调用表示。
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum ClientContext {
     Exit,
@@ -596,7 +585,7 @@ pub enum ClientContext {
     EmitNestedSessionFrame,
 }
 
-/// Stack call representations corresponding to the different types of [`ServerInstruction`]s.
+/// 对应于不同类型 [`ServerInstruction`] 的栈调用表示。
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum ServerContext {
     NewClient,
@@ -688,22 +677,22 @@ pub enum ZellijError {
         "This version of zellij was built to load the core plugins from
 the globally configured plugin directory. However, a plugin wasn't found:
 
-    Plugin name: '{plugin_path}'
-    Plugin directory: '{plugin_dir}'
+Plugin name: '{plugin_path}'
+Plugin directory: '{plugin_dir}'
 
 If you're a user:
     Please report this error to the distributor of your current zellij version
 
 If you're a developer:
-    Either make sure to include the plugins with the application (See feature
-    'disable_automatic_asset_installation'), or make them available in the
-    plugin directory.
+Either make sure to include the plugins with the application (See feature
+'disable_automatic_asset_installation'), or make them available in the
+plugin directory.
 
 Possible fix for your problem:
     Place the builtin plugin '.wasm' files in the plugin directory shown above,
-    or in the 'plugins' folder of the system data directory. Both are visible in
-    the output of `zellij setup --check`. This build carries no bundled plugins,
-    so `zellij setup --dump-plugins` cannot provide them.
+or in the 'plugins' folder of the system data directory. Both are visible in
+the output of `zellij setup --check`. This build carries no bundled plugins,
+so `zellij setup --dump-plugins` cannot provide them.
 "
     )]
     BuiltinPluginMissing {
@@ -735,8 +724,8 @@ open an issue on GitHub:
         source: anyhow::Error,
     },
 
-    // this is a temporary hack until we're able to merge custom errors from within the various
-    // crates themselves without having to move their payload types here
+    // 这是一个临时的 hack，直到我们能够从各个 crate 内部合并自定义错误，
+    // 而不必将它们的有效载荷类型移到这里
     #[error("Cannot resize fixed panes")]
     CantResizeFixedPanes { pane_ids: Vec<(u32, bool)> }, // bool: 0 => terminal_pane, 1 =>
     // plugin_pane
@@ -767,8 +756,7 @@ mod not_wasm {
     use std::panic::PanicHookInfo;
     use thiserror::Error as ThisError;
 
-    /// The maximum amount of calls an [`ErrorContext`] will keep track
-    /// of in its stack representation. This is a per-thread maximum.
+    /// [`ErrorContext`] 在其栈表示中跟踪的最大调用数量。这是每个线程的最大值。
     const MAX_THREAD_CALL_STACK: usize = 6;
 
     #[derive(Debug, ThisError, Diagnostic)]
@@ -777,14 +765,11 @@ mod not_wasm {
     struct Panic(String);
 
     impl Panic {
-        // We already capture a backtrace with `anyhow` using the `backtrace` crate in the background.
-        // The advantage is that this is the backtrace of the real errors source (i.e. where we first
-        // encountered the error and turned it into an `anyhow::Error`), whereas the backtrace recorded
-        // here is the backtrace leading to the call to any `panic`ing function. Since now we propagate
-        // errors up before `unwrap`ing them (e.g. in `zellij_server::screen::screen_thread_main`), the
-        // former is what we really want to diagnose.
-        // We still keep the second one around just in case the first backtrace isn't meaningful or
-        // non-existent in the first place (Which really shouldn't happen, but you never know).
+        // 我们已经在后台使用 `backtrace` crate 通过 `anyhow` 捕获了回溯。
+        // 优点是这是真正错误来源的回溯（即我们第一次遇到错误并将其转换为 `anyhow::Error` 的地方），
+        // 而这里记录的回溯是导致调用任何 `panic` 函数的回溯。由于现在我们在 `unwrap` 之前向上传播错误
+        // （例如在 `zellij_server::screen::screen_thread_main` 中），前者才是我们真正想要诊断的。
+        // 我们仍然保留第二个，以防第一个回溯没有意义或根本不存在（这真的不应该发生，但你永远不知道）。
         fn show_backtrace(&self) -> String {
             if let Ok(var) = std::env::var("RUST_BACKTRACE") {
                 if !var.is_empty() && var != "0" {
@@ -808,7 +793,7 @@ mod not_wasm {
         }
     }
 
-    /// Custom panic handler/hook. Prints the [`ErrorContext`].
+    /// 自定义 panic 处理器/钩子。打印 [`ErrorContext`]。
     pub fn handle_panic<T>(info: &PanicHookInfo<'_>, sender: Option<&SenderWithContext<T>>)
     where
         T: ErrorInstruction + Clone,
@@ -859,9 +844,8 @@ mod not_wasm {
         );
 
         if thread == "main" || sender.is_none() {
-            // here we only show the first line because the backtrace is not readable otherwise
-            // a better solution would be to escape raw mode before we do this, but it's not trivial
-            // to get os_input here
+            // 这里我们只显示第一行，因为否则回溯不可读
+            // 更好的解决方案是在这之前转义原始模式，但在这里获取 os_input 并不简单
             println!("\u{1b}[2J{}", fmt_report(report));
             process::exit(1);
         } else {
@@ -883,27 +867,26 @@ mod not_wasm {
         out
     }
 
-    /// A representation of the call stack.
+    /// 调用栈的表示。
     #[derive(Clone, Copy, Serialize, Deserialize, Debug)]
     pub struct ErrorContext {
         calls: [ContextType; MAX_THREAD_CALL_STACK],
     }
 
     impl ErrorContext {
-        /// Returns a new, blank [`ErrorContext`] containing only [`Empty`](ContextType::Empty)
-        /// calls.
+        /// 返回一个新的、空白的 [`ErrorContext`]，仅包含 [`Empty`](ContextType::Empty) 调用。
         pub fn new() -> Self {
             Self {
                 calls: [ContextType::Empty; MAX_THREAD_CALL_STACK],
             }
         }
 
-        /// Returns `true` if the calls has all [`Empty`](ContextType::Empty) calls.
+        /// 如果所有调用都是 [`Empty`](ContextType::Empty) 调用，则返回 `true`。
         pub fn is_empty(&self) -> bool {
             self.calls.iter().all(|c| c == &ContextType::Empty)
         }
 
-        /// Adds a call to this [`ErrorContext`]'s call stack representation.
+        /// 向此 [`ErrorContext`] 的调用栈表示中添加一个调用。
         pub fn add_call(&mut self, call: ContextType) {
             for ctx in &mut self.calls {
                 if let ContextType::Empty = ctx {
@@ -914,7 +897,7 @@ mod not_wasm {
             self.update_thread_ctx()
         }
 
-        /// Updates the thread local [`ErrorContext`].
+        /// 更新线程局部的 [`ErrorContext`]。
         pub fn update_thread_ctx(&self) {
             ASYNCOPENCALLS
                 .try_with(|ctx| *ctx.borrow_mut() = *self)
@@ -941,19 +924,17 @@ mod not_wasm {
         }
     }
 
-    /// Helper trait to convert error types that don't satisfy `anyhow`s trait requirements to
-    /// anyhow errors.
+    /// 用于将不满足 `anyhow` trait 要求的错误类型转换为 anyhow 错误的辅助 trait。
     pub trait ToAnyhow<U> {
         fn to_anyhow(self) -> anyhow::Result<U>;
     }
 
-    /// `SendError` doesn't satisfy `anyhow`s trait requirements due to `T` possibly being a
-    /// `PluginInstruction` type, which wraps an `mpsc::Send` and isn't `Sync`. Due to this, in turn,
-    /// the whole error type isn't `Sync` and doesn't work with `anyhow` (or pretty much any other
-    /// error handling crate).
+    /// `SendError` 不满足 `anyhow` 的 trait 要求，因为 `T` 可能是 `PluginInstruction` 类型，
+    /// 它包装了一个 `mpsc::Send` 且不是 `Sync`。因此，整个错误类型不是 `Sync`，
+    /// 无法与 `anyhow`（或几乎任何其他错误处理 crate）一起使用。
     ///
-    /// Takes the `SendError` and creates an `anyhow` error type with the message that was sent
-    /// (formatted as string), attaching the [`ErrorContext`] as anyhow context to it.
+    /// 接受 `SendError` 并创建一个带有已发送消息（格式化为字符串）的 `anyhow` 错误类型，
+    /// 将 [`ErrorContext`] 作为 anyhow 上下文附加到它上面。
     impl<T: std::fmt::Debug, U> ToAnyhow<U>
         for Result<U, crate::channels::SendError<(T, ErrorContext)>>
     {

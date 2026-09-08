@@ -28,20 +28,20 @@ use crate::vendored::termwiz::{
     input::{KeyCode, KeyCodeEncodeModes, KeyboardEncoding, Modifiers},
 };
 
-pub type ClientId = u16; // TODO: merge with crate type?
+pub type ClientId = u16; // TODO: 与 crate 类型合并？
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum UnblockCondition {
-    /// Unblock only when exit status is 0 (success)
+    /// 仅在退出状态为 0（成功）时解除阻塞
     OnExitSuccess,
-    /// Unblock only when exit status is non-zero (failure)
+    /// 仅在退出状态非零（失败）时解除阻塞
     OnExitFailure,
-    /// Unblock on any exit (success or failure)
+    /// 在任何退出时解除阻塞（成功或失败）
     OnAnyExit,
 }
 
 impl UnblockCondition {
-    /// Check if the condition is met for the given exit status
+    /// 检查给定退出状态是否满足条件
     pub fn is_met(&self, exit_status: i32) -> bool {
         match self {
             UnblockCondition::OnExitSuccess => exit_status == 0,
@@ -55,7 +55,7 @@ impl UnblockCondition {
 pub enum CommandOrPlugin {
     Command(RunCommandAction),
     Plugin(RunPluginOrAlias),
-    File(FileToOpen), // open file in configured editor
+    File(FileToOpen), // 在配置的编辑器中打开文件
 }
 
 impl CommandOrPlugin {
@@ -68,7 +68,7 @@ pub fn client_id_to_colors(
     client_id: ClientId,
     colors: MultiplayerColors,
 ) -> Option<(PaletteColor, PaletteColor)> {
-    // (primary color, secondary color)
+    //（主色，辅色）
     let black = PaletteColor::EightBit(default_colors::BLACK);
     match client_id {
         1 => Some((colors.player_1, black)),
@@ -406,8 +406,8 @@ bitflags::bitflags! {
         const ALT     = 0b0000_0010;
         const CONTROL = 0b0000_0100;
         const SUPER   = 0b0000_1000;
-        // we don't actually use the below, left here for completeness in case we want to add them
-        // later
+        // 我们实际上没有使用下面的内容，保留在这里是为了在需要添加时保持完整性
+        // 稍后
         const HYPER = 0b0001_0000;
         const META = 0b0010_0000;
         const CAPS_LOCK = 0b0100_0000;
@@ -418,10 +418,10 @@ bitflags::bitflags! {
 impl KeyModifier {
     pub fn from_bytes(bytes: &[u8]) -> BTreeSet<KeyModifier> {
         let modifier_flags = str::from_utf8(bytes)
-            .ok() // convert to string: (eg. "16")
-            .and_then(|s| u8::from_str_radix(&s, 10).ok()) // convert to u8: (eg. 16)
-            .map(|s| s.saturating_sub(1)) // subtract 1: (eg. 15)
-            .and_then(|b| ModifierFlags::from_bits(b)); // bitflags: (0b0000_1111: Shift, Alt, Control, Super)
+            .ok() // 转换为字符串：（例如 "16"）
+            .and_then(|s| u8::from_str_radix(&s, 10).ok()) // 转换为 u8：（例如 16）
+            .map(|s| s.saturating_sub(1)) // 减 1：（例如 15）
+            .and_then(|b| ModifierFlags::from_bits(b)); // 位标志：（0b0000_1111：Shift、Alt、Control、Super）
         let mut key_modifiers = BTreeSet::new();
         if let Some(modifier_flags) = modifier_flags {
             for name in modifier_flags.iter() {
@@ -583,8 +583,8 @@ impl KeyWithModifier {
         let modifiers = self.to_termwiz_modifiers();
         let key_code_encode_modes = KeyCodeEncodeModes {
             encoding: KeyboardEncoding::Xterm,
-            // all these flags are false because they have been dealt with before this
-            // serialization
+            // 所有这些标志都为 false，因为它们在此序列化之前已经处理过
+            // 序列化
             application_cursor_keys: false,
             newline_mode: false,
             modify_other_keys: None,
@@ -598,8 +598,8 @@ impl KeyWithModifier {
         let modifiers = self.to_termwiz_modifiers();
         let key_code_encode_modes = KeyCodeEncodeModes {
             encoding: KeyboardEncoding::Kitty(KittyKeyboardFlags::DISAMBIGUATE_ESCAPE_CODES),
-            // all these flags are false because they have been dealt with before this
-            // serialization
+            // 所有这些标志都为 false，因为它们在此序列化之前已经处理过
+            // 序列化
             application_cursor_keys: false,
             newline_mode: false,
             modify_other_keys: None,
@@ -692,7 +692,7 @@ impl FromStr for Direction {
     }
 }
 
-/// Resize operation to perform.
+/// 要执行的调整大小操作。
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, Deserialize, Serialize)]
 pub enum Resize {
     Increase,
@@ -737,23 +737,23 @@ impl FromStr for Resize {
     }
 }
 
-/// Container type that fully describes resize operations.
+/// 完整描述调整大小操作的容器类型。
 ///
-/// This is best thought of as follows:
+/// 最好这样理解：
 ///
-/// - `resize` commands how the total *area* of the pane will change as part of this resize
-///   operation.
-/// - `direction` has two meanings:
-///     - `None` means to resize all borders equally
-///     - Anything else means to move the named border to achieve the change in area
+/// - `resize` 表示在此调整大小操作中窗格的总*面积*将如何变化
+///   操作。
+/// - `direction` 有两个含义：
+///     - `None` 表示均匀调整所有边框
+///     - 其他值表示移动指定的边框以实现面积变化
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, Deserialize, Serialize)]
 pub struct ResizeStrategy {
-    /// Whether to increase or resize total area
+    /// 是增加还是减少总面积
     pub resize: Resize,
-    /// With which border, if any, to change area
+    /// 使用哪个边框（如果有）来改变面积
     pub direction: Option<Direction>,
-    /// If set to true (default), increasing resizes towards a viewport border will be inverted.
-    /// I.e. a scenario like this ("increase right"):
+    /// 如果设置为 true（默认值），向视口边框方向增加大小将被反转。
+    /// 例如这样的场景（"向右增加"）：
     ///
     /// ```text
     /// +---+---+
@@ -761,7 +761,7 @@ pub struct ResizeStrategy {
     /// +---+---+
     /// ```
     ///
-    /// turns into this ("decrease left"):
+    /// 会变成这样（"向左减少"）：
     ///
     /// ```text
     /// +---+---+
@@ -892,24 +892,24 @@ impl fmt::Display for ResizeStrategy {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-// FIXME: This should be extended to handle different button clicks (not just
-// left click) and the `ScrollUp` and `ScrollDown` events could probably be
-// merged into a single `Scroll(isize)` event.
+// FIXME: 这应该扩展以处理不同的按钮点击（不仅仅是
+// 左键点击），并且 `ScrollUp` 和 `ScrollDown` 事件可能可以
+// 合并为单个 `Scroll(isize)` 事件。
 pub enum Mouse {
-    ScrollUp(usize),   // number of lines
-    ScrollDown(usize), // number of lines
+    ScrollUp(usize),   // 行数
+    ScrollDown(usize), // 行数
     ScrollLeft(usize),
     ScrollRight(usize),
-    LeftClick(isize, usize),  // line and column
-    RightClick(isize, usize), // line and column
-    Hold(isize, usize),       // line and column
-    Release(isize, usize),    // line and column
-    Hover(isize, usize),      // line and column
+    LeftClick(isize, usize),  // 行和列
+    RightClick(isize, usize), // 行和列
+    Hold(isize, usize),       // 行和列
+    Release(isize, usize),    // 行和列
+    Hover(isize, usize),      // 行和列
 }
 
 impl Mouse {
     pub fn position(&self) -> Option<(usize, usize)> {
-        // (line, column)
+        //（行，列）
         match self {
             Mouse::LeftClick(line, column) => Some((*line as usize, *column as usize)),
             Mouse::RightClick(line, column) => Some((*line as usize, *column as usize)),
@@ -946,8 +946,8 @@ pub struct StyledText {
     pub indices: Vec<Vec<usize>>,
 }
 
-/// These events can be subscribed to with subscribe method exported by `zellij-tile`.
-/// Once subscribed to, they will trigger the `update` method of the `ZellijPlugin` trait.
+/// 这些事件可以通过 `zellij-tile` 导出的 subscribe 方法订阅。
+/// 订阅后，它们将触发 `ZellijPlugin` trait 的 `update` 方法。
 #[derive(Debug, Clone, PartialEq, EnumDiscriminants, Display, Serialize, Deserialize)]
 #[strum_discriminants(derive(EnumString, Hash, Serialize, Deserialize))]
 #[strum_discriminants(name(EventType))]
@@ -956,73 +956,73 @@ pub enum Event {
     ModeUpdate(ModeInfo),
     TabUpdate(Vec<TabInfo>),
     PaneUpdate(PaneManifest),
-    /// A key was pressed while the user is focused on this plugin's pane
+    /// 当用户聚焦在此插件的窗格上时按下了一个按键
     Key(KeyWithModifier),
-    /// A mouse event happened while the user is focused on this plugin's pane
+    /// 当用户聚焦在此插件的窗格上时发生了鼠标事件
     Mouse(Mouse),
-    /// A timer expired set by the `set_timeout` method exported by `zellij-tile`.
+    /// 由 `zellij-tile` 导出的 `set_timeout` 方法设置的计时器已过期。
     Timer(f64),
-    /// Text was copied to the clipboard anywhere in the app
+    /// 应用中任意位置将文本复制到了剪贴板
     CopyToClipboard(CopyDestination),
-    /// Failed to copy text to clipboard anywhere in the app
+    /// 应用中任意位置复制文本到剪贴板失败
     SystemClipboardFailure,
-    /// Input was received anywhere in the app
+    /// 应用中任意位置接收到了输入
     InputReceived,
-    /// This plugin became visible or invisible
+    /// 此插件变为可见或不可见
     Visible(bool),
-    /// A message from one of the plugin's workers
+    /// 来自插件某个 worker 的消息
     CustomMessage(
-        String, // message
-        String, // payload
+        String, // 消息
+        String, // 载荷
     ),
-    /// A file was created somewhere in the Zellij CWD folder
+    /// 在 Zellij 当前工作目录文件夹中的某处创建了文件
     FileSystemCreate(Vec<(PathBuf, Option<FileMetadata>)>),
-    /// A file was accessed somewhere in the Zellij CWD folder
+    /// 在 Zellij 当前工作目录文件夹中的某处访问了文件
     FileSystemRead(Vec<(PathBuf, Option<FileMetadata>)>),
-    /// A file was modified somewhere in the Zellij CWD folder
+    /// 在 Zellij 当前工作目录文件夹中的某处修改了文件
     FileSystemUpdate(Vec<(PathBuf, Option<FileMetadata>)>),
-    /// A file was deleted somewhere in the Zellij CWD folder
+    /// 在 Zellij 当前工作目录文件夹中的某处删除了文件
     FileSystemDelete(Vec<(PathBuf, Option<FileMetadata>)>),
-    /// A Result of plugin permission request
+    /// 插件权限请求的结果
     PermissionRequestResult(PermissionStatus),
     SessionUpdate(
         Vec<SessionInfo>,
-        Vec<(String, Duration)>, // resurrectable sessions
+        Vec<(String, Duration)>, // 可复活的会话
     ),
-    RunCommandResult(Option<i32>, Vec<u8>, Vec<u8>, BTreeMap<String, String>), // exit_code, STDOUT, STDERR,
-    // context
+    RunCommandResult(Option<i32>, Vec<u8>, Vec<u8>, BTreeMap<String, String>), // exit_code、STDOUT、STDERR、
+    // 上下文
     WebRequestResult(
         u16,
         BTreeMap<String, String>,
         Vec<u8>,
         BTreeMap<String, String>,
-    ), // status,
-    // headers,
-    // body,
-    // context
+    ), // 状态码、
+    // 请求头、
+    // 响应体、
+    // 上下文
     CommandPaneOpened(u32, Context), // u32 - terminal_pane_id
-    CommandPaneExited(u32, Option<i32>, Context), // u32 - terminal_pane_id, Option<i32> -
+    CommandPaneExited(u32, Option<i32>, Context), // u32 - terminal_pane_id，Option<i32> -
     // exit_code
     PaneClosed(PaneId),
     EditPaneOpened(u32, Context),              // u32 - terminal_pane_id
-    EditPaneExited(u32, Option<i32>, Context), // u32 - terminal_pane_id, Option<i32> - exit code
-    CommandPaneReRun(u32, Context),            // u32 - terminal_pane_id, Option<i32> -
-    FailedToWriteConfigToDisk(Option<String>), // String -> the file path we failed to write
+    EditPaneExited(u32, Option<i32>, Context), // u32 - terminal_pane_id，Option<i32> - 退出码
+    CommandPaneReRun(u32, Context),            // u32 - terminal_pane_id，Option<i32> -
+    FailedToWriteConfigToDisk(Option<String>), // String -> 写入失败的文件路径
     ListClients(Vec<ClientInfo>),
-    HostFolderChanged(PathBuf),               // PathBuf -> new host folder
-    FailedToChangeHostFolder(Option<String>), // String -> the error we got when changing
+    HostFolderChanged(PathBuf),               // PathBuf -> 新的宿主文件夹
+    FailedToChangeHostFolder(Option<String>), // String -> 更改时遇到的错误
     PastedText(String),
     ConfigWasWrittenToDisk,
     WebServerStatus(WebServerStatus),
     FailedToStartWebServer(String),
     BeforeClose,
     InterceptedKeyPress(KeyWithModifier),
-    /// An action was performed by the user (requires InterceptInput permission)
-    UserAction(Action, ClientId, Option<u32>, Option<ClientId>), // Action, client_id, terminal_id, cli_client_id
+    /// 用户执行了一个操作（需要 InterceptInput 权限）
+    UserAction(Action, ClientId, Option<u32>, Option<ClientId>), // Action、client_id、terminal_id、cli_client_id
     PaneRenderReport(HashMap<PaneId, PaneContents>),
-    ActionComplete(Action, Option<PaneId>, BTreeMap<String, String>), // Action, pane_id, context
-    CwdChanged(PaneId, PathBuf, Vec<ClientId>), // pane_id, cwd, focused_client_ids
-    CommandChanged(PaneId, Vec<String>, bool, Vec<ClientId>), // pane_id, command, is_foreground, focused_client_ids
+    ActionComplete(Action, Option<PaneId>, BTreeMap<String, String>), // Action、pane_id、context
+    CwdChanged(PaneId, PathBuf, Vec<ClientId>), // pane_id、cwd、focused_client_ids
+    CommandChanged(PaneId, Vec<String>, bool, Vec<ClientId>), // pane_id、command、is_foreground、focused_client_ids
     AvailableLayoutInfo(Vec<LayoutInfo>, Vec<LayoutWithError>),
     PluginConfigurationChanged(BTreeMap<String, String>),
     HighlightClicked {
@@ -1031,11 +1031,11 @@ pub enum Event {
         matched_string: String,
         context: BTreeMap<String, String>,
     },
-    /// Initial keybindings sent once on plugin load and on reconfiguration.
-    /// Plugins that subscribe to this event signal they cache keybindings
-    /// and can handle lightweight ModeUpdate events without keybindings.
+    /// 在插件加载和重新配置时发送一次的初始快捷键绑定。
+    /// 订阅此事件的插件表示它们缓存快捷键绑定
+    /// 并且可以处理不带快捷键绑定的轻量级 ModeUpdate 事件。
     InitialKeybinds(KeybindsVec),
-    /// The host terminal indicated its color palette theme mode (CSI 2031 / DSR 997).
+    /// 宿主终端指示了其调色板主题模式（CSI 2031 / DSR 997）。
     HostTerminalThemeChanged(HostTerminalThemeMode),
     SoftKeyboardVisibilityChanged(bool),
     HintText(BTreeMap<usize, StyledText>),
@@ -1050,9 +1050,9 @@ pub enum HostTerminalThemeMode {
 
 #[derive(Debug, Clone, PartialEq, Eq, EnumDiscriminants, Display, Serialize, Deserialize)]
 pub enum WebServerStatus {
-    Online(String), // String -> base url
+    Online(String), // String -> 基础 URL
     Offline,
-    DifferentVersion(String), // version
+    DifferentVersion(String), // 版本
 }
 
 #[derive(
@@ -1140,7 +1140,7 @@ impl PluginPermission {
     }
 }
 
-/// Describes the different input modes, which change the way that keystrokes will be interpreted.
+/// 描述不同的输入模式，这些模式会改变按键的解释方式。
 #[derive(
     Debug,
     PartialEq,
@@ -1156,48 +1156,48 @@ impl PluginPermission {
     Ord,
 )]
 pub enum InputMode {
-    /// In `Normal` mode, input is always written to the terminal, except for the shortcuts leading
-    /// to other modes
+    /// 在 `Normal` 模式下，输入总是写入终端，除了通向
+    /// 其他模式的快捷键
     #[serde(alias = "normal")]
     Normal,
-    /// In `Locked` mode, input is always written to the terminal and all shortcuts are disabled
-    /// except the one leading back to normal mode
+    /// 在 `Locked` 模式下，输入总是写入终端，所有快捷键都被禁用
+    /// 除了返回普通模式的快捷键
     #[serde(alias = "locked")]
     Locked,
-    /// `Resize` mode allows resizing the different existing panes.
+    /// `Resize` 模式允许调整不同现有窗格的大小。
     #[serde(alias = "resize")]
     Resize,
-    /// `Pane` mode allows creating and closing panes, as well as moving between them.
+    /// `Pane` 模式允许创建和关闭窗格，以及在窗格之间移动。
     #[serde(alias = "pane")]
     Pane,
-    /// `Tab` mode allows creating and closing tabs, as well as moving between them.
+    /// `Tab` 模式允许创建和关闭标签页，以及在标签页之间移动。
     #[serde(alias = "tab")]
     Tab,
-    /// `Scroll` mode allows scrolling up and down within a pane.
+    /// `Scroll` 模式允许在窗格内上下滚动。
     #[serde(alias = "scroll")]
     Scroll,
-    /// `EnterSearch` mode allows for typing in the needle for a search in the scroll buffer of a pane.
+    /// `EnterSearch` 模式允许在窗格的回滚缓冲区中输入搜索关键词。
     #[serde(alias = "entersearch")]
     EnterSearch,
-    /// `Search` mode allows for searching a term in a pane (superset of `Scroll`).
+    /// `Search` 模式允许在窗格中搜索术语（`Scroll` 的超集）。
     #[serde(alias = "search")]
     Search,
-    /// `RenameTab` mode allows assigning a new name to a tab.
+    /// `RenameTab` 模式允许为标签页分配新名称。
     #[serde(alias = "renametab")]
     RenameTab,
-    /// `RenamePane` mode allows assigning a new name to a pane.
+    /// `RenamePane` 模式允许为窗格分配新名称。
     #[serde(alias = "renamepane")]
     RenamePane,
-    /// `Session` mode allows detaching sessions
+    /// `Session` 模式允许分离会话
     #[serde(alias = "session")]
     Session,
-    /// `Move` mode allows moving the different existing panes within a tab
+    /// `Move` 模式允许在标签页内移动不同的现有窗格
     #[serde(alias = "move")]
     Move,
-    /// `Prompt` mode allows interacting with active prompts.
+    /// `Prompt` 模式允许与活动提示交互。
     #[serde(alias = "prompt")]
     Prompt,
-    /// `Tmux` mode allows for basic tmux keybindings functionality
+    /// `Tmux` 模式允许基本的 tmux 快捷键绑定功能
     #[serde(alias = "tmux")]
     Tmux,
 }
@@ -1273,15 +1273,15 @@ impl Default for PaletteColor {
     }
 }
 
-/// Priority layer for plugin-supplied regex highlights.
-/// Higher-priority layers take visual precedence over lower ones
-/// when highlights overlap.  Built-in highlights (mouse selection,
-/// search results) always take precedence over all plugin layers.
+/// 插件提供的正则表达式高亮的优先级层。
+/// 较高优先级的层在视觉上优先于较低优先级的层
+/// 当高亮重叠时。内置高亮（鼠标选择、
+/// 搜索结果）始终优先于所有插件层。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum HighlightLayer {
-    Hint,           // lowest: pure pattern matching (paths, URLs, IPs)
-    Tool,           // middle: backed by runtime domain knowledge (git, docker, k8s)
-    ActionFeedback, // highest: result of an explicit user action (search, bookmarks)
+    Hint,           // 最低：纯模式匹配（路径、URL、IP）
+    Tool,           // 中等：由运行时领域知识支持（git、docker、k8s）
+    ActionFeedback, // 最高：显式用户操作的结果（搜索、书签）
 }
 
 impl Default for HighlightLayer {
@@ -1290,19 +1290,19 @@ impl Default for HighlightLayer {
     }
 }
 
-/// Style for a plugin-supplied regex highlight.
-/// Theme-based variants reference `style.colors.text_unselected.*`.
+/// 插件提供的正则表达式高亮的样式。
+/// 基于主题的变体引用 `style.colors.text_unselected.*`。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum HighlightStyle {
-    None,      // no color override — use with bold/italic/underline for style-only highlights
-    Emphasis0, // fg = emphasis_0, no bg override
-    Emphasis1, // fg = emphasis_1, no bg override
-    Emphasis2, // fg = emphasis_2, no bg override
-    Emphasis3, // fg = emphasis_3, no bg override
-    BackgroundEmphasis0, // bg = emphasis_0, fg = background
-    BackgroundEmphasis1, // bg = emphasis_1, fg = background
-    BackgroundEmphasis2, // bg = emphasis_2, fg = background
-    BackgroundEmphasis3, // bg = emphasis_3, fg = background
+    None,      // 无颜色覆盖 — 与 bold/italic/underline 一起用于仅样式高亮
+    Emphasis0, // fg = emphasis_0，无 bg 覆盖
+    Emphasis1, // fg = emphasis_1，无 bg 覆盖
+    Emphasis2, // fg = emphasis_2，无 bg 覆盖
+    Emphasis3, // fg = emphasis_3，无 bg 覆盖
+    BackgroundEmphasis0, // bg = emphasis_0，fg = background
+    BackgroundEmphasis1, // bg = emphasis_1，fg = background
+    BackgroundEmphasis2, // bg = emphasis_2，fg = background
+    BackgroundEmphasis3, // bg = emphasis_3，fg = background
     CustomRgb {
         fg: Option<(u8, u8, u8)>,
         bg: Option<(u8, u8, u8)>,
@@ -1313,21 +1313,21 @@ pub enum HighlightStyle {
     },
 }
 
-/// One pattern + style pair sent by a plugin.
+/// 插件发送的一个模式 + 样式对。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RegexHighlight {
-    pub pattern: String, // key for upsert; also the regex source
+    pub pattern: String, // 用于 upsert 的键；也是正则表达式源
     pub style: HighlightStyle,
     pub layer: HighlightLayer,
-    pub context: BTreeMap<String, String>, // arbitrary data echoed back verbatim on click
-    pub on_hover: bool, // if true, only rendered when the cursor overlaps this match
+    pub context: BTreeMap<String, String>, // 点击时原样回显的任意数据
+    pub on_hover: bool, // 如果为 true，仅在光标与此匹配项重叠时渲染
     pub bold: bool,
     pub italic: bool,
     pub underline: bool,
-    pub tooltip_text: Option<String>, // shown at bottom of pane frame when hovering over match
+    pub tooltip_text: Option<String>, // 悬停在匹配项上时显示在窗格框架底部
 }
 
-// these are used for the web client
+// 这些用于 Web 客户端
 impl PaletteColor {
     pub fn as_rgb_str(&self) -> String {
         let (r, g, b) = match *self {
@@ -1771,10 +1771,10 @@ impl From<Palette> for Styling {
     }
 }
 
-// FIXME: Poor devs hashtable since HashTable can't derive `Default`...
+// FIXME: 可怜的开发者哈希表，因为 HashTable 无法派生 `Default`...
 pub type KeybindsVec = Vec<(InputMode, Vec<(KeyWithModifier, Vec<Action>)>)>;
 
-/// Provides information helpful in rendering the Zellij controls for UI bars
+/// 提供有助于为 UI 栏渲染 Zellij 控件的信息
 #[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ModeInfo {
     pub mode: InputMode,
@@ -1789,7 +1789,7 @@ pub struct ModeInfo {
     pub web_sharing: Option<WebSharing>,
     pub currently_marking_pane_group: Option<bool>,
     pub is_web_client: Option<bool>,
-    // note: these are only the configured ip/port that will be bound if and when the server is up
+    // 注意：这些只是配置的 ip/port，仅在服务端启动时才会绑定
     pub web_server_ip: Option<IpAddr>,
     pub web_server_port: Option<u16>,
     pub web_server_capability: Option<bool>,
@@ -1828,8 +1828,8 @@ impl ModeInfo {
         self.style.rounded_corners = rounded_corners;
     }
     pub fn update_arrow_fonts(&mut self, should_support_arrow_fonts: bool) {
-        // it is honestly quite baffling to me how "arrow_fonts: false" can mean "I support arrow
-        // fonts", but since this is a public API... ¯\_(ツ)_/¯
+        // 老实说，我很困惑 "arrow_fonts: false" 怎么能表示 "我支持箭头
+        // 字体"，但既然这是一个公共 API... ¯\_(ツ)_/¯
         self.capabilities.arrow_fonts = !should_support_arrow_fonts;
     }
     pub fn update_hide_session_name(&mut self, hide_session_name: bool) {
@@ -1932,7 +1932,7 @@ impl From<&PathBuf> for LayoutMetadata {
                                 .collect()
                         };
 
-                        // Get file metadata for creation and modification times as Unix epochs
+                        // 获取文件元数据以获取创建和修改时间（Unix 时间戳）
                         let (creation_time, update_time) =
                             LayoutMetadata::creation_and_update_times(&path);
 
@@ -1958,7 +1958,7 @@ impl From<&PathBuf> for LayoutMetadata {
 
 impl LayoutMetadata {
     fn creation_and_update_times(path: &PathBuf) -> (String, String) {
-        // (creation_time, update_time) returns stringified unix epoch
+        //（creation_time, update_time）返回字符串化的 unix 时间戳
         match std::fs::metadata(path) {
             Ok(metadata) => {
                 let creation_time = metadata
@@ -2010,11 +2010,11 @@ impl
     ) -> Self {
         let (tab_name, tiled_pane_layout, floating_panes) = tab;
 
-        // Collect panes from tiled layout (only leaf nodes are real panes)
+        // 从平铺布局中收集窗格（只有叶节点是真实窗格）
         let mut panes = Vec::new();
         collect_leaf_panes(&tiled_pane_layout, &mut panes);
 
-        // Collect panes from floating panes
+        // 从浮动窗格中收集窗格
         for floating_pane in floating_panes {
             panes.push(PaneMetadata::from(floating_pane));
         }
@@ -2038,18 +2038,18 @@ impl From<&crate::input::layout::TiledPaneLayout> for PaneMetadata {
         let mut is_plugin = false;
         let mut is_builtin_plugin = false;
 
-        // Try to get the name from the pane's name field first
+        // 首先尝试从窗格的 name 字段获取名称
         let name = if let Some(ref name) = pane.name {
             Some(name.clone())
         } else if let Some(ref run) = pane.run {
-            // If no explicit name, glean it from the run configuration
+            // 如果没有显式名称，则从运行配置中提取
             match run {
                 Run::Command(cmd) => {
-                    // Use the command name
+                    // 使用命令名称
                     Some(cmd.command.to_string_lossy().to_string())
                 },
                 Run::EditFile(path, _line, _cwd) => {
-                    // Use the file name
+                    // 使用文件名
                     path.file_name().map(|n| n.to_string_lossy().to_string())
                 },
                 Run::Plugin(plugin) => {
@@ -2076,18 +2076,18 @@ impl From<&crate::input::layout::FloatingPaneLayout> for PaneMetadata {
         let mut is_plugin = false;
         let mut is_builtin_plugin = false;
 
-        // Try to get the name from the pane's name field first
+        // 首先尝试从窗格的 name 字段获取名称
         let name = if let Some(ref name) = pane.name {
             Some(name.clone())
         } else if let Some(ref run) = pane.run {
-            // If no explicit name, glean it from the run configuration
+            // 如果没有显式名称，则从运行配置中提取
             match run {
                 Run::Command(cmd) => {
-                    // Use the command name
+                    // 使用命令名称
                     Some(cmd.command.to_string_lossy().to_string())
                 },
                 Run::EditFile(path, _line, _cwd) => {
-                    // Use the file name
+                    // 使用文件名
                     path.file_name().map(|n| n.to_string_lossy().to_string())
                 },
                 Run::Plugin(plugin) => {
@@ -2098,7 +2098,7 @@ impl From<&crate::input::layout::FloatingPaneLayout> for PaneMetadata {
                         },
                         crate::input::layout::RunPluginOrAlias::Alias(_) => false,
                     };
-                    // Use the plugin location string
+                    // 使用插件位置字符串
                     Some(plugin.location_string())
                 },
                 Run::Cwd(_) => None,
@@ -2115,16 +2115,16 @@ impl From<&crate::input::layout::FloatingPaneLayout> for PaneMetadata {
     }
 }
 
-// Helper function to recursively collect leaf panes from TiledPaneLayout
+// 从 TiledPaneLayout 递归收集叶窗格的辅助函数
 fn collect_leaf_panes(
     pane: &crate::input::layout::TiledPaneLayout,
     result: &mut Vec<PaneMetadata>,
 ) {
     if pane.children.is_empty() {
-        // This is a leaf node (actual pane)
+        // 这是一个叶节点（实际窗格）
         result.push(PaneMetadata::from(pane));
     } else {
-        // This is a container, recurse into children
+        // 这是一个容器，递归进入子节点
         for child in &pane.children {
             collect_leaf_panes(child, result);
         }
@@ -2153,11 +2153,11 @@ impl LayoutInfo {
         maybe_layout_path: &Option<PathBuf>,
         cwd: PathBuf,
     ) -> Option<Self> {
-        // If we're not given a layout path, fall back to "default". Since we cannot tell ahead of
-        // time whether the user has a layout named "default.kdl" in their layout directory, we
-        // cannot blindly assume that this is indeed the builtin default layout. The layout
-        // resolution below will correctly handle this.
-        // The docs promise this behavior, so we have to abide:
+        // 如果没有给定布局路径，则回退到 "default"。由于我们无法提前
+        // 判断用户的布局目录中是否有名为 "default.kdl" 的布局，我们
+        // 不能盲目假设这确实是内置默认布局。布局
+        // 下面的解析将正确处理这种情况。
+        // 文档承诺了此行为，因此我们必须遵守：
         // <https://zellij.dev/documentation/layouts.html#layout-default-directory>
         let layout_path = maybe_layout_path
             .clone()
@@ -2174,8 +2174,8 @@ impl LayoutInfo {
                 LayoutMetadata::from(&file_path),
             ))
         } else {
-            // Attempt to interpret the layout as bare layout name from the layout application
-            // directory. This is described in the docs:
+            // 尝试将布局解释为布局应用程序目录中的裸布局名称
+            // 目录。这在文档中有描述：
             // <https://zellij.dev/documentation/layouts.html#layout-default-directory>
             if let Some(layout_dir) = layout_dir
                 .as_ref()
@@ -2197,7 +2197,7 @@ impl LayoutInfo {
                     ));
                 }
             }
-            // Assume a builtin layout by default
+            // 默认假设为内置布局
             Some(LayoutInfo::BuiltIn(layout_path.display().to_string()))
         }
     }
@@ -2205,11 +2205,11 @@ impl LayoutInfo {
         layout_dir: &Option<PathBuf>,
         maybe_layout_path: &Option<PathBuf>,
     ) -> Option<Self> {
-        // If we're not given a layout path, fall back to "default". Since we cannot tell ahead of
-        // time whether the user has a layout named "default.kdl" in their layout directory, we
-        // cannot blindly assume that this is indeed the builtin default layout. The layout
-        // resolution below will correctly handle this.
-        // The docs promise this behavior, so we have to abide:
+        // 如果没有给定布局路径，则回退到 "default"。由于我们无法提前
+        // 判断用户的布局目录中是否有名为 "default.kdl" 的布局，我们
+        // 不能盲目假设这确实是内置默认布局。布局
+        // 下面的解析将正确处理这种情况。
+        // 文档承诺了此行为，因此我们必须遵守：
         // <https://zellij.dev/documentation/layouts.html#layout-default-directory>
         let layout_path = maybe_layout_path
             .clone()
@@ -2232,8 +2232,8 @@ impl LayoutInfo {
                 LayoutMetadata::from(&file_path),
             ))
         } else {
-            // Attempt to interpret the layout as bare layout name from the layout application
-            // directory. This is described in the docs:
+            // 尝试将布局解释为布局应用程序目录中的裸布局名称
+            // 目录。这在文档中有描述：
             // <https://zellij.dev/documentation/layouts.html#layout-default-directory>
             if let Some(layout_dir) = layout_dir
                 .as_ref()
@@ -2255,7 +2255,7 @@ impl LayoutInfo {
                     ));
                 }
             }
-            // Assume a builtin layout by default
+            // 默认假设为内置布局
             Some(LayoutInfo::BuiltIn(layout_path.display().to_string()))
         }
     }
@@ -2294,90 +2294,90 @@ impl SessionInfo {
     }
 }
 
-/// Contains all the information for a currently opened tab.
+/// 包含当前打开的标签页的所有信息。
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct TabInfo {
-    /// The Tab's 0 indexed position
+    /// 标签页的 0 索引位置
     pub position: usize,
-    /// The name of the tab as it appears in the UI (if there's enough room for it)
+    /// 标签页在界面中显示的名称（如果有足够空间）
     pub name: String,
-    /// Whether this tab is focused
+    /// 此标签页是否被聚焦
     pub active: bool,
-    /// The number of suppressed panes this tab has
+    /// 此标签页拥有的被抑制窗格数量
     pub panes_to_hide: usize,
-    /// Whether there's one pane taking up the whole display area on this tab
+    /// 此标签页上是否有一个窗格占据整个显示区域
     pub is_fullscreen_active: bool,
-    /// Whether input sent to this tab will be synced to all panes in it
+    /// 发送到此标签页的输入是否将同步到其中的所有窗格
     pub is_sync_panes_active: bool,
     pub are_floating_panes_visible: bool,
     pub other_focused_clients: Vec<ClientId>,
     pub active_swap_layout_name: Option<String>,
-    /// Whether the user manually changed the layout, moving out of the swap layout scheme
+    /// 用户是否手动更改了布局，从而退出交换布局方案
     pub is_swap_layout_dirty: bool,
-    /// Row count in the viewport (including all non-ui panes, eg. will exclude the status bar)
+    /// 视口中的行数（包括所有非 UI 窗格，例如将排除状态栏）
     pub viewport_rows: usize,
-    /// Column count in the viewport (including all non-ui panes, eg. will exclude the status bar)
+    /// 视口中的列数（包括所有非 UI 窗格，例如将排除状态栏）
     pub viewport_columns: usize,
-    /// Row count in the display area (including all panes, will typically be larger than the
-    /// viewport)
+    /// 显示区域中的行数（包括所有窗格，通常大于视口）
+    /// 视口）
     pub display_area_rows: usize,
-    /// Column count in the display area (including all panes, will typically be larger than the
-    /// viewport)
+    /// 显示区域中的列数（包括所有窗格，通常大于视口）
+    /// 视口）
     pub display_area_columns: usize,
-    /// The number of selectable (eg. not the UI bars) tiled panes currently in this tab
+    /// 当前此标签页中可选择的（例如非 UI 栏）平铺窗格数量
     pub selectable_tiled_panes_count: usize,
-    /// The number of selectable (eg. not the UI bars) floating panes currently in this tab
+    /// 当前此标签页中可选择的（例如非 UI 栏）浮动窗格数量
     pub selectable_floating_panes_count: usize,
-    /// The stable identifier for this tab
+    /// 此标签页的稳定标识符
     pub tab_id: usize,
-    /// Whether this tab has an active (persistent) bell notification
+    /// 此标签页是否有活动的（持久的）铃声通知
     pub has_bell_notification: bool,
-    /// Whether this tab is currently flashing its bell (transient 400ms state)
+    /// 此标签页当前是否正在闪烁铃声（瞬态 400ms 状态）
     pub is_flashing_bell: bool,
 }
 
-/// The `PaneManifest` contains a dictionary of panes, indexed by the tab position (0 indexed).
-/// Panes include all panes in the relevant tab, including `tiled` panes, `floating` panes and
-/// `suppressed` panes.
+/// `PaneManifest` 包含一个窗格字典，按标签页位置（0 索引）索引。
+/// 窗格包括相关标签页中的所有窗格，包括 `tiled` 窗格、`floating` 窗格和
+/// `suppressed` 窗格。
 #[derive(Debug, Default, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct PaneManifest {
-    pub panes: HashMap<usize, Vec<PaneInfo>>, // usize is the tab position
+    pub panes: HashMap<usize, Vec<PaneInfo>>, // usize 是标签页位置
 }
 
-/// Contains all the information for a currently open pane
+/// 包含当前打开的窗格的所有信息
 ///
-/// # Difference between coordinates/size and content coordinates/size
+/// # 坐标/大小与内容坐标/大小之间的区别
 ///
-/// The pane basic coordinates and size (eg. `pane_x` or `pane_columns`) are the entire space taken
-/// up by this pane - including its frame and title if it has a border.
+/// 窗格的基本坐标和大小（例如 `pane_x` 或 `pane_columns`）是此窗格占据的整个空间
+/// — 如果有边框，包括其框架和标题。
 ///
-/// The pane content coordinates and size (eg. `pane_content_x` or `pane_content_columns`)
-/// represent the area taken by the pane's content, excluding its frame and title if it has a
-/// border.
+/// 窗格内容的坐标和大小（例如 `pane_content_x` 或 `pane_content_columns`）
+/// 表示窗格内容占据的区域，如果有边框，则不包括其框架和标题。
+/// 边框。
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct PaneInfo {
-    /// The id of the pane, unique to all panes of this kind (eg. id in terminals or id in panes)
+    /// 窗格的 id，对此类型的所有窗格唯一（例如终端中的 id 或窗格中的 id）
     pub id: u32,
-    /// Whether this pane is a plugin (`true`) or a terminal (`false`), used along with `id` can represent a unique pane ID across
-    /// the running session
+    /// 此窗格是插件（`true`）还是终端（`false`），与 `id` 一起使用可以表示跨运行会话的唯一窗格 ID
+    /// 运行中的会话
     pub is_plugin: bool,
-    /// Whether the pane is focused in its layer (tiled or floating)
+    /// 窗格在其层（平铺或浮动）中是否被聚焦
     pub is_focused: bool,
     pub is_fullscreen: bool,
-    /// Whether a pane is floating or tiled (embedded)
+    /// 窗格是浮动的还是平铺的（嵌入的）
     pub is_floating: bool,
-    /// Whether a pane is suppressed - suppressed panes are not visible to the user, but still run
-    /// in the background
+    /// 窗格是否被抑制 — 被抑制的窗格对用户不可见，但仍在后台运行
+    /// 在后台
     pub is_suppressed: bool,
-    /// The full title of the pane as it appears in the UI (if there is room for it)
+    /// 窗格在界面中显示的完整标题（如果有足够空间）
     pub title: String,
-    /// Whether a pane exited or not, note that most panes close themselves before setting this
-    /// flag, so this is only relevant to command panes
+    /// 窗格是否已退出，请注意大多数窗格在设置此标志之前会自行关闭，
+    /// 因此这仅与命令窗格相关
     pub exited: bool,
-    /// The exit status of a pane if it did exit and is still in the UI
+    /// 如果窗格已退出且仍在界面中，则为其退出状态
     pub exit_status: Option<i32>,
-    /// A "held" pane is a paused pane that is waiting for user input (eg. a command pane that
-    /// exited and is waiting to be re-run or closed)
+    /// "held" 窗格是一个暂停的窗格，正在等待用户输入（例如已退出并等待重新运行或关闭的命令窗格）
+    /// 已退出并等待重新运行或关闭）
     pub is_held: bool,
     pub pane_x: usize,
     pub pane_content_x: usize,
@@ -2387,24 +2387,24 @@ pub struct PaneInfo {
     pub pane_content_rows: usize,
     pub pane_columns: usize,
     pub pane_content_columns: usize,
-    /// The coordinates of the cursor - if this pane is focused - relative to the pane's
-    /// coordinates
-    pub cursor_coordinates_in_pane: Option<(usize, usize)>, // x, y if cursor is visible
-    /// If this is a command pane, this will show the stringified version of the command and its
-    /// arguments
+    /// 光标的坐标 — 如果此窗格被聚焦 — 相对于窗格的坐标
+    /// 坐标
+    pub cursor_coordinates_in_pane: Option<(usize, usize)>, // x, y 如果光标可见
+    /// 如果这是命令窗格，这将显示命令及其参数的字符串化版本
+    /// 参数
     pub terminal_command: Option<String>,
-    /// The URL from which this plugin was loaded (eg. `zellij:strider` for the built-in `strider`
-    /// plugin or `file:/path/to/my/plugin.wasm` for a local plugin)
+    /// 加载此插件的 URL（例如内置 `strider` 插件的 `zellij:strider`
+    /// 或本地插件的 `file:/path/to/my/plugin.wasm`）
     pub plugin_url: Option<String>,
-    /// Unselectable panes are often used for UI elements that do not have direct user interaction
-    /// (eg. the default `status-bar` or `tab-bar`).
+    /// 不可选择的窗格通常用于没有直接用户交互的 UI 元素
+    ///（例如默认的 `status-bar` 或 `tab-bar`）。
     pub is_selectable: bool,
-    /// Grouped panes (usually through an explicit user action) that are staged for a bulk action
-    /// the index is kept track of in order to preserve the pane group order
+    /// 已分组的窗格（通常通过显式用户操作），已暂存以执行批量操作
+    /// 跟踪索引以保持窗格组的顺序
     pub index_in_pane_group: BTreeMap<ClientId, usize>,
-    /// The default foreground color of this pane, if set (e.g. "#00e000")
+    /// 此窗格的默认前景色（如果已设置）（例如 "#00e000"）
     pub default_fg: Option<String>,
-    /// The default background color of this pane, if set (e.g. "#001a3a")
+    /// 此窗格的默认背景色（如果已设置）（例如 "#001a3a"）
     pub default_bg: Option<String>,
 }
 
@@ -2487,9 +2487,9 @@ impl PaneRenderReport {
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct PaneContents {
-    // NOTE: both lines_above_viewport and lines_below_viewport are only populated if explicitly
-    // requested (eg. with get_full_scrollback true in the plugin command) this is for performance
-    // reasons
+    // 注意：lines_above_viewport 和 lines_below_viewport 仅在显式请求时填充
+    //（例如在插件命令中设置 get_full_scrollback 为 true），这是出于性能原因
+    // 原因
     pub lines_above_viewport: Vec<String>,
     pub lines_below_viewport: Vec<String>,
     pub viewport: Vec<String>,
@@ -2497,7 +2497,7 @@ pub struct PaneContents {
     pub cursor: Option<(usize, usize)>,
 }
 
-/// Extract text from a line between two column positions, accounting for wide characters
+/// 从一行中两个列位置之间提取文本，考虑宽字符
 fn extract_text_by_columns(line: &str, start_col: usize, end_col: usize) -> String {
     let mut current_col = 0;
     let mut result = String::new();
@@ -2506,17 +2506,17 @@ fn extract_text_by_columns(line: &str, start_col: usize, end_col: usize) -> Stri
     for ch in line.chars() {
         let char_width = ch.width().unwrap_or(0);
 
-        // Start capturing when we reach start_col
+        // 到达 start_col 时开始捕获
         if current_col >= start_col && !capturing {
             capturing = true;
         }
 
-        // Stop if we've reached or passed end_col
+        // 如果已到达或超过 end_col 则停止
         if current_col >= end_col {
             break;
         }
 
-        // Capture character if we're in the range
+        // 如果在范围内则捕获字符
         if capturing {
             result.push(ch);
         }
@@ -2527,7 +2527,7 @@ fn extract_text_by_columns(line: &str, start_col: usize, end_col: usize) -> Stri
     result
 }
 
-/// Extract text from a line starting at a column position, accounting for wide characters
+/// 从一行中从某个列位置开始提取文本，考虑宽字符
 fn extract_text_from_column(line: &str, start_col: usize) -> String {
     let mut current_col = 0;
     let mut result = String::new();
@@ -2550,7 +2550,7 @@ fn extract_text_from_column(line: &str, start_col: usize) -> String {
     result
 }
 
-/// Extract text from a line up to a column position, accounting for wide characters
+/// 从一行中提取到某个列位置为止的文本，考虑宽字符
 fn extract_text_to_column(line: &str, end_col: usize) -> String {
     let mut current_col = 0;
     let mut result = String::new();
@@ -2593,8 +2593,8 @@ impl PaneContents {
         }
     }
 
-    /// Returns the actual text content of the selection, if any exists.
-    /// Selection only occurs within the viewport.
+    /// 返回选区的实际文本内容（如果存在）。
+    /// 选区仅在视口内发生。
     pub fn get_selected_text(&self) -> Option<String> {
         let selected_text = self.selected_text?;
 
@@ -2603,31 +2603,31 @@ impl PaneContents {
         let end_line = selected_text.end.line() as usize;
         let end_col = selected_text.end.column();
 
-        // Handle out of bounds
+        // 处理越界
         if start_line >= self.viewport.len() || end_line >= self.viewport.len() {
             return None;
         }
 
         if start_line == end_line {
-            // Single line selection
+            // 单行选择
             let line = &self.viewport[start_line];
             Some(extract_text_by_columns(line, start_col, end_col))
         } else {
-            // Multi-line selection
+            // 多行选择
             let mut result = String::new();
 
-            // First line - from start column to end of line
+            // 第一行 — 从起始列到行尾
             let first_line = &self.viewport[start_line];
             result.push_str(&extract_text_from_column(first_line, start_col));
             result.push('\n');
 
-            // Middle lines - complete lines
+            // 中间行 — 完整行
             for i in (start_line + 1)..end_line {
                 result.push_str(&self.viewport[i]);
                 result.push('\n');
             }
 
-            // Last line - from start to end column
+            // 最后一行 — 从起始列到结束列
             let last_line = &self.viewport[end_line];
             result.push_str(&extract_text_to_column(last_line, end_col));
 
@@ -2728,15 +2728,15 @@ pub struct SelectedText {
 
 impl SelectedText {
     pub fn new(start: Position, end: Position) -> Self {
-        // Normalize: ensure start <= end
+        // 规范化：确保 start <= end
         let (normalized_start, normalized_end) = if start <= end {
             (start, end)
         } else {
             (end, start)
         };
 
-        // Normalize negative line values to 0
-        // (column is already usize so can't be negative)
+        // 将负行值规范化为 0
+        //（column 已经是 usize，所以不能为负）
         let normalized_start = Position::new(
             normalized_start.line().max(0) as i32,
             normalized_start.column() as u16,
@@ -2769,7 +2769,7 @@ pub struct PluginIds {
     pub client_id: ClientId,
 }
 
-/// Tag used to identify the plugin in layout and config kdl files
+/// 用于在布局和配置 KDL 文件中标识插件的标签
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, Deserialize, Serialize, PartialOrd, Ord)]
 pub struct PluginTag(String);
 
@@ -2802,7 +2802,7 @@ impl Default for PluginCapabilities {
     }
 }
 
-/// Represents a Clipboard type
+/// 表示剪贴板类型
 #[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub enum CopyDestination {
     Command,
@@ -2871,8 +2871,8 @@ pub struct MessageToPlugin {
     pub message_name: String,
     pub message_payload: Option<String>,
     pub message_args: BTreeMap<String, String>,
-    /// these will only be used in case we need to launch a new plugin to send this message to,
-    /// since none are running
+    /// 这些仅在需要启动新插件来发送此消息时使用，
+    /// 因为没有正在运行的插件
     pub new_plugin_args: Option<NewPluginArgs>,
     pub floating_pane_coordinates: Option<FloatingPaneCoordinates>,
 }
@@ -3006,7 +3006,7 @@ impl MessageToPlugin {
 pub struct ConnectToSession {
     pub name: Option<String>,
     pub tab_position: Option<usize>,
-    pub pane_id: Option<(u32, bool)>, // (id, is_plugin)
+    pub pane_id: Option<(u32, bool)>, //（id, is_plugin）
     pub layout: Option<LayoutInfo>,
     pub cwd: Option<PathBuf>,
 }
@@ -3055,9 +3055,9 @@ pub enum HttpVerb {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PipeSource {
-    Cli(String), // String is the pipe_id of the CLI pipe (used for blocking/unblocking)
-    Plugin(u32), // u32 is the lugin id
-    Keybind,     // TODO: consider including the actual keybind here?
+    Cli(String), // String 是 CLI 管道的 pipe_id（用于阻塞/解除阻塞）
+    Plugin(u32), // u32 是插件 id
+    Keybind,     // TODO: 考虑在这里包含实际的快捷键绑定？
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -3106,11 +3106,11 @@ impl FloatingPaneCoordinates {
         pinned: Option<bool>,
         borderless: Option<bool>,
     ) -> Option<Self> {
-        // Parse x/y coordinates - allows 0% or 0
+        // 解析 x/y 坐标 — 允许 0% 或 0
         let x = x.and_then(|x| PercentOrFixed::from_str(&x).ok());
         let y = y.and_then(|y| PercentOrFixed::from_str(&y).ok());
 
-        // Parse width/height - reject 0% or 0
+        // 解析宽度/高度 — 拒绝 0% 或 0
         let width = width.and_then(|w| {
             PercentOrFixed::from_str(&w)
                 .ok()
@@ -3265,7 +3265,7 @@ impl WebSharing {
         }
     }
     pub fn set_sharing(&mut self) -> bool {
-        // returns true if successfully set sharing
+        // 如果成功设置共享则返回 true
         match self {
             WebSharing::On => true,
             WebSharing::Off => {
@@ -3276,7 +3276,7 @@ impl WebSharing {
         }
     }
     pub fn set_not_sharing(&mut self) -> bool {
-        // returns true if successfully set not sharing
+        // 如果成功设置为不共享则返回 true
         match self {
             WebSharing::On => {
                 *self = WebSharing::Off;
@@ -3413,19 +3413,19 @@ pub enum PluginCommand {
     GetZellijVersion,
     OpenFile(FileToOpen, Context),
     OpenFileFloating(FileToOpen, Option<FloatingPaneCoordinates>, Context),
-    OpenTerminal(FileToOpen), // only used for the path as cwd
-    OpenTerminalFloating(FileToOpen, Option<FloatingPaneCoordinates>), // only used for the path as cwd
+    OpenTerminal(FileToOpen), // 仅将路径用作 cwd
+    OpenTerminalFloating(FileToOpen, Option<FloatingPaneCoordinates>), // 仅将路径用作 cwd
     OpenCommandPane(CommandToRun, Context),
     OpenCommandPaneFloating(CommandToRun, Option<FloatingPaneCoordinates>, Context),
-    SwitchTabTo(u32), // tab index
-    SetTimeout(f64),  // seconds
+    SwitchTabTo(u32), // 标签页索引
+    SetTimeout(f64),  // 秒
     ExecCmd(Vec<String>),
     PostMessageTo(PluginMessage),
     PostMessageToPlugin(PluginMessage),
     HideSelf,
-    ShowSelf(bool), // bool - should float if hidden
+    ShowSelf(bool), // bool - 如果隐藏则应浮动
     SwitchToMode(InputMode),
-    NewTabsWithLayout(String), // raw kdl layout
+    NewTabsWithLayout(String), // 原始 KDL 布局
     NewTab {
         name: Option<String>,
         cwd: Option<String>,
@@ -3452,7 +3452,7 @@ pub enum PluginCommand {
     MoveFocusOrTab(Direction),
     Detach,
     EditScrollback,
-    Write(Vec<u8>), // bytes
+    Write(Vec<u8>), // 字节
     WriteChars(String),
     ToggleTab,
     MovePane,
@@ -3479,56 +3479,56 @@ pub enum PluginCommand {
     NextSwapLayout,
     GoToTabName(String),
     FocusOrCreateTab(String),
-    GoToTab(u32),                       // tab index
-    StartOrReloadPlugin(String),        // plugin url (eg. file:/path/to/plugin.wasm)
-    CloseTerminalPane(u32),             // terminal pane id
-    ClosePluginPane(u32),               // plugin pane id
-    FocusTerminalPane(u32, bool, bool), // terminal pane id, should_float_if_hidden, should_be_in_place_if_hidden
-    FocusPluginPane(u32, bool, bool), // plugin pane id, should_float_if_hidden, should_be_in_place_if_hidden
-    RenameTerminalPane(u32, String),  // terminal pane id, new name
-    RenamePluginPane(u32, String),    // plugin pane id, new name
-    RenameTab(u32, String),           // tab index, new name
-    ReportPanic(String),              // stringified panic
+    GoToTab(u32),                       // 标签页索引
+    StartOrReloadPlugin(String),        // 插件 URL（例如 file:/path/to/plugin.wasm）
+    CloseTerminalPane(u32),             // 终端窗格 id
+    ClosePluginPane(u32),               // 插件窗格 id
+    FocusTerminalPane(u32, bool, bool), // 终端窗格 id，should_float_if_hidden，should_be_in_place_if_hidden
+    FocusPluginPane(u32, bool, bool), // 插件窗格 id，should_float_if_hidden，should_be_in_place_if_hidden
+    RenameTerminalPane(u32, String),  // 终端窗格 id，新名称
+    RenamePluginPane(u32, String),    // 插件窗格 id，新名称
+    RenameTab(u32, String),           // 标签页索引，新名称
+    ReportPanic(String),              // 字符串化的 panic
     RequestPluginPermissions(Vec<PermissionType>),
     SwitchSession(ConnectToSession),
-    DeleteDeadSession(String),       // String -> session name
-    DeleteAllDeadSessions,           // String -> session name
-    OpenTerminalInPlace(FileToOpen), // only used for the path as cwd
+    DeleteDeadSession(String),       // String -> 会话名称
+    DeleteAllDeadSessions,           // String -> 会话名称
+    OpenTerminalInPlace(FileToOpen), // 仅将路径用作 cwd
     OpenFileInPlace(FileToOpen, Context),
     OpenCommandPaneInPlace(CommandToRun, Context),
     RunCommand(
-        Vec<String>,              // command
+        Vec<String>,              // 命令
         BTreeMap<String, String>, // env_variables
         PathBuf,                  // cwd
-        BTreeMap<String, String>, // context
+        BTreeMap<String, String>, // 上下文
     ),
     WebRequest(
         String, // url
         HttpVerb,
         BTreeMap<String, String>, // headers
         Vec<u8>,                  // body
-        BTreeMap<String, String>, // context
+        BTreeMap<String, String>, // 上下文
     ),
-    RenameSession(String),         // String -> new session name
-    UnblockCliPipeInput(String),   // String => pipe name
-    BlockCliPipeInput(String),     // String => pipe name
-    CliPipeOutput(String, String), // String => pipe name, String => output
+    RenameSession(String),         // String -> 新会话名称
+    UnblockCliPipeInput(String),   // String => 管道名称
+    BlockCliPipeInput(String),     // String => 管道名称
+    CliPipeOutput(String, String), // String => 管道名称，String => 输出
     MessageToPlugin(MessageToPlugin),
     DisconnectOtherClients,
-    KillSessions(Vec<String>), // one or more session names
-    ScanHostFolder(PathBuf),   // TODO: rename to ScanHostFolder
+    KillSessions(Vec<String>), // 一个或多个会话名称
+    ScanHostFolder(PathBuf),   // TODO: 重命名为 ScanHostFolder
     WatchFilesystem,
     DumpSessionLayout {
         tab_index: Option<usize>,
     },
     CloseSelf,
     NewTabsWithLayoutInfo(LayoutInfo),
-    Reconfigure(String, bool), // String -> stringified configuration, bool -> save configuration
-    // file to disk
+    Reconfigure(String, bool), // String -> 字符串化配置，bool -> 保存配置
+    // 文件到磁盘
     HidePaneWithId(PaneId),
-    ShowPaneWithId(PaneId, bool, bool), // bools -> should_float_if_hidden, should_focus_pane
+    ShowPaneWithId(PaneId, bool, bool), // bools -> should_float_if_hidden，should_focus_pane
     OpenCommandPaneBackground(CommandToRun, Context),
-    RerunCommandPane(u32), // u32  - terminal pane id
+    RerunCommandPane(u32), // u32 - 终端窗格 id
     ResizePaneIdWithDirection(ResizeStrategy, PaneId),
     EditScrollbackForPaneWithId(PaneId),
     GetPaneScrollback {
@@ -3561,18 +3561,18 @@ pub enum PluginCommand {
     TogglePaneEmbedOrEjectForPaneId(PaneId),
     CloseTabWithIndex(usize), // usize - tab_index
     BreakPanesToNewTab(Vec<PaneId>, Option<String>, bool), // bool -
-    // should_change_focus_to_new_tab,
-    // Option<String> - optional name for
-    // the new tab
-    BreakPanesToTabWithIndex(Vec<PaneId>, usize, bool), // usize - tab_index, bool -
+    // should_change_focus_to_new_tab，
+    // Option<String> - 可选名称，用于
+    // 新标签页
+    BreakPanesToTabWithIndex(Vec<PaneId>, usize, bool), // usize - tab_index，bool -
     // should_change_focus_to_new_tab
     SwitchTabToId(u64),                            // u64 - tab_id
     GoToTabWithId(u64),                            // u64 - tab_id
     CloseTabWithId(u64),                           // u64 - tab_id
-    RenameTabWithId(u64, String),                  // u64 - tab_id, String - new name
-    BreakPanesToTabWithId(Vec<PaneId>, u64, bool), // u64 - tab_id, bool -
+    RenameTabWithId(u64, String),                  // u64 - tab_id，String - 新名称
+    BreakPanesToTabWithId(Vec<PaneId>, u64, bool), // u64 - tab_id，bool -
     // should_change_focus_to_target_tab
-    ReloadPlugin(u32), // u32 - plugin pane id
+    ReloadPlugin(u32), // u32 - 插件窗格 id
     LoadNewPlugin {
         url: String,
         config: BTreeMap<String, String>,
@@ -3586,7 +3586,7 @@ pub enum PluginCommand {
     },
     ListClients,
     ChangeHostFolder(PathBuf),
-    SetFloatingPanePinned(PaneId, bool), // bool -> should be pinned
+    SetFloatingPanePinned(PaneId, bool), // bool -> 应该被固定
     StackPanes(Vec<PaneId>),
     ChangeFloatingPanesCoordinates(Vec<(PaneId, FloatingPaneCoordinates)>),
     TogglePaneBorderless(PaneId),
@@ -3605,32 +3605,32 @@ pub enum PluginCommand {
     ShareCurrentSession,
     StopSharingCurrentSession,
     OpenFileInPlaceOfPlugin(FileToOpen, bool, Context), // bool -> close_plugin_after_replace
-    GroupAndUngroupPanes(Vec<PaneId>, Vec<PaneId>, bool), // panes to group, panes to ungroup,
-    // bool -> for all clients
-    HighlightAndUnhighlightPanes(Vec<PaneId>, Vec<PaneId>), // panes to highlight, panes to
-    // unhighlight
+    GroupAndUngroupPanes(Vec<PaneId>, Vec<PaneId>, bool), // 要分组的窗格，要取消分组的窗格，
+    // bool -> 适用于所有客户端
+    HighlightAndUnhighlightPanes(Vec<PaneId>, Vec<PaneId>), // 要高亮的窗格，要
+    // 取消高亮的窗格
     CloseMultiplePanes(Vec<PaneId>),
     FloatMultiplePanes(Vec<PaneId>),
     EmbedMultiplePanes(Vec<PaneId>),
     QueryWebServerStatus,
     SetSelfMouseSelectionSupport(bool),
-    GenerateWebLoginToken(Option<String>, bool), // (token_label, read_only)
-    RevokeWebLoginToken(String), // String -> token id (provided name or generated id)
+    GenerateWebLoginToken(Option<String>, bool), //（token_label, read_only）
+    RevokeWebLoginToken(String), // String -> token id（提供的名称或生成的 id）
     ListWebLoginTokens,
     RevokeAllWebLoginTokens,
-    RenameWebLoginToken(String, String), // (original_name, new_name)
+    RenameWebLoginToken(String, String), //（original_name, new_name）
     InterceptKeyPresses,
     ClearKeyPressesIntercepts,
-    ReplacePaneWithExistingPane(PaneId, PaneId, bool), // (pane id to replace, pane id of existing,
-    // suppress_replaced_pane)
+    ReplacePaneWithExistingPane(PaneId, PaneId, bool), //（要替换的窗格 id，现有窗格的 id，
+    // suppress_replaced_pane）
     RunAction(Action, BTreeMap<String, String>),
-    CopyToClipboard(String), // text to copy
+    CopyToClipboard(String), // 要复制的文本
     OverrideLayout(
         LayoutInfo,
         bool,                     // retain_existing_terminal_panes
         bool,                     // retain_existing_plugin_panes
-        bool,                     // apply_only_to_active_tab,
-        BTreeMap<String, String>, // context
+        bool,                     // apply_only_to_active_tab，
+        BTreeMap<String, String>, // 上下文
     ),
     SaveLayout {
         layout_name: String,
@@ -3650,7 +3650,7 @@ pub enum PluginCommand {
     },
     GenerateRandomName,
     DumpLayout(String),
-    ParseLayout(String), // String contains raw KDL layout
+    ParseLayout(String), // String 包含原始 KDL 布局
     GetLayoutDir,
     GetFocusedPaneInfo,
     SaveSession,
@@ -3674,7 +3674,7 @@ pub enum PluginCommand {
     ShowFloatingPanes {
         tab_id: Option<usize>,
     },
-    SetPaneColor(PaneId, Option<String>, Option<String>), // (pane_id, fg, bg)
+    SetPaneColor(PaneId, Option<String>, Option<String>), //（pane_id, fg, bg）
     SetPaneRegexHighlights(PaneId, Vec<RegexHighlight>),
     ClearPaneHighlights(PaneId),
     OpenPluginPaneFloating {
@@ -3685,21 +3685,21 @@ pub enum PluginCommand {
     },
     ListWindowsVolumes,
     GetSessionList,
-    KillSessionsAndReply(Vec<String>), // one or more session names; sends a response back
-    DeleteDeadSessionAndReply(String), // session name; sends a response back
-    DeleteAllDeadSessionsAndReply,     // no payload; sends a response back
+    KillSessionsAndReply(Vec<String>), // 一个或多个会话名称；发送响应回来
+    DeleteDeadSessionAndReply(String), // 会话名称；发送响应回来
+    DeleteAllDeadSessionsAndReply,     // 无载荷；发送响应回来
     SetSoftKeyboard(bool),
     FocusHostSession,
 }
 
-// Response type for plugin API methods that open a pane in a new tab
+// 在新标签页中打开窗格的插件 API 方法的响应类型
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct OpenPaneInNewTabResponse {
     pub tab_id: Option<usize>,
     pub pane_id: Option<PaneId>,
 }
 
-// Response types for plugin API methods that create tabs
+// 创建标签页的插件 API 方法的响应类型
 pub type NewTabResponse = Option<usize>;
 pub type NewTabUnfocusedResponse = Option<usize>;
 pub type NewTabsResponse = Vec<usize>;
@@ -3708,7 +3708,7 @@ pub type BreakPanesToNewTabResponse = Option<usize>;
 pub type BreakPanesToTabWithIndexResponse = Option<usize>;
 pub type BreakPanesToTabWithIdResponse = Option<usize>;
 
-// Response types for plugin API methods that create panes
+// 创建窗格的插件 API 方法的响应类型
 pub type OpenFileResponse = Option<PaneId>;
 pub type OpenFileFloatingResponse = Option<PaneId>;
 pub type OpenFileInPlaceResponse = Option<PaneId>;

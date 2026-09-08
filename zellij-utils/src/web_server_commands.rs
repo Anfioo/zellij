@@ -31,7 +31,7 @@ pub fn shutdown_all_webserver_instances() -> Result<()> {
                             );
                         },
                         Err(_) => {
-                            // no-op
+                            // 无操作
                         },
                     }
                 }
@@ -68,14 +68,14 @@ pub fn send_webserver_instruction(
     sender: &mut BufWriter<LocalSocketStream>,
     instruction: InstructionForWebServer,
 ) -> Result<()> {
-    // Convert to protobuf and send with length prefix
+    // 转换为 protobuf 并带长度前缀发送
     let proto_instruction: ProtoInstructionForWebServer = instruction.into();
     let encoded = proto_instruction.encode_to_vec();
     let len = encoded.len() as u32;
 
-    // Write length prefix
+    // 写入长度前缀
     sender.write_all(&len.to_le_bytes())?;
-    // Write protobuf message
+    // 写入 protobuf 消息
     sender.write_all(&encoded)?;
     sender.flush()?;
     Ok(())

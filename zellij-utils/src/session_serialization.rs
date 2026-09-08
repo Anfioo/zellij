@@ -43,7 +43,7 @@ pub struct PaneLayoutManifest {
 pub fn serialize_session_layout(
     global_layout_manifest: GlobalLayoutManifest,
 ) -> Result<(String, BTreeMap<String, String>), &'static str> {
-    // BTreeMap is the pane contents and their file names
+    // BTreeMap 是窗格内容及其文件名
     let mut document = KdlDocument::new();
     let mut pane_contents = BTreeMap::new();
     let mut layout_node = KdlNode::new("layout");
@@ -254,9 +254,9 @@ pub fn extract_plugin_and_config(
                 Some(run_plugin.configuration.clone()),
             ),
             RunPluginOrAlias::Alias(plugin_alias) => {
-                // in this case, the aliases should already be populated by the RunPlugins they
-                // translate to - if they are not, the alias either does not exist or this is some
-                // sort of bug
+                // 在这种情况下，别名应该已经由它们转换为的 RunPlugins 填充
+                // — 如果没有，别名要么不存在，要么这是某种
+                // bug
                 let name = plugin_alias
                     .run_plugin
                     .as_ref()
@@ -274,7 +274,7 @@ pub fn extract_plugin_and_config(
 }
 pub fn extract_edit_and_line_number(layout_run: &Option<Run>) -> (Option<String>, Option<usize>) {
     match &layout_run {
-        // TODO: line number in layouts?
+        // TODO: 布局中的行号？
         Some(Run::EditFile(path, line_number, _cwd)) => {
             (Some(path.display().to_string()), line_number.clone())
         },
@@ -717,10 +717,10 @@ fn stack_layout_from_manifest(
         })
     }
     if stack_nodes.len() == 1 {
-        // if there's only one stack, we return it without a wrapper
+        // 如果只有一个栈，我们直接返回它而不包装
         stack_nodes.iter().next().cloned()
     } else {
-        // here there is more than one stack, so we wrap it in a logical container node
+        // 这里有多个栈，所以我们将其包装在一个逻辑容器节点中
         Some(TiledPaneLayout {
             split_size,
             children: stack_nodes,
@@ -778,7 +778,7 @@ fn tiled_pane_layout_from_manifest(
     }
 }
 
-/// Tab-level parsing
+/// 标签页级别解析
 fn get_tiled_panes_layout_from_panegeoms(
     geoms: &Vec<PaneLayoutManifest>,
     split_size: Option<SplitSize>,
@@ -787,8 +787,8 @@ fn get_tiled_panes_layout_from_panegeoms(
         Some(x) => x,
         None => {
             if geoms.len() > 1 {
-                // this can only happen if all geoms belong to one or more stacks
-                // since stack splits are discounted in the get_splits method
+                // 这只有在所有 geom 都属于一个或多个栈时才会发生
+                // 因为栈拆分在 get_splits 方法中被忽略
                 return stack_layout_from_manifest(geoms, split_size);
             } else {
                 return Some(tiled_pane_layout_from_manifest(
@@ -915,10 +915,10 @@ fn get_y_lims(geoms: &Vec<PaneLayoutManifest>) -> Option<(usize, usize)> {
     }
 }
 
-/// Returns the `SplitDirection` as well as the values, on the axis
-/// perpendicular the `SplitDirection`, for which there is a split spanning
-/// the max_cols or max_rows of the domain. The values are ordered
-/// increasingly and contains the boundaries of the domain.
+/// 返回 `SplitDirection` 以及垂直于 `SplitDirection` 的轴上的值，
+/// 对于这些值，存在一个跨越域的 max_cols 或 max_rows 的拆分。
+/// 值按递增顺序排列，包含域的边界。
+/// 越来越多，包含域的边界。
 fn get_splits(geoms: &Vec<PaneLayoutManifest>) -> Option<(SplitDirection, Vec<usize>)> {
     if geoms.len() == 1 {
         return None;
@@ -933,7 +933,7 @@ fn get_splits(geoms: &Vec<PaneLayoutManifest>) -> Option<(SplitDirection, Vec<us
         SplitDirection::Horizontal => get_row_splits(&geoms, &x_lims, &y_lims),
     };
     if splits.len() <= 2 {
-        // ie only the boundaries are present and no real split has been found
+        // 即只有边界存在，没有找到真正的拆分
         direction = !direction;
         splits = match direction {
             SplitDirection::Vertical => get_col_splits(&geoms, &x_lims, &y_lims),
@@ -941,15 +941,15 @@ fn get_splits(geoms: &Vec<PaneLayoutManifest>) -> Option<(SplitDirection, Vec<us
         };
     }
     if splits.len() <= 2 {
-        // ie no real split has been found in both directions
+        // 即在两个方向上都没有找到真正的拆分
         None
     } else {
         Some((direction, splits))
     }
 }
 
-/// Returns a vector containing the abscisse (x) of the cols that split the
-/// domain including the boundaries, ie the min and max abscisse values.
+/// 返回一个向量，包含拆分域的列的横坐标（x），
+/// 包括边界，即最小和最大横坐标值。
 fn get_col_splits(
     geoms: &Vec<PaneLayoutManifest>,
     (_, x_max): &(usize, usize),
@@ -973,12 +973,12 @@ fn get_col_splits(
             splits.push(x);
         };
     }
-    splits.push(*x_max); // Necessary as `g.x` is from the upper-left corner
+    splits.push(*x_max); // 必要的，因为 `g.x` 是从左上角开始的
     splits
 }
 
-/// Returns a vector containing the coordinate (y) of the rows that split the
-/// domain including the boundaries, ie the min and max coordinate values.
+/// 返回一个向量，包含拆分域的行的坐标（y），
+/// 包括边界，即最小和最大坐标值。
 fn get_row_splits(
     geoms: &Vec<PaneLayoutManifest>,
     (x_min, x_max): &(usize, usize),
@@ -989,9 +989,9 @@ fn get_row_splits(
     let mut sorted_geoms = geoms.clone();
     sorted_geoms.sort_by_key(|g| g.geom.y);
 
-    //  here we make sure the various panes in all the stacks aren't counted as splits, since
-    //  stacked panes must always stay togethyer - we group them into one "geom" for the purposes
-    //  of figuring out their splits
+    //  这里我们确保所有栈中的各个窗格不被计为拆分，因为
+    //  堆叠的窗格必须始终保持在一起 — 我们将它们分组为一个 "geom"，以便
+    //  计算它们的拆分
     let mut stack_geoms: HashMap<usize, Vec<PaneLayoutManifest>> = HashMap::new();
     let mut all_geoms = vec![];
     for pane_layout_manifest in sorted_geoms.drain(..) {
@@ -1031,12 +1031,12 @@ fn get_row_splits(
             splits.push(y);
         };
     }
-    splits.push(*y_max); // Necessary as `g.y` is from the upper-left corner
+    splits.push(*y_max); // 必要的，因为 `g.y` 是从左上角开始的
     splits
 }
 
-/// Get the constraint of the domain considered, base on the rows or columns,
-/// depending on the split direction provided.
+/// 获取所考虑域的约束，基于行或列，
+/// 取决于提供的拆分方向。
 fn get_domain_constraint(
     geoms: &Vec<PaneLayoutManifest>,
     split_direction: &SplitDirection,
@@ -1055,7 +1055,7 @@ fn get_domain_col_constraint(
     let mut percent = 0.0;
     let mut x = x_min;
     while x != x_max {
-        // we only look at one (ie the last) geom that has value `x` for `g.x`
+        // 我们只查看一个（即最后一个）`g.x` 值为 `x` 的 geom
         let geom = geoms.iter().filter(|g| g.geom.x == x).last();
         match geom {
             Some(geom) => {
@@ -1083,7 +1083,7 @@ fn get_domain_row_constraint(
     let mut percent = 0.0;
     let mut y = y_min;
     while y != y_max {
-        // we only look at one (ie the last) geom that has value `y` for `g.y`
+        // 我们只查看一个（即最后一个）`g.y` 值为 `y` 的 geom
         let geom = geoms.iter().filter(|g| g.geom.y == y).last();
         match geom {
             Some(geom) => {
@@ -1104,8 +1104,8 @@ fn get_domain_row_constraint(
     }
 }
 
-/// Returns split sizes for all the children of a `TiledPaneLayout` based on
-/// their constraints.
+/// 基于约束返回 `TiledPaneLayout` 所有子项的拆分大小。
+/// 它们的约束。
 fn get_split_sizes(constraints: &Vec<Constraint>) -> Vec<Option<SplitSize>> {
     let mut split_sizes = Vec::new();
     let max_percent = constraints
@@ -1819,8 +1819,8 @@ mod tests {
                     ..Default::default()
                 },
                 PaneLayoutManifest {
-                    // note that in this case, `is_borderless` should be ignored because this is a
-                    // floating pane
+                    // 注意在这种情况下，`is_borderless` 应该被忽略，因为这是一个
+                    // 浮动窗格
                     is_borderless: true,
                     geom: PaneGeom {
                         x: 0,
@@ -2348,10 +2348,10 @@ mod tests {
         assert_snapshot!(kdl.0);
     }
 
-    // utility functions
+    // 工具函数
     fn parse_panegeom_from_json(data_str: &str) -> PaneGeom {
         //
-        // Expects this input
+        // 期望此输入
         //
         //  r#"{ "x": 0, "y": 1, "rows": { "constraint": "Percent(100.0)", "inner": 43 }, "cols": { "constraint": "Percent(100.0)", "inner": 211 }, "is_stacked": false }"#,
         //

@@ -19,17 +19,17 @@ pub mod session_serialization;
 pub mod setup;
 pub mod shared;
 
-// The following modules can't be used when targeting wasm
+// 以下模块在目标为 wasm 时无法使用
 #[cfg(not(target_family = "wasm"))]
-pub mod channels; // Requires tokio
+pub mod channels; // 需要 tokio
 #[cfg(not(target_family = "wasm"))]
 pub mod common_path;
 #[cfg(not(target_family = "wasm"))]
-pub mod downloader; // Requires tokio
+pub mod downloader; // 需要 tokio
 #[cfg(not(target_family = "wasm"))]
-pub mod ipc; // Requires interprocess
+pub mod ipc; // 需要 interprocess
 #[cfg(not(target_family = "wasm"))]
-pub mod logging; // Requires log4rs
+pub mod logging; // 需要 log4rs
 #[cfg(not(target_family = "wasm"))]
 pub mod nested_session;
 #[cfg(all(not(target_family = "wasm"), feature = "web_server_capability"))]
@@ -43,8 +43,8 @@ pub mod web_server_commands;
 #[cfg(all(not(target_family = "wasm"), feature = "web_server_capability"))]
 pub mod web_server_contract;
 
-// TODO(hartan): Remove this re-export for the next minor release.
+// TODO(hartan): 在下一个次版本中移除此重新导出。
 pub use ::prost;
 
-// Vendored libraries
+// 内置库
 pub mod vendored;

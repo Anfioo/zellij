@@ -1,4 +1,4 @@
-/// Uniformly operates ZELLIJ* environment variables
+/// 统一操作 ZELLIJ* 环境变量
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -31,7 +31,7 @@ pub fn get_socket_dir() -> Result<String> {
     Ok(var(SOCKET_DIR_ENV_KEY)?)
 }
 
-/// Manage ENVIRONMENT VARIABLES from the configuration and the layout files
+/// 从配置文件和布局文件中管理环境变量
 #[derive(Default, Clone, PartialEq, Serialize, Deserialize)]
 pub struct EnvironmentVariables {
     env: HashMap<String, String>,
@@ -48,7 +48,7 @@ impl fmt::Debug for EnvironmentVariables {
 }
 
 impl EnvironmentVariables {
-    /// Merges two structs, keys from `other` supersede keys from `self`
+    /// 合并两个结构体，`other` 中的键会覆盖 `self` 中的键
     pub fn merge(&self, other: Self) -> Self {
         let mut env = self.clone();
         env.env.extend(other.env);
@@ -57,8 +57,7 @@ impl EnvironmentVariables {
     pub fn from_data(data: HashMap<String, String>) -> Self {
         EnvironmentVariables { env: data }
     }
-    /// Set all the ENVIRONMENT VARIABLES, that are configured
-    /// in the configuration and layout files
+    /// 设置所有在配置文件和布局文件中配置的环境变量
     pub fn set_vars(&self) {
         for (k, v) in &self.env {
             set_var(k, v);

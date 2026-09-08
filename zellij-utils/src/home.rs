@@ -1,6 +1,6 @@
 //!
-//! # This module contain everything you'll need to access local system paths
-//! containing configuration and layouts
+//! # 本模块包含访问本地系统路径所需的一切
+//! 包括配置和布局
 
 use crate::consts::{SYSTEM_DEFAULT_CONFIG_DIR, ZELLIJ_PROJ_DIR};
 
@@ -12,8 +12,7 @@ use crate::home_unix as platform;
 use crate::home_windows as platform;
 
 #[cfg(not(test))]
-/// Goes through a predefined list and checks for an already
-/// existing config directory, returns the first match
+/// 遍历预定义列表，检查是否已存在配置目录，返回第一个匹配项
 pub fn find_default_config_dir() -> Option<PathBuf> {
     default_config_dirs()
         .into_iter()
@@ -27,7 +26,7 @@ pub fn find_default_config_dir() -> Option<PathBuf> {
     None
 }
 
-/// Order in which config directories are checked
+/// 检查配置目录的顺序
 pub(crate) fn default_config_dirs() -> Vec<Option<PathBuf>> {
     vec![
         home_config_dir(),
@@ -36,8 +35,7 @@ pub(crate) fn default_config_dirs() -> Vec<Option<PathBuf>> {
     ]
 }
 
-/// Looks for an existing dir, uses that, else returns a
-/// dir matching the config spec.
+/// 查找已存在的目录并使用它，否则返回符合配置规范的目录。
 pub fn get_default_data_dir() -> PathBuf {
     [xdg_data_dir(), platform::system_data_dir()]
         .into_iter()

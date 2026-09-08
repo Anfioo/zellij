@@ -243,29 +243,28 @@ pub fn dump_builtin_plugins(_path: &PathBuf) -> Result<()> {
 
 #[derive(Debug, Default, Clone, Args, Serialize, Deserialize)]
 pub struct Setup {
-    /// Dump the default configuration file to stdout
+    /// 将默认配置文件转储到标准输出
     #[clap(long, value_parser)]
     pub dump_config: bool,
 
-    /// Disables loading of configuration file at default location,
-    /// loads the defaults that zellij ships with
+    /// 禁用在默认位置加载配置文件，
+    /// 加载 zellij 附带的默认配置
     #[clap(long, value_parser)]
     pub clean: bool,
 
-    /// Checks the configuration of zellij and displays
-    /// currently used directories
+    /// 检查 zellij 的配置并显示当前使用的目录
     #[clap(long, value_parser)]
     pub check: bool,
 
-    /// Dump specified layout to stdout
+    /// 将指定的布局转储到标准输出
     #[clap(long, value_parser)]
     pub dump_layout: Option<String>,
 
-    /// Dump the specified swap layout file to stdout
+    /// 将指定的交换布局文件转储到标准输出
     #[clap(long, value_parser)]
     pub dump_swap_layout: Option<String>,
 
-    /// Dump the builtin plugins to DIR or "DATA DIR" if unspecified
+    /// 将内置插件转储到 DIR，若未指定则转储到 "DATA DIR"
     #[clap(
         long,
         value_name = "DIR",
@@ -275,28 +274,26 @@ pub struct Setup {
     )]
     pub dump_plugins: Option<Option<PathBuf>>,
 
-    /// Generates completion for the specified shell
+    /// 为指定的 shell 生成补全
     #[clap(long, value_name = "SHELL", value_parser)]
     pub generate_completion: Option<String>,
 
-    /// Generates auto-start script for the specified shell
+    /// 为指定的 shell 生成自动启动脚本
     #[clap(long, value_name = "SHELL", value_parser)]
     pub generate_auto_start: Option<String>,
 }
 
 impl Setup {
-    /// Entrypoint from main
-    /// Merges options from the config file and the command line options
-    /// into `[Options]`, the command line options superseding the layout
-    /// file options, superseding the config file options:
-    /// 1. command line options (`zellij options`)
-    /// 2. layout options
-    ///    (`layout.kdl` / `zellij --layout`)
-    /// 3. config options (`config.kdl`)
+    /// 来自 main 的入口点
+    /// 将配置文件和命令行选项中的选项合并到 `[Options]` 中，
+    /// 命令行选项优先于布局文件选项，布局文件选项优先于配置文件选项：
+    /// 1. 命令行选项（`zellij options`）
+    /// 2. 布局选项（`layout.kdl` / `zellij --layout`）
+    /// 3. 配置选项（`config.kdl`）
     pub fn from_cli_args(
         cli_args: &CliArgs,
     ) -> Result<(Config, Option<LayoutInfo>, Options, Config, Options), ConfigError> {
-        // note that this can potentially exit the process
+        // 注意这可能会退出进程
         Setup::handle_setup_commands(cli_args);
         let config = Config::try_from(cli_args)?;
         let cli_config_options: Option<Options> =
@@ -306,8 +303,7 @@ impl Setup {
                 None
             };
 
-        // the attach CLI command can also have its own Options, we need to merge them if they
-        // exist
+        // attach CLI 命令也可以有自己的 Options，如果存在我们需要合并它们
         let cli_config_options = merge_attach_command_options(cli_config_options, &cli_args);
 
         let mut config_without_layout = config.clone();
@@ -360,7 +356,7 @@ impl Setup {
         ))
     }
 
-    /// General setup helpers
+    /// 通用设置辅助函数
     pub fn from_cli(&self) -> Result<()> {
         if self.clean {
             return Ok(());
@@ -394,7 +390,7 @@ impl Setup {
         Ok(())
     }
 
-    /// Checks the merged configuration
+    /// 检查合并后的配置
     pub fn from_cli_with_options(&self, opts: &CliArgs, config_options: &Options) -> Result<()> {
         if self.check {
             Setup::check_defaults_config(opts, config_options)?;
@@ -439,7 +435,7 @@ impl Setup {
             .clone()
             .or_else(|| config_dir.clone().map(|p| p.join(CONFIG_NAME)));
 
-        // according to
+        // 根据
         // https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
         let hyperlink_start = "\u{1b}]8;;";
         let hyperlink_mid = "\u{1b}\\";
@@ -575,7 +571,7 @@ impl Setup {
         };
         let mut out = std::io::stdout();
         clap_complete::generate(shell, &mut CliArgs::command(), "zellij", &mut out);
-        // add shell dependent extra completion
+        // 添加 shell 相关的额外补全
         match shell {
             Shell::Bash => {
                 let _ = out.write_all(BASH_EXTRA_COMPLETION);
@@ -620,18 +616,18 @@ impl Setup {
         config: Config,
         cli_args: &CliArgs,
     ) -> Result<(Option<LayoutInfo>, Config), ConfigError> {
-        // find the layout folder relative to which we'll look for our layout
+        // 查找我们将用于查找布局的布局文件夹
         let layout_dir = cli_config_options
             .as_ref()
             .and_then(|cli_options| cli_options.layout_dir.clone())
             .or_else(|| config.options.layout_dir.clone())
             .or_else(|| get_layout_dir(cli_args.config_dir.clone()))
             .or_else(|| get_layout_dir(find_default_config_dir()))
-            // Try to get an absolute path, else let the resolution code figure this out.
+            // 尝试获取绝对路径，否则让解析代码来解决这个问题。
             .map(|d| d.canonicalize().unwrap_or(d));
-        // the chosen layout can either be a path relative to the layout_dir or a name of one
-        // of our assets, this distinction is made when parsing the layout - TODO: ideally, this
-        // logic should not be split up and all the decisions should happen here
+        // 所选布局可以是相对于 layout_dir 的路径，也可以是我们某个资源的名称，
+        // 这个区别是在解析布局时做出的 - TODO：理想情况下，这个逻辑不应该被拆分，
+        // 所有的决定都应该在这里发生
         let (layout_info, chosen_layout) = if let Some(ref layout_string) = cli_args.layout_string {
             (Some(LayoutInfo::Stringified(layout_string.clone())), None)
         } else if let Some(chosen_layout) = cli_args.layout.clone() {
@@ -870,8 +866,8 @@ mod setup_test {
 
     #[test]
     fn cli_with_relative_layout_and_extension() {
-        // NOTE: We assume to be in `zellij-utils` root directory. If this doesn't hold, path
-        // resolution cannot work (as it actually reads path to ensure they exist).
+        // 注意：我们假设在 `zellij-utils` 根目录中。如果这不成立，
+        // 路径解析将无法工作（因为它实际上会读取路径以确保它们存在）。
         let cwd = std::env::current_dir().unwrap();
         assert_eq!(cwd, PathBuf::from(env!("CARGO_MANIFEST_DIR")));
 
@@ -889,8 +885,8 @@ mod setup_test {
 
     #[test]
     fn cli_with_relative_layout_and_separator() {
-        // NOTE: We assume to be in `zellij-utils` root directory. If this doesn't hold, path
-        // resolution cannot work (as it actually reads path to ensure they exist).
+        // 注意：我们假设在 `zellij-utils` 根目录中。如果这不成立，
+        // 路径解析将无法工作（因为它实际上会读取路径以确保它们存在）。
         let cwd = std::env::current_dir().unwrap();
         assert_eq!(cwd, PathBuf::from(env!("CARGO_MANIFEST_DIR")));
 

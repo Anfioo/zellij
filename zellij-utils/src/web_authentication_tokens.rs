@@ -1,4 +1,4 @@
-// TODO: GATE THIS WHOLE FILE AND RELEVANT DEPS BEHIND web_server_capability
+// TODO: 将整个文件及相关依赖用 web_server_capability 特性门控
 use crate::consts::ZELLIJ_PROJ_DIR;
 use rusqlite::Connection;
 use sha2::{Digest, Sha256};
@@ -77,7 +77,7 @@ fn open_db() -> Result<Connection> {
     let conn = Connection::open(&db_path)?;
     init_db(&conn)?;
 
-    // Set restrictive permissions on the database file
+    // 对数据库文件设置严格的权限
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
@@ -115,7 +115,7 @@ fn init_db(conn: &Connection) -> Result<()> {
         [],
     )?;
 
-    // Migration: Add read_only column if it doesn't exist
+    // 迁移：如果 read_only 列不存在则添加
     match conn.execute(
         "ALTER TABLE tokens ADD COLUMN read_only BOOLEAN NOT NULL DEFAULT 0",
         [],
@@ -123,7 +123,7 @@ fn init_db(conn: &Connection) -> Result<()> {
         Ok(_) => {},
         Err(e) => {
             let err_msg = e.to_string();
-            // "duplicate column name" is the expected error when the column already exists
+            // "duplicate column name" 是列已存在时的预期错误
             if !err_msg.contains("duplicate column name") {
                 return Err(TokenError::Database(e));
             }
@@ -199,13 +199,13 @@ pub fn create_session_token(auth_token: &str, remember_me: bool) -> Result<Strin
         let four_weeks = 4 * 7 * 24 * 60 * 60;
         format!("datetime({}, 'unixepoch')", now + four_weeks)
     } else {
-        // For session-only: very short expiration (e.g., 5 minutes)
-        // The browser will handle the session aspect via cookie expiration
+        // 仅会话模式：非常短的过期时间（例如 5 分钟）
+        // 浏览器将通过 cookie 过期来处理会话方面
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs();
-        let short_duration = 5 * 60; // 5 minutes
+        let short_duration = 5 * 60; // 5 分钟
         format!("datetime({}, 'unixepoch')", now + short_duration)
     };
 
@@ -236,7 +236,7 @@ pub fn is_session_token_read_only(session_token: &str) -> Result<bool> {
 
     let session_token_hash = hash_token(session_token);
 
-    // Join session_tokens to tokens table to get read_only flag
+    // 将 session_tokens 与 tokens 表连接以获取 read_only 标志
     let read_only: i64 = match conn.query_row(
         "SELECT t.read_only FROM tokens t
          JOIN session_tokens st ON st.auth_token_hash = t.token_hash

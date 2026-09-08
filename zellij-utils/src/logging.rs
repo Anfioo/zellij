@@ -1,4 +1,4 @@
-//! Zellij logging utility functions.
+//! Zellij 日志工具函数。
 
 use std::{
     fs,
@@ -20,7 +20,7 @@ use log4rs::encode::pattern::PatternEncoder;
 use crate::consts::{ZELLIJ_TMP_DIR, ZELLIJ_TMP_LOG_DIR, ZELLIJ_TMP_LOG_FILE};
 use crate::shared::set_permissions;
 
-const LOG_MAX_BYTES: u64 = 1024 * 1024 * 16; // 16 MiB per log
+const LOG_MAX_BYTES: u64 = 1024 * 1024 * 16; // 每个日志 16 MiB
 
 pub fn configure_logger() {
     atomic_create_dir(&*ZELLIJ_TMP_DIR).unwrap();
@@ -38,11 +38,11 @@ pub fn configure_logger() {
         )
         .unwrap();
 
-    // {n} means platform dependent newline
-    // module is padded to exactly 25 bytes and thread is padded to be between 10 and 15 bytes.
+    // {n} 表示平台相关的换行符
+    // module 被填充到恰好 25 字节，thread 被填充到 10 到 15 字节之间。
     let file_pattern = "{highlight({level:<6})} |{module:<25.25}| {date(%Y-%m-%d %H:%M:%S.%3f)} [{thread:<10.15}] {file}:{line}: {message} {n}";
 
-    // default zellij appender, should be used across most of the codebase.
+    // 默认的 zellij 日志追加器，应在大部分代码库中使用。
     let log_file = RollingFileAppender::builder()
         .encoder(Box::new(PatternEncoder::new(file_pattern)))
         .build(
@@ -54,8 +54,8 @@ pub fn configure_logger() {
         )
         .unwrap();
 
-    // plugin appender. To be used in logging_pipe to forward stderr output from plugins. We do some formatting
-    // in logging_pipe to print plugin name as 'module' and plugin_id instead of thread.
+    // 插件日志追加器。用于 logging_pipe 转发插件的 stderr 输出。
+    // 我们在 logging_pipe 中做了一些格式化，将插件名称打印为 'module'，将 plugin_id 打印为 thread。
     let log_plugin = RollingFileAppender::builder()
         .encoder(Box::new(PatternEncoder::new(
             "{highlight({level:<6})} {message} {n}",
@@ -66,13 +66,13 @@ pub fn configure_logger() {
         )
         .unwrap();
 
-    // Set the default logging level to "info" and log it to zellij.log file
-    // Decrease verbosity for `wasmtime_wasi` module because it has a lot of useless info logs
-    // For `zellij_server::logging_pipe`, we use custom format as we use logging macros to forward stderr output from plugins
+    // 将默认日志级别设置为 "info"，并记录到 zellij.log 文件
+    // 降低 `wasmtime_wasi` 模块的详细程度，因为它有很多无用的 info 日志
+    // 对于 `zellij_server::logging_pipe`，我们使用自定义格式，因为使用日志宏来转发插件的 stderr 输出
     let config = Config::builder()
         .appender(Appender::builder().build("logFile", Box::new(log_file)))
         .appender(Appender::builder().build("logPlugin", Box::new(log_plugin)))
-        // reduce the verbosity of isahc, otherwise it logs on every failed web request
+        // 降低 isahc 的详细程度，否则它会在每次失败的 web 请求时记录日志
         .logger(
             Logger::builder()
                 .appender("logFile")
