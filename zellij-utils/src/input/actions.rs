@@ -1151,7 +1151,7 @@ impl Action {
                 if blocking || unblock_condition.is_some() {
                     // 对于阻塞窗格，我们不支持插件
                     if plugin.is_some() {
-                        return Err("Blocking panes do not support plugin variants".to_string());
+                        return Err("阻塞窗格不支持插件变体".to_string());
                     }
 
                     let command = if !command.is_empty() {
@@ -1804,7 +1804,7 @@ impl Action {
                             .map_err(|e| format!("加载布局失败：{}", e))?
                     }
                 } else {
-                    return Err("Either layout or layout-string must be provided".to_string());
+                    return Err("必须提供 layout 或 layout-string".to_string());
                 };
 
                 // 解析 KDL 布局
@@ -2116,7 +2116,7 @@ impl Action {
                 let pane_id_str = match pane_id {
                     Some(id) => id,
                     None => std::env::var("ZELLIJ_PANE_ID").map_err(|_| {
-                        "No --pane-id provided and ZELLIJ_PANE_ID is not set".to_string()
+                        "未提供 --pane-id 且未设置 ZELLIJ_PANE_ID".to_string()
                     })?,
                 };
                 let parsed_pane_id = PaneId::from_str(&pane_id_str);
@@ -2317,7 +2317,7 @@ impl Action {
 
 fn suggest_key_fix(key_str: &str) -> String {
     if key_str.contains('-') {
-        return "  Hint: Use spaces instead of hyphens (e.g., \"Ctrl a\" not \"Ctrl-a\")"
+        return "  Hint: 请使用空格代替连字符 (e.g., \"Ctrl a\" not \"Ctrl-a\")"
             .to_string();
     }
 
@@ -2442,7 +2442,7 @@ mod tests {
         let result = Action::actions_from_cli(cli_action, Box::new(|| PathBuf::from("/tmp")), None);
         assert!(result.is_err());
         let err = result.unwrap_err();
-        assert!(err.contains("Use spaces instead of hyphens"));
+        assert!(err.contains("请使用空格代替连字符"));
     }
 
     #[test]

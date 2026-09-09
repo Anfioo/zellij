@@ -260,7 +260,7 @@ impl<'a> KdlLayoutParser<'a> {
                 Ok(size) => {
                     if !can_be_zero && size.is_zero() {
                         Err(kdl_parsing_error!(
-                            format!("{} should be greater than 0", value_name),
+                            format!("{} 应大于 0", value_name),
                             kdl_node
                         ))
                     } else {
@@ -278,7 +278,7 @@ impl<'a> KdlLayoutParser<'a> {
         } else if let Some(size) = kdl_get_int_property_or_child_value!(kdl_node, value_name) {
             if size == 0 && !can_be_zero {
                 return Err(kdl_parsing_error!(
-                    format!("{} should be greater than 0", value_name),
+                    format!("{} 应大于 0", value_name),
                     kdl_node
                 ));
             }
@@ -395,7 +395,7 @@ impl<'a> KdlLayoutParser<'a> {
         match kdl_get_child!(pane_node, "args") {
             Some(kdl_args) => {
                 if kdl_args.entries().is_empty() {
-                    return Err(kdl_parsing_error!(format!("args cannot be empty and should contain one or more command arguments (eg. args \"-h\" \"-v\")"), kdl_args));
+                    return Err(kdl_parsing_error!(format!("args 不能为空，应包含一个或多个命令参数（例如 args \"-h\" \"-v\"）"), kdl_args));
                 }
                 Ok(Some(
                     kdl_string_arguments!(kdl_args)
@@ -467,7 +467,7 @@ impl<'a> KdlLayoutParser<'a> {
             },
             (None, Some(edit), None) => Ok(Some(Run::EditFile(edit, None, None))),
             (Some(_command), Some(_edit), _) => Err(ConfigError::new_layout_kdl_error(
-                "cannot have both a command and an edit instruction for the same pane".into(),
+                "同一窗格不能同时具有命令和编辑指令".into(),
                 pane_node.span().offset(),
                 pane_node.span().len(),
             )),
@@ -488,7 +488,7 @@ impl<'a> KdlLayoutParser<'a> {
                 .unwrap_or(false);
             if has_non_cwd_run_prop {
                 return Err(ConfigError::new_layout_kdl_error(
-                    "Cannot have both a command/edit and a plugin block for a single pane".into(),
+                    "单个窗格不能同时具有命令/编辑和插件块".into(),
                     plugin_block.span().offset(),
                     plugin_block.span().len(),
                 ));
@@ -511,7 +511,7 @@ impl<'a> KdlLayoutParser<'a> {
                 .unwrap_or(false);
             if has_non_cwd_run_prop {
                 return Err(ConfigError::new_layout_kdl_error(
-                    "Cannot have both a command/edit and a plugin block for a single pane".into(),
+                    "单个窗格不能同时具有命令/编辑和插件块".into(),
                     plugin_block.span().offset(),
                     plugin_block.span().len(),
                 ));
@@ -550,19 +550,19 @@ impl<'a> KdlLayoutParser<'a> {
         };
         if children_are_stacked && external_children_index.is_none() && children.is_empty() {
             return Err(ConfigError::new_layout_kdl_error(
-                format!("A stacked pane must have children nodes or possibly a \"children\" node if in a swap_layout"),
+                format!("堆叠窗格必须具有子节点，或者如果处于 swap_layout 中，则可能具有 \"children\" 节点"),
                 kdl_node.span().offset(),
                 kdl_node.span().len(),
             ));
         } else if children_are_stacked && children_split_direction == SplitDirection::Vertical {
             return Err(ConfigError::new_layout_kdl_error(
-                format!("Stacked panes cannot be vertical"),
+                format!("堆叠窗格不能是垂直的"),
                 kdl_node.span().offset(),
                 kdl_node.span().len(),
             ));
         } else if is_expanded_in_stack && !is_part_of_stack {
             return Err(ConfigError::new_layout_kdl_error(
-                format!("An expanded pane must be part of a stack"),
+                format!("展开的窗格必须是堆叠的一部分"),
                 kdl_node.span().offset(),
                 kdl_node.span().len(),
             ));

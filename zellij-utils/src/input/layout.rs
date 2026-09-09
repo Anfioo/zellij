@@ -771,7 +771,7 @@ impl FromStr for PercentOrFixed {
             if percent_size <= 100 {
                 Ok(PercentOrFixed::Percent(percent_size))
             } else {
-                Err("Percent must be between 0 and 100".into())
+                Err("百分比必须在 0 到 100 之间".into())
             }
         } else {
             let fixed_size = usize::from_str_radix(s, 10)?;
@@ -984,7 +984,7 @@ impl TiledPaneLayout {
         };
         for (_pane_layout, pane_geom) in layouts.iter() {
             if !pane_geom.is_at_least_minimum_size() {
-                return Err("No room on screen for this layout!");
+                return Err("屏幕上没有空间容纳此布局！");
             }
         }
         Ok(layouts)
@@ -1219,7 +1219,7 @@ impl LayoutParts {
                 Ok(())
             },
             LayoutParts::Tabs(_tabs) => Err(ConfigError::new_layout_kdl_error(
-                "Trying to insert a pane into a tab layout".into(),
+                "试图将窗格插入标签页布局".into(),
                 0,
                 0,
             )),
@@ -1650,7 +1650,7 @@ impl Layout {
                 None,
             )),
             None | Some(_) => Err(ConfigError::IoPath(
-                std::io::Error::new(std::io::ErrorKind::Other, "The layout was not found"),
+                std::io::Error::new(std::io::ErrorKind::Other, "未找到该布局"),
                 path.into(),
             )),
         }
@@ -1845,7 +1845,7 @@ fn split_space(
         if sizes.len() > space_to_split.rows.as_usize().saturating_sub(3) {
             // 4 是 MIN_TERMINAL_HEIGHT，减 1 因为 sizes 还包括展开的窗格
             // the stack
-            return Err("Not enough room for stacked panes in this layout");
+            return Err("此布局中没有足够的空间容纳堆叠窗格");
         }
         sizes
     } else if ignore_percent_split_sizes {
@@ -1887,7 +1887,7 @@ fn split_space(
         Some(SplitSize::Fixed(fixed)) => acc + fixed,
     });
     if min_size_for_panes > split_dimension_space.as_usize() {
-        return Err("Not enough room for panes"); // TODO: 使用错误基础设施
+        return Err("没有足够的空间容纳窗格"); // TODO: 使用错误基础设施
     }
 
     let flex_parts = sizes.iter().filter(|s| s.is_none()).count();
@@ -2088,7 +2088,7 @@ impl FromStr for SplitSize {
             if percent_size > 0 && percent_size <= 100 {
                 Ok(SplitSize::Percent(percent_size))
             } else {
-                Err("Percent must be between 0 and 100".into())
+                Err("百分比必须在 0 到 100 之间".into())
             }
         } else {
             let fixed_size = usize::from_str_radix(s, 10)?;

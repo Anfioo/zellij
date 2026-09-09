@@ -120,7 +120,7 @@ impl<'de> Visitor<'de> for HexColorVisitor {
             ))
         } else {
             Err(Error::custom(
-                "Hex color must be of form \"#RGB\" or \"#RRGGBB\"",
+                "十六进制颜色必须采用 \"#RGB\" 或 \"#RRGGBB\" 形式",
             ))
         }
     }

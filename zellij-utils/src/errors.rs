@@ -138,7 +138,7 @@ fn discard_result<T>(_arg: anyhow::Result<T>) {}
 impl<T> FatalError<T> for anyhow::Result<T> {
     fn non_fatal(self) {
         if self.is_err() {
-            discard_result(self.context("a non-fatal error occurred").to_log());
+            discard_result(self.context("发生了一个非致命错误").to_log());
         }
     }
 

@@ -832,7 +832,7 @@ mod setup_test {
         };
         let (_, layout_info, _, _, _) = Setup::from_cli_args(&cli_args).unwrap();
         let Some(LayoutInfo::File(layout_path, _)) = layout_info else {
-            panic!("layout info has unexpected format");
+            panic!("布局信息格式不符合预期");
         };
         let expected = config_dir
             .join("layouts")
@@ -854,7 +854,7 @@ mod setup_test {
         };
         let (_, layout_info, _, _, _) = Setup::from_cli_args(&cli_args).unwrap();
         let Some(LayoutInfo::File(layout_path, _)) = layout_info else {
-            panic!("layout info has unexpected format");
+            panic!("布局信息格式不符合预期");
         };
         let expected = config_dir
             .join("layouts")
@@ -877,7 +877,7 @@ mod setup_test {
         };
         let (_, layout_info, _, _, _) = Setup::from_cli_args(&cli_args).unwrap();
         let Some(LayoutInfo::File(layout_path, _)) = layout_info else {
-            panic!("layout info has unexpected format: {:?}", &layout_info);
+            panic!("布局信息格式不符合预期: {:?}", &layout_info);
         };
         let expected = cwd.join("assets/layouts/compact.kdl");
         assert_eq!(layout_path, expected.display().to_string());
@@ -896,7 +896,7 @@ mod setup_test {
         };
         let (_, layout_info, _, _, _) = Setup::from_cli_args(&cli_args).unwrap();
         let Some(LayoutInfo::File(layout_path, _)) = layout_info else {
-            panic!("layout info has unexpected format");
+            panic!("布局信息格式不符合预期");
         };
         let expected = cwd.join("assets/layouts/compact");
         assert_eq!(layout_path, expected.display().to_string());
@@ -912,7 +912,7 @@ mod setup_test {
         let (_, layout_info, _, _, _) = Setup::from_cli_args(&cli_args).unwrap();
         let Some(LayoutInfo::Stringified(content)) = layout_info else {
             panic!(
-                "layout info should be Stringified variant, got: {:#?}",
+                "布局信息应为 Stringified 变体，实际为：{:#?}",
                 layout_info
             );
         };

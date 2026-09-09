@@ -286,7 +286,7 @@ pub fn get_active_session() -> ActiveSession {
         Ok(mut sessions) if sessions.len() == 1 => ActiveSession::One(sessions.pop().unwrap().0),
         Ok(_) => ActiveSession::Many,
         Err(e) => {
-            eprintln!("Error occurred: {:?}", e);
+            eprintln!("发生错误：{:?}", e);
             process::exit(1);
         },
     }
@@ -322,7 +322,7 @@ pub fn kill_session(name: &str) {
             }
         },
         Err(e) => {
-            eprintln!("Error occurred: {:?}", e);
+            eprintln!("发生错误：{:?}", e);
             process::exit(1);
         },
     };
@@ -394,7 +394,7 @@ pub fn list_sessions(no_formatting: bool, short: bool, reverse: bool) {
             }
         },
         Err(e) => {
-            eprintln!("Error occurred: {:?}", e);
+            eprintln!("发生错误：{:?}", e);
             1
         },
     };
@@ -458,12 +458,12 @@ pub fn resurrection_layout(session_name_to_resurrect: &str) -> Result<Option<Lay
         Ok(layout) => Ok(Some(layout)),
         Err(e) => {
             log::error!(
-                "Failed to parse resurrection layout file {}: {}",
+                "解析复活布局文件 {} 失败：{}",
                 layout_file_name.display(),
                 e
             );
             return Err(format!(
-                "Failed to parse resurrection layout file {}: {}.",
+                "解析复活布局文件 {} 失败：{}.",
                 layout_file_name.display(),
                 e
             ));
@@ -477,7 +477,7 @@ pub fn assert_session(name: &str) {
             if result {
                 return;
             } else {
-                println!("No session named {:?} found.", name);
+                println!("未找到名为 {:?} 的会话。", name);
                 if let Some(sugg) = get_sessions()
                     .unwrap()
                     .iter()
@@ -485,12 +485,12 @@ pub fn assert_session(name: &str) {
                     .collect::<Vec<_>>()
                     .suggest(name)
                 {
-                    println!("  help: Did you mean `{}`?", sugg);
+                    println!("  提示：您是不是想用 `{}`？", sugg);
                 }
             }
         },
         Err(e) => {
-            eprintln!("Error occurred: {:?}", e);
+            eprintln!("发生错误：{:?}", e);
         },
     };
     process::exit(1);
@@ -501,18 +501,18 @@ pub fn assert_dead_session(name: &str, force: bool) {
         Ok(exists) => {
             if exists && !force {
                 println!(
-                    "A session by the name {:?} exists and is active, use --force to delete it.",
+                    "名为 {:?} 的会话存在且处于活动状态，请使用 --force 删除它。",
                     name
                 )
             } else if exists && force {
-                println!("A session by the name {:?} exists and is active, but will be force killed and deleted.", name);
+                println!("名为 {:?} 的会话存在且处于活动状态，但将被强制终止并删除。", name);
                 return;
             } else {
                 return;
             }
         },
         Err(e) => {
-            eprintln!("Error occurred: {:?}", e);
+            eprintln!("发生错误：{:?}", e);
         },
     };
     process::exit(1);
@@ -521,14 +521,14 @@ pub fn assert_dead_session(name: &str, force: bool) {
 pub fn validate_session_name(name: &str) -> Result<(), String> {
     if name.trim().is_empty() {
         return Err(
-            "Session name cannot be empty. Please provide a specific session name.".to_string(),
+            "会话名称不能为空。请提供具体的会话名称。".to_string(),
         );
     }
     if name == "." || name == ".." {
-        return Err(format!("Invalid session name: \"{}\".", name));
+        return Err(format!("无效的会话名称：\"{}\"。", name));
     }
     if name.contains('/') {
-        return Err("Session name cannot contain '/'.".to_string());
+        return Err("会话名称不能包含 '/'。".to_string());
     }
     Ok(())
 }
@@ -543,13 +543,13 @@ pub fn assert_session_ne(name: &str) {
         Ok(result) if !result => {
             let resurrectable_sessions = get_resurrectable_session_names();
             if resurrectable_sessions.iter().find(|s| s == &name).is_some() {
-                println!("Session with name {:?} already exists, but is dead. Use the attach command to resurrect it or, the delete-session command to kill it or specify a different name.", name);
+                println!("名为 {:?} 的会话已存在，但已死亡。请使用 attach 命令恢复它，使用 delete-session 命令删除它，或指定其他名称。", name);
             } else {
                 return
             }
         }
-        Ok(_) => println!("Session with name {:?} already exists. Use attach command to connect to it or specify a different name.", name),
-        Err(e) => eprintln!("Error occurred: {:?}", e),
+        Ok(_) => println!("名为 {:?} 的会话已存在。请使用 attach 命令连接，或指定其他名称。", name),
+        Err(e) => eprintln!("发生错误：{:?}", e),
     };
     process::exit(1);
 }

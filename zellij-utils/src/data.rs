@@ -3191,7 +3191,7 @@ impl FloatingPaneCoordinates {
     }
     pub fn with_height_percent(mut self, height: usize) -> Self {
         if height > 100 {
-            eprintln!("height must be between 0 and 100");
+            eprintln!("高度必须在 0 到 100 之间");
             return self;
         }
         self.height = Some(PercentOrFixed::Percent(height));

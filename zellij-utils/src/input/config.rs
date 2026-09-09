@@ -213,7 +213,7 @@ impl Config {
         match Self::from_kdl(&cfg, None) {
             Ok(config) => Ok(config),
             Err(ConfigError::KdlError(kdl_error)) => Err(ConfigError::KdlError(
-                kdl_error.add_src("Default built-in-configuration".into(), cfg),
+                kdl_error.add_src("默认内置配置".into(), cfg),
             )),
             Err(e) => Err(e),
         }
@@ -336,14 +336,14 @@ impl Config {
         config_file_path: &Option<PathBuf>,
     ) -> bool {
         let Some(config_file_path) = config_file_path.clone() else {
-            log::error!("Could not find file path to write config");
+            log::error!("找不到写入配置的文件路径");
             return false;
         };
         if config_file_path.exists() {
             false
         } else {
             if let Err(e) = std::fs::write(&config_file_path, config.as_bytes()) {
-                log::error!("Failed to write config to disk: {}", e);
+                log::error!("将配置写入磁盘失败：{}", e);
                 return false;
             }
             match std::fs::read_to_string(&config_file_path) {
@@ -386,7 +386,7 @@ impl Config {
             Ok(backed_up_config) => current_config == &backed_up_config,
             Err(e) => {
                 log::error!(
-                    "Failed to back up config file {}: {:?}",
+                    "备份配置文件 {} 失败：{:?}",
                     backup_config_path.display(),
                     e
                 );
@@ -404,7 +404,7 @@ impl Config {
                 let Some(backup_config_path) =
                     Config::find_free_backup_file_name(&config_file_path)
                 else {
-                    log::error!("Failed to find a file name to back up the configuration to, ran out of files.");
+                    log::error!("找不到用于备份配置的文件名，已用尽可用文件。");
                     return Err(None);
                 };
                 if Config::backup_config_with_written_content_confirmation(
@@ -415,7 +415,7 @@ impl Config {
                     Ok(Some(backup_config_path))
                 } else {
                     log::error!(
-                        "Failed to back up config file: {}",
+                        "备份配置文件失败：{}",
                         backup_config_path.display()
                     );
                     Err(Some(backup_config_path))
@@ -426,7 +426,7 @@ impl Config {
                     Ok(None)
                 } else {
                     log::error!(
-                        "Failed to read current config {}: {}",
+                        "读取当前配置 {} 失败：{}",
                         config_file_path.display(),
                         e
                     );
@@ -519,7 +519,7 @@ pub async fn watch_config_file_changes<F, Fut>(
             match load_config_and_theme_dir(config_file_path, config_dir) {
                 Some(loaded) => loaded,
                 None => {
-                    log::error!("Failed to reload config from {:?}", config_file_path);
+                    log::error!("从 {:?} 重新加载配置失败", config_file_path);
                     return None;
                 },
             };
@@ -542,20 +542,20 @@ pub async fn watch_config_file_changes<F, Fut>(
             ) {
                 Ok(watcher) => watcher,
                 Err(e) => {
-                    log::error!("Failed to create config watcher: {}", e);
+                    log::error!("创建配置监视器失败：{}", e);
                     break;
                 },
             };
 
             if let Err(e) = watcher.watch(&config_file_path, RecursiveMode::NonRecursive) {
-                log::error!("Failed to watch config file {:?}: {}", config_file_path, e);
+                log::error!("监视配置文件 {:?} 失败：{}", config_file_path, e);
                 break;
             }
 
             if let Some(watched_theme_dir) = &watched_theme_dir {
                 if let Err(e) = watcher.watch(watched_theme_dir, RecursiveMode::NonRecursive) {
                     log::error!(
-                        "Failed to watch theme dir {:?}, continuing without it: {}",
+                        "监视主题目录 {:?} 失败，将在没有它的状态下继续：{}",
                         watched_theme_dir,
                         e,
                     );
@@ -566,7 +566,7 @@ pub async fn watch_config_file_changes<F, Fut>(
                 let event = match event_result {
                     Ok(event) => event,
                     Err(e) => {
-                        log::error!("Config watcher event error: {}", e);
+                        log::error!("配置监视器事件错误：{}", e);
                         break;
                     },
                 };

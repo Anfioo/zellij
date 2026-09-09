@@ -451,7 +451,7 @@ impl Action {
                 Ok(Action::GoToTab { index: tab_index })
             },
             _ => Err(ConfigError::new_kdl_error(
-                "Failed to parse action".into(),
+                "解析动作失败".into(),
                 action_node.span().offset(),
                 action_node.span().len(),
             )),
@@ -538,7 +538,7 @@ impl Action {
                 })?;
                 if direction.is_vertical() {
                     Err(ConfigError::new_kdl_error(
-                        format!("Invalid horizontal direction: '{}'", string),
+                        format!("无效的水平方向：'{}'", string),
                         action_node.span().offset(),
                         action_node.span().len(),
                     ))
@@ -1475,14 +1475,14 @@ impl TryFrom<(&str, &KdlDocument)> for PaletteColor {
             Ok(PaletteColor::Rgb((r, g, b)))
         } else if is_eight_bit() {
             let n = kdl_first_entry_as_i64!(color).ok_or(ConfigError::new_kdl_error(
-                "Failed to parse color".into(),
+                "解析颜色失败".into(),
                 color.span().offset(),
                 color.span().len(),
             ))?;
             Ok(PaletteColor::EightBit(n as u8))
         } else {
             Err(ConfigError::new_kdl_error(
-                "Failed to parse color".into(),
+                "解析颜色失败".into(),
                 color.span().offset(),
                 color.span().len(),
             ))
@@ -1852,7 +1852,7 @@ impl TryFrom<(&KdlNode, &Options)> for Action {
                 let mut tabs = layout.tabs();
                 if tabs.len() > 1 {
                     return Err(ConfigError::new_kdl_error(
-                        "Tab layout cannot itself have tabs".to_string(),
+                        "标签页布局本身不能包含标签页".to_string(),
                         kdl_action.span().offset(),
                         kdl_action.span().len(),
                     ));
@@ -1962,7 +1962,7 @@ impl TryFrom<(&KdlNode, &Options)> for Action {
                 let mut tabs = layout.tabs();
                 if tabs.len() > 1 {
                     return Err(ConfigError::new_kdl_error(
-                        "Tab layout cannot itself have tabs".to_string(),
+                        "标签页布局本身不能包含标签页".to_string(),
                         kdl_action.span().offset(),
                         kdl_action.span().len(),
                     ));
@@ -2022,7 +2022,7 @@ impl TryFrom<(&KdlNode, &Options)> for Action {
                 let mut args = kdl_arguments_that_are_strings(arguments)?;
                 if args.is_empty() {
                     return Err(ConfigError::new_kdl_error(
-                        "No command found in Run action".into(),
+                        "Run 动作中未找到命令".into(),
                         kdl_action.span().offset(),
                         kdl_action.span().len(),
                     ));
@@ -2128,7 +2128,7 @@ impl TryFrom<(&KdlNode, &Options)> for Action {
                 let mut args = kdl_arguments_that_are_strings(arguments)?;
                 if args.is_empty() {
                     return Err(ConfigError::new_kdl_error(
-                        "No plugin found to launch in LaunchOrFocusPlugin".into(),
+                        "LaunchOrFocusPlugin 中未找到要启动的插件".into(),
                         kdl_action.span().offset(),
                         kdl_action.span().len(),
                     ));
@@ -2184,7 +2184,7 @@ impl TryFrom<(&KdlNode, &Options)> for Action {
                 let mut args = kdl_arguments_that_are_strings(arguments)?;
                 if args.is_empty() {
                     return Err(ConfigError::new_kdl_error(
-                        "No plugin found to launch in LaunchPlugin".into(),
+                        "LaunchPlugin 中未找到要启动的插件".into(),
                         kdl_action.span().offset(),
                         kdl_action.span().len(),
                     ));
@@ -2382,7 +2382,7 @@ macro_rules! kdl_property_first_arg_as_string_or_error {
                 },
                 None => {
                     return Err(ConfigError::new_kdl_error(
-                        format!("Property {} must have a value", $property_name),
+                        format!("属性 {} 必须具有值", $property_name),
                         property.span().offset(),
                         property.span().len(),
                     ));
@@ -2414,7 +2414,7 @@ macro_rules! kdl_property_first_arg_as_bool_or_error {
                 },
                 None => {
                     return Err(ConfigError::new_kdl_error(
-                        format!("Property {} must have a value", $property_name),
+                        format!("属性 {} 必须具有值", $property_name),
                         property.span().offset(),
                         property.span().len(),
                     ));
@@ -2446,7 +2446,7 @@ macro_rules! kdl_property_first_arg_as_i64_or_error {
                 },
                 None => {
                     return Err(ConfigError::new_kdl_error(
-                        format!("Property {} must have a value", $property_name),
+                        format!("属性 {} 必须具有值", $property_name),
                         property.span().offset(),
                         property.span().len(),
                     ));

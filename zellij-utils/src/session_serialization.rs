@@ -644,7 +644,7 @@ fn serialize_multiple_tabs(
         if let Some(serialized) = serialized {
             serialized_tabs.push(serialized);
         } else {
-            return Err("Failed to serialize session state");
+            return Err("序列化会话状态失败");
         }
     }
     Ok(serialized_tabs)
