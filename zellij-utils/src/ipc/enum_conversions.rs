@@ -76,7 +76,7 @@ impl TryFrom<ProtoBareKey> for BareKey {
             ProtoBareKey::F10 => Ok(BareKey::F(10)),
             ProtoBareKey::F11 => Ok(BareKey::F(11)),
             ProtoBareKey::F12 => Ok(BareKey::F(12)),
-            ProtoBareKey::Char => Err(anyhow!("Character key needs character data")),
+            ProtoBareKey::Char => Err(anyhow!("字符键需要字符数据")),
             ProtoBareKey::Tab => Ok(BareKey::Tab),
             ProtoBareKey::Esc => Ok(BareKey::Esc),
             ProtoBareKey::Enter => Ok(BareKey::Enter),
@@ -86,7 +86,7 @@ impl TryFrom<ProtoBareKey> for BareKey {
             ProtoBareKey::PrintScreen => Ok(BareKey::PrintScreen),
             ProtoBareKey::Pause => Ok(BareKey::Pause),
             ProtoBareKey::Menu => Ok(BareKey::Menu),
-            ProtoBareKey::Unspecified => Err(anyhow!("Unspecified bare key")),
+            ProtoBareKey::Unspecified => Err(anyhow!("未指定的裸键")),
         }
     }
 }
@@ -112,7 +112,7 @@ impl TryFrom<ProtoKeyModifier> for KeyModifier {
             ProtoKeyModifier::Alt => Ok(KeyModifier::Alt),
             ProtoKeyModifier::Shift => Ok(KeyModifier::Shift),
             ProtoKeyModifier::Super => Ok(KeyModifier::Super),
-            ProtoKeyModifier::Unspecified => Err(anyhow!("Unspecified key modifier")),
+            ProtoKeyModifier::Unspecified => Err(anyhow!("未指定的键修饰符")),
         }
     }
 }
@@ -125,7 +125,7 @@ pub fn bare_key_to_proto_i32(key: BareKey) -> i32 {
 pub fn bare_key_from_proto_i32(value: i32) -> Result<BareKey> {
     let proto_key = ProtoBareKey::try_from(value)
         .ok()
-        .ok_or_else(|| anyhow!("Invalid BareKey value: {}", value))?;
+        .ok_or_else(|| anyhow!("无效的 BareKey 值：{}", value))?;
     proto_key.try_into()
 }
 
@@ -136,6 +136,6 @@ pub fn key_modifier_to_proto_i32(modifier: KeyModifier) -> i32 {
 pub fn key_modifier_from_proto_i32(value: i32) -> Result<KeyModifier> {
     let proto_modifier = ProtoKeyModifier::try_from(value)
         .ok()
-        .ok_or_else(|| anyhow!("Invalid KeyModifier value: {}", value))?;
+        .ok_or_else(|| anyhow!("无效的 KeyModifier 值：{}", value))?;
     proto_modifier.try_into()
 }

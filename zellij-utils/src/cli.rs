@@ -42,7 +42,7 @@ fn validate_session(name: &str) -> Result<String, String> {
                 .saturating_sub(1);
 
             return Err(format!(
-                "session name must be less than {} characters",
+                "会话名称长度必须小于 {} 个字符",
                 available_length
             ));
         };
@@ -55,7 +55,7 @@ fn validate_session(name: &str) -> Result<String, String> {
 #[clap(
     version,
     name = "zellij",
-    about = "A terminal workspace with batteries included",
+    about = "一个开箱即用的终端工作区",
     styles = CLI_STYLES,
     args_override_self = true
 )]
@@ -522,7 +522,7 @@ pub enum Sessions {
         near_current_pane: bool,
         #[clap(
             long,
-            help = "if set, will open the pane without changing the focus of any client, placing it relative to the pane the command was issued from"
+            help = "如果设置，将打开窗格而不改变任何客户端的焦点，位置相对于发出命令的窗格"
         )]
         no_focus: bool,
         /// 以无边框方式启动此窗格（警告：将无法用
@@ -582,7 +582,7 @@ pub enum Sessions {
         pinned: Option<bool>,
         #[clap(
             long,
-            help = "if set, will open the plugin pane without changing the focus of any client, placing it relative to the pane the command was issued from"
+            help = "如果设置，将打开插件窗格而不改变任何客户端的焦点，位置相对于发出命令的窗格"
         )]
         no_focus: bool,
         /// 以无边框方式启动此窗格（警告：将无法用
@@ -642,7 +642,7 @@ pub enum Sessions {
         near_current_pane: bool,
         #[clap(
             long,
-            help = "if set, will open the pane without changing the focus of any client, placing it relative to the pane the command was issued from"
+            help = "如果设置，将打开窗格而不改变任何客户端的焦点，位置相对于发出命令的窗格"
         )]
         no_focus: bool,
         /// 以无边框方式启动此窗格（警告：将无法用
@@ -865,14 +865,14 @@ pub enum CliAction {
         pane_id: Option<String>,
     },
     #[clap(
-        about = "Toggle between fullscreen over the entire display (including the UI bars) and normal layout"
+        about = "在整个显示区域（包括 UI 栏）的全屏与正常布局之间切换"
     )]
     ToggleNoUiFullscreen {
         #[clap(
             short,
             long,
             value_parser,
-            help = "Target a specific pane by ID (eg. terminal_1, plugin_2, or 3)"
+            help = "按 ID 指定目标窗格（例如 terminal_1、plugin_2 或 3）"
         )]
         pane_id: Option<String>,
     },
@@ -999,7 +999,7 @@ pub enum CliAction {
         near_current_pane: bool,
         #[clap(
             long,
-            help = "if set, will open the pane without changing the focus of any client, placing it relative to the pane the command was issued from"
+            help = "如果设置，将打开窗格而不改变任何客户端的焦点，位置相对于发出命令的窗格"
         )]
         no_focus: bool,
         /// 以无边框方式启动此窗格（警告：将无法用
@@ -1063,7 +1063,7 @@ pub enum CliAction {
         near_current_pane: bool,
         #[clap(
             long,
-            help = "if set, will open the pane without changing the focus of any client, placing it relative to the pane the command was issued from"
+            help = "如果设置，将打开窗格而不改变任何客户端的焦点，位置相对于发出命令的窗格"
         )]
         no_focus: bool,
         /// 以无边框方式启动此窗格（警告：将无法用
@@ -1254,7 +1254,7 @@ pub enum CliAction {
 
         #[clap(
             long,
-            help = "if set, will create the tab without changing the focus of any client"
+            help = "如果设置，将创建标签页而不改变任何客户端的焦点"
         )]
         no_focus: bool,
     },
@@ -1349,7 +1349,7 @@ pub enum CliAction {
         skip_plugin_cache: bool,
         #[clap(
             long,
-            help = "if set, will open the plugin pane without changing the focus of any client"
+            help = "如果设置，将打开插件窗格而不改变任何客户端的焦点"
         )]
         no_focus: bool,
         /// 按 ID 定位指定标签页
@@ -1599,7 +1599,7 @@ mod tests {
         let cli = CliArgs::try_parse_from(full_args).unwrap();
         match cli.command {
             Some(Command::Subscribe(s)) => s,
-            other => panic!("Expected Subscribe, got {:?}", other),
+            other => panic!("预期 Subscribe，实际为 {:?}", other),
         }
     }
 

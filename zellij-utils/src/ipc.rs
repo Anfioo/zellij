@@ -337,7 +337,7 @@ impl Display for ExitReason {
             Self::Disconnect => {
                 let session_tip = match crate::envs::get_session_name() {
                     Ok(name) => format!("`zellij attach {}`", name),
-                    Err(_) => "see `zellij ls` and `zellij attach`".to_string(),
+                    Err(_) => "参见 `zellij ls` 和 `zellij attach`".to_string(),
                 };
                 write!(
                     f,
@@ -360,7 +360,7 @@ There are a few things you can try now:
             },
             Self::KickedByHost => write!(f, "Disconnected by host"),
             Self::CustomExitStatus(exit_status) => write!(f, "Exit {}", exit_status),
-            Self::Error(e) => write!(f, "Error occurred in server:\n{}", e),
+            Self::Error(e) => write!(f, "服务器中发生错误：\n{}", e),
         }
     }
 }
@@ -427,7 +427,7 @@ impl Display for IpcReceiveError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::result::Result<(), Error> {
         match self {
             IpcReceiveError::Disconnected => write!(f, "the peer closed the connection"),
-            IpcReceiveError::Undecodable => write!(f, "received a message that could not be read"),
+            IpcReceiveError::Undecodable => write!(f, "收到无法读取的消息"),
         }
     }
 }
@@ -466,7 +466,7 @@ where
         match proto_msg.try_into() {
             Ok(rust_msg) => Ok((rust_msg, ErrorContext::default())),
             Err(e) => {
-                warn!("Error converting protobuf to ClientToServerMsg: {:?}", e);
+                warn!("将 protobuf 转换为 ClientToServerMsg 时出错：{:?}", e);
                 Err(IpcReceiveError::Undecodable)
             },
         }
@@ -479,7 +479,7 @@ where
         match proto_msg.try_into() {
             Ok(rust_msg) => Ok((rust_msg, ErrorContext::default())),
             Err(e) => {
-                warn!("Error converting protobuf to ServerToClientMsg: {:?}", e);
+                warn!("将 protobuf 转换为 ServerToClientMsg 时出错：{:?}", e);
                 Err(IpcReceiveError::Undecodable)
             },
         }

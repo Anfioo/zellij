@@ -149,13 +149,13 @@ impl<'a> KdlLayoutParser<'a> {
     fn assert_legal_node_name(&self, name: &str, kdl_node: &KdlNode) -> Result<(), ConfigError> {
         if name.contains(char::is_whitespace) {
             Err(ConfigError::new_layout_kdl_error(
-                format!("Node names ({}) cannot contain whitespace.", name),
+                format!("节点名称（{}）不能包含空白字符。", name),
                 kdl_node.span().offset(),
                 kdl_node.span().len(),
             ))
         } else if self.is_a_reserved_word(&name) {
             Err(ConfigError::new_layout_kdl_error(
-                format!("Node name '{}' is a reserved word.", name),
+                format!("节点名称 '{}' 是保留字。", name),
                 kdl_node.span().offset(),
                 kdl_node.span().len(),
             ))
@@ -170,13 +170,13 @@ impl<'a> KdlLayoutParser<'a> {
     ) -> Result<(), ConfigError> {
         if name.is_empty() {
             Err(ConfigError::new_layout_kdl_error(
-                format!("Template names cannot be empty"),
+                format!("模板名称不能为空"),
                 kdl_node.span().offset(),
                 kdl_node.span().len(),
             ))
         } else if name.contains(')') || name.contains('(') {
             Err(ConfigError::new_layout_kdl_error(
-                format!("Template names cannot contain parantheses"),
+                format!("模板名称不能包含括号"),
                 kdl_node.span().offset(),
                 kdl_node.span().len(),
             ))
@@ -187,7 +187,7 @@ impl<'a> KdlLayoutParser<'a> {
             .unwrap_or(false)
         {
             Err(ConfigError::new_layout_kdl_error(
-                format!("Template names cannot start with numbers"),
+                format!("模板名称不能以数字开头"),
                 kdl_node.span().offset(),
                 kdl_node.span().len(),
             ))
@@ -205,7 +205,7 @@ impl<'a> KdlLayoutParser<'a> {
                 if kdl_name!(child) == "pane" || self.pane_templates.get(kdl_name!(child)).is_some()
                 {
                     return Err(ConfigError::new_layout_kdl_error(
-                        format!("Stacked panes cannot have children"),
+                        format!("堆叠窗格不能包含子窗格"),
                         child.span().offset(),
                         child.span().len(),
                     ));
@@ -220,7 +220,7 @@ impl<'a> KdlLayoutParser<'a> {
                 Ok(size) => Ok(Some(size)),
                 Err(_e) => Err(kdl_parsing_error!(
                     format!(
-                        "size should be a fixed number (eg. 1) or a quoted percent (eg. \"50%\")"
+                        "尺寸应为固定数字（如 1）或带引号的百分比（如 \"50%\"）"
                     ),
                     kdl_node
                 )),
@@ -228,14 +228,14 @@ impl<'a> KdlLayoutParser<'a> {
         } else if let Some(size) = kdl_get_int_property_or_child_value!(kdl_node, "size") {
             if size == 0 {
                 return Err(kdl_parsing_error!(
-                    format!("size should be greater than 0"),
+                    format!("尺寸应大于 0"),
                     kdl_node
                 ));
             }
             Ok(Some(SplitSize::Fixed(size as usize)))
         } else if let Some(node) = kdl_property_or_child_value_node!(kdl_node, "size") {
             Err(kdl_parsing_error!(
-                format!("size should be a fixed number (eg. 1) or a quoted percent (eg. \"50%\")"),
+                format!("尺寸应为固定数字（如 1）或带引号的百分比（如 \"50%\"）"),
                 node
             ))
         } else if let Some(node) = kdl_child_with_name!(kdl_node, "size") {

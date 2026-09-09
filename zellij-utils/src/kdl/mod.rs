@@ -41,7 +41,7 @@ macro_rules! parse_kdl_action_arguments {
     ( $action_name:expr, $action_arguments:expr, $action_node:expr ) => {{
         if !$action_arguments.is_empty() {
             Err(ConfigError::new_kdl_error(
-                format!("Action '{}' must have arguments", $action_name),
+                format!("动作 '{}' 必须带有参数", $action_name),
                 $action_node.span().offset(),
                 $action_node.span().len(),
             ))
@@ -114,7 +114,7 @@ macro_rules! parse_kdl_action_u8_arguments {
                 Some(int_value) => bytes.push(int_value as u8),
                 None => {
                     return Err(ConfigError::new_kdl_error(
-                        format!("Arguments for '{}' must be integers", $action_name),
+                        format!("'{}' 的参数必须是整数", $action_name),
                         kdl_entry.span().offset(),
                         kdl_entry.span().len(),
                     ));
@@ -191,7 +191,7 @@ macro_rules! parse_kdl_action_char_or_string_arguments {
                 Some(string_value) => chars_to_write.push_str(string_value),
                 None => {
                     return Err(ConfigError::new_kdl_error(
-                        format!("All entries for action '{}' must be strings", $action_name),
+                        format!("动作 '{}' 的所有条目必须是字符串", $action_name),
                         kdl_entry.span().offset(),
                         kdl_entry.span().len(),
                     ))
@@ -210,7 +210,7 @@ macro_rules! kdl_arg_is_truthy {
                 Some(value) => value,
                 None => {
                     return Err(ConfigError::new_kdl_error(
-                        format!("Argument must be true or false, found: {}", arg.value()),
+                        format!("参数必须为 true 或 false，实际为：{}", arg.value()),
                         arg.span().offset(),
                         arg.span().len(),
                     ))
@@ -358,7 +358,7 @@ macro_rules! keys_from_kdl {
 #[macro_export]
 macro_rules! actions_from_kdl {
     ( $kdl_node:expr, $config_options:expr ) => {
-        kdl_children_nodes_or_error!($kdl_node, "no actions found for key_block")
+        kdl_children_nodes_or_error!($kdl_node, "未找到 key_block 的动作")
             .iter()
             .map(|kdl_action| Action::try_from((kdl_action, $config_options)))
             .collect::<Result<_, _>>()?
@@ -374,7 +374,7 @@ pub fn kdl_arguments_that_are_strings<'a>(
             Some(string_value) => args.push(string_value.to_string()),
             None => {
                 return Err(ConfigError::new_kdl_error(
-                    format!("Argument must be a string"),
+                    format!("参数必须是字符串"),
                     kdl_entry.span().offset(),
                     kdl_entry.span().len(),
                 ));
@@ -395,7 +395,7 @@ pub fn kdl_arguments_that_are_digits<'a>(
             },
             None => {
                 return Err(ConfigError::new_kdl_error(
-                    format!("Argument must be a digit"),
+                    format!("参数必须是数字"),
                     kdl_entry.span().offset(),
                     kdl_entry.span().len(),
                 ));
@@ -443,7 +443,7 @@ impl Action {
             "GoToTab" => {
                 let tab_index = *bytes.get(0).ok_or_else(|| {
                     ConfigError::new_kdl_error(
-                        format!("Missing tab index"),
+                        format!("缺少标签页索引"),
                         action_node.span().offset(),
                         action_node.span().len(),
                     )
