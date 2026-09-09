@@ -306,16 +306,16 @@ fn main() {
         } else if web_opts.stop {
             match commands::stop_web_server() {
                 Ok(()) => {
-                    println!("Stopped web server.");
+                    println!("已停止 Web 服务器。");
                 },
                 Err(e) => {
-                    eprintln!("Failed to stop web server: {}", e);
+                    eprintln!("停止 Web 服务器失败：{}", e);
                     std::process::exit(2)
                 },
             }
         } else if web_opts.status {
             let mut config_options = commands::get_config_options_from_cli_args(&opts)
-                .expect("Can't find config options");
+                .expect("找不到配置选项");
             if let Some(ip) = web_opts.ip {
                 config_options.web_server_ip = Some(ip);
             }
@@ -327,33 +327,33 @@ fn main() {
                 Ok(version) => {
                     let version = version.trim();
                     println!(
-                        "Web server online with version: {}. Checked: {}",
+                        "Web 服务器在线，版本：{}。检查时间：{}",
                         version, web_server_base_url
                     );
                     if version != VERSION {
                         println!("");
                         println!(
-                            "Note: this version differs from the current Zellij version: {}.",
+                            "注意：此版本与当前 Zellij 版本不同：{}。",
                             VERSION
                         );
-                        println!("Consider stopping the server with: zellij web --stop");
-                        println!("And then restarting it with: zellij web --start");
+                        println!("可考虑停止服务器：zellij web --stop");
+                        println!("然后重启服务器：zellij web --start");
                     }
                 },
                 Err(_e) => {
-                    println!("Web server is offline, checked: {}", web_server_base_url);
+                    println!("Web 服务器已离线，检查时间：{}", web_server_base_url);
                 },
             }
         } else if web_opts.create_token {
             let read_only = false;
             match commands::create_auth_token(web_opts.token_name.clone(), read_only) {
                 Ok(token_and_name) => {
-                    println!("Created token successfully");
+                    println!("令牌创建成功");
                     println!("");
                     println!("{}", token_and_name);
                 },
                 Err(e) => {
-                    eprintln!("Failed to create token: {}", e);
+                    eprintln!("创建令牌失败：{}", e);
                     std::process::exit(2)
                 },
             }
@@ -361,12 +361,12 @@ fn main() {
             let read_only = true;
             match commands::create_auth_token(web_opts.token_name.clone(), read_only) {
                 Ok(token_and_name) => {
-                    println!("Created token successfully");
+                    println!("令牌创建成功");
                     println!("");
                     println!("{}", token_and_name);
                 },
                 Err(e) => {
-                    eprintln!("Failed to create token: {}", e);
+                    eprintln!("创建令牌失败：{}", e);
                     std::process::exit(2)
                 },
             }
@@ -374,24 +374,24 @@ fn main() {
             match commands::revoke_auth_token(token_name_to_revoke) {
                 Ok(revoked) => {
                     if revoked {
-                        println!("Successfully revoked token.");
+                        println!("令牌撤销成功。");
                     } else {
-                        eprintln!("Token by that name does not exist.");
+                        eprintln!("该名称的令牌不存在。");
                         std::process::exit(2)
                     }
                 },
                 Err(e) => {
-                    eprintln!("Failed to revoke token: {}", e);
+                    eprintln!("撤销令牌失败：{}", e);
                     std::process::exit(2)
                 },
             }
         } else if web_opts.revoke_all_tokens {
             match commands::revoke_all_auth_tokens() {
                 Ok(_) => {
-                    println!("Successfully revoked all auth tokens");
+                    println!("已成功撤销所有身份验证令牌");
                 },
                 Err(e) => {
-                    eprintln!("Failed to revoke all auth tokens: {}", e);
+                    eprintln!("撤销所有身份验证令牌失败：{}", e);
                     std::process::exit(2)
                 },
             }
@@ -403,7 +403,7 @@ fn main() {
                     }
                 },
                 Err(e) => {
-                    eprintln!("Failed to list tokens: {}", e);
+                    eprintln!("列出令牌失败：{}", e);
                     std::process::exit(2)
                 },
             }

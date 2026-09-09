@@ -49,14 +49,14 @@ pub(crate) use zellij_utils::sessions::list_sessions;
 pub(crate) fn kill_all_sessions(yes: bool) {
     match get_sessions() {
         Ok(sessions) if sessions.is_empty() => {
-            eprintln!("No active zellij sessions found.");
+            eprintln!("未找到活动的 zellij 会话。");
             process::exit(1);
         },
         Ok(sessions) => {
             if !yes {
-                println!("WARNING: this action will kill all sessions.");
+                println!("警告：此操作将终止所有会话。");
                 if !Confirm::new()
-                    .with_prompt("Do you want to continue?")
+                    .with_prompt("是否继续？")
                     .interact()
                     .unwrap()
                 {
@@ -105,9 +105,9 @@ pub(crate) fn delete_all_sessions(yes: bool, force: bool) {
             .collect()
     };
     if !yes {
-        println!("WARNING: this action will delete all resurrectable sessions.");
+        println!("警告：此操作将删除所有可恢复的会话。");
         if !Confirm::new()
-            .with_prompt("Do you want to continue?")
+            .with_prompt("是否继续？")
             .interact()
             .unwrap()
         {
@@ -129,7 +129,7 @@ pub(crate) fn kill_session(target_session: &Option<String>) {
             process::exit(0);
         },
         None => {
-            println!("Please specify the session name to kill.");
+            println!("请指定要终止的会话名称。");
             process::exit(1);
         },
     }
@@ -147,7 +147,7 @@ pub(crate) fn delete_session(target_session: &Option<String>, force: bool) {
             process::exit(0);
         },
         None => {
-            println!("Please specify the session name to delete.");
+            println!("请指定要删除的会话名称。");
             process::exit(1);
         },
     }
@@ -159,7 +159,7 @@ fn get_os_input<OsInputOutput>(
     match fn_get_os_input() {
         Ok(os_input) => os_input,
         Err(e) => {
-            eprintln!("failed to open terminal:\n{}", e);
+            eprintln!("打开终端失败：\n{}", e);
             process::exit(1);
         },
     }
@@ -220,10 +220,10 @@ pub(crate) fn start_web_server(
     _startup_timeout: Option<u64>,
 ) {
     log::error!(
-        "This version of Zellij was compiled without web server support, cannot run web server!"
+        "此版本的 Zellij 编译时未包含 Web 服务器支持，无法运行 Web 服务器！"
     );
     eprintln!(
-        "This version of Zellij was compiled without web server support, cannot run web server!"
+        "此版本的 Zellij 编译时未包含 Web 服务器支持，无法运行 Web 服务器！"
     );
     std::process::exit(2);
 }
@@ -241,10 +241,10 @@ pub(crate) fn stop_web_server() -> Result<(), String> {
 #[cfg(not(feature = "web_server_capability"))]
 pub(crate) fn stop_web_server() -> Result<(), String> {
     log::error!(
-        "This version of Zellij was compiled without web server support, cannot stop web server!"
+        "此版本的 Zellij 编译时未包含 Web 服务器支持，无法停止 Web 服务器！"
     );
     eprintln!(
-        "This version of Zellij was compiled without web server support, cannot stop web server!"
+        "此版本的 Zellij 编译时未包含 Web 服务器支持，无法停止 Web 服务器！"
     );
     std::process::exit(2);
 }
@@ -263,10 +263,10 @@ pub(crate) fn create_auth_token(name: Option<String>, read_only: bool) -> Result
 #[cfg(not(feature = "web_server_capability"))]
 pub(crate) fn create_auth_token(_name: Option<String>, _read_only: bool) -> Result<String, String> {
     log::error!(
-        "This version of Zellij was compiled without web server support, cannot create auth token!"
+        "此版本的 Zellij 编译时未包含 Web 服务器支持，无法创建身份验证令牌！"
     );
     eprintln!(
-        "This version of Zellij was compiled without web server support, cannot create auth token!"
+        "此版本的 Zellij 编译时未包含 Web 服务器支持，无法创建身份验证令牌！"
     );
     std::process::exit(2);
 }
@@ -279,10 +279,10 @@ pub(crate) fn revoke_auth_token(token_name: &str) -> Result<bool, String> {
 #[cfg(not(feature = "web_server_capability"))]
 pub(crate) fn revoke_auth_token(_token_name: &str) -> Result<bool, String> {
     log::error!(
-        "This version of Zellij was compiled without web server support, cannot revoke auth token!"
+        "此版本的 Zellij 编译时未包含 Web 服务器支持，无法撤销身份验证令牌！"
     );
     eprintln!(
-        "This version of Zellij was compiled without web server support, cannot revoke auth token!"
+        "此版本的 Zellij 编译时未包含 Web 服务器支持，无法撤销身份验证令牌！"
     );
     std::process::exit(2);
 }
@@ -296,10 +296,10 @@ pub(crate) fn revoke_all_auth_tokens() -> Result<usize, String> {
 #[cfg(not(feature = "web_server_capability"))]
 pub(crate) fn revoke_all_auth_tokens() -> Result<usize, String> {
     log::error!(
-        "This version of Zellij was compiled without web server support, cannot revoke all tokens!"
+        "此版本的 Zellij 编译时未包含 Web 服务器支持，无法撤销所有令牌！"
     );
     eprintln!(
-        "This version of Zellij was compiled without web server support, cannot revoke all tokens!"
+        "此版本的 Zellij 编译时未包含 Web 服务器支持，无法撤销所有令牌！"
     );
     std::process::exit(2);
 }
@@ -325,10 +325,10 @@ pub(crate) fn list_auth_tokens() -> Result<Vec<String>, String> {
 #[cfg(not(feature = "web_server_capability"))]
 pub(crate) fn list_auth_tokens() -> Result<Vec<String>, String> {
     log::error!(
-        "This version of Zellij was compiled without web server support, cannot list tokens!"
+        "此版本的 Zellij 编译时未包含 Web 服务器支持，无法列出令牌！"
     );
     eprintln!(
-        "This version of Zellij was compiled without web server support, cannot list tokens!"
+        "此版本的 Zellij 编译时未包含 Web 服务器支持，无法列出令牌！"
     );
     std::process::exit(2);
 }
@@ -370,10 +370,10 @@ pub(crate) fn web_server_status(
     _timeout_secs: Option<u64>,
 ) -> Result<String, String> {
     log::error!(
-        "This version of Zellij was compiled without web server support, cannot get web server status!"
+        "此版本的 Zellij 编译时未包含 Web 服务器支持，无法获取 Web 服务器状态！"
     );
     eprintln!(
-        "This version of Zellij was compiled without web server support, cannot get web server status!"
+        "此版本的 Zellij 编译时未包含 Web 服务器支持，无法获取 Web 服务器状态！"
     );
     std::process::exit(2);
 }
@@ -389,7 +389,7 @@ fn find_indexed_session(
         None if create => create_new_client(),
         None => {
             println!(
-                "No session indexed by {} found. The following sessions are active:",
+                "未找到索引为 {} 的会话。以下会话处于活动状态：",
                 index
             );
             print_sessions_with_index(sessions);
@@ -408,14 +408,14 @@ pub(crate) fn send_action_to_session(
 ) {
     match get_active_session() {
         ActiveSession::None => {
-            eprintln!("There is no active session!");
+            eprintln!("当前没有活动会话！");
             std::process::exit(1);
         },
         ActiveSession::One(session_name) => {
             if let Some(requested_session_name) = requested_session_name {
                 if requested_session_name != session_name {
                     eprintln!(
-                        "Session '{}' not found. The following sessions are active:",
+                        "未找到会话 '{}'。以下会话处于活动状态：",
                         requested_session_name
                     );
                     eprintln!("{}", session_name);
@@ -435,7 +435,7 @@ pub(crate) fn send_action_to_session(
                     attach_with_cli_client(cli_action, &session_name, config);
                 } else {
                     eprintln!(
-                        "Session '{}' not found. The following sessions are active:",
+                        "未找到会话 '{}'。以下会话处于活动状态：",
                         session_name
                     );
                     list_sessions(false, false, true);
@@ -444,7 +444,7 @@ pub(crate) fn send_action_to_session(
             } else if let Ok(session_name) = envs::get_session_name() {
                 attach_with_cli_client(cli_action, &session_name, config);
             } else {
-                eprintln!("Please specify the session name to send actions to. The following sessions are active:");
+                eprintln!("请指定要发送操作的会话名称。以下会话处于活动状态：");
                 list_sessions(false, false, true);
                 std::process::exit(1);
             }
@@ -458,14 +458,14 @@ pub(crate) fn subscribe_to_session(
 ) {
     let session_name = match get_active_session() {
         ActiveSession::None => {
-            eprintln!("There is no active session!");
+            eprintln!("当前没有活动会话！");
             std::process::exit(1);
         },
         ActiveSession::One(session_name) => {
             if let Some(ref requested) = requested_session_name {
                 if *requested != session_name {
                     eprintln!(
-                        "Session '{}' not found. The following sessions are active:",
+                        "未找到会话 '{}'。以下会话处于活动状态：",
                         requested
                     );
                     eprintln!("{}", session_name);
@@ -485,7 +485,7 @@ pub(crate) fn subscribe_to_session(
                     session_name
                 } else {
                     eprintln!(
-                        "Session '{}' not found. The following sessions are active:",
+                        "未找到会话 '{}'。以下会话处于活动状态：",
                         session_name
                     );
                     list_sessions(false, false, true);
@@ -494,7 +494,7 @@ pub(crate) fn subscribe_to_session(
             } else if let Ok(session_name) = envs::get_session_name() {
                 session_name
             } else {
-                eprintln!("Please specify the session name to subscribe to. The following sessions are active:");
+                eprintln!("请指定要订阅的会话名称。以下会话处于活动状态：");
                 list_sessions(false, false, true);
                 std::process::exit(1);
             }
@@ -526,7 +526,7 @@ fn attach_with_cli_client(
         },
         Err(e) => {
             eprintln!("{}", e);
-            log::error!("Error sending action: {}", e);
+            log::error!("发送操作时出错：{}", e);
             std::process::exit(2);
         },
     }
@@ -539,7 +539,7 @@ fn attach_with_session_index(config_options: Options, index: usize, create: bool
             if create {
                 create_new_client()
             } else {
-                eprintln!("No active zellij sessions found.");
+                eprintln!("未找到活动的 zellij 会话。");
                 process::exit(1);
             }
         },
@@ -571,7 +571,7 @@ fn attach_with_session_name(
             },
             Ok(SessionNameMatch::AmbiguousPrefix(sessions)) => {
                 println!(
-                    "Ambiguous selection: multiple sessions names start with '{}':",
+                    "选择不明确：多个会话名称以 '{}' 开头：",
                     prefix
                 );
                 print_sessions(
@@ -586,7 +586,7 @@ fn attach_with_session_name(
                 process::exit(1);
             },
             Ok(SessionNameMatch::None) => {
-                eprintln!("No session with the name '{}' found!", prefix);
+                eprintln!("未找到名为 '{}' 的会话！", prefix);
                 process::exit(1);
             },
             Err(kind) => {
@@ -597,12 +597,12 @@ fn attach_with_session_name(
         None => match get_active_session() {
             ActiveSession::None if create => create_new_client(),
             ActiveSession::None => {
-                eprintln!("No active zellij sessions found.");
+                eprintln!("未找到活动的 zellij 会话。");
                 process::exit(1);
             },
             ActiveSession::One(session_name) => ClientInfo::Attach(session_name, config_options),
             ActiveSession::Many => {
-                println!("Please specify the session to attach to, either by using the full name or a unique prefix.\nThe following sessions are active:");
+                println!("请指定要附加的会话，可使用完整名称或唯一前缀。\n以下会话处于活动状态：");
                 list_sessions(false, false, true);
                 process::exit(1);
             },
@@ -716,17 +716,17 @@ pub(crate) fn start_client(opts: CliArgs) {
                 }
             }) {
                 if !cfg!(feature = "web_server_capability") {
-                    eprintln!("This version of Zellij was compiled without web/remote-attach capabilities.");
+                    eprintln!("此版本的 Zellij 编译时未包含 Web/远程附加功能。");
                     std::process::exit(2);
                 }
 
                 if options.is_some() || create || create_background || force_run_commands {
-                    eprintln!("Cannot attach to remote session with options.");
+                    eprintln!("无法带选项附加到远程会话。");
                     std::process::exit(2);
                 }
 
                 if !initial_command.is_empty() {
-                    eprintln!("Cannot run an initial command on a remote session.");
+                    eprintln!("无法在远程会话上运行初始命令。");
                     std::process::exit(2);
                 }
 
@@ -802,7 +802,7 @@ pub(crate) fn start_client(opts: CliArgs) {
 
                 if let Ok(val) = std::env::var(envs::SESSION_NAME_ENV_KEY) {
                     if val == *client.get_session_name() {
-                        panic!("You are trying to attach to the current session (\"{}\"). This is not supported.", val);
+                        panic!("您正尝试附加到当前会话（\"{}\"），此操作不受支持。", val);
                     }
                 }
 
@@ -942,7 +942,7 @@ pub(crate) fn start_client(opts: CliArgs) {
 
 fn generate_unique_session_name_or_exit() -> String {
     let Some(unique_session_name) = generate_unique_session_name() else {
-        eprintln!("Failed to generate a unique session name, giving up");
+        eprintln!("无法生成唯一的会话名称，正在放弃");
         process::exit(1);
     };
     unique_session_name
@@ -990,7 +990,7 @@ pub(crate) fn watch_session(session_name: Option<String>, opts: CliArgs) {
             },
             SessionNameMatch::AmbiguousPrefix(sessions) => {
                 eprintln!(
-                    "Ambiguous selection: multiple sessions names start with '{}':",
+                    "选择不明确：多个会话名称以 '{}' 开头：",
                     prefix
                 );
                 print_sessions(
@@ -1005,18 +1005,18 @@ pub(crate) fn watch_session(session_name: Option<String>, opts: CliArgs) {
                 process::exit(1);
             },
             SessionNameMatch::None => {
-                eprintln!("No session with the name '{}' found!", prefix);
+                eprintln!("未找到名为 '{}' 的会话！", prefix);
                 process::exit(1);
             },
         },
         None => match get_active_session() {
             ActiveSession::None => {
-                eprintln!("No active zellij sessions found.");
+                eprintln!("未找到活动的 zellij 会话。");
                 process::exit(1);
             },
             ActiveSession::One(name) => ClientInfo::Watch(name, config_options.clone()),
             ActiveSession::Many => {
-                eprintln!("Please specify the session name to watch.");
+                eprintln!("请指定要监看的会话名称。");
                 process::exit(1);
             },
         },
@@ -1052,7 +1052,7 @@ fn reload_config_from_disk(
             *config_options_without_layout = reloaded_config_options_without_layout;
         },
         Err(e) => {
-            log::error!("Failed to reload config: {}", e);
+            log::error!("重新加载配置失败：{}", e);
         },
     };
 }
