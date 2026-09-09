@@ -759,7 +759,7 @@ impl PaneFrame {
         self.render_title_middle(total_title_length)
             .map(|(middle, middle_length)| self.title_line_with_middle(middle, &middle_length))
             .or_else(|| Some(self.title_line_without_middle()))
-            .with_context(|| format!("failed to render title '{}'", self.title))
+            .with_context(|| format!("渲染标题 '{}' 失败", self.title))
     }
     fn render_stack_list_entry(&self, entry: &StackListEntry) -> Vec<TerminalCharacter> {
         let usable_cols = self.geom.cols;
@@ -851,7 +851,7 @@ impl PaneFrame {
                 .render_title_middle(total_title_length)
                 .map(|(middle, middle_length)| self.title_line_with_middle(middle, &middle_length))
                 .or_else(|| Some(self.title_line_without_middle()))
-                .with_context(|| format!("failed to render title '{}'", self.title));
+                .with_context(|| format!("渲染标题 '{}' 失败", self.title));
         }
 
         let width = self.geom.cols;
@@ -1272,7 +1272,7 @@ impl PaneFrame {
         false
     }
     pub fn render(&self) -> Result<(Vec<CharacterChunk>, Option<String>)> {
-        let err_context = || "failed to render pane frame";
+        let err_context = || "渲染窗格边框失败";
         let mut character_chunks = vec![];
         if self.omit_title {
             return Ok((character_chunks, None));
@@ -1511,7 +1511,7 @@ mod tests {
         let (chars, _) = frame.help_text_version_full(80).unwrap();
         let text = characters_to_string(&chars);
         assert!(!text.contains("MouseScroll"));
-        assert!(text.contains("<drag borders> to resize"));
+        assert!(text.contains("<拖动边框> 以调整大小"));
     }
 
     #[test]
@@ -1520,7 +1520,7 @@ mod tests {
         let (chars, _) = frame.help_text_version_full(80).unwrap();
         let text = characters_to_string(&chars);
         assert!(text.contains("Ctrl <MouseScroll>"));
-        assert!(text.contains("Ctrl <drag borders>"));
+        assert!(text.contains("Ctrl <拖动边框>"));
     }
 
     #[test]
@@ -1529,7 +1529,7 @@ mod tests {
         let (chars, _) = frame.help_text_version_full(80).unwrap();
         let text = characters_to_string(&chars);
         assert!(!text.contains("MouseScroll"));
-        assert!(text.contains("Ctrl <drag borders> to resize"));
+        assert!(text.contains("Ctrl <拖动边框> 以调整大小"));
     }
 
     #[test]
@@ -1538,7 +1538,7 @@ mod tests {
         let (chars, _) = frame.help_text_version_medium(40).unwrap();
         let text = characters_to_string(&chars);
         assert!(!text.contains("MouseScroll"));
-        assert!(text.contains("<drag borders> resize"));
+        assert!(text.contains("<拖动边框> 调整大小"));
     }
 
     #[test]

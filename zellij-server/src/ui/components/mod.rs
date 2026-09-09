@@ -66,7 +66,7 @@ impl<'a> UiComponentParser<'a> {
         let mut params_iter = params.iter_mut().peekable();
         let component_name = params_iter
             .next()
-            .with_context(|| format!("ui component must have a name"))?;
+            .with_context(|| format!("UI 组件必须具有名称"))?;
 
         // 解析坐标
         let mut component_coordinates = None;
@@ -94,7 +94,7 @@ impl<'a> UiComponentParser<'a> {
             let stringified_params = parse_text_params(params_iter)
                 .into_iter()
                 .next()
-                .with_context(|| format!("a ribbon must have text"))?;
+                .with_context(|| format!("丝带组件必须具有文本"))?;
             let encoded_text = ribbon(
                 stringified_params,
                 &self.style,
@@ -113,7 +113,7 @@ impl<'a> UiComponentParser<'a> {
             let stringified_params = parse_text_params(params_iter)
                 .into_iter()
                 .next()
-                .with_context(|| format!("text must have, well, text..."))?;
+                .with_context(|| format!("文本组件必须具有……文本……"))?;
             let encoded_text = text(stringified_params, &self.style, component_coordinates);
             parse_vte_bytes!(self, encoded_text);
             Ok(())
@@ -128,13 +128,13 @@ impl<'a> UiComponentParser<'a> {
         if let Some(captures) = RE.captures_iter(&coordinates).next() {
             let x = captures[1].parse::<usize>().with_context(|| {
                 format!(
-                    "Failed to parse x coordinates for string: {:?}",
+                    "解析字符串 {:?} 的 x 坐标失败",
                     coordinates
                 )
             })?;
             let y = captures[2].parse::<usize>().with_context(|| {
                 format!(
-                    "Failed to parse y coordinates for string: {:?}",
+                    "解析字符串 {:?} 的 y 坐标失败",
                     coordinates
                 )
             })?;

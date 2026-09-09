@@ -56,10 +56,10 @@ impl BoundarySymbol {
                 .boundary_type
                 .chars()
                 .next()
-                .context("no boundary symbols defined")
+                .context("未定义边界符号")
                 .with_context(|| {
                     format!(
-                        "failed to convert boundary symbol {} into terminal character",
+                        "将边界符号 {} 转换为终端字符失败",
                         self.boundary_type
                     )
                 })?;
@@ -594,7 +594,7 @@ impl Boundaries {
             character_chunks.push(CharacterChunk::new(
                 vec![boundary_character
                     .as_terminal_character()
-                    .context("failed to render as terminal character")?],
+                    .context("渲染为终端字符失败")?],
                 coordinates.x,
                 coordinates.y,
             ));

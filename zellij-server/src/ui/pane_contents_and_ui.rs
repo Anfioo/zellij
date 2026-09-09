@@ -126,7 +126,7 @@ impl<'a> PaneContentsAndUi<'a> {
         &mut self,
         clients: impl Iterator<Item = ClientId>,
     ) -> Result<()> {
-        let err_context = "failed to render pane contents to multiple clients";
+        let err_context = "向多个客户端渲染窗格内容失败";
 
         // here we 丢弃 the 假 光标 so that their lines will be updated
         // and we can 清空 them from the UI below
@@ -171,7 +171,7 @@ impl<'a> PaneContentsAndUi<'a> {
         Ok(())
     }
     pub fn render_pane_contents_for_client(&mut self, client_id: ClientId) -> Result<()> {
-        let err_context = || format!("failed to render pane contents for client {client_id}");
+        let err_context = || format!("为客户端 {client_id} 渲染窗格内容失败");
 
         if let Some((character_chunks, raw_vte_output, sixel_image_chunks, kitty_image_chunks)) =
             self.pane
@@ -214,7 +214,7 @@ impl<'a> PaneContentsAndUi<'a> {
         let _ = self.pane.render(None);
     }
     pub fn render_guest_modal_for_client(&mut self, client_id: ClientId) -> Result<()> {
-        let err_context = || format!("failed to render guest modal for client {client_id}");
+        let err_context = || format!("为客户端 {client_id} 渲染访客模态框失败");
         let selection = self.pane.guest_modal_selection(client_id).unwrap_or(0);
         let session_name = self
             .pane
@@ -254,7 +254,7 @@ impl<'a> PaneContentsAndUi<'a> {
                 .iter()
                 .find(|&&c_id| c_id != client_id)
                 .with_context(|| {
-                    format!("failed to render fake cursor if needed for client {client_id}")
+                    format!("为客户端 {client_id} 渲染伪光标（如需要）失败")
                 })?;
             if let Some(colors) = client_id_to_colors(
                 *fake_cursor_client_id,
@@ -319,7 +319,7 @@ impl<'a> PaneContentsAndUi<'a> {
         pane_is_floating: bool,
         pane_is_selectable: bool,
     ) -> Result<()> {
-        let err_context = || format!("failed to render pane frame for client {client_id}");
+        let err_context = || format!("为客户端 {client_id} 渲染窗格边框失败");
 
         let pane_focused_for_client_id = self.focused_clients.contains(&client_id);
         let other_focused_clients: Vec<ClientId> = self

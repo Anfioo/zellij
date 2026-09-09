@@ -266,7 +266,7 @@ pub fn parse_text(stringified: &mut String) -> Result<String> {
             stringified_character
                 .to_string()
                 .parse::<u8>()
-                .with_context(|| format!("Failed to parse utf8"))?,
+                .with_context(|| format!("解析 UTF-8 失败"))?,
         );
     }
     Ok(String::from_utf8_lossy(&utf8).to_string())

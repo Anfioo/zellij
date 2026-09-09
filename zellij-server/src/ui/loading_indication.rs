@@ -111,7 +111,7 @@ impl Display for LoadingIndication {
             stringified.push_str(&format!(
                 "\n\r{}",
                 red.bold()
-                    .paint("ERROR IN PLUGIN - check logs for more info")
+                    .paint("插件中出错——查看日志以获取更多信息")
             ));
         } else {
             let loading_text = "Loading";
