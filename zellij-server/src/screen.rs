@@ -7070,7 +7070,7 @@ impl Screen {
         }
         if !found {
             log::error!(
-                "找不到窗格 with id: {:?} to set as pinned",
+                "找不到要固定、ID 为 {:?} 的窗格",
                 pane_id
             );
         }
