@@ -148,7 +148,7 @@ fn build_command(
                 .path
                 .into_os_string()
                 .into_string()
-                .expect("Not valid Utf8 Encoding");
+                .expect("无效的 UTF-8 编码");
             if let Some(line_number) = payload.line_number {
                 if command.ends_with("vim")
                     || command.ends_with("nvim")
@@ -237,7 +237,7 @@ impl ClientSender {
             .or_else(|err| {
                 if let TrySendError::Full(_) = err {
                     log::warn!(
-                        "client {} is processing server messages too slow",
+                        "客户端 {} 处理服务器消息速度过慢",
                         self.client_id
                     );
                 }
@@ -699,7 +699,7 @@ impl ResizeCache {
         senders
             .send_to_pty_writer(PtyWriteInstruction::StartCachingResizes)
             .unwrap_or_else(|e| {
-                log::error!("Failed to cache resizes: {}", e);
+                log::error!("缓存调整大小事件失败：{}", e);
             });
         ResizeCache { senders }
     }
@@ -710,7 +710,7 @@ impl Drop for ResizeCache {
         self.senders
             .send_to_pty_writer(PtyWriteInstruction::ApplyCachedResizes)
             .unwrap_or_else(|e| {
-                log::error!("Failed to apply cached resizes: {}", e);
+                log::error!("应用缓存的调整大小事件失败：{}", e);
             });
     }
 }
@@ -723,7 +723,7 @@ fn apply_post_command_hook(command: Vec<String>, post_hook: &Option<String>) -> 
     let cmd = match run_command_hook(&stringified, post_hook) {
         Ok(command) => command,
         Err(e) => {
-            Err::<(), _>(anyhow!("post command discovery hook failed to run: {e}")).non_fatal();
+            Err::<(), _>(anyhow!("命令发现后的钩子执行失败：{e}")).non_fatal();
             stringified
         },
     };

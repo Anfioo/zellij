@@ -786,7 +786,7 @@ mod tests {
             Some(Run::Command(rc)) => {
                 assert_eq!(rc.command, PathBuf::from("grep"));
             },
-            other => panic!("expected Command, got {:?}", other),
+            other => panic!("预期 Command，实际为 {:?}", other),
         }
     }
 
@@ -800,7 +800,7 @@ mod tests {
                 assert_eq!(rc.command, PathBuf::from("nvim"));
                 assert!(rc.args.is_empty());
             },
-            other => panic!("expected Command, got {:?}", other),
+            other => panic!("预期 Command，实际为 {:?}", other),
         }
     }
 
@@ -814,7 +814,7 @@ mod tests {
                 assert_eq!(rc.command, PathBuf::from("nvim"));
                 assert_eq!(rc.args, vec!["a.txt", "b.txt"]);
             },
-            other => panic!("expected Command, got {:?}", other),
+            other => panic!("预期 Command，实际为 {:?}", other),
         }
     }
 
@@ -873,7 +873,7 @@ mod tests {
         meta.detect_editor_panes();
         match get_first_tiled_run(&meta) {
             Some(Run::Command(rc)) => assert_eq!(rc.command, PathBuf::from("vim")),
-            other => panic!("expected Command, got {:?}", other),
+            other => panic!("预期 Command，实际为 {:?}", other),
         }
     }
 

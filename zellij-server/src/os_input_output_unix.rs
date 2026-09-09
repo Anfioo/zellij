@@ -72,7 +72,7 @@ impl RawFdAsyncReader {
             let file = self
                 .pending
                 .take()
-                .expect("RawFdAsyncReader used after init");
+                .expect("RawFdAsyncReader 在初始化后被使用");
             self.async_fd = Some(AsyncFd::new(file)?);
         }
         Ok(self.async_fd.as_mut().unwrap())
@@ -151,7 +151,7 @@ fn handle_command_exit(mut child: Child) -> Result<Option<i32>> {
             Ok(None) => {
                 thread::sleep(Duration::from_millis(10));
             },
-            Err(e) => panic!("error attempting to wait: {}", e),
+            Err(e) => panic!("等待时出错：{}", e),
         }
 
         if !should_exit {
@@ -210,7 +210,7 @@ fn handle_openpty(
                 command.current_dir(current_dir);
             } else {
                 log::error!(
-                    "Failed to set CWD for new pane. '{}' does not exist or is not a folder",
+                    "为新窗格设置工作目录失败。'{}' 不存在或不是文件夹",
                     current_dir.display()
                 );
             }
@@ -220,7 +220,7 @@ fn handle_openpty(
             .env("ZELLIJ_PANE_ID", &format!("{}", terminal_id))
             .pre_exec(move || -> io::Result<()> {
                 if libc::login_tty(pid_secondary) != 0 {
-                    panic!("failed to set controlling terminal");
+                    panic!("设置控制终端失败");
                 }
                 close_fds::close_open_fds(3, &[]);
                 Ok(())
@@ -297,7 +297,7 @@ impl UnixPtyBackend {
     pub fn new() -> Result<Self, io::Error> {
         let current_termios = termios::tcgetattr(io::stdin()).ok();
         if current_termios.is_none() {
-            log::warn!("Starting a server without a controlling terminal, using the default termios configuration.");
+            log::warn!("正在无控制终端的情况下启动服务器，使用默认 termios 配置。");
         }
         Ok(Self {
             orig_termios: Arc::new(Mutex::new(current_termios)),
@@ -331,7 +331,7 @@ impl UnixPtyBackend {
             .insert(terminal_id, Some(pid_primary));
         let async_reader = Box::new(
             RawFdAsyncReader::new(pid_primary)
-                .map_err(|e| anyhow::anyhow!("failed to create async reader: {}", e))?,
+                .map_err(|e| anyhow::anyhow!("创建异步读取器失败：{}", e))?,
         ) as Box<dyn AsyncReader>;
         Ok((async_reader, child_fd))
     }
@@ -363,7 +363,7 @@ impl UnixPtyBackend {
                 }
             },
             _ => {
-                Err::<(), _>(anyhow!("failed to find terminal fd for id {terminal_id}"))
+                Err::<(), _>(anyhow!("找不到 ID 为 {terminal_id} 的终端文件描述符"))
                     .with_context(err_context)
                     .non_fatal();
             },
@@ -383,7 +383,7 @@ impl UnixPtyBackend {
         {
             Some(Some(fd)) => *fd,
             _ => {
-                return Err(anyhow!("could not find raw file descriptor")).with_context(err_context)
+                return Err(anyhow!("找不到原始文件描述符")).with_context(err_context)
             },
         };
 
@@ -403,7 +403,7 @@ impl UnixPtyBackend {
             Some(Some(fd)) => {
                 termios::tcdrain(unsafe { BorrowedFd::borrow_raw(*fd) }).with_context(err_context)
             },
-            _ => Err(anyhow!("could not find raw file descriptor")).with_context(err_context),
+            _ => Err(anyhow!("找不到原始文件描述符")).with_context(err_context),
         }
     }
 
@@ -489,7 +489,7 @@ mod tests {
             match super::try_write_to_fd(master_fd, &chunk) {
                 Ok(0) => break,
                 Ok(n) => total_filled += n,
-                Err(e) => panic!("unexpected error filling buffer: {e}"),
+                Err(e) => panic!("填充缓冲区时出现意外错误：{e}"),
             }
         }
         assert!(
@@ -501,8 +501,8 @@ mod tests {
         let mut drain = vec![0u8; 512];
         let slave_file = unsafe { std::fs::File::from_raw_fd(slave_fd) };
         let mut slave_reader = std::io::BufReader::new(&slave_file);
-        let drained = slave_reader.read(&mut drain).expect("slave read failed");
-        assert!(drained > 0, "should have drained some bytes");
+        let drained = slave_reader.read(&mut drain).expect("从端读取失败");
+        assert!(drained > 0, "本应已排空部分字节");
         // 防止 File 关闭从端 fd — 我们在下面手动关闭它
         std::mem::forget(slave_file);
 
@@ -510,7 +510,7 @@ mod tests {
         let size = 128 * 1024;
         let data: Vec<u8> = (0..size).map(|i| (i % 256) as u8).collect();
         let written = super::try_write_to_fd(master_fd, &data)
-            .expect("try_write_to_fd should not error on EAGAIN");
+            .expect("try_write_to_fd 不应在 EAGAIN 上报错");
 
         assert!(
             written > 0 && written < size,
@@ -548,13 +548,13 @@ mod tests {
             match super::try_write_to_fd(master_fd, &fill) {
                 Ok(0) => break,
                 Ok(_) => continue,
-                Err(e) => panic!("unexpected error filling buffer: {e}"),
+                Err(e) => panic!("填充缓冲区时出现意外错误：{e}"),
             }
         }
 
         // 现在缓冲区已满 — 下一次写入应返回 Ok(0)
         let written = super::try_write_to_fd(master_fd, &[0x01, 0x02, 0x03])
-            .expect("try_write_to_fd should not error on EAGAIN");
+            .expect("try_write_to_fd 不应在 EAGAIN 上报错");
 
         assert_eq!(written, 0, "expected zero bytes written on full buffer");
 

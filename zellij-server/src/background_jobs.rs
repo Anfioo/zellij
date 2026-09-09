@@ -336,7 +336,7 @@ pub(crate) fn background_jobs_main(
                                 )]));
                             },
                             Err(e) => {
-                                log::error!("Failed to run command: {}", e);
+                                log::error!("运行命令失败：{}", e);
                                 let stdout = vec![];
                                 let stderr = format!("{}", e).as_bytes().to_vec();
                                 let exit_code = Some(2);
@@ -390,7 +390,7 @@ pub(crate) fn background_jobs_main(
                                     Ok(value) => Some((name.to_string(), value.to_string())),
                                     Err(e) => {
                                         log::error!(
-                                            "Failed to convert header {:?} to string: {:?}",
+                                            "将头部 {:?} 转换为字符串失败：{:?}",
                                             name,
                                             e
                                         );
@@ -402,7 +402,7 @@ pub(crate) fn background_jobs_main(
                             Ok((status_code.as_u16(), headers, body))
                         }
                         let Some(http_client) = http_client else {
-                            log::error!("Cannot perform http request, likely due to a misconfigured http client");
+                            log::error!("无法执行 HTTP 请求，很可能是 HTTP 客户端配置错误");
                             return;
                         };
 
@@ -415,7 +415,7 @@ pub(crate) fn background_jobs_main(
                                 )]));
                             },
                             Err(e) => {
-                                log::error!("Failed to send web request: {}", e);
+                                log::error!("发送 Web 请求失败：{}", e);
                                 let error_body = e.to_string().as_bytes().to_vec();
                                 let _ = senders.send_to_plugin(PluginInstruction::Update(vec![(
                                     Some(plugin_id),
@@ -781,7 +781,7 @@ pub fn write_session_state_to_disk(
                 std::fs::File::create(&external_file_path)
                     .and_then(|mut f| write!(f, "{}", external_file_contents))
                     .unwrap_or_else(|e| {
-                        log::error!("Failed to write layout metadata file: {:?}", e);
+                        log::error!("写入布局元数据文件失败：{:?}", e);
                     });
             }
         }
@@ -851,7 +851,7 @@ fn find_resurrectable_sessions(
                                 return None; // 没有布局文件，无法恢复会话，不列出它
                             } else {
                                 log::error!(
-                                    "Failed to read created stamp of resurrection file: {:?}",
+                                    "读取复活文件的创建时间戳失败：{:?}",
                                     e
                                 );
                             }
@@ -866,7 +866,7 @@ fn find_resurrectable_sessions(
                 .collect()
         },
         Err(e) => {
-            log::error!("Failed to read session info cache dir: {:?}", e);
+            log::error!("读取会话信息缓存目录失败：{:?}", e);
             BTreeMap::new()
         },
     }
@@ -917,7 +917,7 @@ mod tests {
     use zellij_utils::data::SessionInfo;
 
     fn make_socket(dir: &std::path::Path, name: &str) -> UnixListener {
-        UnixListener::bind(dir.join(name)).expect("bind unix socket")
+        UnixListener::bind(dir.join(name)).expect("绑定 Unix 套接字")
     }
 
     fn write_metadata(info_dir: &std::path::Path, session: &str, info: &SessionInfo) {

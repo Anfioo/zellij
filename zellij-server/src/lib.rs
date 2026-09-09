@@ -273,7 +273,7 @@ impl SessionConfiguration {
                 self.runtime_config.insert(*client_id, new_config);
             },
             Err(e) => {
-                log::error!("Failed to reconfigure runtime config: {}", e);
+                log::error!("重新配置运行时配置失败：{}", e);
             },
         }
         (full_reconfigured_config, config_changed)
@@ -321,7 +321,7 @@ impl SessionConfiguration {
             },
             None => {
                 log::error!(
-                    "Could not find runtime or saved configuration for client, cannot rebind keys"
+                    "找不到客户端的运行时或已保存配置，无法重新绑定按键"
                 );
             },
         }
@@ -425,13 +425,13 @@ impl SessionMetaData {
                 .and_then(|name| new_config.theme_config(Some(name)));
             if new_config.options.theme_dark.is_some() && host_theme_dark.is_none() {
                 log::warn!(
-                    "theme_dark='{}' not found in themes; auto-theme switch disabled for dark.",
+                    "在主题中找不到 theme_dark='{}'；已禁用暗色自动主题切换。",
                     new_config.options.theme_dark.as_deref().unwrap_or("?")
                 );
             }
             if new_config.options.theme_light.is_some() && host_theme_light.is_none() {
                 log::warn!(
-                    "theme_light='{}' not found in themes; auto-theme switch disabled for light.",
+                    "在主题中找不到 theme_light='{}'；已禁用亮色自动主题切换。",
                     new_config.options.theme_light.as_deref().unwrap_or("?")
                 );
             }
@@ -793,7 +793,7 @@ mod session_state_tests {
         s.last_active_client = Some(3);
         let picked = s
             .pick_forward_target()
-            .expect("some client still connected");
+            .expect("仍有客户端连接");
         assert!(picked == 1 || picked == 2);
     }
 
@@ -847,7 +847,7 @@ pub fn start_server(os_input: Box<dyn ServerOsApi>, socket_path: PathBuf) {
             .working_directory(std::env::current_dir().unwrap())
             .umask(current_umask.bits() as u32)
             .start()
-            .expect("could not daemonize the server process");
+            .expect("无法将服务器进程守护化");
     }
 
     #[cfg(windows)]
@@ -921,7 +921,7 @@ pub fn start_server_impl(
                             #[cfg(windows)]
                             let reply_stream = reply_listener
                                 .accept()
-                                .expect("failed to accept reply connection");
+                                .expect("接受回复连接失败");
 
                             #[cfg(windows)]
                             let receiver = os_input
@@ -1617,7 +1617,7 @@ pub fn start_server_impl(
             ServerInstruction::SwitchSession(mut connect_to_session, client_id, completion_tx) => {
                 let current_session_name = envs::get_session_name();
                 if connect_to_session.name == current_session_name.ok() {
-                    log::error!("Cannot attach to same session");
+                    log::error!("无法附加到同一个会话");
                 } else {
                     let layout_dir = session_data
                         .read()
@@ -1783,7 +1783,7 @@ pub fn start_server_impl(
                     );
                 } else {
                     // TODO: 测试这个
-                    log::error!("Cannot start web server: this instance of Zellij was compiled without web_server_capability");
+                    log::error!("无法启动 Web 服务器：此 Zellij 实例编译时未包含 web_server_capability");
                 }
             },
             ServerInstruction::ShareCurrentSession(_client_id) => {
@@ -1804,7 +1804,7 @@ pub fn start_server_impl(
                             .unwrap();
                     }
                 } else {
-                    log::error!("Cannot share session: this instance of Zellij was compiled without web_server_capability");
+                    log::error!("无法共享会话：此 Zellij 实例编译时未包含 web_server_capability");
                 }
             },
             ServerInstruction::StopSharingCurrentSession(_client_id) => {
@@ -1860,7 +1860,7 @@ pub fn start_server_impl(
                     }
                 } else {
                     // TODO: 测试这个
-                    log::error!("Cannot start web server: this instance of Zellij was compiled without web_server_capability");
+                    log::error!("无法启动 Web 服务器：此 Zellij 实例编译时未包含 web_server_capability");
                 }
             },
             ServerInstruction::WebServerStarted(base_url) => {
@@ -1929,7 +1929,7 @@ pub fn start_server_impl(
                 } else {
                     // 没有客户端可询问 — 合成一个空回复，以便 `Screen` 的进行中槽释放。如果没有这个，分离的会话（应用程序仍在运行）会在 `forward_queue` 中累积转发，在有人重新附加之前无法排空。
                     log::warn!(
-                        "No connected client to forward host query (token={}); returning empty reply",
+                        "没有可转发主机查询的已连接客户端（token={}）；返回空回复",
                         token
                     );
                     if let Some(session) = session_data.read().unwrap().as_ref() {
@@ -2353,7 +2353,7 @@ fn should_show_release_notes(
         }
         if let Err(e) = std::fs::write(&*ZELLIJ_SEEN_RELEASE_NOTES_CACHE_FILE, &[]) {
             log::error!(
-                "Failed to write seen release notes indication to disk: {}",
+                "将已读版本说明标记写入磁盘失败：{}",
                 e
             );
             return false;
@@ -2441,7 +2441,7 @@ fn update_new_saved_config(
                 .clone();
 
             let Some(config_file_path) = config_file_path.as_ref() else {
-                log::error!("No config file path found.");
+                log::error!("未找到配置文件路径。");
                 session_data
                     .write()
                     .unwrap()
@@ -2479,7 +2479,7 @@ fn update_new_saved_config(
                         .as_ref()
                         .map(|p| p.display().to_string())
                         .unwrap_or_else(String::new);
-                    log::error!("Failed to write config to disk: {}", error_path);
+                    log::error!("将配置写入磁盘失败：{}", error_path);
                     session_data
                         .write()
                         .unwrap()

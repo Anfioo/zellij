@@ -12,6 +12,6 @@ pub fn get_tokio_runtime() -> &'static Runtime {
             .thread_name("async-runtime")
             .enable_all()
             .build()
-            .expect("Failed to create tokio runtime")
+            .expect("创建 tokio 运行时失败")
     })
 }

@@ -57,7 +57,7 @@ pub fn wait_for_action_completion(
             match receiver.await {
                 Ok(result) => result,
                 Err(e) => {
-                    log::error!("Failed to wait for action {}: {}", action_name, e);
+                    log::error!("等待操作 {} 失败：{}", action_name, e);
                     ActionCompletionResult {
                         exit_status: None,
                         affected_pane_id: None,
@@ -75,7 +75,7 @@ pub fn wait_for_action_completion(
             Ok(Ok(result)) => result,
             Err(_) | Ok(Err(_)) => {
                 log::error!(
-                    "Action {} did not complete within {:?} timeout",
+                    "操作 {} 未在 {:?} 超时时间内完成",
                     action_name,
                     ACTION_COMPLETION_TIMEOUT
                 );
@@ -1418,7 +1418,7 @@ pub(crate) fn route_action(
                     ))
                     .with_context(err_context)?;
             } else {
-                log::error!("Must have pane_id in order to open in place pane");
+                log::error!("必须指定 pane_id 才能就地打开窗格");
             }
         },
         Action::StartOrReloadPlugin { plugin: run_plugin } => {
@@ -1660,7 +1660,7 @@ pub(crate) fn route_action(
             if let Some(name) = name.take() {
                 let should_open_in_place = in_place.unwrap_or(false);
                 if should_open_in_place && pane_id.is_none() {
-                    log::error!("Was asked to open a new plugin in-place, but cannot identify the pane id... is the ZELLIJ_PANE_ID variable set?");
+                    log::error!("被要求就地打开新插件，但无法识别窗格 ID……是否设置了 ZELLIJ_PANE_ID 环境变量？?");
                 }
                 let pane_id_to_replace = if should_open_in_place { pane_id } else { None };
                 senders
@@ -1680,7 +1680,7 @@ pub(crate) fn route_action(
                     })
                     .with_context(err_context)?;
             } else {
-                log::error!("Message must have a name");
+                log::error!("消息必须带有名称");
             }
         },
         Action::KeybindPipe {
@@ -1725,7 +1725,7 @@ pub(crate) fn route_action(
                     })
                     .with_context(err_context)?;
             } else {
-                log::error!("Message must have a name");
+                log::error!("消息必须带有名称");
             }
         },
         Action::ListClients => {
@@ -2223,7 +2223,7 @@ macro_rules! send_to_screen_or_retry_queue {
         match $senders.as_ref() {
             Some(senders) => senders.send_to_screen($message),
             None => {
-                log::warn!("Server not ready, trying to place instruction in retry queue...");
+                log::warn!("服务器未就绪，正在将指令放入重试队列……");
                 if let Some(retry_queue) = $retry_queue.as_mut() {
                     retry_queue.push_back($instruction);
                 }
@@ -2857,7 +2857,7 @@ pub(crate) fn route_thread_main(
                         continue;
                     }
                     if index < retried_count {
-                        log::warn!("Server ready, retrying sending instruction.");
+                        log::warn!("服务器已就绪，正在重试发送指令。");
                         thread::sleep(Duration::from_millis(5));
                     }
                     let should_break =
@@ -2875,10 +2875,10 @@ pub(crate) fn route_thread_main(
             Err(IpcReceiveError::Undecodable) => {
                 consecutive_unknown_messages_received += 1;
                 if consecutive_unknown_messages_received == 1 {
-                    log::error!("Received unknown message from client.");
+                    log::error!("收到来自客户端的未知消息。");
                 }
                 if consecutive_unknown_messages_received >= 1000 {
-                    log::error!("Client sent over 1000 consecutive unknown messages, this is probably an infinite loop, logging client out");
+                    log::error!("客户端连续发送超过 1000 条未知消息，这可能是无限循环，正在将客户端登出");
                     let _ = os_input.send_to_client(
                         client_id,
                         ServerToClientMsg::Exit {
@@ -2915,11 +2915,11 @@ fn request_panes_from_screen(
     match response_receiver.recv_timeout(Duration::from_secs(1)) {
         Ok(entries) => Ok(Some(entries)),
         Err(RecvTimeoutError::Timeout) => {
-            log::error!("ListPanes timed out waiting for Screen response");
+            log::error!("ListPanes 等待 Screen 响应超时");
             Ok(None)
         },
         Err(RecvTimeoutError::Disconnected) => {
-            log::error!("ListPanes channel disconnected");
+            log::error!("ListPanes 通道已断开");
             Ok(None)
         },
     }
@@ -2941,11 +2941,11 @@ fn request_tabs_from_screen(
     match response_receiver.recv_timeout(Duration::from_secs(1)) {
         Ok(entries) => Ok(Some(entries)),
         Err(RecvTimeoutError::Timeout) => {
-            log::error!("ListTabs timed out waiting for Screen response");
+            log::error!("ListTabs 等待 Screen 响应超时");
             Ok(None)
         },
         Err(RecvTimeoutError::Disconnected) => {
-            log::error!("ListTabs channel disconnected");
+            log::error!("ListTabs 通道已断开");
             Ok(None)
         },
     }
@@ -2967,11 +2967,11 @@ fn request_current_tab_info_from_screen(
     match response_receiver.recv_timeout(Duration::from_secs(1)) {
         Ok(tab_info_opt) => Ok(tab_info_opt),
         Err(RecvTimeoutError::Timeout) => {
-            log::error!("GetCurrentTabInfo timed out waiting for Screen response");
+            log::error!("GetCurrentTabInfo 等待 Screen 响应超时");
             Ok(None)
         },
         Err(RecvTimeoutError::Disconnected) => {
-            log::error!("GetCurrentTabInfo channel disconnected");
+            log::error!("GetCurrentTabInfo 通道已断开");
             Ok(None)
         },
     }

@@ -213,7 +213,7 @@ pub(crate) struct Pty {
 
 pub(crate) fn pty_thread_main(mut pty: Pty, layout: Box<Layout>) -> Result<()> {
     loop {
-        let (event, mut err_ctx) = pty.bus.recv().expect("failed to receive event on channel");
+        let (event, mut err_ctx) = pty.bus.recv().expect("在通道上接收事件失败");
         err_ctx.add_call(ContextType::Pty((&event).into()));
         match event {
             PtyInstruction::SpawnTerminal(
@@ -344,7 +344,7 @@ pub(crate) fn pty_thread_main(mut pty: Pty, layout: Box<Layout>) -> Result<()> {
                                     .with_context(err_context)?;
                                 }
                             } else {
-                                log::error!("Failed to spawn terminal: {:?}", err);
+                                log::error!("启动终端失败：{:?}", err);
                                 pty.close_pane(PaneId::Terminal(*terminal_id))
                                     .with_context(err_context)?;
                             }
@@ -433,7 +433,7 @@ pub(crate) fn pty_thread_main(mut pty: Pty, layout: Box<Layout>) -> Result<()> {
                                     .with_context(err_context)?;
                                 }
                             } else {
-                                log::error!("Failed to spawn terminal: {:?}", err);
+                                log::error!("启动终端失败：{:?}", err);
                                 pty.close_pane(PaneId::Terminal(*terminal_id))
                                     .with_context(err_context)?;
                             }
@@ -554,7 +554,7 @@ pub(crate) fn pty_thread_main(mut pty: Pty, layout: Box<Layout>) -> Result<()> {
                         Ok(tab_result) => all_tab_results.push(tab_result),
                         Err(e) => {
                             log::error!(
-                                "Failed to spawn terminals for tab {}: {:?}",
+                                "为标签页 {} 启动终端失败：{:?}",
                                 tab_layout_info.tab_index,
                                 e
                             );
@@ -783,7 +783,7 @@ pub(crate) fn pty_thread_main(mut pty: Pty, layout: Box<Layout>) -> Result<()> {
                                 .with_context(err_context)?;
                         },
                         Err(e) => {
-                            log::error!("Failed to log layout to HD: {}", e);
+                            log::error!("将布局记录到磁盘失败：{}", e);
                         },
                     }
                 }
@@ -819,7 +819,7 @@ pub(crate) fn pty_thread_main(mut pty: Pty, layout: Box<Layout>) -> Result<()> {
                         );
                     },
                     Err(e) => {
-                        log::error!("Failed to serialize layout: {}", e);
+                        log::error!("序列化布局失败：{}", e);
                     },
                 };
             },
@@ -1181,7 +1181,7 @@ impl Pty {
                 if let CommandOrPlugin::Command(run_command_action) = initial_pane {
                     let run_command: RunCommand = run_command_action.clone().into();
                     if !layout.replace_next_empty_slot_with_run(Run::Command(run_command)) {
-                        log::warn!("More initial_panes provided than empty slots available");
+                        log::warn!("提供的初始窗格数超过可用空位");
                         break;
                     }
                 } else if let CommandOrPlugin::File(file_to_open) = initial_pane {
@@ -1190,7 +1190,7 @@ impl Pty {
                         file_to_open.line_number,
                         file_to_open.cwd.clone(),
                     )) {
-                        log::warn!("More initial_panes provided than empty slots available");
+                        log::warn!("提供的初始窗格数超过可用空位");
                         break;
                     }
                 }
@@ -1935,7 +1935,7 @@ impl Pty {
                 }
                 Ok(())
             },
-            _ => Err(anyhow!("cannot respawn plugin panes")).with_context(err_context),
+            _ => Err(anyhow!("无法重新生成插件窗格")).with_context(err_context),
         }
     }
     pub fn populate_session_layout_metadata(
@@ -2231,11 +2231,11 @@ impl Pty {
                         .with_context(err_context)
                         .non_fatal();
                 } else {
-                    log::warn!("Terminal pane {} not found or not running", terminal_id);
+                    log::warn!("未找到终端窗格 {} 或它未在运行", terminal_id);
                 }
             },
             PaneId::Plugin(plugin_id) => {
-                log::warn!("Cannot send SIGINT to plugin pane {}", plugin_id);
+                log::warn!("无法向插件窗格 {} 发送 SIGINT", plugin_id);
             },
         }
     }
@@ -2254,11 +2254,11 @@ impl Pty {
                         .with_context(err_context)
                         .non_fatal();
                 } else {
-                    log::warn!("Terminal pane {} not found or not running", terminal_id);
+                    log::warn!("未找到终端窗格 {} 或它未在运行", terminal_id);
                 }
             },
             PaneId::Plugin(plugin_id) => {
-                log::warn!("Cannot send SIGKILL to plugin pane {}", plugin_id);
+                log::warn!("无法向插件窗格 {} 发送 SIGKILL", plugin_id);
             },
         }
     }
@@ -2270,7 +2270,7 @@ impl Pty {
                     GetPanePidResponse::Ok(child_pid as i32)
                 } else {
                     GetPanePidResponse::Err(format!(
-                        "Terminal pane {} not found or not running",
+                        "未找到终端窗格 {} 或它未在运行",
                         terminal_id
                     ))
                 }
@@ -2312,7 +2312,7 @@ impl Pty {
                     }
                 } else {
                     GetPaneRunningCommandResponse::Err(format!(
-                        "Terminal pane {} not found or not running",
+                        "未找到终端窗格 {} 或它未在运行",
                         terminal_id
                     ))
                 }
@@ -2343,7 +2343,7 @@ impl Pty {
                     }
                 } else {
                     GetPaneCwdResponse::Err(format!(
-                        "Terminal pane {} not found or not running",
+                        "未找到终端窗格 {} 或它未在运行",
                         terminal_id
                     ))
                 }
@@ -2393,7 +2393,7 @@ fn send_command_not_found_to_screen(
 #[cfg(not(windows))]
 pub fn get_default_shell() -> PathBuf {
     PathBuf::from(std::env::var("SHELL").unwrap_or_else(|_| {
-        log::warn!("Cannot read SHELL env, falling back to use /bin/sh");
+        log::warn!("无法读取 SHELL 环境变量，回退使用 /bin/sh");
         "/bin/sh".to_string()
     }))
 }
@@ -2404,7 +2404,7 @@ pub fn get_default_shell() -> PathBuf {
         return PathBuf::from(shell);
     }
     PathBuf::from(std::env::var("COMSPEC").unwrap_or_else(|_| {
-        log::warn!("Cannot read SHELL or COMSPEC env, falling back to use cmd.exe");
+        log::warn!("无法读取 SHELL 或 COMSPEC 环境变量，回退使用 cmd.exe");
         "cmd.exe".to_string()
     }))
 }

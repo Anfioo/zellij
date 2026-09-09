@@ -106,7 +106,7 @@ impl AsyncReader for ConPtyAsyncReader {
         let pipe = self
             .pipe
             .as_mut()
-            .expect("ConPtyAsyncReader used after init");
+            .expect("ConPtyAsyncReader 在初始化后被使用");
         pipe.read(buf).await
     }
 }
@@ -332,7 +332,7 @@ fn spawn_child_process(
             Some(to_wide(&p.to_string_lossy()))
         } else {
             log::error!(
-                "CWD for new pane '{}' does not exist or is not a directory",
+                "新窗格的工作目录 '{}' 不存在或不是目录",
                 p.display()
             );
             None
@@ -557,14 +557,14 @@ impl WindowsPtyBackend {
                     };
                     let hr = unsafe { ResizePseudoConsole(term.hpcon, size) };
                     if hr != S_OK {
-                        Err::<(), _>(anyhow!("ResizePseudoConsole failed: HRESULT 0x{:08x}", hr))
+                        Err::<(), _>(anyhow!("ResizePseudoConsole 失败：HRESULT 0x{:08x}", hr))
                             .with_context(err_context)
                             .non_fatal();
                     }
                 }
             },
             _ => {
-                Err::<(), _>(anyhow!("no ConPTY terminal found for id {}", terminal_id))
+                Err::<(), _>(anyhow!("未找到 ID 为 {} 的 ConPTY 终端", terminal_id))
                     .with_context(err_context)
                     .non_fatal();
             },
@@ -599,7 +599,7 @@ impl WindowsPtyBackend {
                     Ok(written as usize)
                 }
             },
-            _ => Err(anyhow!("no ConPTY terminal found for id {}", terminal_id))
+            _ => Err(anyhow!("未找到 ID 为 {} 的 ConPTY 终端", terminal_id))
                 .with_context(err_context),
         }
     }
@@ -624,7 +624,7 @@ impl WindowsPtyBackend {
                 }
                 Ok(())
             },
-            _ => Err(anyhow!("no ConPTY terminal found for id {}", terminal_id))
+            _ => Err(anyhow!("未找到 ID 为 {} 的 ConPTY 终端", terminal_id))
                 .with_context(err_context),
         }
     }
