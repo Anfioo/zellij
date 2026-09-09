@@ -39,17 +39,17 @@ pub fn session_info_folder_for_session(session_name: &str) -> PathBuf {
 
 pub fn create_config_and_cache_folders() {
     if let Err(e) = std::fs::create_dir_all(&ZELLIJ_CACHE_DIR.as_path()) {
-        log::error!("Failed to create cache dir: {:?}", e);
+        log::error!("创建缓存目录失败：{:?}", e);
     }
     if let Some(config_dir) = find_default_config_dir() {
         if let Err(e) = std::fs::create_dir_all(&config_dir.as_path()) {
-            log::error!("Failed to create config dir: {:?}", e);
+            log::error!("创建配置目录失败：{:?}", e);
         }
     }
     // 虽然 session_info 目前是 cache 的子目录，但将来不一定总是如此，
     // 因此在这里显式创建它
     if let Err(e) = std::fs::create_dir_all(&ZELLIJ_SESSION_INFO_CACHE_DIR.as_path()) {
-        log::error!("Failed to create session_info cache dir: {:?}", e);
+        log::error!("创建会话信息缓存目录失败：{:?}", e);
     }
     prune_empty_session_info_folders();
 }
@@ -69,7 +69,7 @@ fn prune_empty_session_info_folders() {
         if is_empty {
             if let Err(e) = std::fs::remove_dir(&path) {
                 if e.kind() != std::io::ErrorKind::NotFound {
-                    log::debug!("Failed to prune empty session folder {:?}: {:?}", path, e);
+                    log::debug!("清理空会话文件夹 {:?} 失败：{:?}", path, e);
                 }
             }
         }

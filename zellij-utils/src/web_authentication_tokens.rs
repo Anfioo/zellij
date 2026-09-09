@@ -29,8 +29,8 @@ impl std::fmt::Display for TokenError {
             TokenError::Database(e) => write!(f, "Database error: {}", e),
             TokenError::Io(e) => write!(f, "IO error: {}", e),
             TokenError::InvalidPath => write!(f, "Invalid path"),
-            TokenError::DuplicateName(name) => write!(f, "Token name '{}' already exists", name),
-            TokenError::TokenNotFound(name) => write!(f, "Token '{}' not found", name),
+            TokenError::DuplicateName(name) => write!(f, "令牌名称 '{}' 已存在", name),
+            TokenError::TokenNotFound(name) => write!(f, "未找到令牌 '{}'", name),
             TokenError::InvalidToken => write!(f, "Invalid token"),
         }
     }

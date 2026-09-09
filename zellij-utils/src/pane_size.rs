@@ -215,7 +215,7 @@ impl Dimension {
                 self.inner = self.inner.saturating_sub(by_inner);
             },
             Constraint::Fixed(_fixed) => {
-                log::error!("Cannot reduce_by fixed dimensions");
+                log::error!("无法按固定尺寸缩小");
             },
         }
     }
@@ -337,7 +337,7 @@ impl PaneGeom {
                 Some(combined)
             },
             _ => {
-                log::error!("Can't combine fixed panes");
+                log::error!("无法组合固定窗格");
                 None
             },
         }
@@ -351,7 +351,7 @@ impl PaneGeom {
                 Some(combined)
             },
             _ => {
-                log::error!("Can't combine fixed panes");
+                log::error!("无法组合固定窗格");
                 None
             },
         }
@@ -371,7 +371,7 @@ impl PaneGeom {
                     combined.rows.inner = new_rows_inner;
                 },
                 _ => {
-                    log::error!("Can't combine fixed panes");
+                    log::error!("无法组合固定窗格");
                     return None;
                 },
             }
@@ -397,7 +397,7 @@ impl PaneGeom {
                     combined.cols.inner = new_cols;
                 },
                 _ => {
-                    log::error!("Can't combine fixed panes");
+                    log::error!("无法组合固定窗格");
                     return None;
                 },
             }

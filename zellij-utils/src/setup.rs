@@ -173,7 +173,7 @@ pub fn dump_specified_layout(layout: &str) -> std::io::Result<()> {
         "disable-status" => dump_asset(NO_STATUS_LAYOUT),
         "classic" => dump_asset(CLASSIC_LAYOUT),
         custom => {
-            info!("Dump {custom} layout");
+            info!("导出 {custom} 布局");
             let custom = add_layout_ext(custom);
             let home = default_layout_dir();
             let path = home.map(|h| h.join(&custom));
@@ -185,7 +185,7 @@ pub fn dump_specified_layout(layout: &str) -> std::io::Result<()> {
                     std::io::stdout().write_all(content.as_bytes())
                 },
                 _ => {
-                    log::error!("No layout named {custom} found");
+                    log::error!("未找到名为 {custom} 的布局");
                     return Ok(());
                 },
             }
@@ -201,7 +201,7 @@ pub fn dump_specified_swap_layout(swap_layout: &str) -> std::io::Result<()> {
         "classic" => dump_asset(CLASSIC_SWAP_LAYOUT),
         not_found => Err(std::io::Error::new(
             std::io::ErrorKind::Other,
-            format!("Swap Layout not found for: {}", not_found),
+            format!("未找到 {} 的交换布局", not_found),
         )),
     }
 }
@@ -214,7 +214,7 @@ pub fn dump_builtin_plugins(path: &PathBuf) -> Result<()> {
             .parent()
             .with_context(|| {
                 format!(
-                    "failed to acquire parent path of '{}'",
+                    "获取 '{}' 的父路径失败",
                     plugin_path.display()
                 )
             })
@@ -223,14 +223,14 @@ pub fn dump_builtin_plugins(path: &PathBuf) -> Result<()> {
             })
             .with_context(|| {
                 format!(
-                    "failed to create folder '{}' to dump plugin '{}' to",
+                    "创建用于导出插件 '{}' 的文件夹 '{}' 失败",
                     path.display(),
                     plugin_path.display()
                 )
             })?;
 
         std::fs::write(plugin_path, bytes)
-            .with_context(|| format!("failed to dump builtin plugin '{}'", asset_path.display()))?;
+            .with_context(|| format!("导出内置插件 '{}' 失败", asset_path.display()))?;
     }
 
     Ok(())
@@ -729,7 +729,7 @@ mod setup_test {
         let (_config, layout_info, options, _, _) = Setup::from_cli_args(&cli_args).unwrap();
         assert_snapshot!(format!("{:#?}", options));
         let Some(LayoutInfo::File(layout_path, _)) = layout_info else {
-            panic!("layout info doesn't have expected format");
+            panic!("布局信息格式不符合预期");
         };
         assert_eq!(
             layout_path,
@@ -753,7 +753,7 @@ mod setup_test {
         let (_config, layout_info, options, _, _) = Setup::from_cli_args(&cli_args).unwrap();
         assert_snapshot!(format!("{:#?}", options));
         let Some(LayoutInfo::File(layout_path, _)) = layout_info else {
-            panic!("layout info doesn't have expected format");
+            panic!("布局信息格式不符合预期");
         };
         assert_eq!(
             layout_path,

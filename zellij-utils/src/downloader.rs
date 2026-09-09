@@ -71,7 +71,7 @@ impl Downloader {
         file_name: Option<&str>,
     ) -> Result<(), DownloaderError> {
         let Some(client) = &self.client else {
-            log::error!("No Http client found, cannot perform requests - this is likely a misconfiguration of isahc::HttpClient");
+            log::error!("未找到 HTTP 客户端，无法执行请求——这很可能是 isahc::HttpClient 配置错误");
             return Ok(());
         };
         let file_name = match file_name {
@@ -88,7 +88,7 @@ impl Downloader {
 
         let file_path = self.location.join(file_name.as_str());
         if file_path.exists() {
-            log::debug!("File already exists: {:?}", file_path);
+            log::debug!("文件已存在：{:?}", file_path);
             return Ok(());
         }
         let file_part_path = self.location.join(format!("{}.part", file_name));
@@ -107,7 +107,7 @@ impl Downloader {
                     .map_err(|e| DownloaderError::Io(e))?
                     .len();
 
-                log::debug!("Resuming download from {} bytes", file_part_size);
+                log::debug!("从 {} 字节处继续下载", file_part_size);
 
                 (file_part, file_part_size)
             } else {
@@ -232,7 +232,7 @@ mod tests {
     #[ignore]
     #[tokio::test]
     async fn test_download_ok() {
-        let location = tempdir().expect("Failed to create temp directory");
+        let location = tempdir().expect("创建临时目录失败");
         let location_path = location.path();
 
         let downloader = Downloader::new(location_path.to_path_buf());
@@ -247,13 +247,13 @@ mod tests {
         assert!(result);
         assert!(location_path.join("monocle.wasm").exists());
 
-        location.close().expect("Failed to close temp directory");
+        location.close().expect("关闭临时目录失败");
     }
 
     #[ignore]
     #[tokio::test]
     async fn test_download_without_file_name() {
-        let location = tempdir().expect("Failed to create temp directory");
+        let location = tempdir().expect("创建临时目录失败");
         let location_path = location.path();
 
         let downloader = Downloader::new(location_path.to_path_buf());
@@ -268,6 +268,6 @@ mod tests {
         assert!(result);
         assert!(location_path.join("multitask.wasm").exists());
 
-        location.close().expect("Failed to close temp directory");
+        location.close().expect("关闭临时目录失败");
     }
 }

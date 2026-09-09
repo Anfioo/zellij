@@ -185,10 +185,10 @@ impl Display for ContextType {
             ContextType::Plugin(c) => Some(("plugin_thread:", format!("{:?}", c))),
             ContextType::Client(c) => Some(("main_thread:", format!("{:?}", c))),
             ContextType::IPCServer(c) => Some(("ipc_server:", format!("{:?}", c))),
-            ContextType::StdinHandler => Some(("stdin_handler_thread:", "AcceptInput".to_string())),
+            ContextType::StdinHandler => Some(("标准输入处理线程：", "AcceptInput".to_string())),
             ContextType::AsyncTask => Some(("stream_terminal_bytes:", "AsyncTask".to_string())),
-            ContextType::PtyWrite(c) => Some(("pty_writer_thread:", format!("{:?}", c))),
-            ContextType::BackgroundJob(c) => Some(("background_jobs_thread:", format!("{:?}", c))),
+            ContextType::PtyWrite(c) => Some(("PTY 写入线程：", format!("{:?}", c))),
+            ContextType::BackgroundJob(c) => Some(("后台任务线程：", format!("{:?}", c))),
             ContextType::Empty => None,
         } {
             write!(f, "{} {}", left.purple(), right.green())
@@ -945,12 +945,12 @@ mod not_wasm {
                     let (msg, context) = e.into_inner();
                     if *crate::consts::DEBUG_MODE.get().unwrap_or(&true) {
                         Err(anyhow::anyhow!(
-                            "failed to send message to channel: {:#?}",
+                            "发送消息到通道失败：{:#?}",
                             msg
                         ))
                         .with_context(|| context.to_string())
                     } else {
-                        Err(anyhow::anyhow!("failed to send message to channel"))
+                        Err(anyhow::anyhow!("发送消息到通道失败"))
                             .with_context(|| context.to_string())
                     }
                 },
@@ -964,9 +964,9 @@ mod not_wasm {
                 Ok(val) => anyhow::Ok(val),
                 Err(e) => {
                     if *crate::consts::DEBUG_MODE.get().unwrap_or(&true) {
-                        Err(anyhow::anyhow!("cannot acquire poisoned lock for {e:#?}"))
+                        Err(anyhow::anyhow!("无法获取已污染的锁 {e:#?}"))
                     } else {
-                        Err(anyhow::anyhow!("cannot acquire poisoned lock"))
+                        Err(anyhow::anyhow!("无法获取已污染的锁"))
                     }
                 },
             }

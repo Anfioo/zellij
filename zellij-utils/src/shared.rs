@@ -103,7 +103,7 @@ pub mod colors {
 
 pub fn _hex_to_rgb(hex: &str) -> (u8, u8, u8) {
     Rgb::from_hex_str(hex)
-        .expect("The passed argument must be a valid hex color")
+        .expect("传入的参数必须是有效的十六进制颜色")
         .into()
 }
 

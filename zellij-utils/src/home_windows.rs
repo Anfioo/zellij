@@ -9,7 +9,7 @@ pub(crate) fn home_config_dir() -> Option<PathBuf> {
 pub(crate) fn try_create_home_config_dir() {
     let config_dir = crate::home::xdg_config_dir();
     if let Err(e) = std::fs::create_dir_all(config_dir) {
-        log::error!("Failed to create config dir: {:?}", e);
+        log::error!("创建配置目录失败：{:?}", e);
     }
 }
 

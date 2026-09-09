@@ -78,7 +78,7 @@ pub fn get_resurrectable_sessions() -> Vec<(String, Duration)> {
         },
         Err(e) => {
             log::error!(
-                "Failed to read session_info cache folder: \"{:?}\": {:?}",
+                "读取会话信息缓存文件夹：\"{:?}\" 失败：{:?}",
                 &*ZELLIJ_SESSION_INFO_CACHE_DIR,
                 e
             );
@@ -109,7 +109,7 @@ pub fn get_resurrectable_session_names() -> Vec<String> {
         },
         Err(e) => {
             log::error!(
-                "Failed to read session_info cache folder: \"{:?}\": {:?}",
+                "读取会话信息缓存文件夹：\"{:?}\" 失败：{:?}",
                 &*ZELLIJ_SESSION_INFO_CACHE_DIR,
                 e
             );
@@ -238,7 +238,7 @@ pub fn print_sessions(
                 let suffix = if curr_session == *session_name {
                     format!("(current)")
                 } else if *is_dead {
-                    format!("(EXITED - attach to resurrect)")
+                    format!("（已退出 - 附加以恢复）")
                 } else {
                     String::new()
                 };
@@ -249,7 +249,7 @@ pub fn print_sessions(
                 let suffix = if curr_session == *session_name {
                     format!("(current)")
                 } else if *is_dead {
-                    format!("(\u{1b}[31;1mEXITED\u{1b}[m - attach to resurrect)")
+                    format!("(\u{1b}[31;1m已退出\u{1b}[m - 附加以恢复)")
                 } else {
                     String::new()
                 };
@@ -354,13 +354,13 @@ pub fn delete_session(name: &str, force: bool) {
     }
     if let Err(e) = std::fs::remove_dir_all(session_info_folder_for_session(name)) {
         if e.kind() == std::io::ErrorKind::NotFound {
-            eprintln!("Session: {:?} not found.", name);
+            eprintln!("未找到会话：{:?}。", name);
             process::exit(2);
         } else {
-            log::error!("Failed to remove session {:?}: {:?}", name, e);
+            log::error!("删除会话 {:?} 失败：{:?}", name, e);
         }
     } else {
-        println!("Session: {:?} successfully deleted.", name);
+        println!("会话 {:?} 已成功删除。", name);
     }
 }
 
@@ -376,7 +376,7 @@ pub fn list_sessions(no_formatting: bool, short: bool, reverse: bool) {
                 all_sessions.insert(session_name.clone(), (duration, false));
             }
             if all_sessions.is_empty() {
-                eprintln!("No active zellij sessions found.");
+                eprintln!("未找到活动的 zellij 会话。");
                 1
             } else {
                 print_sessions(

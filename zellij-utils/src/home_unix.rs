@@ -11,7 +11,7 @@ pub(crate) fn try_create_home_config_dir() {
     if let Some(user_dirs) = BaseDirs::new() {
         let config_dir = user_dirs.home_dir().join(CONFIG_LOCATION);
         if let Err(e) = std::fs::create_dir_all(config_dir) {
-            log::error!("Failed to create config dir: {:?}", e);
+            log::error!("创建配置目录失败：{:?}", e);
         }
     }
 }

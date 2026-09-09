@@ -685,7 +685,7 @@ impl FromStr for Direction {
             "Up" | "up" => Ok(Direction::Up),
             "Down" | "down" => Ok(Direction::Down),
             _ => Err(format!(
-                "Failed to parse Direction. Unknown Direction: {}",
+                "解析方向失败。未知的方向：{}",
                 s
             )),
         }
@@ -730,7 +730,7 @@ impl FromStr for Resize {
             "Increase" | "increase" | "+" => Ok(Resize::Increase),
             "Decrease" | "decrease" | "-" => Ok(Resize::Decrease),
             _ => Err(format!(
-                "failed to parse resize type. Unknown specifier '{}'",
+                "解析调整大小类型失败。未知的指示符 '{}'",
                 s
             )),
         }
@@ -1228,7 +1228,7 @@ impl FromStr for ThemeHue {
             "light" => Ok(ThemeHue::Light),
             "dark" => Ok(ThemeHue::Dark),
             e => Err(format!(
-                "Unknown theme hue: '{}' (expected 'dark' or 'light')",
+                "未知的主题色相：'{}'（期望 'dark' 或 'light'）",
                 e
             )),
         }
@@ -1943,13 +1943,13 @@ impl From<&PathBuf> for LayoutMetadata {
                         }
                     },
                     Err(e) => {
-                        log::error!("Failed to parse layout: {}", e);
+                        log::error!("解析布局失败：{}", e);
                         LayoutMetadata::default()
                     },
                 }
             },
             Err(e) => {
-                log::error!("Failed to read layout file: {}", e);
+                log::error!("读取布局文件失败：{}", e);
                 LayoutMetadata::default()
             },
         }
@@ -3155,7 +3155,7 @@ impl FloatingPaneCoordinates {
     }
     pub fn with_x_percent(mut self, x: usize) -> Self {
         if x > 100 {
-            eprintln!("x must be between 0 and 100");
+            eprintln!("x 必须在 0 到 100 之间");
             return self;
         }
         self.x = Some(PercentOrFixed::Percent(x));
@@ -3167,7 +3167,7 @@ impl FloatingPaneCoordinates {
     }
     pub fn with_y_percent(mut self, y: usize) -> Self {
         if y > 100 {
-            eprintln!("y must be between 0 and 100");
+            eprintln!("y 必须在 0 到 100 之间");
             return self;
         }
         self.y = Some(PercentOrFixed::Percent(y));
@@ -3179,7 +3179,7 @@ impl FloatingPaneCoordinates {
     }
     pub fn with_width_percent(mut self, width: usize) -> Self {
         if width > 100 {
-            eprintln!("width must be between 0 and 100");
+            eprintln!("宽度必须在 0 到 100 之间");
             return self;
         }
         self.width = Some(PercentOrFixed::Percent(width));

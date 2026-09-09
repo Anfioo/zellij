@@ -2378,7 +2378,7 @@ mod tests {
             dim.set_inner(dim_hm["inner"].to_string().parse().unwrap());
             dim
         } else {
-            panic!("Constraint is nor a percent nor fixed");
+            panic!("约束既不是百分比也不是固定值");
         };
         dim
     }
