@@ -1376,7 +1376,7 @@ impl<'a> PaneApplier<'a> {
                     }
                 },
                 None => {
-                    log::error!("could not find room for pane!")
+                    log::error!("找不到容纳窗格的空间！")
                 },
             }
         }

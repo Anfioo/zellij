@@ -793,7 +793,7 @@ impl MouseHandler {
                 let word_separators = tab.word_separators.clone();
                 let pane = tab
                     .get_pane_with_id_mut(pane_id)
-                    .ok_or_else(|| anyhow!("Failed to find pane {pane_id:?}"))?;
+                    .ok_or_else(|| anyhow!("找不到窗格 {pane_id:?}"))?;
                 let relative_position = pane.relative_position(&position);
 
                 let mut leave_clipboard_message = false;
@@ -909,7 +909,7 @@ impl MouseHandler {
                 .map(|p| p.pid());
             let active_pane_id = tab
                 .get_active_pane_id(client_id)
-                .ok_or_else(|| anyhow!("Failed to find active pane"))?;
+                .ok_or_else(|| anyhow!("找不到活动窗格"))?;
             if let Some(pane_id) = pane_id_at_position {
                 if pane_id != active_pane_id {
                     Self::focus_pane_at(tab, &position, client_id).with_context(err_context)?;
@@ -928,7 +928,7 @@ impl MouseHandler {
         clear_hover_for_client(tab, client_id);
         let active_pane_id_before = tab
             .get_active_pane_id(client_id)
-            .ok_or_else(|| anyhow!("Failed to find active pane"))?;
+            .ok_or_else(|| anyhow!("找不到活动窗格"))?;
 
         Self::focus_pane_at(tab, &position, client_id).with_context(err_context)?;
 
@@ -947,7 +947,7 @@ impl MouseHandler {
                 .move_pane_with_mouse(position, search_selectable);
             let active_pane_id_after = tab
                 .get_active_pane_id(client_id)
-                .ok_or_else(|| anyhow!("Failed to find active pane"))?;
+                .ok_or_else(|| anyhow!("找不到活动窗格"))?;
             if moved_pane_with_mouse || active_pane_id_before != active_pane_id_after {
                 return Ok(MouseEffect::state_changed());
             } else {
@@ -957,7 +957,7 @@ impl MouseHandler {
 
         let active_pane_id_after = tab
             .get_active_pane_id(client_id)
-            .ok_or_else(|| anyhow!("Failed to find active pane"))?;
+            .ok_or_else(|| anyhow!("找不到活动窗格"))?;
         if active_pane_id_before != active_pane_id_after {
             Ok(MouseEffect::state_changed())
         } else {
@@ -987,12 +987,12 @@ impl MouseHandler {
 
         let active_pane_id = tab
             .get_active_pane_id(client_id)
-            .ok_or_else(|| anyhow!("Failed to find active pane"))
+            .ok_or_else(|| anyhow!("找不到活动窗格"))
             .with_context(err_context)?;
 
         let pane = tab
             .get_pane_with_id(active_pane_id)
-            .ok_or_else(|| anyhow!("Failed to find pane {active_pane_id:?}"))
+            .ok_or_else(|| anyhow!("找不到窗格 {active_pane_id:?}"))
             .with_context(err_context)?;
 
         let terminal_wants_mouse = pane.terminal_emulator_wants_mouse();
@@ -1101,10 +1101,10 @@ impl MouseHandler {
         if never_moved {
             let active_pane_id = tab
                 .get_active_pane_id(client_id)
-                .ok_or_else(|| anyhow!("Failed to find active pane"))?;
+                .ok_or_else(|| anyhow!("找不到活动窗格"))?;
             let pane_id_at_position = Self::get_pane_at(tab, &position, false)
                 .with_context(err_context)?
-                .ok_or_else(|| anyhow!("Failed to find pane at position"))?
+                .ok_or_else(|| anyhow!("在指定位置找不到窗格"))?
                 .pid();
             if active_pane_id != pane_id_at_position {
                 Self::focus_pane_at(tab, &position, client_id).with_context(err_context)?;
@@ -1258,11 +1258,11 @@ impl MouseHandler {
         let mut should_render = false;
         let active_pane_id = tab
             .get_active_pane_id(client_id)
-            .ok_or_else(|| anyhow!("Failed to find active pane"))?;
+            .ok_or_else(|| anyhow!("找不到活动窗格"))?;
         if pane_id == active_pane_id {
             let pane = tab
                 .get_pane_with_id(pane_id)
-                .ok_or_else(|| anyhow!("Failed to find pane {pane_id:?}"))?;
+                .ok_or_else(|| anyhow!("找不到窗格 {pane_id:?}"))?;
             let relative_position = pane.relative_position(&event.position);
             let mut event_for_pane = event.clone();
             event_for_pane.position = relative_position;
@@ -1825,7 +1825,7 @@ impl MouseHandler {
         } else {
             let active_pane_id = tab
                 .get_active_pane_id(client_id)
-                .ok_or_else(|| anyhow!("Failed to find active pane"))?;
+                .ok_or_else(|| anyhow!("找不到活动窗格"))?;
 
             tab.dissolve_stack_lists_for_classic_mutation();
             Self::resize_tiled_pane_with_stacked_resize(tab, active_pane_id, &strategy)
@@ -1860,7 +1860,7 @@ impl MouseHandler {
         } else {
             let active_pane_id = tab
                 .get_active_pane_id(client_id)
-                .ok_or_else(|| anyhow!("Failed to find active pane"))?;
+                .ok_or_else(|| anyhow!("找不到活动窗格"))?;
 
             tab.dissolve_stack_lists_for_classic_mutation();
             Self::resize_tiled_pane_with_stacked_resize(tab, active_pane_id, &strategy)

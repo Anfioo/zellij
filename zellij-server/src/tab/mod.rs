@@ -1225,7 +1225,7 @@ impl Tab {
             Some((_is_scrollback_editor, pane)) => pane,
             None => {
                 log::error!(
-                    "stack-list member {:?} not found in suppressed panes",
+                    "堆叠列表成员 {:?} 未在受抑制窗格中找到",
                     target_member
                 );
                 return;
@@ -1333,7 +1333,7 @@ impl Tab {
             let target_box = match self.suppressed_panes.remove(&promote_target) {
                 Some((_is_scrollback_editor, pane)) => pane,
                 None => {
-                    log::error!("stack-list promote target not found in suppressed panes");
+                    log::error!("未在受抑制窗格中找到堆叠列表的提升目标");
                     return StackListRemoval::NotRemoved;
                 },
             };
@@ -1434,7 +1434,7 @@ impl Tab {
         }
         let geoms = self.tiled_panes.stack_panes(visible, n);
         if geoms.len() != n {
-            log::error!("degroupify: could not compute classic stack geoms");
+            log::error!("取消分组：无法计算经典堆叠几何信息");
             return;
         }
         for (i, member) in members.iter().enumerate() {
@@ -1774,7 +1774,7 @@ impl Tab {
                 // 配置 that was somehow not 捕获的 in our KDL 布局 解析器
                 // we should still be able to properly 恢复 from this with a useful 错误
                 // 消息 though
-                log::error!("Failed to apply layout: {}", e);
+                log::error!("应用布局失败：{}", e);
                 self.tiled_panes.reapply_pane_frames();
                 self.is_pending = false;
                 self.apply_buffered_instructions().non_fatal();
@@ -1884,7 +1884,7 @@ impl Tab {
                 // 配置 that was somehow not 捕获的 in our KDL 布局 解析器
                 // we should still be able to properly 恢复 from this with a useful 错误
                 // 消息 though
-                log::error!("Failed to apply layout: {}", e);
+                log::error!("应用布局失败：{}", e);
             },
         }
         Ok(())
@@ -2392,7 +2392,7 @@ impl Tab {
             if self.get_selectable_tiled_panes().count() <= 1
                 && !self.pane_is_stack_list_member(&pane_id)
             {
-                log::error!("Cannot float the last tiled pane...");
+                log::error!("无法浮动最后一个平铺窗格……");
                 // don't 关闭 the only 窗格 on 屏幕...
                 return Ok(());
             }
@@ -2969,11 +2969,11 @@ impl Tab {
                     )?;
                 },
                 None => {
-                    log::error!("Cannot find active pane");
+                    log::error!("找不到活动窗格");
                 },
             },
             _ => {
-                log::error!("Must have pane id to replace or client id to start pane in place>");
+                log::error!("必须指定要替换的窗格 ID，或用于就地启动窗格的客户端 ID>");
             },
         }
         if let Some(initial_pane_title) = initial_pane_title {
@@ -3094,7 +3094,7 @@ impl Tab {
             } else if let Some(client_id) = client_id {
                 self.add_stacked_pane_to_active_pane(new_pane, pid, client_id, should_focus_pane)
             } else {
-                log::error!("Must have client id or pane id to stack pane");
+                log::error!("堆叠窗格时必须指定客户端 ID 或窗格 ID");
                 return Ok(());
             }
         }
@@ -3141,7 +3141,7 @@ impl Tab {
                     },
                     None => {
                         Err::<(), _>(anyhow!(
-                            "Could not find editor pane to replace - is no pane focused?"
+                            "找不到要替换的编辑器窗格——是否没有窗格获得焦点？"
                         ))
                         .with_context(err_context)
                         .non_fatal();
@@ -3179,7 +3179,7 @@ impl Tab {
                     .values()
                     .any(|s_p| s_p.1.pid() == pane_id_to_replace)
                 {
-                    log::error!("Cannot replace suppressed pane");
+                    log::error!("无法替换受抑制的窗格");
                     None
                 } else {
                     // not a thing
@@ -3201,7 +3201,7 @@ impl Tab {
                         self.insert_scrollback_editor_replaced_pane(replaced_pane, pid);
                     },
                     None => {
-                        Err::<(), _>(anyhow!("Could not find editor pane to replace"))
+                        Err::<(), _>(anyhow!("找不到要替换的编辑器窗格"))
                             .with_context(err_context)
                             .non_fatal();
                     },
@@ -3298,7 +3298,7 @@ impl Tab {
                         },
                         None => {
                             Err::<(), _>(anyhow!(
-                                "Could not find editor pane to replace - is no pane focused?"
+                                "找不到要替换的编辑器窗格——是否没有窗格获得焦点？"
                             ))
                             .with_context(err_context)
                             .non_fatal();
@@ -3367,7 +3367,7 @@ impl Tab {
                         },
                         None => {
                             Err::<(), _>(anyhow!(
-                                "Could not find editor pane to replace - is no pane focused?"
+                                "找不到要替换的编辑器窗格——是否没有窗格获得焦点？"
                             ))
                             .with_context(err_context)
                             .non_fatal();
@@ -3493,7 +3493,7 @@ impl Tab {
                 self.swap_layouts.set_is_tiled_damaged();
             }
         } else {
-            log::error!("No room to split pane horizontally");
+            log::error!("没有空间水平拆分窗格");
             if let Some(active_pane_id) = self.tiled_panes.get_active_pane_id(client_id) {
                 self.senders
                     .send_to_background_jobs(BackgroundJob::DisplayPaneError(
@@ -3568,7 +3568,7 @@ impl Tab {
                 self.swap_layouts.set_is_tiled_damaged();
             }
         } else {
-            log::error!("No room to split pane vertically");
+            log::error!("没有空间垂直拆分窗格");
             if let Some(active_pane_id) = self.tiled_panes.get_active_pane_id(client_id) {
                 self.senders
                     .send_to_background_jobs(BackgroundJob::DisplayPaneError(
@@ -4354,7 +4354,7 @@ impl Tab {
                 .or_else(|| self.tiled_panes.get_active_pane_id(client_id))
                 .ok_or_else(|| {
                     anyhow!(format!(
-                        "failed to find active pane id for client {client_id}"
+                        "找不到客户端 {client_id} 的活动窗格 ID"
                     ))
                 })
                 .with_context(err_context)?
@@ -4430,7 +4430,7 @@ impl Tab {
         let err_context = || format!("failed to paste to active terminal for client {client_id}");
         let active_pane_id = self
             .get_active_pane_id(client_id)
-            .ok_or_else(|| anyhow!("no active pane for client {client_id}"))
+            .ok_or_else(|| anyhow!("客户端 {client_id} 没有活动窗格"))
             .with_context(err_context)?;
         self.paste_to_pane_id(bytes, active_pane_id, completion)
     }
@@ -4455,7 +4455,7 @@ impl Tab {
             .get_mut(&pane_id)
             .or_else(|| self.tiled_panes.get_pane_mut(pane_id))
             .or_else(|| self.suppressed_panes.get_mut(&pane_id).map(|p| &mut p.1))
-            .ok_or_else(|| anyhow!(format!("failed to find pane with id {pane_id:?}")))
+            .ok_or_else(|| anyhow!(format!("找不到 ID 为 {pane_id:?} 的窗格")))
             .with_context(err_context)?;
 
         // We always 写入 for non-synced 终端.
@@ -4610,7 +4610,7 @@ impl Tab {
                 should_update_ui = true;
             },
             PaneId::Plugin(_pid) => {
-                log::error!("Unsupported plugin action");
+                log::error!("不支持的插件操作");
             },
         }
         Ok(should_update_ui)
@@ -4682,7 +4682,7 @@ impl Tab {
         if self.tiled_panes.panes_contain(&pane_id) {
             self.tiled_panes.toggle_pane_fullscreen(pane_id);
         } else {
-            log::error!("No tiled pane with id: {:?} found", pane_id);
+            log::error!("未找到 ID 为 {:?} 的平铺窗格", pane_id);
         }
     }
     pub fn toggle_active_pane_no_ui_fullscreen(&mut self, client_id: ClientId) {
@@ -4716,7 +4716,7 @@ impl Tab {
         if self.tiled_panes.panes_contain(&pane_id) {
             self.tiled_panes.toggle_pane_no_ui_fullscreen(pane_id);
         } else {
-            log::error!("No tiled pane with id: {:?} found", pane_id);
+            log::error!("未找到 ID 为 {:?} 的平铺窗格", pane_id);
         }
     }
     pub fn unset_fullscreen(&mut self) {
@@ -6127,7 +6127,7 @@ impl Tab {
                 completion_tx,
             ))
         } else {
-            log::error!("Editing plugin pane scrollback is currently unsupported.");
+            log::error!("当前不支持编辑插件窗格的回滚缓冲区。");
             Ok(())
         }
     }
@@ -6156,7 +6156,7 @@ impl Tab {
                 completion_tx,
             ))
         } else {
-            log::error!("Editing plugin pane scrollback is currently unsupported.");
+            log::error!("当前不支持编辑插件窗格的回滚缓冲区。");
             Ok(())
         }
     }
@@ -7097,7 +7097,7 @@ impl Tab {
                                     (is_scrollback_editor, replaced_pane),
                                 );
                             } else {
-                                log::error!("Could not find pane to replace, aborting.");
+                                log::error!("找不到要替换的窗格，正在中止。");
                             }
                             Ok(())
                         } else {
@@ -7122,7 +7122,7 @@ impl Tab {
                 self.floating_panes.focus_pane_for_all_clients(pane_id);
             },
             None => {
-                log::error!("Could not find suppressed pane wiht id: {:?}", pane_id);
+                log::error!("找不到 ID 为 {:?} 的受抑制窗格", pane_id);
             },
         }
     }
@@ -7158,7 +7158,7 @@ impl Tab {
                 }
             },
             None => {
-                log::error!("Could not find suppressed pane with id: {:?}", pane_id);
+                log::error!("找不到 ID 为 {:?} 的受抑制窗格", pane_id);
             },
         }
     }
@@ -7185,7 +7185,7 @@ impl Tab {
                 let expand_panes_success = self.tiled_panes.expand_pane_in_stack(pane_id).len() > 0;
                 if !expand_panes_success {
                     log::error!(
-                        "Could not find suppressed or stacked pane with id: {:?}",
+                        "找不到 ID 为 {:?} 的受抑制或堆叠窗格",
                         pane_id
                     );
                 }
@@ -7469,12 +7469,12 @@ impl Tab {
                         completion_tx,
                     ));
                 } else {
-                    log::error!("Pane is still running!")
+                    log::error!("窗格仍在运行！")
                 }
             },
             None => {
                 log::error!(
-                    "Failed to find terminal pane with id {} to rerun in tab",
+                    "找不到要在标签页中重新运行、ID 为 {} 的终端窗格",
                     terminal_pane_id
                 );
             },
@@ -7526,7 +7526,7 @@ impl Tab {
             .values()
             .any(|s_p| s_p.1.pid() == pane_id)
         {
-            log::error!("Cannot resize suppressed panes");
+            log::error!("无法调整受抑制窗格的大小");
         }
         Ok(())
     }
@@ -7670,7 +7670,7 @@ impl Tab {
         if self.floating_panes.panes_contain(&root_pane_id)
             || self.suppressed_panes.contains_key(&root_pane_id)
         {
-            log::error!("Root pane of stack cannot be floating or suppressed");
+            log::error!("堆叠的根窗格不能是浮动或受抑制状态");
             return false;
         }
         if self.pane_is_stacked(root_pane_id) {
@@ -7705,7 +7705,7 @@ impl Tab {
                 .tiled_panes
                 .stack_panes(root_pane_id, panes_to_stack.len() + 1);
             if stack_geoms.is_empty() {
-                log::error!("Failed to find room for stacked panes");
+                log::error!("找不到容纳堆叠窗格的空间");
                 return;
             }
             self.tiled_panes
@@ -7788,7 +7788,7 @@ impl Tab {
             return Ok(());
         }
 
-        log::error!("Pane with id {:?} not found", pane_id);
+        log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
         Ok(())
     }
     pub fn set_pane_borderless(&mut self, pane_id: &PaneId, borderless: bool) -> Result<()> {
@@ -7827,7 +7827,7 @@ impl Tab {
             return Ok(());
         }
 
-        log::error!("Pane with id {:?} not found", pane_id);
+        log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
         Ok(())
     }
     pub fn get_viewport(&self) -> Viewport {
