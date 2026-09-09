@@ -868,7 +868,7 @@ pub(crate) fn start_client(opts: CliArgs) {
                         // 这会导致 `zellij_server::terminal_bytes::listen` 任务中
                         // 的无限递归，用无限的 `Render` 请求淹没服务端和客户端。
                         if *session_name == val {
-                            eprintln!("You are trying to attach to the current session (\"{}\"). Zellij does not support nesting a session in itself.", session_name);
+                            eprintln!("您正尝试附加到当前会话（\"{}\"），Zellij 不支持在会话中嵌套会话。", session_name);
                             process::exit(1);
                         }
                     }
