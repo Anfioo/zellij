@@ -249,7 +249,7 @@ macro_rules! active_tab_and_connected_client_id {
                         Err(err) => Err::<(), _>(err).non_fatal(),
                     }
                 } else {
-                    log::error!("No client ids in screen found");
+                    log::error!("屏幕中未找到客户端 ID");
                 };
             },
         }
@@ -269,7 +269,7 @@ macro_rules! active_tab_and_connected_client_id {
                         Err(err) => Err::<(), _>(err).non_fatal(),
                     }
                 } else {
-                    log::error!("No client ids in screen found");
+                    log::error!("屏幕中未找到客户端 ID");
                 };
             },
         }
@@ -296,7 +296,7 @@ macro_rules! active_tab_and_connected_client_id_with_first_tab_fallback {
                             $closure(first_tab, None);
                         },
                         None => {
-                            log::error!("Not tabs found!");
+                            log::error!("未找到标签页！");
                         },
                     }
                 };
@@ -323,7 +323,7 @@ macro_rules! active_tab_and_connected_client_id_with_first_tab_fallback {
                             $closure(first_tab, None)?;
                         },
                         None => {
-                            log::error!("Not tabs found!");
+                            log::error!("未找到标签页！");
                         },
                     }
                 };
@@ -1899,7 +1899,7 @@ impl Screen {
 
         if self.tabs.is_empty() {
             Err::<(), _>(anyhow!(
-                "No tabs left, cannot move clients: {:?} from closed tab",
+                "没有剩余标签页，无法将客户端 {:?} 从已关闭的标签页移出",
                 client_ids_and_mode_infos
             ))
             .with_context(err_context)
@@ -2130,7 +2130,7 @@ impl Screen {
                             current_tab.visible(false).with_context(err_context)?;
                         }
                     } else {
-                        Err::<(), _>(anyhow!("Tab index {:?} not found", current_tab_index))
+                        Err::<(), _>(anyhow!("未找到标签页索引 {:?}", current_tab_index))
                             .with_context(err_context)
                             .non_fatal();
                     }
@@ -2679,7 +2679,7 @@ impl Screen {
         if fit_changed {
             if let Some(&tab_id) = self.active_tab_ids.get(&client_id) {
                 if let Err(e) = self.recompute_tab_size(tab_id) {
-                    log::error!("Failed to recompute tab size after single-pane demotion: {e:?}");
+                    log::error!("单窗格降级后重新计算标签页大小失败：{e:?}");
                 }
             }
         }
@@ -3012,7 +3012,7 @@ impl Screen {
                 PaneId::Plugin(_) => {
                     // 插件窗格不会发出白名单主机查询；如果我们到达这里，映射被错误地填充了。丢弃回复。
                     log::warn!(
-                        "Discarding host reply for plugin pane (token={}); plugins do not forward CSI/OSC queries",
+                        "正在丢弃插件窗格的主机回复（token={}）；插件不转发 CSI/OSC 查询",
                         token
                     );
                 },
@@ -4365,8 +4365,8 @@ impl Screen {
             Some(tab) => self
                 .tabs
                 .get(tab)
-                .ok_or_else(|| anyhow!("active tab {} does not exist", tab)),
-            None => Err(anyhow!("active tab not found for client {:?}", client_id)),
+                .ok_or_else(|| anyhow!("活动标签页 {} 不存在", tab)),
+            None => Err(anyhow!("未找到客户端 {:?} 的活动标签页", client_id)),
         }
     }
 
@@ -4422,8 +4422,8 @@ impl Screen {
             Some(tab) => self
                 .tabs
                 .get_mut(tab)
-                .ok_or_else(|| anyhow!("active tab {} does not exist", tab)),
-            None => Err(anyhow!("active tab not found for client {:?}", client_id)),
+                .ok_or_else(|| anyhow!("活动标签页 {} 不存在", tab)),
+            None => Err(anyhow!("未找到客户端 {:?} 的活动标签页", client_id)),
         }
     }
 
@@ -4582,7 +4582,7 @@ impl Screen {
             },
             Ok(_) => {},
             Err(e) => {
-                log::error!("Failed to forward desktop notifications: {}", e);
+                log::error!("转发桌面通知失败：{}", e);
             },
         }
     }
@@ -4824,7 +4824,7 @@ impl Screen {
     ) -> Result<()> {
         if self.tabs.get(&tab_id).is_none() {
             // TODO：我们应该用 UI 防止这种情况 — 例如，不能关闭具有挂起状态的标签页
-            log::error!("Tab with index {tab_id} not found. Cannot apply layout!");
+            log::error!("未找到索引为 {tab_id} 的标签页。无法应用布局！");
             return Ok(());
         }
         let (client_id, mut is_web_client) = client_id_and_is_web_client;
@@ -5012,7 +5012,7 @@ impl Screen {
         } else if let Some(tab_index) = self.tabs.keys().next() {
             tab_index.to_owned()
         } else {
-            bail!("Can't find a valid tab to attach client to!");
+            bail!("找不到可附加客户端的有效标签页！");
         };
 
         self.active_tab_ids.insert(client_id, tab_index);
@@ -5815,7 +5815,7 @@ impl Screen {
             .find(|t| t.position == active_tab_pos)
             .map(|t| t.id)
         else {
-            log::error!("Failed to find active tab at position: {}", active_tab_pos);
+            log::error!("在位置 {} 找不到活动标签页", active_tab_pos);
             return;
         };
         let Some(other_tab_id) = self
@@ -5825,7 +5825,7 @@ impl Screen {
             .map(|t| t.id)
         else {
             log::error!(
-                "Failed to find tab to switch to at position: {}",
+                "在位置 {} 找不到要切换到的标签页",
                 other_tab_pos
             );
             return;
@@ -5833,7 +5833,7 @@ impl Screen {
 
         if !self.tabs.contains_key(&active_tab_id) || !self.tabs.contains_key(&other_tab_id) {
             warn!(
-                "failed to switch tabs: index {} or {} not found in {:?}",
+                "切换标签页失败：在 {:?} 中找不到索引 {} 或 {}",
                 active_tab_id,
                 other_tab_id,
                 self.tabs.keys()
@@ -5845,11 +5845,11 @@ impl Screen {
         let mut active_tab = self
             .tabs
             .remove(&active_tab_id)
-            .expect("active tab not found");
+            .expect("未找到活动标签页");
         let mut other_tab = self
             .tabs
             .remove(&other_tab_id)
-            .expect("other tab not found");
+            .expect("未找到其他标签页");
 
         std::mem::swap(&mut active_tab.position, &mut other_tab.position);
 
@@ -5927,7 +5927,7 @@ impl Screen {
             }
             self.log_and_report_session_state()?;
         } else {
-            log::error!("Tab with id {} not found", tab_id);
+            log::error!("未找到 ID 为 {} 的标签页", tab_id);
         }
         Ok(())
     }
@@ -6323,7 +6323,7 @@ impl Screen {
                     .non_fatal();
             },
             None => {
-                log::error!("Could not find pane with id: {:?}", pane_id);
+                log::error!("找不到 ID 为 {:?} 的窗格", pane_id);
             },
         };
         Ok(())
@@ -6343,7 +6343,7 @@ impl Screen {
         }
         if !found {
             log::error!(
-                "Failed to find terminal pane with id: {} to run",
+                "找不到 ID 为 {} 的终端窗格来运行",
                 terminal_pane_id
             );
         }
@@ -6358,7 +6358,7 @@ impl Screen {
             }
         }
         if !found {
-            log::error!("Failed to find pane with id: {:?} to resize", pane_id);
+            log::error!("找不到 ID 为 {:?} 的窗格来调整大小", pane_id);
         }
     }
     pub fn break_pane(
@@ -6576,7 +6576,7 @@ impl Screen {
             .find(|t| t.position == tab_index)
             .is_some();
         if !has_tab_with_index {
-            log::error!("Cannot find tab with index: {tab_index}");
+            log::error!("找不到索引为 {tab_index} 的标签页");
             return Ok(());
         }
         let mut extracted_panes = vec![];
@@ -6632,7 +6632,7 @@ impl Screen {
                 }
             }
         } else {
-            log::error!("Could not find tab with index: {:?}", tab_index);
+            log::error!("找不到索引为 {:?} 的标签页", tab_index);
         }
         self.log_and_report_session_state()?;
         Ok(())
@@ -6673,7 +6673,7 @@ impl Screen {
                         },
                         None => {
                             log::error!(
-                                "Failed to find active pane for client id: {:?}",
+                                "找不到客户端 ID {:?} 的活动窗格",
                                 client_id
                             );
                         },
@@ -6695,13 +6695,13 @@ impl Screen {
                         }
                     },
                     None => {
-                        log::error!("Could not find pane with id: {:?}", pane_id);
+                        log::error!("找不到 ID 为 {:?} 的窗格", pane_id);
                     },
                 };
             },
             ClientTabIndexOrPaneId::TabIndex(_tab_index)
             | ClientTabIndexOrPaneId::TabIndexNoFocus(_tab_index) => {
-                log::error!("Cannot replace pane with tab index");
+                log::error!("无法用标签页索引替换窗格");
             },
         }
         Ok(())
@@ -6720,7 +6720,7 @@ impl Screen {
             .map(|(_tab_index, tab)| tab.position)
         else {
             log::error!(
-                "Could not find tab with pane_id: {:?} to replace",
+                "找不到要替换的、包含 pane_id {:?} 的标签页",
                 pane_id_to_replace
             );
             return;
@@ -6732,7 +6732,7 @@ impl Screen {
             .map(|(_tab_index, tab)| tab.position)
         else {
             log::error!(
-                "Could not find tab with pane_id: {:?} to be replaced by",
+                "找不到要被 pane_id {:?} 替换的标签页",
                 pane_id_of_existing_pane
             );
             return;
@@ -6743,7 +6743,7 @@ impl Screen {
             .find(|(_, t)| t.position == tab_index_of_existing_pane)
             .and_then(|(_, t)| t.extract_pane(pane_id_of_existing_pane, true))
         else {
-            log::error!("Failed to find pane");
+            log::error!("找不到窗格");
             return;
         };
         if let Some(tab) = self
@@ -6945,7 +6945,7 @@ impl Screen {
                 }
             } else {
                 log::warn!(
-                    "host theme auto-switch enabled but resolved styling missing for {:?}",
+                    "已启用主机主题自动切换，但缺少 {:?} 的已解析样式",
                     mode
                 );
             }
@@ -7070,7 +7070,7 @@ impl Screen {
         }
         if !found {
             log::error!(
-                "Failed to find pane with id: {:?} to set as pinned",
+                "找不到窗格 with id: {:?} to set as pinned",
                 pane_id
             );
         }
@@ -7078,7 +7078,7 @@ impl Screen {
     pub fn stack_panes(&mut self, mut pane_ids_to_stack: Vec<PaneId>) -> Option<PaneId> {
         // 如果成功，返回堆栈中最后一个窗格的窗格 id
         if pane_ids_to_stack.is_empty() {
-            log::error!("Got an empty list of pane_ids to stack");
+            log::error!("收到空的待堆叠窗格 ID 列表");
             return None;
         }
         let stack_size = pane_ids_to_stack.len();
@@ -7096,7 +7096,7 @@ impl Screen {
             })
             .copied()
         else {
-            log::error!("Failed to find tab for root_pane_id: {:?}", root_pane_id);
+            log::error!("找不到根窗格 ID {:?} 所在的标签页", root_pane_id);
             return None;
         };
         let root_pane_id_is_floating = self
@@ -7118,7 +7118,7 @@ impl Screen {
             .map(|t| t.has_room_for_stack(root_pane_id, stack_size))
             .unwrap_or(false);
         if !target_tab_has_room_for_stack {
-            log::error!("No room for stack with root pane id: {:?}", root_pane_id);
+            log::error!("没有空间容纳以根窗格 ID {:?} 开头的堆叠", root_pane_id);
             return None;
         }
 
@@ -7134,7 +7134,7 @@ impl Screen {
                             panes_to_stack.push(pane);
                         },
                         None => {
-                            log::error!("Failed to extract pane: {:?}", pane_id);
+                            log::error!("提取窗格失败：{:?}", pane_id);
                         },
                     }
                 }
@@ -7256,7 +7256,7 @@ impl Screen {
                 }
             },
             Err(e) => {
-                log::error!("Failed to process MouseEvent: {}", e);
+                log::error!("处理鼠标事件失败：{}", e);
             },
         }
     }
@@ -7963,13 +7963,13 @@ pub(crate) fn screen_thread_main(
         .and_then(|name| config.themes.get_theme(name).map(|t| t.palette));
     if config.options.theme_dark.is_some() && host_theme_dark_styling.is_none() {
         log::warn!(
-            "theme_dark='{}' not found in themes; auto-theme switch disabled for dark.",
+            "在主题中找不到 theme_dark='{}'；已禁用暗色自动主题切换。",
             config.options.theme_dark.as_deref().unwrap_or("?")
         );
     }
     if config.options.theme_light.is_some() && host_theme_light_styling.is_none() {
         log::warn!(
-            "theme_light='{}' not found in themes; auto-theme switch disabled for light.",
+            "在主题中找不到 theme_light='{}'；已禁用亮色自动主题切换。",
             config.options.theme_light.as_deref().unwrap_or("?")
         );
     }
@@ -8282,7 +8282,7 @@ pub(crate) fn screen_thread_main(
                                 active_tab.hold_pane(pid, None, is_first_run, hold_for_command);
                             }
                         } else {
-                            log::error!("Tab index not found: {:?}", tab_index);
+                            log::error!("未找到标签页索引：{:?}", tab_index);
                         }
                     },
                     ClientTabIndexOrPaneId::PaneId(pane_id) => {
@@ -8341,7 +8341,7 @@ pub(crate) fn screen_thread_main(
                         }
                         if !found {
                             log::error!(
-                                "Failed to find tab containing pane with id: {:?}",
+                                "找不到包含 ID 为 {:?} 的窗格的标签页",
                                 pane_id
                             );
                         }
@@ -8366,7 +8366,7 @@ pub(crate) fn screen_thread_main(
                     },
                     ClientTabIndexOrPaneId::TabIndex(_tab_index)
                     | ClientTabIndexOrPaneId::TabIndexNoFocus(_tab_index) => {
-                        log::error!("Cannot OpenInPlaceEditor with a TabIndex");
+                        log::error!("无法使用 TabIndex 就地打开编辑器");
                     },
                     ClientTabIndexOrPaneId::PaneId(pane_id_to_replace) => {
                         let mut found = false;
@@ -8381,7 +8381,7 @@ pub(crate) fn screen_thread_main(
                         }
                         if !found {
                             log::error!(
-                                "Could not find pane with id {:?} to replace",
+                                "找不到要替换、ID 为 {:?} 的窗格",
                                 pane_id_to_replace
                             );
                         }
@@ -8564,10 +8564,10 @@ pub(crate) fn screen_thread_main(
             },
             ScreenInstruction::FocusNextPane(client_id, mut _completion_tx) => {
                 if screen.get_first_client_id().is_none() {
-                    log::error!("No connected clients to change focus for");
+                    log::error!("没有可更改焦点的已连接客户端");
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message("No connected clients to change focus for".to_string());
+                        c.set_error_message("没有可更改焦点的已连接客户端".to_string());
                     }
                 } else {
                     let old_pane_id = screen.get_active_pane_id(&client_id);
@@ -8586,10 +8586,10 @@ pub(crate) fn screen_thread_main(
             },
             ScreenInstruction::FocusPreviousPane(client_id, mut _completion_tx) => {
                 if screen.get_first_client_id().is_none() {
-                    log::error!("No connected clients to change focus for");
+                    log::error!("没有可更改焦点的已连接客户端");
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message("No connected clients to change focus for".to_string());
+                        c.set_error_message("没有可更改焦点的已连接客户端".to_string());
                     }
                 } else {
                     let old_pane_id = screen.get_active_pane_id(&client_id);
@@ -8624,10 +8624,10 @@ pub(crate) fn screen_thread_main(
             },
             ScreenInstruction::MoveFocusLeft(client_id, mut _completion_tx) => {
                 if screen.get_first_client_id().is_none() {
-                    log::error!("No connected clients to move focus for");
+                    log::error!("没有可移动焦点的已连接客户端");
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message("No connected clients to move focus for".to_string());
+                        c.set_error_message("没有可移动焦点的已连接客户端".to_string());
                     }
                 } else {
                     let old_pane_id = screen.get_active_pane_id(&client_id);
@@ -8659,10 +8659,10 @@ pub(crate) fn screen_thread_main(
             },
             ScreenInstruction::MoveFocusLeftOrPreviousTab(client_id, mut _completion_tx) => {
                 if screen.get_first_client_id().is_none() {
-                    log::error!("No connected clients to move focus for");
+                    log::error!("没有可移动焦点的已连接客户端");
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message("No connected clients to move focus for".to_string());
+                        c.set_error_message("没有可移动焦点的已连接客户端".to_string());
                     }
                 } else {
                     let old_pane_id = screen.get_active_pane_id(&client_id);
@@ -8687,10 +8687,10 @@ pub(crate) fn screen_thread_main(
             },
             ScreenInstruction::MoveFocusDown(client_id, mut _completion_tx) => {
                 if screen.get_first_client_id().is_none() {
-                    log::error!("No connected clients to move focus for");
+                    log::error!("没有可移动焦点的已连接客户端");
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message("No connected clients to move focus for".to_string());
+                        c.set_error_message("没有可移动焦点的已连接客户端".to_string());
                     }
                 } else {
                     let old_pane_id = screen.get_active_pane_id(&client_id);
@@ -8722,10 +8722,10 @@ pub(crate) fn screen_thread_main(
             },
             ScreenInstruction::MoveFocusRight(client_id, mut _completion_tx) => {
                 if screen.get_first_client_id().is_none() {
-                    log::error!("No connected clients to move focus for");
+                    log::error!("没有可移动焦点的已连接客户端");
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message("No connected clients to move focus for".to_string());
+                        c.set_error_message("没有可移动焦点的已连接客户端".to_string());
                     }
                 } else {
                     let old_pane_id = screen.get_active_pane_id(&client_id);
@@ -8757,10 +8757,10 @@ pub(crate) fn screen_thread_main(
             },
             ScreenInstruction::MoveFocusRightOrNextTab(client_id, mut _completion_tx) => {
                 if screen.get_first_client_id().is_none() {
-                    log::error!("No connected clients to move focus for");
+                    log::error!("没有可移动焦点的已连接客户端");
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message("No connected clients to move focus for".to_string());
+                        c.set_error_message("没有可移动焦点的已连接客户端".to_string());
                     }
                 } else {
                     let old_pane_id = screen.get_active_pane_id(&client_id);
@@ -8785,10 +8785,10 @@ pub(crate) fn screen_thread_main(
             },
             ScreenInstruction::MoveFocusUp(client_id, mut _completion_tx) => {
                 if screen.get_first_client_id().is_none() {
-                    log::error!("No connected clients to move focus for");
+                    log::error!("没有可移动焦点的已连接客户端");
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message("No connected clients to move focus for".to_string());
+                        c.set_error_message("没有可移动焦点的已连接客户端".to_string());
                     }
                 } else {
                     let old_pane_id = screen.get_active_pane_id(&client_id);
@@ -9115,7 +9115,7 @@ pub(crate) fn screen_thread_main(
                     Some(contents) => PaneScrollbackResponse::Ok(contents),
                     None => {
                         log::warn!(
-                            "Plugin requested scrollback for pane {:?} but pane was not found",
+                            "插件请求窗格 {:?} 的回滚缓冲区，但未找到该窗格",
                             pane_id
                         );
                         PaneScrollbackResponse::Err(format!("Pane {:?} not found", pane_id))
@@ -9811,7 +9811,7 @@ pub(crate) fn screen_thread_main(
                     None
                 } else if screen
                     .active_tab_ids
-                    .contains_key(&client_id.expect("This is checked above"))
+                    .contains_key(&client_id.expect("此条件已在上面检查过"))
                 {
                     client_id
                 } else {
@@ -9849,7 +9849,7 @@ pub(crate) fn screen_thread_main(
                     None
                 } else if screen
                     .active_tab_ids
-                    .contains_key(&client_id.expect("This is checked above"))
+                    .contains_key(&client_id.expect("此条件已在上面检查过"))
                 {
                     client_id
                 } else {
@@ -10335,7 +10335,7 @@ pub(crate) fn screen_thread_main(
                     match screen.get_active_tab_mut(client_id) {
                         Ok(active_tab) => {
                             if tab_layouts.is_empty() {
-                                log::error!("No tab layouts found, cannot override.");
+                                log::error!("未找到标签页布局，无法覆盖。");
                                 continue;
                             }
                             let mut tab_layout_info = tab_layouts.remove(0);
@@ -10369,7 +10369,7 @@ pub(crate) fn screen_thread_main(
                             processed_tab_layouts.push(tab_layout_info);
                         },
                         Err(e) => {
-                            log::error!("Failed to override layout of active tab: {}", e);
+                            log::error!("覆盖活动标签页布局失败：{}", e);
                         },
                     }
                 } else {
@@ -10459,7 +10459,7 @@ pub(crate) fn screen_thread_main(
                             None,
                         ) {
                             log::error!(
-                                "Failed to override layout for tab {}: {:?}",
+                                "覆盖标签页 {} 的布局失败：{:?}",
                                 tab_result.tab_index,
                                 e
                             );
@@ -10477,7 +10477,7 @@ pub(crate) fn screen_thread_main(
                             None,
                         ) {
                             log::error!(
-                                "Failed to create new tab {} during override completion: {:?}",
+                                "覆盖完成期间创建新标签页 {} 失败：{:?}",
                                 tab_result.tab_index,
                                 e
                             );
@@ -10500,7 +10500,7 @@ pub(crate) fn screen_thread_main(
                                 None,
                             ) {
                                 log::error!(
-                                    "Failed to override layout for new tab {}: {:?}",
+                                    "覆盖新标签页 {} 的布局失败：{:?}",
                                     tab_result.tab_index,
                                     e
                                 );
@@ -10611,7 +10611,7 @@ pub(crate) fn screen_thread_main(
                     },
                     None => {
                         log::error!(
-                            "Could not find an active tab - is there at least 1 connected user?"
+                            "找不到活动标签页——是否至少有一个已连接的用户？"
                         );
                     },
                 }
@@ -10657,7 +10657,7 @@ pub(crate) fn screen_thread_main(
                     },
                     None => {
                         log::error!(
-                            "Could not find an active tab - is there at least 1 connected user?"
+                            "找不到活动标签页——是否至少有一个已连接的用户？"
                         );
                     },
                 }
@@ -10774,7 +10774,7 @@ pub(crate) fn screen_thread_main(
                             client_tab_index_or_pane_id,
                         )?;
                     } else {
-                        log::error!("Must have pane id to replace or connected client_id if replacing a pane");
+                        log::error!("替换窗格时必须指定要替换的窗格 ID，或已连接的 client_id");
                     }
                 } else if let Some(client_id) = client_id {
                     active_tab_and_connected_client_id!(screen, client_id, |active_tab: &mut Tab, _client_id: ClientId| {
@@ -10803,7 +10803,7 @@ pub(crate) fn screen_thread_main(
                         None,
                     )?;
                 } else {
-                    log::error!("Tab index not found: {:?}", tab_index);
+                    log::error!("未找到标签页索引：{:?}", tab_index);
                 }
                 if let Some(loading_indication) = plugin_loading_message_cache.remove(&plugin_id) {
                     screen.update_plugin_loading_stage(plugin_id, loading_indication);
@@ -10887,7 +10887,7 @@ pub(crate) fn screen_thread_main(
                         },
                         None => {
                             log::error!(
-                            "Could not find an active tab - is there at least 1 connected user?"
+                            "找不到活动标签页——是否至少有一个已连接的用户？"
                         );
                         },
                     }
@@ -10942,7 +10942,7 @@ pub(crate) fn screen_thread_main(
                             }
                         },
                         None => {
-                            log::error!("No connected clients found - cannot load or focus plugin")
+                            log::error!("未找到已连接的客户端——无法加载或聚焦插件")
                         },
                     }
                 },
@@ -10988,7 +10988,7 @@ pub(crate) fn screen_thread_main(
                         },
                         None => {
                             log::error!(
-                                "Could not find an active tab - is there at least 1 connected user?"
+                                "找不到活动标签页——是否至少有一个已连接的用户？"
                             );
                         },
                     }
@@ -11031,7 +11031,7 @@ pub(crate) fn screen_thread_main(
                                 ))?;
                         },
                         None => {
-                            log::error!("No connected clients found - cannot load or focus plugin")
+                            log::error!("未找到已连接的客户端——无法加载或聚焦插件")
                         },
                     }
                 },
@@ -11083,7 +11083,7 @@ pub(crate) fn screen_thread_main(
                 if !pane_exists {
                     if let Some(c) = completion_tx.as_mut() {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 } else {
                     let already_focused = screen
@@ -11120,7 +11120,7 @@ pub(crate) fn screen_thread_main(
                     if tab.has_pane_with_pid(&pane_id) {
                         match tab.rename_pane(new_name, pane_id) {
                             Ok(()) => drop(screen.render(None)),
-                            Err(e) => log::error!("Failed to rename pane: {:?}", e),
+                            Err(e) => log::error!("重命名窗格失败：{:?}", e),
                         }
                         break;
                     }
@@ -11160,7 +11160,7 @@ pub(crate) fn screen_thread_main(
                         tab.name = String::from_utf8_lossy(&new_name).to_string();
                     },
                     None => {
-                        log::error!("Failed to find tab at position: {}", tab_position);
+                        log::error!("在位置 {} 找不到标签页", tab_position);
                     },
                 }
                 screen.log_and_report_session_state()?;
@@ -11189,7 +11189,7 @@ pub(crate) fn screen_thread_main(
                             .or_insert_with(Vec::new)
                             .push(tab_id);
                     } else {
-                        log::error!("Tab with ID {} not found", tab_id);
+                        log::error!("未找到 ID 为 {} 的标签页", tab_id);
                     }
                 }
             },
@@ -11199,14 +11199,14 @@ pub(crate) fn screen_thread_main(
                     tab.name = String::from_utf8_lossy(&new_name).to_string();
                     screen.log_and_report_session_state()?;
                 } else {
-                    log::error!("Failed to find tab with ID: {}", tab_id);
+                    log::error!("找不到 ID 为 {} 的标签页", tab_id);
                 }
             },
             ScreenInstruction::CloseTabWithId(tab_id, _completion_tx) => {
                 if screen.get_tab_by_id(tab_id).is_some() {
                     screen.close_tab_by_id(tab_id).non_fatal();
                 } else {
-                    log::error!("Failed to find tab with ID: {}", tab_id);
+                    log::error!("找不到 ID 为 {} 的标签页", tab_id);
                 }
             },
             ScreenInstruction::BreakPanesToTabWithId {
@@ -11218,7 +11218,7 @@ pub(crate) fn screen_thread_main(
             } => {
                 // Verify tab exists
                 if screen.get_tab_by_id(tab_id).is_none() {
-                    log::error!("Tab with ID {} not found", tab_id);
+                    log::error!("未找到 ID 为 {} 的标签页", tab_id);
                     // Don't set affected_tab_id, it will remain None to signal failure
                 } else {
                     // break_multiple_panes_to_tab_with_index uses tab ID
@@ -11256,7 +11256,7 @@ pub(crate) fn screen_thread_main(
                 });
 
                 if !found {
-                    log::error!("PluginId '{}' not found - caching request", plugin_id);
+                    log::error!("未找到 PluginId '{}'——正在缓存请求", plugin_id);
                     pending_events_waiting_for_client.push(
                         ScreenInstruction::RequestPluginPermissions(plugin_id, plugin_permission),
                     );
@@ -11432,7 +11432,7 @@ pub(crate) fn screen_thread_main(
                     let old_socket_file_path = ZELLIJ_SOCK_DIR.join(&old_session_name);
                     let new_socket_file_path = ZELLIJ_SOCK_DIR.join(&name);
                     if let Err(e) = std::fs::rename(old_socket_file_path, new_socket_file_path) {
-                        log::error!("Failed to rename ipc socket: {:?}", e);
+                        log::error!("重命名 IPC 套接字失败：{:?}", e);
                     }
 
                     // rename session_info folder (TODO: make this atomic, right now there is a
@@ -11444,7 +11444,7 @@ pub(crate) fn screen_thread_main(
                     if let Err(e) =
                         std::fs::rename(old_session_info_folder, new_session_info_folder)
                     {
-                        log::error!("Failed to rename session_info folder: {:?}", e);
+                        log::error!("重命名会话信息文件夹失败：{:?}", e);
                     }
 
                     // report
@@ -11694,7 +11694,7 @@ pub(crate) fn screen_thread_main(
                             // this is because to do this with plugins, we need the client_id -
                             // which we do not have (yet?) in this context...
                             log::error!(
-                                "Currently only terminal panes are supported for scrolling up"
+                                "目前仅支持终端窗格向上滚动"
                             );
                         }
                         break;
@@ -11713,7 +11713,7 @@ pub(crate) fn screen_thread_main(
                             // this is because to do this with plugins, we need the client_id -
                             // which we do not have (yet?) in this context...
                             log::error!(
-                                "Currently only terminal panes are supported for scrolling down"
+                                "目前仅支持终端窗格向下滚动"
                             );
                         }
                         break;
@@ -11732,7 +11732,7 @@ pub(crate) fn screen_thread_main(
                             // this is because to do this with plugins, we need the client_id -
                             // which we do not have (yet?) in this context...
                             log::error!(
-                                "Currently only terminal panes are supported for scrolling to top"
+                                "目前仅支持终端窗格滚动到顶部"
                             );
                         }
                         break;
@@ -11750,7 +11750,7 @@ pub(crate) fn screen_thread_main(
                         } else {
                             // this is because to do this with plugins, we need the client_id -
                             // which we do not have (yet?) in this context...
-                            log::error!("Currently only terminal panes are supported for scrolling to bottom");
+                            log::error!("目前仅支持终端窗格滚动到底部");
                         }
                         break;
                     }
@@ -11768,7 +11768,7 @@ pub(crate) fn screen_thread_main(
                             // this is because to do this with plugins, we need the client_id -
                             // which we do not have (yet?) in this context...
                             log::error!(
-                                "Currently only terminal panes are supported for scrolling"
+                                "目前仅支持终端窗格滚动"
                             );
                         }
                         break;
@@ -11787,7 +11787,7 @@ pub(crate) fn screen_thread_main(
                             // this is because to do this with plugins, we need the client_id -
                             // which we do not have (yet?) in this context...
                             log::error!(
-                                "Currently only terminal panes are supported for scrolling"
+                                "目前仅支持终端窗格滚动"
                             );
                         }
                         break;
@@ -11832,7 +11832,7 @@ pub(crate) fn screen_thread_main(
                 if let Some(tab_id) = screen.get_tab_id_at_position(tab_index) {
                     screen.close_tab_by_id(tab_id).non_fatal();
                 } else {
-                    log::error!("Failed to find tab at position: {}", tab_index);
+                    log::error!("在位置 {} 找不到标签页", tab_index);
                 }
             },
             ScreenInstruction::BreakPanesToNewTab {
@@ -12226,10 +12226,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.sync_scroll_mode_for_pane_id(pane_id)?;
@@ -12246,10 +12246,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.sync_scroll_mode_for_pane_id(pane_id)?;
@@ -12266,10 +12266,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.sync_scroll_mode_for_pane_id(pane_id)?;
@@ -12286,10 +12286,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.sync_scroll_mode_for_pane_id(pane_id)?;
@@ -12306,10 +12306,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.sync_scroll_mode_for_pane_id(pane_id)?;
@@ -12326,10 +12326,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.sync_scroll_mode_for_pane_id(pane_id)?;
@@ -12346,10 +12346,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.sync_scroll_mode_for_pane_id(pane_id)?;
@@ -12366,10 +12366,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.sync_scroll_mode_for_pane_id(pane_id)?;
@@ -12386,10 +12386,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.render(None)?;
@@ -12406,10 +12406,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.render(None)?;
@@ -12426,10 +12426,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.render(None)?;
@@ -12446,10 +12446,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.render(None)?;
@@ -12471,7 +12471,7 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                 }
                 screen.render(None)?;
             },
@@ -12486,10 +12486,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.render(None)?;
@@ -12506,10 +12506,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.render(None)?;
@@ -12527,10 +12527,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.log_and_report_session_state()?;
@@ -12548,7 +12548,7 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                 }
                 screen.render(None)?;
                 screen.log_and_report_session_state()?;
@@ -12564,10 +12564,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.render(None)?;
@@ -12584,10 +12584,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
                 screen.render(None)?;
@@ -12603,10 +12603,10 @@ pub(crate) fn screen_thread_main(
                     }
                 }
                 if !found {
-                    log::error!("Pane with id {:?} not found", pane_id);
+                    log::error!("未找到 ID 为 {:?} 的窗格", pane_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Pane with id {:?} not found", pane_id));
+                        c.set_error_message(format!("未找到 ID 为 {:?} 的窗格", pane_id));
                     }
                 }
             },
@@ -12618,10 +12618,10 @@ pub(crate) fn screen_thread_main(
                         screen.log_and_report_session_state()?;
                     }
                 } else {
-                    log::error!("Tab with id {} not found", tab_id);
+                    log::error!("未找到 ID 为 {} 的标签页", tab_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Tab with id {} not found", tab_id));
+                        c.set_error_message(format!("未找到 ID 为 {} 的标签页", tab_id));
                     }
                 }
                 screen.render(None)?;
@@ -12630,10 +12630,10 @@ pub(crate) fn screen_thread_main(
                 if let Some(tab) = screen.tabs.get_mut(&tab_id) {
                     tab.toggle_sync_panes_is_active();
                 } else {
-                    log::error!("Tab with id {} not found", tab_id);
+                    log::error!("未找到 ID 为 {} 的标签页", tab_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Tab with id {} not found", tab_id));
+                        c.set_error_message(format!("未找到 ID 为 {} 的标签页", tab_id));
                     }
                 }
                 screen.log_and_report_session_state()?;
@@ -12650,10 +12650,10 @@ pub(crate) fn screen_thread_main(
                     tab.toggle_floating_panes(None, default_shell, completion_tx)
                         .non_fatal();
                 } else {
-                    log::error!("Tab with id {} not found", tab_id);
+                    log::error!("未找到 ID 为 {} 的标签页", tab_id);
                     if let Some(ref mut c) = completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Tab with id {} not found", tab_id));
+                        c.set_error_message(format!("未找到 ID 为 {} 的标签页", tab_id));
                     }
                     drop(completion_tx);
                 }
@@ -12664,10 +12664,10 @@ pub(crate) fn screen_thread_main(
                 if let Some(tab) = screen.tabs.get_mut(&tab_id) {
                     tab.previous_swap_layout().non_fatal();
                 } else {
-                    log::error!("Tab with id {} not found", tab_id);
+                    log::error!("未找到 ID 为 {} 的标签页", tab_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Tab with id {} not found", tab_id));
+                        c.set_error_message(format!("未找到 ID 为 {} 的标签页", tab_id));
                     }
                 }
                 screen.render(None)?;
@@ -12677,10 +12677,10 @@ pub(crate) fn screen_thread_main(
                 if let Some(tab) = screen.tabs.get_mut(&tab_id) {
                     tab.next_swap_layout().non_fatal();
                 } else {
-                    log::error!("Tab with id {} not found", tab_id);
+                    log::error!("未找到 ID 为 {} 的标签页", tab_id);
                     if let Some(ref mut c) = _completion_tx {
                         c.set_exit_status(1);
-                        c.set_error_message(format!("Tab with id {} not found", tab_id));
+                        c.set_error_message(format!("未找到 ID 为 {} 的标签页", tab_id));
                     }
                 }
                 screen.render(None)?;
