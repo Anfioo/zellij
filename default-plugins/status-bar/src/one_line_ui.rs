@@ -974,14 +974,14 @@ fn secondary_keybinds(
         if new_pane_hovered {
             secondary_info.append(&add_shortcut_hovered(
                 help,
-                "New Pane",
+                "新建窗格",
                 &new_pane_key_to_display,
                 Some(0),
             ));
         } else {
             secondary_info.append(&add_shortcut(
                 help,
-                "New Pane",
+                "新建窗格",
                 &new_pane_key_to_display,
                 false,
                 Some(0),
@@ -991,14 +991,14 @@ fn secondary_keybinds(
         if should_show_focus_and_resize_shortcuts {
             secondary_info.append(&add_shortcut(
                 help,
-                "Change Focus",
+                "切换焦点",
                 &move_focus_shortcuts,
                 false,
                 Some(0),
             ));
             secondary_info.append(&add_shortcut(
                 help,
-                "Resize",
+                "缩放",
                 &resize_shortcuts,
                 false,
                 Some(0),
@@ -1008,14 +1008,14 @@ fn secondary_keybinds(
         if floating_hovered {
             secondary_info.append(&add_shortcut_hovered(
                 help,
-                "Floating",
+                "浮动",
                 &toggle_floating_key_to_display,
                 Some(0),
             ));
         } else {
             secondary_info.append(&add_shortcut(
                 help,
-                "Floating",
+                "浮动",
                 &toggle_floating_key_to_display,
                 are_floating_panes_visible,
                 Some(0),
@@ -1056,13 +1056,13 @@ fn secondary_keybinds(
         if new_pane_hovered {
             secondary_info.append(&add_shortcut_with_inline_key_hovered(
                 help,
-                "New Pane",
+                "新建窗格",
                 new_pane_key_to_display,
             ));
         } else {
             secondary_info.append(&add_shortcut_with_inline_key(
                 help,
-                "New Pane",
+                "新建窗格",
                 new_pane_key_to_display,
                 false,
             ));
@@ -1071,13 +1071,13 @@ fn secondary_keybinds(
         if should_show_focus_and_resize_shortcuts {
             secondary_info.append(&add_shortcut_with_inline_key(
                 help,
-                "Change Focus",
+                "切换焦点",
                 move_focus_shortcuts,
                 false,
             ));
             secondary_info.append(&add_shortcut_with_inline_key(
                 help,
-                "Resize",
+                "缩放",
                 resize_shortcuts,
                 false,
             ));
@@ -1086,13 +1086,13 @@ fn secondary_keybinds(
         if floating_hovered {
             secondary_info.append(&add_shortcut_with_inline_key_hovered(
                 help,
-                "Floating",
+                "浮动",
                 toggle_floating_key_to_display,
             ));
         } else {
             secondary_info.append(&add_shortcut_with_inline_key(
                 help,
-                "Floating",
+                "浮动",
                 toggle_floating_key_to_display,
                 are_floating_panes_visible,
             ));
@@ -1109,14 +1109,14 @@ fn secondary_keybinds(
         if new_pane_hovered {
             short_line.append(&add_shortcut_hovered(
                 help,
-                "New",
+                "新建",
                 &new_pane_key_to_display,
                 Some(0),
             ));
         } else {
             short_line.append(&add_shortcut(
                 help,
-                "New",
+                "新建",
                 &new_pane_key_to_display,
                 false,
                 Some(0),
@@ -1126,14 +1126,14 @@ fn secondary_keybinds(
         if should_show_focus_and_resize_shortcuts {
             short_line.append(&add_shortcut(
                 help,
-                "Focus",
+                "焦点",
                 &move_focus_shortcuts,
                 false,
                 Some(0),
             ));
             short_line.append(&add_shortcut(
                 help,
-                "Resize",
+                "缩放",
                 &resize_shortcuts,
                 false,
                 Some(0),
@@ -1143,14 +1143,14 @@ fn secondary_keybinds(
         if floating_hovered {
             short_line.append(&add_shortcut_hovered(
                 help,
-                "Floating",
+                "浮动",
                 &toggle_floating_key_to_display,
                 Some(0),
             ));
         } else {
             short_line.append(&add_shortcut(
                 help,
-                "Floating",
+                "浮动",
                 &toggle_floating_key_to_display,
                 are_floating_panes_visible,
                 Some(0),
@@ -1191,13 +1191,13 @@ fn secondary_keybinds(
         if new_pane_hovered {
             short_line.append(&add_shortcut_with_inline_key_hovered(
                 help,
-                "New",
+                "新建",
                 new_pane_key_to_display,
             ));
         } else {
             short_line.append(&add_shortcut_with_inline_key(
                 help,
-                "New",
+                "新建",
                 new_pane_key_to_display,
                 false,
             ));
@@ -1206,13 +1206,13 @@ fn secondary_keybinds(
         if should_show_focus_and_resize_shortcuts {
             short_line.append(&add_shortcut_with_inline_key(
                 help,
-                "Focus",
+                "焦点",
                 move_focus_shortcuts,
                 false,
             ));
             short_line.append(&add_shortcut_with_inline_key(
                 help,
-                "Resize",
+                "缩放",
                 resize_shortcuts,
                 false,
             ));
@@ -1221,13 +1221,13 @@ fn secondary_keybinds(
         if floating_hovered {
             short_line.append(&add_shortcut_with_inline_key_hovered(
                 help,
-                "Floating",
+                "浮动",
                 toggle_floating_key_to_display,
             ));
         } else {
             short_line.append(&add_shortcut_with_inline_key(
                 help,
-                "Floating",
+                "浮动",
                 toggle_floating_key_to_display,
                 are_floating_panes_visible,
             ));

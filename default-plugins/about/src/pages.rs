@@ -61,10 +61,10 @@ impl Page {
             .with_title(main_screen_title(zellij_version.clone(), is_release_notes))
             .with_bulletin_list(BulletinList::new(whats_new_title()).with_items(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(main_menu_item(
-                        "Nested Sessions",
+                        "嵌套会话",
                     )))
                     .with_hover(TextOrCustomRender::Text(
-                        main_menu_item("Nested Sessions").selected(),
+                        main_menu_item("嵌套会话").selected(),
                     ))
                     .with_left_click_action(ClickAction::new_change_page({
                         let keybinding_state = keybinding_state.clone();
@@ -72,19 +72,19 @@ impl Page {
                         move || Page::new_nested_sessions(keybinding_state, main_screen_builder)
                     })),
                     ActiveComponent::new(TextOrCustomRender::Text(main_menu_item(
-                        "Kitty Graphics Protocol",
+                        "Kitty 图形协议",
                     )))
                     .with_hover(TextOrCustomRender::Text(
-                        main_menu_item("Kitty Graphics Protocol").selected(),
+                        main_menu_item("Kitty 图形协议").selected(),
                     ))
                     .with_left_click_action(ClickAction::new_change_page({
                         move || Page::new_kitty_graphics()
                     })),
                     ActiveComponent::new(TextOrCustomRender::Text(main_menu_item(
-                        "Scroll By Command",
+                        "按命令滚动",
                     )))
                     .with_hover(TextOrCustomRender::Text(
-                        main_menu_item("Scroll By Command").selected(),
+                        main_menu_item("按命令滚动").selected(),
                     ))
                     .with_left_click_action(ClickAction::new_change_page({
                         let keybinding_state = keybinding_state.clone();
@@ -92,36 +92,36 @@ impl Page {
                         move || Page::new_scroll_by_command(keybinding_state, main_screen_builder)
                     })),
                     ActiveComponent::new(TextOrCustomRender::Text(main_menu_item(
-                        "Mobile Web UI",
+                        "移动端 Web 界面",
                     )))
                     .with_hover(TextOrCustomRender::Text(
-                        main_menu_item("Mobile Web UI").selected(),
+                        main_menu_item("移动端 Web 界面").selected(),
                     ))
                     .with_left_click_action(ClickAction::new_change_page({
                         let link_executable = link_executable.clone();
                         move || Page::new_mobile_web_ui(link_executable)
                     })),
-                    ActiveComponent::new(TextOrCustomRender::Text(main_menu_item("New UI")))
+                    ActiveComponent::new(TextOrCustomRender::Text(main_menu_item("新界面")))
                     .with_hover(TextOrCustomRender::Text(
-                        main_menu_item("New UI").selected(),
+                        main_menu_item("新界面").selected(),
                     ))
                     .with_left_click_action(ClickAction::new_change_page({
                         move || Page::new_ui()
                     })),
                     ActiveComponent::new(TextOrCustomRender::Text(main_menu_item(
-                        "Per-Client Tab Sizes",
+                        "按客户端标签大小",
                     )))
                     .with_hover(TextOrCustomRender::Text(
-                        main_menu_item("Per-Client Tab Sizes").selected(),
+                        main_menu_item("按客户端标签大小").selected(),
                     ))
                     .with_left_click_action(ClickAction::new_change_page({
                         move || Page::new_per_client_tab_sizes()
                     })),
                     ActiveComponent::new(TextOrCustomRender::Text(main_menu_item(
-                        "Focus Last Pane and Fullscreen Floating Panes",
+                        "聚焦上一个窗格和全屏浮动窗格",
                     )))
                     .with_hover(TextOrCustomRender::Text(
-                        main_menu_item("Focus Last Pane and Fullscreen Floating Panes").selected(),
+                        main_menu_item("聚焦上一个窗格和全屏浮动窗格").selected(),
                     ))
                     .with_left_click_action(ClickAction::new_change_page({
                         let keybinding_state = keybinding_state.clone();
@@ -178,9 +178,9 @@ impl Page {
     ) -> Page {
         let base_mode_name = keybinding_state.borrow().base_mode_name();
         let mut option_lines = vec![
-            option_title_line("1. Zoom in and control this session"),
+            option_title_line("1. 放大并控制此会话"),
             option_text_line(
-                "   The session will take up the whole screen and can be toggled on and off.",
+                "   会话将占据整个屏幕，可以开启和关闭。",
             ),
         ];
         option_lines.extend(bind_lines(
@@ -188,12 +188,12 @@ impl Page {
             &[Action::ToggleHostFullscreen],
             "   ",
         ));
-        option_lines.push(option_title_line("2. Control this session on focus"));
+        option_lines.push(option_title_line("2. 聚焦时控制此会话"));
         option_lines.push(option_text_line(
-            "   When this pane gains focus, keybindings will be sent to this session.",
+            "   当此窗格获得焦点时，按键绑定将发送到此会话。",
         ));
         option_lines.push(option_text_line(
-            "   You can then ascend back to the current session.",
+            "   然后你可以返回到当前会话。",
         ));
         option_lines.extend(bind_lines(
             &keybinding_state,
@@ -202,19 +202,19 @@ impl Page {
         ));
         let mut page = Page::new()
             .with_kind(PageKind::NestedSessions)
-            .with_title(Text::new("Nested Sessions").color_range(0, ..))
+            .with_title(Text::new("嵌套会话").color_range(0, ..))
             .with_paragraph(vec![
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
                     Text::new(
-                        "Zellij now detects when it is started inside another Zellij session.",
+                        "Zellij 现在可以检测是否在另一个 Zellij 会话中启动。",
                     ),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
                     Text::new(format!(
-                        "Allowing you to decide between (SESSION mode, returns to {}):",
+                        "让你在以下选项中选择（会话模式，返回到 {}）：",
                         base_mode_name
                     ))
-                    .color_substring(3, "SESSION")
+                    .color_substring(3, "会话")
                     .color_substring(3, &base_mode_name),
                 ))]),
             ])
@@ -237,29 +237,29 @@ impl Page {
         let mut page = Page::new()
             .with_kind(PageKind::PaneFocus)
             .with_title(
-                Text::new("Focus Last Pane and Fullscreen Floating Panes").color_range(0, ..),
+                Text::new("聚焦上一个窗格和全屏浮动窗格").color_range(0, ..),
             )
             .with_paragraph(vec![
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("A new action returns focus to the pane that was focused before the"),
+                    Text::new("一个新的操作将焦点返回到之前聚焦的窗格，"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("current one, so that two panes can be alternated with a single"),
+                    Text::new("即当前窗格，这样两个窗格可以通过单个"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("keypress."),
+                    Text::new("按键来交替。"),
                 ))]),
             ])
             .with_paragraph(bind_lines(&keybinding_state, &[Action::FocusLastPane], ""))
             .with_paragraph(vec![
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("Floating panes can now be made fullscreen, just like tiled panes."),
+                    Text::new("浮动窗格现在可以全屏，就像平铺窗格一样。"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("The focused floating pane expands over the whole viewport, or over"),
+                    Text::new("聚焦的浮动窗格会扩展到整个视口，或"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("the entire screen when hiding the UI."),
+                    Text::new("隐藏界面时扩展到整个屏幕。"),
                 ))]),
             ]);
         if let Some(missing_binds_note) =
@@ -278,7 +278,7 @@ impl Page {
         let mut command_bind_lines = merged_bind_line(
             &keybinding_state,
             &[Action::ScrollToPreviousPrompt, Action::ScrollToNextPrompt],
-            "Scroll to the previous / next command",
+            "滚动到上一个/下一个命令",
         );
         command_bind_lines.extend(bind_lines(
             &keybinding_state,
@@ -290,11 +290,11 @@ impl Page {
         ));
         let mut page = Page::new()
             .with_kind(PageKind::ScrollByCommand)
-            .with_title(Text::new("Scroll By Command").color_range(0, ..))
+            .with_title(Text::new("按命令滚动").color_range(0, ..))
             .with_paragraph(vec![ComponentLine::new(vec![ActiveComponent::new(
                 TextOrCustomRender::Text(
                     Text::new(
-                        "Zellij can now navigate the commands marked by the shell (OSC 133):",
+                        "Zellij 现在可以导航 shell 标记的命令 (OSC 133)：",
                     )
                     .color_substring(2, "OSC 133"),
                 ),
@@ -302,14 +302,14 @@ impl Page {
             .with_paragraph(command_bind_lines)
             .with_paragraph(vec![
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("- Hold <Alt> with the mouse wheel to scroll through commands.")
+                    Text::new("- 按住 <Alt> 并使用鼠标滚轮来滚动命令。")
                         .color_substring(3, "<Alt>"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("- Triple-click to select an entire command.")
-                        .color_substring(2, "Triple-click"),
+                    Text::new("- 三击以选择整个命令。")
+                        .color_substring(2, "三击"),
                 ))]),
-                opt_out_line("triple-click selection", "osc133_command_selection false"),
+                opt_out_line("三击选择", "osc133_command_selection false"),
             ]);
         if let Some(missing_binds_note) = missing_binds_note(
             &keybinding_state,
@@ -436,25 +436,25 @@ impl Page {
     }
     fn new_kitty_graphics() -> Page {
         Page::new()
-            .with_title(Text::new("Kitty Graphics Protocol").color_range(0, ..))
+            .with_title(Text::new("Kitty 图形协议").color_range(0, ..))
             .with_paragraph(vec![
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("Zellij now implements the Kitty graphics protocol.")
-                        .color_substring(2, "Kitty graphics protocol"),
+                    Text::new("Zellij 现在实现了 Kitty 图形协议。")
+                        .color_substring(2, "Kitty 图形协议"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("Images displayed by image viewers, plotting libraries and"),
+                    Text::new("图像查看器、绘图库和"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("documentation tools are rendered inside panes, and keep working"),
+                    Text::new("文档工具显示的图像会渲染在窗格内，并且"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("when panes are scrolled, moved, resized or stacked."),
+                    Text::new("在窗格滚动、移动、调整大小或堆叠时仍然正常工作。"),
                 ))]),
             ])
             .with_paragraph(vec![ComponentLine::new(vec![ActiveComponent::new(
                 TextOrCustomRender::Text(Text::new(
-                    "The host terminal needs to support the protocol as well.",
+                    "宿主终端也需要支持该协议。",
                 )),
             )])])
             .with_help(Box::new(|_hovering_over_link, _menu_item_is_selected| {
@@ -463,35 +463,35 @@ impl Page {
     }
     fn new_mobile_web_ui(link_executable: Rc<RefCell<String>>) -> Page {
         Page::new()
-            .with_title(Text::new("Mobile Web UI").color_range(0, ..))
+            .with_title(Text::new("移动端 Web 界面").color_range(0, ..))
             .with_paragraph(vec![
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("The web client now has a dedicated mobile interface."),
+                    Text::new("Web 客户端现在有专门的移动界面。"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("It provides touch controls and a layout adapted to small screens,")
-                        .color_substring(1, "touch controls"),
+                    Text::new("它提供触摸控制和适配小屏幕的布局，")
+                        .color_substring(1, "触摸控制"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("making sessions usable from a phone or a tablet."),
+                    Text::new("使得会话可以在手机或平板上使用。"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("Sessions and panes can be switched directly from this interface.")
-                        .color_substring(1, "Sessions and panes"),
+                    Text::new("会话和窗格可以直接从此界面切换。")
+                        .color_substring(1, "会话和窗格"),
                 ))]),
             ])
             .with_paragraph(vec![
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("The web client can also be installed as a standalone app (PWA)")
-                        .color_substring(1, "standalone app (PWA)"),
+                    Text::new("Web 客户端也可以作为独立应用 (PWA) 安装")
+                        .color_substring(1, "独立应用 (PWA)"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("directly from the browser."),
+                    Text::new("直接从浏览器安装。"),
                 ))]),
             ])
             .with_paragraph(vec![ComponentLine::new(vec![
                 ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("Learn more: ").color_range(2, ..),
+                    Text::new("了解更多：").color_range(2, ..),
                 )),
                 ActiveComponent::new(TextOrCustomRender::Text(Text::new(
                     "https://zellij.dev/tutorials/web-client/",
@@ -511,34 +511,34 @@ impl Page {
     }
     fn new_ui() -> Page {
         Page::new()
-            .with_title(Text::new("New UI").color_range(0, ..))
+            .with_title(Text::new("新界面").color_range(0, ..))
             .with_paragraph(vec![ComponentLine::new(vec![ActiveComponent::new(
-                TextOrCustomRender::Text(Text::new("The Zellij interface has been redesigned.")),
+                TextOrCustomRender::Text(Text::new("Zellij 界面已重新设计。")),
             )])])
             .with_paragraph(vec![
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("1. Title frames: pane frames are now off by default, leaving only")
-                        .color_substring(2, "Title frames"),
+                    Text::new("1. 标题边框：窗格边框现在默认关闭，只保留")
+                        .color_substring(2, "标题边框"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("   the title line if there is more than one pane in a tab. For a"),
+                    Text::new("   标题行（如果标签中有多个窗格）。对于"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("   single pane, the tab's title will be the pane's title."),
+                    Text::new("   单个窗格，标签的标题将是窗格的标题。"),
                 ))]),
                 config_option_line("pane_frame_style \"full\""),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("2. Stacked lists: pane stacks have been redesigned to appear in a")
-                        .color_substring(2, "Stacked lists"),
+                    Text::new("2. 堆叠列表：窗格堆栈已重新设计，以")
+                        .color_substring(2, "堆叠列表"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("   compact list above the whole stack, allowing the full list of"),
+                    Text::new("   紧凑列表的形式出现在整个堆栈上方，允许完整的"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("   panes to be seen in one place, rather than both above and below"),
+                    Text::new("   窗格列表在一处查看，而不是同时出现在"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("   the expanded pane."),
+                    Text::new("   展开窗格的上方和下方。"),
                 ))]),
                 config_option_line("stacked_pane_list false"),
             ])
@@ -548,24 +548,24 @@ impl Page {
     }
     fn new_per_client_tab_sizes() -> Page {
         Page::new()
-            .with_title(Text::new("Per-Client Tab Sizes").color_range(0, ..))
+            .with_title(Text::new("按客户端标签大小").color_range(0, ..))
             .with_paragraph(vec![
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("Tabs can now have different sizes for different clients."),
+                    Text::new("标签现在可以为不同客户端显示不同大小。"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("When several clients are attached to the same session and are"),
+                    Text::new("当多个客户端连接到同一会话并"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("focused on different tabs, each tab is sized to its own client."),
+                    Text::new("聚焦于不同标签时，每个标签按其客户端的大小显示。"),
                 ))]),
             ])
             .with_paragraph(vec![
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("Previously, all tabs shared the size of the smallest client."),
+                    Text::new("以前，所有标签共享最小客户端的大小。"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("Tabs are only shrunk when clients are focused on the same tab."),
+                    Text::new("标签仅在客户端聚焦于同一标签时才缩小。"),
                 ))]),
             ])
             .with_help(Box::new(|_hovering_over_link, _menu_item_is_selected| {
@@ -668,16 +668,16 @@ fn option_title_line(title: &str) -> ComponentLine {
 
 fn opt_out_line(what: &str, config_option: &str) -> ComponentLine {
     ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-        Text::new(format!("  ↳ Opt out of {} with: {}", what, config_option))
-            .color_substring(1, "Opt out")
+        Text::new(format!("  ↳ 退出 {}，使用：{}", what, config_option))
+            .color_substring(1, "退出")
             .color_substring(3, config_option),
     ))])
 }
 
 fn config_option_line(config_option: &str) -> ComponentLine {
     ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-        Text::new(format!("   Opt out with: {}", config_option))
-            .color_substring(1, "Opt out with")
+        Text::new(format!("   用以下方式退出：{}", config_option))
+            .color_substring(1, "用以下方式退出")
             .color_substring(3, config_option),
     ))])
 }

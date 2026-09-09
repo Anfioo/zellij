@@ -45,21 +45,21 @@ impl Page {
     pub fn tip_1(link_executable: Rc<RefCell<String>>) -> Self {
         Page::new()
             .main_screen()
-            .with_title(Text::new("Zellij Tip #1").color_range(0, ..))
+            .with_title(Text::new("Zellij 技巧 #1").color_range(0, ..))
             .with_paragraph(vec![
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                            Text::new("Check out the Zellij screencasts/tutorials to learn how to better take advantage")
+                            Text::new("查看 Zellij 视频教程，学习如何更好地利用")
                     ))
                 ]),
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                            Text::new("of all the Zellij features. Learn about basic usage, layouts, sessions and more!")
+                            Text::new("所有 Zellij 功能。了解基本用法、布局、会话等！")
                     ))
                 ])
             ])
             .with_paragraph(vec![ComponentLine::new(vec![
-                ActiveComponent::new(TextOrCustomRender::Text(Text::new("Follow this link: ").color_range(2, ..))),
+                ActiveComponent::new(TextOrCustomRender::Text(Text::new("点击此链接：").color_range(2, ..))),
                 ActiveComponent::new(TextOrCustomRender::Text(Text::new("https://zellij.dev/screencasts")))
                 .with_hover(TextOrCustomRender::CustomRender(
                     Box::new(screencasts_link_selected()),
@@ -89,17 +89,17 @@ impl Page {
     pub fn tip_2(link_executable: Rc<RefCell<String>>, base_mode: Rc<RefCell<InputMode>>) -> Self {
         Page::new()
             .main_screen()
-            .with_title(Text::new("Zellij Tip #2").color_range(0, ..))
+            .with_title(Text::new("Zellij 技巧 #2").color_range(0, ..))
             .with_paragraph(vec![
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                            Text::new("You can open the terminal contents in your $EDITOR, allowing you to search")
-                                .color_range(2, 43..=49)
+                            Text::new("你可以在 $EDITOR 中打开终端内容，从而搜索")
+                                .color_range(2, 4..=10)
                     ))
                 ]),
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                            Text::new("through them, copy to your clipboard or even save them for later.")
+                            Text::new("复制到剪贴板，甚至保存以供日后使用。")
                     ))
                 ])
             ])
@@ -107,16 +107,16 @@ impl Page {
                 match *base_mode.borrow() {
                     InputMode::Locked => {
                         ActiveComponent::new(TextOrCustomRender::Text(
-                            Text::new("While focused on a terminal pane: Ctrl g + s + e")
-                                .color_range(0, 34..=39)
-                                .color_indices(0, vec![43, 47])
+                            Text::new("在终端窗格中时：Ctrl g + s + e")
+                                .color_range(0, 9..=14)
+                                .color_indices(0, vec![18, 22])
                         ))
                     },
                     _ => {
                         ActiveComponent::new(TextOrCustomRender::Text(
-                            Text::new("While focused on a terminal pane: Ctrl s + e")
-                                .color_range(0, 34..=39)
-                                .color_indices(0, vec![43])
+                            Text::new("在终端窗格中时：Ctrl s + e")
+                                .color_range(0, 9..=14)
+                                .color_indices(0, vec![18])
                         ))
                     }
                 }
@@ -140,17 +140,17 @@ impl Page {
     pub fn tip_3(link_executable: Rc<RefCell<String>>) -> Self {
         Page::new()
             .main_screen()
-            .with_title(Text::new("Zellij Tip #3").color_range(0, ..))
+            .with_title(Text::new("Zellij 技巧 #3").color_range(0, ..))
             .with_paragraph(vec![
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("Want to make your floating pane bigger?"),
+                    Text::new("想让浮动窗格更大？"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
                     Text::new(
-                        "You can switch to the ENLARGED layout with Alt ] while focused on it.",
+                        "在其上聚焦时，可以用 Alt ] 切换到放大布局。",
                     )
-                    .color_range(2, 22..=29)
-                    .color_range(0, 43..=47),
+                    .color_range(2, 21..=22)
+                    .color_range(0, 12..=16),
                 ))]),
             ])
             .with_paragraph(vec![ComponentLine::new(vec![
@@ -172,42 +172,42 @@ impl Page {
     fn tip_4(link_executable: Rc<RefCell<String>>, base_mode: Rc<RefCell<InputMode>>) -> Page {
         Page::new()
             .main_screen()
-            .with_title(Text::new("Zellij tip #4").color_range(0, ..))
+            .with_title(Text::new("Zellij 技巧 #4").color_range(0, ..))
             .with_paragraph(vec![
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("It's possible to \"pin\" a floating pane so that it will always"),
+                    Text::new("可以\"固定\"浮动窗格，使其始终"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("be visible even if floating panes are hidden."),
+                    Text::new("即使浮动窗格被隐藏也保持可见。"),
                 ))]),
             ])
             .with_bulletin_list(
                 BulletinList::new(
-                    Text::new(format!("Floating panes can be \"pinned\": ")).color_range(2, ..),
+                    Text::new(format!("浮动窗格可以被\"固定\"：")).color_range(2, ..),
                 )
                 .with_items(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                        Text::new(format!("With a mouse click on their top right corner"))
-                            .color_range(3, 7..=17),
+                        Text::new(format!("鼠标点击其右上角"))
+                            .color_range(3, 0..=3),
                     )),
                     ActiveComponent::new(TextOrCustomRender::Text(match *base_mode.borrow() {
-                        InputMode::Locked => Text::new(format!("With Ctrl g + p + i"))
-                            .color_range(3, 5..=10)
-                            .color_range(3, 14..15)
-                            .color_range(3, 18..19),
-                        _ => Text::new("With Ctrl p + i")
-                            .color_range(3, 5..=10)
-                            .color_range(3, 14..15),
+                        InputMode::Locked => Text::new(format!("用 Ctrl g + p + i"))
+                            .color_range(3, 2..=7)
+                            .color_range(3, 11..12)
+                            .color_range(3, 15..16),
+                        _ => Text::new("用 Ctrl p + i")
+                            .color_range(3, 2..=7)
+                            .color_range(3, 11..12),
                     })),
                 ]),
             )
             .with_paragraph(vec![
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
-                    Text::new("A great use case for these is to tail log files or to show"),
+                    Text::new("一个很好的用例是跟踪日志文件或显示"),
                 ))]),
                 ComponentLine::new(vec![ActiveComponent::new(TextOrCustomRender::Text(
                     Text::new(format!(
-                        "real-time compiler output while working in other panes."
+                        "在其他窗格中工作时实时编译器输出。"
                     )),
                 ))]),
             ])
@@ -230,50 +230,50 @@ impl Page {
     pub fn tip_5(link_executable: Rc<RefCell<String>>) -> Page {
         Page::new()
             .main_screen()
-            .with_title(Text::new("Zellij Tip #5").color_range(0, ..))
+            .with_title(Text::new("Zellij 技巧 #5").color_range(0, ..))
             .with_paragraph(vec![
                 ComponentLine::new(vec![
-                    ActiveComponent::new(TextOrCustomRender::Text(Text::new("Panes can be resized into stacks to be managed easier."))),
+                    ActiveComponent::new(TextOrCustomRender::Text(Text::new("窗格可以调整为堆叠式以便于管理。"))),
                 ]),
             ])
-            .with_bulletin_list(BulletinList::new(Text::new("To try it out:").color_range(2, ..))
+            .with_bulletin_list(BulletinList::new(Text::new("试试看：").color_range(2, ..))
                 .with_items(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                            Text::new("Hide this pane with Alt f (you can bring it back with Alt f again)")
-                                .color_range(3, 20..=24)
-                                .color_range(3, 54..=58)
+                            Text::new("用 Alt f 隐藏此窗格（再次按 Alt f 可恢复）")
+                                .color_range(3, 2..=6)
+                                .color_range(3, 18..=22)
                     )),
                     ActiveComponent::new(TextOrCustomRender::Text(
-                            Text::new("Open 4-5 panes with Alt n")
-                                .color_range(3, 20..=24)
+                            Text::new("用 Alt n 打开 4-5 个窗格")
+                                .color_range(3, 2..=6)
                     )),
                     ActiveComponent::new(TextOrCustomRender::Text(
-                            Text::new("Press Alt + until you reach full screen")
-                                .color_range(3, 6..=10)
+                            Text::new("按 Alt + 直到全屏")
+                                .color_range(3, 2..=6)
                     )),
                     ActiveComponent::new(TextOrCustomRender::Text(
-                            Text::new("Press Alt - until you are back at the original state")
-                                .color_range(3, 6..=10)
+                            Text::new("按 Alt - 直到回到原始状态")
+                                .color_range(3, 2..=6)
                     )),
                     ActiveComponent::new(TextOrCustomRender::Text(
-                            Text::new("You can always snap back to the built-in swap layouts with Alt <[]>")
-                                .color_range(3, 59..=61)
-                                .color_range(3, 64..=65)
+                            Text::new("随时可以用 Alt <[]> 切回内置交换布局")
+                                .color_range(3, 6..=8)
+                                .color_range(3, 11..=12)
                     )),
                 ])
             )
             .with_paragraph(vec![
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                            Text::new("To disable this behavior, add stacked_resize false to the Zellij Configuration")
-                                .color_range(3, 30..=49)
+                            Text::new("要禁用此行为，在 Zellij 配置中添加 stacked_resize false")
+                                .color_range(3, 22..=41)
                     )),
                 ])
             ])
             .with_paragraph(vec![
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                        Text::new("For more details, see: ")
+                        Text::new("更多详情，见：")
                             .color_range(2, ..)
                     )),
                     ActiveComponent::new(TextOrCustomRender::Text(Text::new("https://zellij.dev/tutorials/stacked-resize")))
@@ -300,43 +300,43 @@ impl Page {
     pub fn tip_6(link_executable: Rc<RefCell<String>>, base_mode: Rc<RefCell<InputMode>>) -> Page {
         Page::new()
             .main_screen()
-            .with_title(Text::new("Zellij Tip #6").color_range(0, ..))
+            .with_title(Text::new("Zellij 技巧 #6").color_range(0, ..))
             .with_paragraph(vec![
                 ComponentLine::new(vec![
-                    ActiveComponent::new(TextOrCustomRender::Text(Text::new("Are the Zellij keybindings colliding with other applications for you?")))
+                    ActiveComponent::new(TextOrCustomRender::Text(Text::new("Zellij 的快捷键与其他应用冲突？")))
                 ]),
             ])
-            .with_bulletin_list(BulletinList::new(Text::new("Check out the non-colliding keybindings preset:"))
+            .with_bulletin_list(BulletinList::new(Text::new("查看不冲突的快捷键预设："))
                 .with_items(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
                             match *base_mode.borrow() {
                                 InputMode::Locked => {
-                                    Text::new("Open the Zellij configuration with Ctrl g + o + c")
-                                        .color_range(3, 35..=40)
-                                        .color_indices(3, vec![44, 48])
+                                    Text::new("用 Ctrl g + o + c 打开 Zellij 配置")
+                                        .color_range(3, 2..=7)
+                                        .color_indices(3, vec![11, 15])
                                 },
                                 _ => {
-                                    Text::new("Open the Zellij configuration with Ctrl o + c")
-                                        .color_range(3, 35..=40)
-                                        .color_indices(3, vec![44])
+                                    Text::new("用 Ctrl o + c 打开 Zellij 配置")
+                                        .color_range(3, 2..=7)
+                                        .color_indices(3, vec![11])
                                 }
                             }
                     )),
                     ActiveComponent::new(TextOrCustomRender::Text(
-                            Text::new("Press TAB to go to Change Mode Behavior")
-                                .color_range(3, 6..=9)
+                            Text::new("按 TAB 转到更改模式行为")
+                                .color_range(3, 2..=5)
                     )),
                     ActiveComponent::new(TextOrCustomRender::Text(
-                            Text::new("Select non-colliding temporarily with ENTER or permanently with Ctrl a")
-                                .color_range(3, 38..=42)
-                                .color_range(3, 64..=69)
+                            Text::new("用 ENTER 临时选择不冲突模式，或用 Ctrl a 永久选择")
+                                .color_range(3, 2..=6)
+                                .color_range(3, 21..=26)
                     )),
                 ])
             )
             .with_paragraph(vec![
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                        Text::new("For more details, see: ")
+                        Text::new("更多详情，见：")
                             .color_range(2, ..)
                     )),
                     ActiveComponent::new(TextOrCustomRender::Text(Text::new("https://zellij.dev/tutorials/colliding-keybindings")))
@@ -363,16 +363,16 @@ impl Page {
     pub fn tip_7(link_executable: Rc<RefCell<String>>) -> Page {
         Page::new()
             .main_screen()
-            .with_title(Text::new("Zellij Tip #7").color_range(0, ..))
+            .with_title(Text::new("Zellij 技巧 #7").color_range(0, ..))
             .with_paragraph(vec![ComponentLine::new(vec![ActiveComponent::new(
                 TextOrCustomRender::Text(Text::new(
-                    "Want to customize the appearance and colors of Zellij?",
+                    "想自定义 Zellij 的外观和颜色？",
                 )),
             )])])
             .with_paragraph(vec![
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                        Text::new("Check out the built-in themes: ").color_range(2, ..),
+                        Text::new("查看内置主题：").color_range(2, ..),
                     )),
                     ActiveComponent::new(TextOrCustomRender::Text(Text::new(
                         "https://zellij.dev/documentation/theme-list",
@@ -388,7 +388,7 @@ impl Page {
                 ]),
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                        Text::new("Or create your own theme: ").color_range(2, ..),
+                        Text::new("或创建自己的主题：").color_range(2, ..),
                     )),
                     ActiveComponent::new(TextOrCustomRender::Text(Text::new(
                         "https://zellij.dev/documentation/themes",
@@ -422,19 +422,19 @@ impl Page {
     pub fn tip_8(link_executable: Rc<RefCell<String>>) -> Page {
         Page::new()
             .main_screen()
-            .with_title(Text::new("Zellij Tip #8").color_range(0, ..))
+            .with_title(Text::new("Zellij 技巧 #8").color_range(0, ..))
             .with_paragraph(vec![
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                        Text::new("If you change the pane focus with Alt + <←↓↑→> or Alt + <hjkl> beyond the")
-                            .color_range(0, 34..=36)
-                            .color_range(2, 40..=45)
-                            .color_range(0, 50..=52)
-                            .color_range(2, 56..=61)
+                        Text::new("如果你用 Alt + <←↓↑→> 或 Alt + <hjkl> 切换窗格焦点超过")
+                            .color_range(0, 5..=7)
+                            .color_range(2, 11..=16)
+                            .color_range(0, 20..=22)
+                            .color_range(2, 26..=31)
                     ))
                 ]),
                 ComponentLine::new(vec![
-                    ActiveComponent::new(TextOrCustomRender::Text(Text::new("right or left side of the screen, the next or previous tab will be focused.")))
+                    ActiveComponent::new(TextOrCustomRender::Text(Text::new("屏幕右边界或左边界，将聚焦到下一个或上一个标签页。")))
                 ]),
             ])
             .with_paragraph(vec![ComponentLine::new(vec![
@@ -456,16 +456,16 @@ impl Page {
     pub fn tip_9(link_executable: Rc<RefCell<String>>) -> Page {
         Page::new()
             .main_screen()
-            .with_title(Text::new("Zellij Tip #9").color_range(0, ..))
+            .with_title(Text::new("Zellij 技巧 #9").color_range(0, ..))
             .with_paragraph(vec![
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                        Text::new("For plugins, integrations and tutorials created by the community, check out the")
+                        Text::new("社区创建的插件、集成和教程，请查看")
                     ))
                 ]),
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                        Text::new("Awesome-zellij repository: ")
+                        Text::new("Awesome-zellij 仓库：")
                             .color_range(2, ..=39)
                     )),
                     ActiveComponent::new(TextOrCustomRender::Text(Text::new("https://github.com/zellij-org/awesome-zellij")))
@@ -482,12 +482,12 @@ impl Page {
             .with_paragraph(vec![
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                        Text::new("For community and support:")
+                        Text::new("社区和支持：")
                             .color_range(2, ..)
                     ))
                 ]),
                 ComponentLine::new(vec![
-                    ActiveComponent::new(TextOrCustomRender::Text(Text::new("Discord: "))),
+                    ActiveComponent::new(TextOrCustomRender::Text(Text::new("Discord："))),
                     ActiveComponent::new(TextOrCustomRender::Text(Text::new("https://discord.com/invite/CrUAFH3")))
                         .with_hover(TextOrCustomRender::CustomRender(
                             Box::new(discord_link_text_selected),
@@ -499,7 +499,7 @@ impl Page {
                         )),
                 ]),
                 ComponentLine::new(vec![
-                    ActiveComponent::new(TextOrCustomRender::Text(Text::new("Matrix: "))),
+                    ActiveComponent::new(TextOrCustomRender::Text(Text::new("Matrix："))),
                     ActiveComponent::new(TextOrCustomRender::Text(Text::new("https://matrix.to/#/#zellij_general:matrix.org")))
                         .with_hover(TextOrCustomRender::CustomRender(
                             Box::new(matrix_link_text_selected),
@@ -530,43 +530,43 @@ impl Page {
     pub fn tip_10(link_executable: Rc<RefCell<String>>, base_mode: Rc<RefCell<InputMode>>) -> Page {
         Page::new()
             .main_screen()
-            .with_title(Text::new("Zellij Tip #10").color_range(0, ..))
+            .with_title(Text::new("Zellij 技巧 #10").color_range(0, ..))
             .with_bulletin_list(
                 BulletinList::new(
-                    Text::new("The Zellij session-manager can:").color_range(2, 11..=25),
+                    Text::new("Zellij 会话管理器可以：").color_range(2, 7..=11),
                 )
                 .with_items(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(Text::new(
-                        "Create new sessions",
+                        "创建新会话",
                     ))),
                     ActiveComponent::new(TextOrCustomRender::Text(Text::new(
-                        "Switch between existing sessions",
+                        "在现有会话之间切换",
                     ))),
                     ActiveComponent::new(TextOrCustomRender::Text(Text::new(
-                        "Resurrect exited sessions",
+                        "恢复已退出的会话",
                     ))),
                     ActiveComponent::new(TextOrCustomRender::Text(Text::new(
-                        "Change the session name",
+                        "更改会话名称",
                     ))),
                     ActiveComponent::new(TextOrCustomRender::Text(Text::new(
-                        "Disconnect other users from the current session",
+                        "断开当前会话的其他用户",
                     ))),
                 ]),
             )
             .with_paragraph(vec![ComponentLine::new(vec![ActiveComponent::new(
                 TextOrCustomRender::Text(match *base_mode.borrow() {
-                    InputMode::Locked => Text::new("Check it out with with: Ctrl g + o + w")
-                        .color_range(3, 24..=29)
-                        .color_indices(3, vec![33, 37]),
-                    _ => Text::new("Check it out with with: Ctrl o + w")
-                        .color_range(3, 24..=29)
-                        .color_indices(3, vec![33]),
+                    InputMode::Locked => Text::new("用以下方式打开：Ctrl g + o + w")
+                        .color_range(3, 9..=14)
+                        .color_indices(3, vec![18, 22]),
+                    _ => Text::new("用以下方式打开：Ctrl o + w")
+                        .color_range(3, 9..=14)
+                        .color_indices(3, vec![18]),
                 }),
             )])])
             .with_paragraph(vec![ComponentLine::new(vec![ActiveComponent::new(
                 TextOrCustomRender::Text(
-                    Text::new("You can also use it as a welcome screen with: zellij -l welcome")
-                        .color_range(0, 46..=62),
+                    Text::new("也可以用作欢迎屏幕：zellij -l welcome")
+                        .color_range(0, 10..=26),
                 ),
             )])])
             .with_paragraph(vec![ComponentLine::new(vec![
@@ -588,37 +588,37 @@ impl Page {
     pub fn tip_11(link_executable: Rc<RefCell<String>>) -> Page {
         Page::new()
             .main_screen()
-            .with_title(Text::new("Zellij Tip #11").color_range(0, ..))
+            .with_title(Text::new("Zellij 技巧 #11").color_range(0, ..))
             .with_paragraph(vec![
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                        Text::new("You can change the arrangement of panes on screen with Alt + []")
-                            .color_range(0, 55..=57)
-                            .color_range(2, 61..=62)
+                        Text::new("你可以用 Alt + [] 更改屏幕上窗格的排列")
+                            .color_range(0, 5..=7)
+                            .color_range(2, 11..=12)
                     )),
                 ]),
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                        Text::new("This works with tiled or floating panes, depending which is visible.")
+                        Text::new("适用于平铺或浮动窗格，取决于哪个可见。")
                     ))
                 ])
             ])
             .with_paragraph(vec![
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                        Text::new("Resizing or splitting a pane breaks out of this arrangement. It is then possible")
+                        Text::new("调整大小或拆分窗格会退出此排列。然后可以")
                     )),
                 ]),
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                        Text::new("to snap back by pressing Alt + [] once more. This status can be seen")
-                            .color_range(0, 25..=27)
-                            .color_range(2, 31..=32)
+                        Text::new("再次按 Alt + [] 切回。此状态可以")
+                            .color_range(0, 4..=6)
+                            .color_range(2, 10..=11)
                     )),
                 ]),
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                        Text::new("on the top right corner of the screen.")
+                        Text::new("在屏幕右上角看到。")
                     )),
                 ]),
             ])
@@ -641,32 +641,32 @@ impl Page {
     pub fn tip_12(link_executable: Rc<RefCell<String>>, base_mode: Rc<RefCell<InputMode>>) -> Page {
         Page::new()
             .main_screen()
-            .with_title(Text::new("Zellij Tip #12").color_range(0, ..))
+            .with_title(Text::new("Zellij 技巧 #12").color_range(0, ..))
             .with_paragraph(vec![
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
-                        Text::new("Zellij plugins can be loaded, reloaded and tracked from the plugin-manager.")
+                        Text::new("Zellij 插件可以从插件管理器加载、重载和跟踪。")
                     )),
                 ]),
                 ComponentLine::new(vec![
                     ActiveComponent::new(TextOrCustomRender::Text(
                             match *base_mode.borrow() {
                                 InputMode::Locked => {
-                                    Text::new("Check it out with with: Ctrl g + o + p")
-                                        .color_range(3, 24..=29)
-                                        .color_indices(3, vec![33, 37])
+                                    Text::new("用以下方式打开：Ctrl g + o + p")
+                                        .color_range(3, 9..=14)
+                                        .color_indices(3, vec![18, 22])
                                 },
                                 _ => {
-                                    Text::new("Check it out with with: Ctrl o + p")
-                                        .color_range(3, 24..=29)
-                                        .color_indices(3, vec![33])
+                                    Text::new("用以下方式打开：Ctrl o + p")
+                                        .color_range(3, 9..=14)
+                                        .color_indices(3, vec![18])
                                 }
                             }
                     )),
                 ]),
             ])
             .with_paragraph(vec![ComponentLine::new(vec![
-                ActiveComponent::new(TextOrCustomRender::Text(Text::new("To learn more about plugins: ").color_range(2, ..))),
+                ActiveComponent::new(TextOrCustomRender::Text(Text::new("了解更多关于插件：").color_range(2, ..))),
                 ActiveComponent::new(TextOrCustomRender::Text(Text::new("https://zellij.dev/documentation/plugins")))
                     .with_hover(TextOrCustomRender::CustomRender(
                         Box::new(plugin_docs_link_text_selected),
