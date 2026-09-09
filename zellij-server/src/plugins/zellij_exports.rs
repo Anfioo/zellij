@@ -3804,7 +3804,7 @@ fn get_pane_info(env: &PluginEnv, pane_id: zellij_utils::data::PaneId) {
         Ok(None) => None, // 窗格 not 找到的
         Err(RecvTimeoutError::Timeout) => {
             log::error!(
-                "GetPaneInfo 等待来自插件 {} 的窗格 {:?} 响应超时",
+                "GetPaneInfo 等待窗格 {:?} 来自插件 {} 的响应超时",
                 pane_id,
                 env.plugin_id
             );
@@ -4174,7 +4174,7 @@ fn get_pane_scrollback(env: &PluginEnv, pane_id: PaneId, get_full_scrollback: bo
         },
         Err(RecvTimeoutError::Disconnected) => {
             log::error!(
-                "GetPaneScrollback 通道已为请求窗格 {:?} 的插件 {} 断开",
+                "GetPaneScrollback 通道已为插件 {} 断开（其请求窗格 {:?}）",
                 env.plugin_id,
                 pane_id
             );
@@ -4290,7 +4290,7 @@ fn get_pane_pid(env: &PluginEnv, pane_id: PaneId) {
         },
         Err(RecvTimeoutError::Disconnected) => {
             log::error!(
-                "GetPanePid 通道已为请求窗格 {:?} 的插件 {} 断开",
+                "GetPanePid 通道已为插件 {} 断开（其请求窗格 {:?}）",
                 env.plugin_id,
                 pane_id
             );
@@ -4392,7 +4392,7 @@ fn await_pane_running_command_response(
         },
         Err(RecvTimeoutError::Disconnected) => {
             log::error!(
-                "GetPaneRunningCommand 通道已为请求窗格 {:?} 的插件 {} 断开",
+                "GetPaneRunningCommand 通道已为插件 {} 断开（其请求窗格 {:?}）",
                 env.plugin_id,
                 pane_id
             );
@@ -4457,7 +4457,7 @@ fn await_pane_cwd_response(
         },
         Err(RecvTimeoutError::Disconnected) => {
             log::error!(
-                "GetPaneCwd 通道已为请求窗格 {:?} 的插件 {} 断开",
+                "GetPaneCwd 通道已为插件 {} 断开（其请求窗格 {:?}）",
                 env.plugin_id,
                 pane_id
             );

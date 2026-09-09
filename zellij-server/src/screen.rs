@@ -5833,7 +5833,7 @@ impl Screen {
 
         if !self.tabs.contains_key(&active_tab_id) || !self.tabs.contains_key(&other_tab_id) {
             warn!(
-                "切换标签页失败：在 {:?} 中找不到索引 {} 或 {}",
+                "切换标签页失败：索引 {} 或 {} 未在 {:?} 中找到",
                 active_tab_id,
                 other_tab_id,
                 self.tabs.keys()
