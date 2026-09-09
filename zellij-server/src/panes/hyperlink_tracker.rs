@@ -416,7 +416,7 @@ mod tests {
                 assert_eq!(link.id, Some(id.to_string()), "Link ID should be set");
             }
         } else {
-            panic!("Should have found a link ID");
+            panic!("本应找到链接 ID");
         }
     }
 
@@ -630,7 +630,7 @@ mod tests {
                 );
             }
         } else {
-            panic!("Should have found a link ID");
+            panic!("本应找到链接 ID");
         }
     }
 
@@ -834,7 +834,7 @@ mod tests {
                 );
             }
         } else {
-            panic!("Should have found a link ID for multiline URL");
+            panic!("本应找到链接 ID for multiline URL");
         }
 
         let row0 = &viewport[0];
@@ -1118,7 +1118,7 @@ mod tests {
                 assert_eq!(link.uri, url1, "First stored URL should match");
             }
         } else {
-            panic!("Should have found first link ID");
+            panic!("本应找到第一个链接 ID");
         }
 
         if let Some(id2) = second_link_id {
@@ -1131,7 +1131,7 @@ mod tests {
                 assert_eq!(link.uri, url2, "Second stored URL should match");
             }
         } else {
-            panic!("Should have found second link ID");
+            panic!("本应找到第二个链接 ID");
         }
 
         assert_ne!(
@@ -1324,7 +1324,7 @@ mod tests {
                             assert_eq!(link.uri, url, "Link should contain the correct URL");
                         }
                     },
-                    _ => panic!("First character should have Start anchor, got {:?}", anchor),
+                    _ => panic!("第一个字符应具有 Start 锚点，实际为 {:?}", anchor),
                 }
             }
         }
@@ -1354,7 +1354,7 @@ mod tests {
                         },
                         LinkAnchor::End => {
                             if i != url.len().saturating_sub(1) {
-                                panic!("Only the last character should have End anchor");
+                                panic!("只有最后一个字符应具有 End 锚点");
                             }
                         },
                     }

@@ -466,7 +466,7 @@ impl<'a> StackedPanes<'a> {
                 return Ok(position_for_new_pane);
             }
         }
-        Err(anyhow!("Not enough room for another pane!"))
+        Err(anyhow!("没有足够的空间再容纳一个窗格！"))
     }
     pub fn make_room_for_new_pane_in_stack(&mut self, pane_id: &PaneId) -> Result<PaneGeom> {
         let err_context = || format!("Failed to add pane to stack");
@@ -498,7 +498,7 @@ impl<'a> StackedPanes<'a> {
                 .set_geom(flexible_pane_geom);
             return Ok(position_for_new_pane);
         }
-        Err(anyhow!("Not enough room for another pane!"))
+        Err(anyhow!("没有足够的空间再容纳一个窗格！"))
     }
     pub fn room_left_in_stack_of_pane_id(&self, pane_id: &PaneId) -> Option<usize> {
         // 如果窗格是堆叠的，返回可以添加到此堆叠的窗格数量
@@ -519,7 +519,7 @@ impl<'a> StackedPanes<'a> {
         let panes = self.panes.borrow();
         let running_stack_geom = panes.get(&root_pane_id).map(|p| p.position_and_size());
         let Some(mut running_stack_geom) = running_stack_geom else {
-            log::error!("Pane not found"); // TODO: better error
+            log::error!("未找到窗格"); // TODO: better error
             return stacked_geoms;
         };
         let stack_id = self.next_stack_id();
@@ -628,17 +628,17 @@ impl<'a> StackedPanes<'a> {
     ) -> Result<()> {
         let (geom_of_main_pane, mut extra_stacked_geoms_of_main_pane) = self
             .extract_geoms_from_stack(*root_pane_id)
-            .ok_or_else(|| anyhow!("Failed to extract geoms from stack"))?;
+            .ok_or_else(|| anyhow!("从堆叠中提取几何信息失败"))?;
         let mut other_pane_ids_and_geoms = self
             .positions_of_panes_and_their_stacks(neighboring_pane_ids)
-            .ok_or_else(|| anyhow!("Failed to get pane geoms"))?;
+            .ok_or_else(|| anyhow!("获取窗格几何信息失败"))?;
         if other_pane_ids_and_geoms.is_empty() {
             // 无事可做
             return Ok(());
         };
         let Some(geom_to_combine) = self.combine_geoms_horizontally(&other_pane_ids_and_geoms)
         else {
-            log::error!("Failed to combine geoms horizontally");
+            log::error!("水平合并几何信息失败");
             return Ok(());
         };
         let new_stack_geom = if geom_to_combine.y < geom_of_main_pane.y {
@@ -664,7 +664,7 @@ impl<'a> StackedPanes<'a> {
         let mut all_stack_geoms = other_pane_ids_and_geoms;
         let original_geom_of_main_pane = panes
             .get(&root_pane_id)
-            .ok_or_else(|| anyhow!("Failed to find root geom"))?
+            .ok_or_else(|| anyhow!("找不到根几何信息"))?
             .position_and_size(); // for sorting purposes
         all_stack_geoms.push((*root_pane_id, original_geom_of_main_pane));
         all_stack_geoms.sort_by(|(_a_id, a_geom), (_b_id, b_geom)| {
@@ -704,16 +704,16 @@ impl<'a> StackedPanes<'a> {
     ) -> Result<()> {
         let (geom_of_main_pane, mut extra_stacked_geoms_of_main_pane) = self
             .extract_geoms_from_stack(*root_pane_id)
-            .ok_or_else(|| anyhow!("Failed to extract geoms from stack"))?;
+            .ok_or_else(|| anyhow!("从堆叠中提取几何信息失败"))?;
         let mut other_pane_ids_and_geoms = self
             .positions_of_panes_and_their_stacks(neighboring_pane_ids)
-            .ok_or_else(|| anyhow!("Failed to get pane geoms"))?;
+            .ok_or_else(|| anyhow!("获取窗格几何信息失败"))?;
         if other_pane_ids_and_geoms.is_empty() {
             // 无事可做
             return Ok(());
         };
         let Some(geom_to_combine) = self.combine_geoms_vertically(&other_pane_ids_and_geoms) else {
-            log::error!("Failed to combine geoms vertically");
+            log::error!("垂直合并几何信息失败");
             return Ok(());
         };
         let new_stack_geom = if geom_to_combine.x < geom_of_main_pane.x {
@@ -738,7 +738,7 @@ impl<'a> StackedPanes<'a> {
         let mut all_stacked_geoms = other_pane_ids_and_geoms;
         let original_geom_of_main_pane = panes
             .get(&root_pane_id)
-            .ok_or_else(|| anyhow!("Failed to find root geom"))?
+            .ok_or_else(|| anyhow!("找不到根几何信息"))?
             .position_and_size(); // for sorting purposes
         all_stacked_geoms.push((*root_pane_id, original_geom_of_main_pane));
         all_stacked_geoms.sort_by(|(_a_id, a_geom), (_b_id, b_geom)| {
@@ -778,7 +778,7 @@ impl<'a> StackedPanes<'a> {
         let err_context = || "Failed to break pane out of stack";
         let mut pane_ids_that_were_resized = vec![];
         let Some(position_and_size_of_stack) = self.position_and_size_of_stack(pane_id) else {
-            log::error!("Could not find stack size for pane id: {:?}", pane_id);
+            log::error!("找不到窗格 ID {:?} 的堆叠大小", pane_id);
             return None;
         };
         let mut all_stacked_pane_positions = self

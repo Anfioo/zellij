@@ -344,7 +344,7 @@ impl Pane for TerminalPane {
         }
 
         if let Some(selection) = client_id.and_then(|c| self.guest_modal.get(&c).copied()) {
-            let client_id = client_id.expect("guest modal selection requires a client id");
+            let client_id = client_id.expect("访客模态选择需要客户端 ID");
             let is_up = key_with_modifier
                 .as_ref()
                 .map(|k| {

@@ -817,7 +817,7 @@ impl FloatingPanes {
                     // 渲染先前活动的窗格，使其边框不会保持活动
                     // 着色
                     let Some(previously_active_pane) = self.get_active_pane_mut(client_id) else {
-                        log::error!("Failed to get active pane");
+                        log::error!("获取活动窗格失败");
                         return Ok(false);
                     };
 
@@ -827,7 +827,7 @@ impl FloatingPanes {
                     previously_active_pane.render_full_viewport();
 
                     let Some(next_active_pane) = self.get_pane_mut(p) else {
-                        log::error!("Failed to get next active pane");
+                        log::error!("获取下一个活动窗格失败");
                         return Ok(false);
                     };
                     next_active_pane.set_should_render(true);
@@ -1071,14 +1071,14 @@ impl FloatingPanes {
         };
         if let Some(new_position_id) = new_position_id {
             let Some(current_position) = self.panes.get(&pane_id) else {
-                log::error!("Failed to find current position");
+                log::error!("找不到当前位置");
                 return;
             };
             let prev_geom = current_position.position_and_size();
             let prev_geom_override = current_position.geom_override();
 
             let Some(new_position) = self.panes.get_mut(&new_position_id) else {
-                log::error!("Failed to find new position");
+                log::error!("找不到新位置");
                 return;
             };
             let next_geom = new_position.position_and_size();
@@ -1090,7 +1090,7 @@ impl FloatingPanes {
             new_position.set_should_render(true);
 
             let Some(current_position) = self.panes.get_mut(&pane_id) else {
-                log::error!("Failed to find current position");
+                log::error!("找不到当前位置");
                 return;
             };
             current_position.set_geom(next_geom);
@@ -1227,7 +1227,7 @@ impl FloatingPanes {
     }
     fn set_fullscreen(&mut self, pane_id: PaneId, covers_ui: bool) {
         if !self.panes.contains_key(&pane_id) {
-            log::error!("No floating pane with id: {:?} found", pane_id);
+            log::error!("未找到 ID 为 {:?} 的浮动窗格", pane_id);
             return;
         }
         if covers_ui {
@@ -1339,7 +1339,7 @@ impl FloatingPanes {
             .map(|p| p.selectable())
             .unwrap_or(false);
         if !pane_is_selectable {
-            log::error!("Cannot focus pane {:?} as it is not selectable!", pane_id);
+            log::error!("无法聚焦窗格 {:?}，因为它不可选择！", pane_id);
             return;
         }
         self.active_panes
@@ -1604,14 +1604,14 @@ impl FloatingPanes {
     pub fn switch_active_pane_with(&mut self, _os_api: &mut Box<dyn ServerOsApi>, pane_id: PaneId) {
         if let Some(active_pane_id) = self.first_active_floating_pane_id() {
             let Some(current_position) = self.panes.get(&active_pane_id) else {
-                log::error!("Can't find current position");
+                log::error!("找不到当前位置");
                 return;
             };
             let prev_geom = current_position.position_and_size();
             let prev_geom_override = current_position.geom_override();
 
             let Some(new_position) = self.panes.get_mut(&pane_id) else {
-                log::error!("Can't find position");
+                log::error!("找不到位置");
                 return;
             };
             let next_geom = new_position.position_and_size();
@@ -1624,7 +1624,7 @@ impl FloatingPanes {
             new_position.set_should_render(true);
 
             let Some(current_position) = self.panes.get_mut(&active_pane_id) else {
-                log::error!("Can't find current position");
+                log::error!("找不到当前位置");
                 return;
             };
             current_position.set_geom(next_geom);
@@ -1653,7 +1653,7 @@ impl FloatingPanes {
             self.focus_pane(pane_id, client_id);
             Ok(())
         } else {
-            Err(anyhow!("Pane not found"))
+            Err(anyhow!("未找到窗格"))
         }
     }
     pub fn pane_info(&self, current_pane_group: &HashMap<ClientId, Vec<PaneId>>) -> Vec<PaneInfo> {
@@ -1679,7 +1679,7 @@ impl FloatingPanes {
                 pane.set_geom(geom);
             },
             None => {
-                log::error!("Failed to find pane with run: {:?}", run);
+                log::error!("找不到具有运行标识 {:?} 的窗格", run);
             },
         }
     }

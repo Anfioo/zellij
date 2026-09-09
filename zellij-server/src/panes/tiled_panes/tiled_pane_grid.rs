@@ -378,7 +378,7 @@ impl<'a> TiledPaneGrid<'a> {
                     .for_each(|pane| self.increase_pane_height(pane, change_by));
             } else {
                 return Err(anyhow!(
-                    "Don't know how to perform resize operation: '{strategy}'"
+                    "不知道如何执行调整大小操作：'{strategy}'"
                 ))
                 .with_context(err_context);
             }
@@ -728,7 +728,7 @@ impl<'a> TiledPaneGrid<'a> {
             format!("failed to find contiguous panes {direction} from pane {id:?} with {alignment} alignment")
         };
         let input_error =
-            anyhow!("Invalid combination of alignment ({alignment}) and direction ({direction})");
+            anyhow!("对齐方式（{alignment}）与方向（{direction}）的组合无效");
 
         let pane_to_check = self
             .get_pane_geom(id)
@@ -1641,12 +1641,12 @@ impl<'a> TiledPaneGrid<'a> {
         // 这里我们寻找直接在提供的根窗格上方但不
         // 超过其垂直边界（x 和 x + cols）的窗格
         let Some(root_pane_geom) = self.get_pane_geom(root_pane_id) else {
-            log::error!("Could nto find root pane geom");
+            log::error!("找不到根窗格几何信息");
             return vec![];
         };
         let Some(neighbor_pane_ids) = self.neighbor_pane_ids(root_pane_id, Direction::Up).ok()
         else {
-            log::error!("Could not find neighbor pane ids above");
+            log::error!("找不到上方的相邻窗格 ID");
             return vec![];
         };
         let neighbor_pane_ids = neighbor_pane_ids
@@ -1677,7 +1677,7 @@ impl<'a> TiledPaneGrid<'a> {
     }
     fn get_vertical_boundaries_of_pane(&self, pane_id: &PaneId) -> Vec<usize> {
         let Some(geom_of_pane) = self.get_pane_geom(pane_id) else {
-            log::error!("Could not find geom of pawne");
+            log::error!("找不到窗格几何信息");
             return vec![];
         };
         vec![
@@ -1687,7 +1687,7 @@ impl<'a> TiledPaneGrid<'a> {
     }
     fn get_horizontal_boundaries_of_pane(&self, pane_id: &PaneId) -> Vec<usize> {
         let Some(geom_of_pane) = self.get_pane_geom(pane_id) else {
-            log::error!("Could not find geom of pawne");
+            log::error!("找不到窗格几何信息");
             return vec![];
         };
         vec![
@@ -2041,7 +2041,7 @@ impl<'a> TiledPaneGrid<'a> {
             if let Err(e) =
                 self.fill_geom_holes_horizontally_upwards(&panes_with_highest_y, &leftover_panes)
             {
-                log::error!("Failed to fill_geom_holes_horizontally upwards: {}", e);
+                log::error!("向上水平填充几何空洞失败：{}", e);
                 return None;
             }
             neighboring_pane_ids_above = panes_with_highest_y;
@@ -2083,12 +2083,12 @@ impl<'a> TiledPaneGrid<'a> {
         // 这里我们寻找直接在提供的根窗格下方但不
         // 超过其垂直边界（x 和 x + cols）的窗格
         let Some(root_pane_geom) = self.get_pane_geom(root_pane_id) else {
-            log::error!("Could nto find root pane geom");
+            log::error!("找不到根窗格几何信息");
             return vec![];
         };
         let Some(neighbor_pane_ids) = self.neighbor_pane_ids(root_pane_id, Direction::Down).ok()
         else {
-            log::error!("Could not find neighbor pane ids above");
+            log::error!("找不到上方的相邻窗格 ID");
             return vec![];
         };
         let neighbor_pane_ids = neighbor_pane_ids
@@ -2125,7 +2125,7 @@ impl<'a> TiledPaneGrid<'a> {
             if let Err(e) = self
                 .fill_geom_holes_horizontally_downwards(&panes_with_lowest_rows, &leftover_panes)
             {
-                log::error!("Failed to fill_geom_holes_horizontally downwards: {}", e);
+                log::error!("向下水平填充几何空洞失败：{}", e);
                 return None;
             }
             neighboring_pane_ids_below = panes_with_lowest_rows;
@@ -2156,12 +2156,12 @@ impl<'a> TiledPaneGrid<'a> {
         // 这里我们寻找直接在提供的根窗格左侧但不
         // 超过其水平边界（y 和 y + rows）的窗格
         let Some(root_pane_geom) = self.get_pane_geom(root_pane_id) else {
-            log::error!("Could nto find root pane geom");
+            log::error!("找不到根窗格几何信息");
             return vec![];
         };
         let Some(neighbor_pane_ids) = self.neighbor_pane_ids(root_pane_id, Direction::Left).ok()
         else {
-            log::error!("Could not find neighbor pane ids to the left");
+            log::error!("找不到左侧的相邻窗格 ID");
             return vec![];
         };
         let neighbor_pane_ids = neighbor_pane_ids
@@ -2199,7 +2199,7 @@ impl<'a> TiledPaneGrid<'a> {
             if let Err(e) =
                 self.fill_geom_holes_vertically_to_the_left(&panes_with_highest_x, &leftover_panes)
             {
-                log::error!("Failed to fill_geom_holes_vertically_to_the_left: {}", e);
+                log::error!("向左垂直填充几何空洞失败：{}", e);
                 return None;
             }
             neighboring_pane_ids_to_the_left = panes_with_highest_x;
@@ -2230,12 +2230,12 @@ impl<'a> TiledPaneGrid<'a> {
         // 这里我们寻找直接在提供的根窗格右侧但不
         // 超过其水平边界（y 和 y + rows）的窗格
         let Some(root_pane_geom) = self.get_pane_geom(root_pane_id) else {
-            log::error!("Could nto find root pane geom");
+            log::error!("找不到根窗格几何信息");
             return vec![];
         };
         let Some(neighbor_pane_ids) = self.neighbor_pane_ids(root_pane_id, Direction::Right).ok()
         else {
-            log::error!("Could not find neighbor pane ids to the right");
+            log::error!("找不到右侧的相邻窗格 ID");
             return vec![];
         };
         let neighbor_pane_ids = neighbor_pane_ids
@@ -2273,7 +2273,7 @@ impl<'a> TiledPaneGrid<'a> {
             if let Err(e) = self
                 .fill_geom_holes_vertically_to_the_right(&panes_with_lowest_cols, &leftover_panes)
             {
-                log::error!("Failed to fill_geom_holes_vertically_to_the_right: {}", e);
+                log::error!("向右垂直填充几何空洞失败：{}", e);
                 return None;
             }
             neighboring_pane_ids_to_the_right = panes_with_lowest_cols;
@@ -2312,12 +2312,12 @@ impl<'a> TiledPaneGrid<'a> {
     pub fn make_pane_stacked(&mut self, pane_id: &PaneId) -> Result<()> {
         let mut geom_of_active_pane = self
             .get_pane_geom(pane_id)
-            .ok_or_else(|| anyhow!("Failed to get pane geom"))?;
+            .ok_or_else(|| anyhow!("获取窗格几何信息失败"))?;
         geom_of_active_pane.stacked = Some(self.next_stack_id());
         self.panes
             .borrow_mut()
             .get_mut(pane_id)
-            .ok_or_else(|| anyhow!("Failed to get pane geom"))?
+            .ok_or_else(|| anyhow!("获取窗格几何信息失败"))?
             .set_geom(geom_of_active_pane);
         Ok(())
     }

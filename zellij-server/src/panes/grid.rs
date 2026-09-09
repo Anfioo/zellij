@@ -1854,7 +1854,7 @@ impl Grid {
                         saved_cursor_position.y = saved_cursor_y_coordinates;
                     },
                     _ => log::error!(
-                        "invalid state - cannot set saved cursor to {:?} {:?}",
+                        "无效状态——无法将已保存的光标设置为 {:?} {:?}",
                         saved_cursor_x_coordinates,
                         saved_cursor_y_coordinates
                     ),
@@ -2126,7 +2126,7 @@ impl Grid {
     /// 清除当前屏幕的所有文本缓冲区
     pub fn clear_screen(&mut self) {
         if self.alternate_screen_state.is_some() {
-            log::warn!("Tried to clear pane with alternate_screen_state");
+            log::warn!("试图清除处于备用屏幕状态的窗格");
             return;
         }
         self.reset_terminal_state();
@@ -2875,7 +2875,7 @@ impl Grid {
                 }
             } else {
                 log::warn!(
-                    "Plugin {} supplied invalid regex: {:?}",
+                    "插件 {} 提供了无效的正则表达式：{:?}",
                     plugin_id,
                     h.pattern
                 );
@@ -3866,7 +3866,7 @@ impl Grid {
                                 .kitty_grid
                                 .pane_image_id_map()
                                 .get(&id)
-                                .expect("freshly transmitted image is mapped");
+                                .expect("新传输的图像已被映射");
                             (id, internal)
                         }),
                         None => Err(KittyError {
@@ -5668,7 +5668,7 @@ impl Perform for Grid {
             },
             _ => {
                 if self.debug {
-                    log::warn!("Unhandled esc_dispatch: {}->{:?}", byte, intermediates);
+                    log::warn!("未处理的 esc_dispatch：{}->{:?}", byte, intermediates);
                 }
             },
         }

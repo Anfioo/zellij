@@ -77,7 +77,7 @@ impl LinkHandler {
 
                 if output.is_none() {
                     log::warn!(
-                        "attempted to output osc8 link start, but id: {} was not found!",
+                        "试图输出 osc8 链接起始标记，但未找到 ID：{}！",
                         index
                     );
                 }
@@ -115,11 +115,11 @@ mod tests {
 
         match anchor {
             Some(LinkAnchor::Start(link_id)) => {
-                let link = link_handler.links.get(&link_id).expect("link was not some");
+                let link = link_handler.links.get(&link_id).expect("链接不是 Some");
                 assert_eq!(link.id, Some("test".to_string()));
                 assert_eq!(link.uri, uri);
             },
-            _ => panic!("pending link handler was not start"),
+            _ => panic!("待处理的链接处理器不是 start 状态"),
         }
 
         let expected = format!("\u{1b}]8;id=test;http://test.com{}", TERMINATOR);

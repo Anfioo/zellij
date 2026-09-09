@@ -340,7 +340,7 @@ impl Pane for PluginPane {
                             )]));
                     },
                     Err(e) => {
-                        log::error!("Failed to convert pasted bytes as utf8 {:?}", e);
+                        log::error!("将粘贴的字节转换为 UTF-8 失败 {:?}", e);
                     },
                 }
             }

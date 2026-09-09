@@ -357,7 +357,7 @@ impl TiledPanes {
                         self.expand_pane_in_stack(pane_id);
                     },
                     Err(e) => {
-                        log::error!("Failed to add pane to stack: {:?}", e);
+                        log::error!("将窗格添加到堆叠失败：{:?}", e);
                     },
                 }
             },
@@ -378,7 +378,7 @@ impl TiledPanes {
             *self.viewport.borrow(),
         );
         let Some(active_pane_id) = self.active_panes.get(&client_id) else {
-            log::error!("Could not find active pane id for client_id");
+            log::error!("找不到 client_id 对应的活动窗格 ID");
             return;
         };
         if pane_grid
@@ -451,7 +451,7 @@ impl TiledPanes {
             *self.viewport.borrow(),
         );
         let Some(active_pane_id) = self.active_panes.get(&client_id) else {
-            log::error!("Could not find active pane id for client_id");
+            log::error!("找不到 client_id 对应的活动窗格 ID");
             return;
         };
         let pane_id_is_stacked = pane_grid
@@ -469,7 +469,7 @@ impl TiledPanes {
                 return;
             },
             Err(e) => {
-                log::error!("Failed to add pane to stack: {}", e);
+                log::error!("将窗格添加到堆叠失败：{}", e);
             },
         }
     }
@@ -491,7 +491,7 @@ impl TiledPanes {
             .unwrap_or(false);
         if !pane_id_is_stacked {
             if let Err(e) = pane_grid.make_pane_stacked(&root_pane_id) {
-                log::error!("Failed to make pane stacked: {:?}", e);
+                log::error!("使窗格堆叠失败：{:?}", e);
             }
         }
         match pane_grid.make_room_in_stack_of_pane_id_for_pane(&root_pane_id) {
@@ -502,7 +502,7 @@ impl TiledPanes {
                 return;
             },
             Err(e) => {
-                log::error!("Failed to add pane to stack: {}", e);
+                log::error!("将窗格添加到堆叠失败：{}", e);
             },
         }
     }
@@ -723,7 +723,7 @@ impl TiledPanes {
                     StackedPanes::new_from_btreemap(&mut self.panes, &self.panes_to_hide)
                         .position_and_size_of_stack(&active_pane_id)
                 else {
-                    log::error!("Failed to find position and size of stack");
+                    log::error!("找不到堆叠的位置和大小");
                     return false;
                 };
                 full_pane_size = position_and_size_of_stack;
@@ -752,7 +752,7 @@ impl TiledPanes {
                     StackedPanes::new_from_btreemap(&mut self.panes, &self.panes_to_hide)
                         .position_and_size_of_stack(&active_pane_id)
                 else {
-                    log::error!("Failed to find position and size of stack");
+                    log::error!("找不到堆叠的位置和大小");
                     return false;
                 };
                 full_pane_size = position_and_size_of_stack;
@@ -793,7 +793,7 @@ impl TiledPanes {
                     full_pane_size = position_and_size_of_stack;
                 },
                 None => {
-                    log::error!("Failed to find position and size of stack");
+                    log::error!("找不到堆叠的位置和大小");
                 },
             }
         }
@@ -807,7 +807,7 @@ impl TiledPanes {
                 {
                     Ok(_) => {},
                     Err(e) => {
-                        log::error!("Failed to resize stack: {}", e);
+                        log::error!("调整堆叠大小失败：{}", e);
                     },
                 }
             } else {
@@ -846,7 +846,7 @@ impl TiledPanes {
                     full_pane_size = position_and_size_of_stack;
                 },
                 None => {
-                    log::error!("Failed to find position and size of stack");
+                    log::error!("找不到堆叠的位置和大小");
                 },
             }
         }
@@ -860,7 +860,7 @@ impl TiledPanes {
                 {
                     Ok(_) => {},
                     Err(e) => {
-                        log::error!("Failed to resize stack: {}", e);
+                        log::error!("调整堆叠大小失败：{}", e);
                     },
                 }
             } else {
@@ -1003,7 +1003,7 @@ impl TiledPanes {
                 all_panes_in_stack
             },
             Err(e) => {
-                log::error!("Failed to expand pane in stack: {:?}", e);
+                log::error!("展开堆叠中的窗格失败：{:?}", e);
                 vec![]
             },
         }
@@ -1020,7 +1020,7 @@ impl TiledPanes {
             .map(|p| p.selectable())
             .unwrap_or(false);
         if !pane_is_selectable {
-            log::error!("Cannot focus pane {:?} as it is not selectable!", pane_id);
+            log::error!("无法聚焦窗格 {:?}，因为它不可选择！", pane_id);
             return;
         }
         if self.panes_to_hide.contains(&pane_id) {
@@ -1056,7 +1056,7 @@ impl TiledPanes {
             self.focus_pane(pane_id, client_id);
             Ok(())
         } else {
-            Err(anyhow!("Pane not found"))
+            Err(anyhow!("未找到窗格"))
         }
     }
     pub fn focus_pane_at_position(&mut self, position_and_size: PaneGeom, client_id: ClientId) {
@@ -1436,7 +1436,7 @@ impl TiledPanes {
                 }
             },
             None => {
-                log::error!("Failed to find pane with run: {:?}", run);
+                log::error!("找不到具有运行标识 {:?} 的窗格", run);
             },
         }
     }
@@ -1446,7 +1446,7 @@ impl TiledPanes {
                 pane.set_geom(geom);
             },
             None => {
-                log::error!("Failed to find pane with id: {:?}", pane_id);
+                log::error!("找不到 ID 为 {:?} 的窗格", pane_id);
             },
         }
     }
@@ -1517,13 +1517,13 @@ impl TiledPanes {
             if successfully_resized_horizontally {
                 resize_vertically(&mut pane_grid, &mut display_area, &mut viewport, rows);
             } else {
-                log::warn!("Failed to resize horizontally, attempting to first resize vertically");
+                log::warn!("水平调整大小失败，正在尝试先垂直调整大小");
                 let successfully_resized_vertically =
                     resize_vertically(&mut pane_grid, &mut display_area, &mut viewport, rows);
                 if successfully_resized_vertically {
                     resize_horizontally(&mut pane_grid, &mut display_area, &mut viewport, cols);
                 } else {
-                    log::error!("Failed to resize vertically, will not attempt again.");
+                    log::error!("垂直调整大小失败，将不再重试。");
                 }
             }
             display_area.rows = rows;
