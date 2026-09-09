@@ -84,7 +84,7 @@ impl Write for LoggingPipe {
                 }
             },
             Err(e) => Err::<(), _>(e)
-                .context("failed to flush logging pipe buffer")
+                .context("刷新日志管道缓冲区失败")
                 .non_fatal(),
         }
 

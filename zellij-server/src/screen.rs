@@ -9040,12 +9040,12 @@ pub(crate) fn screen_thread_main(
                             pane_id: focused_pane_id.into(),
                         },
                         None => GetFocusedPaneInfoResponse::Err(format!(
-                            "No active pane found for client {:?}",
+                            "未找到客户端 {:?} 的活动窗格",
                             client_id
                         )),
                     },
                     None => GetFocusedPaneInfoResponse::Err(format!(
-                        "Client {:?} not found in active_tab_indices",
+                        "在 active_tab_indices 中未找到客户端 {:?}",
                         client_id
                     )),
                 };
@@ -9118,7 +9118,7 @@ pub(crate) fn screen_thread_main(
                             "插件请求窗格 {:?} 的回滚缓冲区，但未找到该窗格",
                             pane_id
                         );
-                        PaneScrollbackResponse::Err(format!("Pane {:?} not found", pane_id))
+                        PaneScrollbackResponse::Err(format!("未找到窗格 {:?}", pane_id))
                     },
                 };
                 if let Err(_) = response_channel.send(response) {

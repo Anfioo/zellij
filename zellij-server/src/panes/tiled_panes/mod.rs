@@ -598,7 +598,7 @@ impl TiledPanes {
             },
         }
         .or_else(|e| Err(anyError::msg(e)))
-        .with_context(|| format!("{:?} relayout of tab failed", direction))
+        .with_context(|| format!("{:?} 标签页重新布局失败", direction))
         .non_fatal();
 
         self.set_pane_frames(self.pane_frame_style);

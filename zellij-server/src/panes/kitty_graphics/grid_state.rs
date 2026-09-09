@@ -278,7 +278,7 @@ impl KittyGrid {
         let source_x = command.source_x as usize;
         let source_y = command.source_y as usize;
         if source_x >= image_width || source_y >= image_height {
-            return Err(einval(command, "source rectangle outside image bounds"));
+            return Err(einval(command, "源矩形超出图像边界"));
         }
         let source_w = if command.source_w == 0 {
             image_width - source_x
@@ -291,7 +291,7 @@ impl KittyGrid {
             std::cmp::min(command.source_h as usize, image_height - source_y)
         };
         if source_w == 0 || source_h == 0 {
-            return Err(einval(command, "empty source rectangle"));
+            return Err(einval(command, "空的源矩形"));
         }
         let off_x = std::cmp::min(command.cell_offset_x as usize, cell.width - 1);
         let off_y = std::cmp::min(command.cell_offset_y as usize, cell.height - 1);

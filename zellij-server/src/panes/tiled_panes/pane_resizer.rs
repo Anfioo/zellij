@@ -117,7 +117,7 @@ impl<'a> PaneResizer<'a> {
                 span.pos = offset;
                 let sz = rounded_sizes[&span.size_var];
                 if sz < 1 {
-                    return Err("Ran out of room for spans".into());
+                    return Err("跨段空间已用完".into());
                 }
                 span.size.set_inner(sz as usize);
                 offset += span.size.as_usize();

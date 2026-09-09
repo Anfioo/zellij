@@ -2276,7 +2276,7 @@ impl Pty {
                 }
             },
             PaneId::Plugin(plugin_id) => {
-                GetPanePidResponse::Err(format!("Cannot get PID for plugin pane {}", plugin_id))
+                GetPanePidResponse::Err(format!("无法获取插件窗格 {} 的 PID", plugin_id))
             },
         }
     }
@@ -2303,12 +2303,12 @@ impl Pty {
                             GetPaneRunningCommandResponse::Ok(command_args.clone())
                         } else {
                             GetPaneRunningCommandResponse::Err(format!(
-                                "Could not retrieve running command for terminal pane {}",
+                                "无法获取终端窗格 {} 的运行命令",
                                 terminal_id
                             ))
                         }
                     } else {
-                        GetPaneRunningCommandResponse::Err("OS input not available".to_string())
+                        GetPaneRunningCommandResponse::Err("操作系统输入不可用".to_string())
                     }
                 } else {
                     GetPaneRunningCommandResponse::Err(format!(
@@ -2318,7 +2318,7 @@ impl Pty {
                 }
             },
             PaneId::Plugin(plugin_id) => GetPaneRunningCommandResponse::Err(format!(
-                "Cannot get running command for plugin pane {}",
+                "无法获取插件窗格 {} 的运行命令",
                 plugin_id
             )),
         }
@@ -2334,12 +2334,12 @@ impl Pty {
                             GetPaneCwdResponse::Ok(cwd.clone())
                         } else {
                             GetPaneCwdResponse::Err(format!(
-                                "Could not retrieve CWD for terminal pane {}",
+                                "无法获取终端窗格 {} 的工作目录",
                                 terminal_id
                             ))
                         }
                     } else {
-                        GetPaneCwdResponse::Err("OS input not available".to_string())
+                        GetPaneCwdResponse::Err("操作系统输入不可用".to_string())
                     }
                 } else {
                     GetPaneCwdResponse::Err(format!(
@@ -2349,7 +2349,7 @@ impl Pty {
                 }
             },
             PaneId::Plugin(plugin_id) => {
-                GetPaneCwdResponse::Err(format!("Cannot get CWD for plugin pane {}", plugin_id))
+                GetPaneCwdResponse::Err(format!("无法获取插件窗格 {} 的工作目录", plugin_id))
             },
         }
     }

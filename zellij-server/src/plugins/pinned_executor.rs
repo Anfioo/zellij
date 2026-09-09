@@ -678,7 +678,7 @@ mod tests {
         let result = rx.recv_timeout(Duration::from_millis(100));
         assert!(
             result.is_err(),
-            "Job for unregistered plugin should not execute"
+            "未注册插件的任务不应执行"
         );
     }
 

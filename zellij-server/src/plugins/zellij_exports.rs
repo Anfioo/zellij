@@ -1272,7 +1272,7 @@ fn get_focused_pane_info(env: &PluginEnv) {
                 env.plugin_id,
                 env.client_id
             );
-            GetFocusedPaneInfoResponse::Err("Timeout retrieving focused pane info".to_string())
+            GetFocusedPaneInfoResponse::Err("获取焦点窗格信息超时".to_string())
         },
         Err(RecvTimeoutError::Disconnected) => {
             log::error!(
@@ -1280,7 +1280,7 @@ fn get_focused_pane_info(env: &PluginEnv) {
                 env.plugin_id
             );
             GetFocusedPaneInfoResponse::Err(
-                "Channel disconnected while retrieving focused pane info".to_string(),
+                "获取焦点窗格信息时通道已断开".to_string(),
             )
         },
     };
@@ -3474,7 +3474,7 @@ fn kill_sessions_and_reply(env: &PluginEnv, session_names: Vec<String>) {
         match tokio::time::timeout(KILL_WEDGE_TIMEOUT, drain).await {
             Ok(res) => res,
             Err(_) => {
-                Err("Timed out waiting for one or more sessions to acknowledge kill".to_string())
+                Err("等待一个或多个会话确认终止超时".to_string())
             },
         }
     });
@@ -3493,7 +3493,7 @@ fn delete_dead_session_and_reply(env: &PluginEnv, session_name: String) {
         match std::fs::remove_dir_all(&*ZELLIJ_SESSION_INFO_CACHE_DIR.join(&session_name)) {
             Ok(()) => DeleteDeadSessionResponse::Ok,
             Err(e) => DeleteDeadSessionResponse::Err(format!(
-                "Failed to delete dead session {}: {}",
+                "删除已死亡会话 {} 失败：{}",
                 session_name, e
             )),
         };
@@ -3511,9 +3511,9 @@ fn delete_all_dead_sessions_and_reply(env: &PluginEnv) {
         let fs_task = tokio::task::spawn_blocking(delete_all_dead_sessions);
         match tokio::time::timeout(KILL_WEDGE_TIMEOUT, fs_task).await {
             Ok(Ok(Ok(()))) => Ok(()),
-            Ok(Ok(Err(e))) => Err(format!("Failed to delete dead sessions: {}", e)),
-            Ok(Err(e)) => Err(format!("Internal error in delete-all task: {}", e)),
-            Err(_) => Err("Timed out deleting dead sessions".to_string()),
+            Ok(Ok(Err(e))) => Err(format!("删除已死亡会话失败：{}", e)),
+            Ok(Err(e)) => Err(format!("删除全部任务中的内部错误：{}", e)),
+            Err(_) => Err("删除已死亡会话超时".to_string()),
         }
     });
     let response = match result {
@@ -4168,7 +4168,7 @@ fn get_pane_scrollback(env: &PluginEnv, pane_id: PaneId, get_full_scrollback: bo
                 pane_id
             );
             PaneScrollbackResponse::Err(format!(
-                "Timeout retrieving scrollback for pane {:?}",
+                "获取窗格 {:?} 的回滚缓冲区超时",
                 pane_id
             ))
         },
@@ -4179,7 +4179,7 @@ fn get_pane_scrollback(env: &PluginEnv, pane_id: PaneId, get_full_scrollback: bo
                 pane_id
             );
             PaneScrollbackResponse::Err(format!(
-                "Channel disconnected while retrieving scrollback for pane {:?}",
+                "获取窗格 {:?} 的回滚缓冲区时通道已断开",
                 pane_id
             ))
         },
@@ -4286,7 +4286,7 @@ fn get_pane_pid(env: &PluginEnv, pane_id: PaneId) {
                 env.plugin_id,
                 pane_id
             );
-            GetPanePidResponse::Err(format!("Timeout retrieving PID for pane {:?}", pane_id))
+            GetPanePidResponse::Err(format!("获取窗格 {:?} 的 PID 超时", pane_id))
         },
         Err(RecvTimeoutError::Disconnected) => {
             log::error!(
@@ -4295,7 +4295,7 @@ fn get_pane_pid(env: &PluginEnv, pane_id: PaneId) {
                 pane_id
             );
             GetPanePidResponse::Err(format!(
-                "Channel disconnected while retrieving PID for pane {:?}",
+                "获取窗格 {:?} 的 PID 时通道已断开",
                 pane_id
             ))
         },
@@ -4346,7 +4346,7 @@ fn get_session_list(env: &PluginEnv) {
             };
             GetSessionListResponse::Ok(snapshot)
         },
-        None => GetSessionListResponse::Err("Session-scan state not initialized".to_string()),
+        None => GetSessionListResponse::Err("会话扫描状态未初始化".to_string()),
     };
 
     let protobuf_response = ProtobufGetSessionListResponse::from(response);

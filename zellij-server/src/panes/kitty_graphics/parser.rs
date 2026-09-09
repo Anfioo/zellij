@@ -189,7 +189,7 @@ impl KittyCommandParser {
                     let pending = self.pending.take().unwrap();
                     let echo = EchoFields::from_command(&pending.command);
                     return Some(Err(
-                        echo.error(KittyErrorCode::Einval, "malformed control data")
+                        echo.error(KittyErrorCode::Einval, "格式错误的控制数据")
                     ));
                 },
             };
@@ -209,7 +209,7 @@ impl KittyCommandParser {
                                 let pending = self.pending.take().unwrap();
                                 let echo = EchoFields::from_command(&pending.command);
                                 return Some(Err(
-                                    echo.error(KittyErrorCode::Einval, "malformed control data")
+                                    echo.error(KittyErrorCode::Einval, "格式错误的控制数据")
                                 ));
                             },
                         }
@@ -317,7 +317,7 @@ fn scan_echo_fields(control: &[u8]) -> EchoFields {
 pub fn parse_control_data(control: &[u8]) -> Result<KittyCommand, KittyError> {
     let echo = scan_echo_fields(control);
     let pairs = tokenize(control)
-        .map_err(|_| echo.error(KittyErrorCode::Einval, "malformed control data"))?;
+        .map_err(|_| echo.error(KittyErrorCode::Einval, "格式错误的控制数据"))?;
     let mut command = KittyCommand::default();
     for (key, value) in pairs {
         match key {
@@ -333,7 +333,7 @@ pub fn parse_control_data(control: &[u8]) -> Result<KittyCommand, KittyError> {
                     b'q' => KittyAction::Query,
                     b'f' | b'a' | b'c' => {
                         return Err(
-                            echo.error(KittyErrorCode::Enotsupported, "animation is not supported")
+                            echo.error(KittyErrorCode::Enotsupported, "不支持动画")
                         );
                     },
                     _ => return Err(echo.error(KittyErrorCode::Einval, "invalid action")),
@@ -349,7 +349,7 @@ pub fn parse_control_data(control: &[u8]) -> Result<KittyCommand, KittyError> {
             },
             b"t" => {
                 if value.len() != 1 {
-                    return Err(echo.error(KittyErrorCode::Einval, "invalid transmission medium"));
+                    return Err(echo.error(KittyErrorCode::Einval, "无效的传输介质"));
                 }
                 command.medium = match value[0] {
                     b'd' => KittyMedium::Direct,
@@ -363,7 +363,7 @@ pub fn parse_control_data(control: &[u8]) -> Result<KittyCommand, KittyError> {
                     },
                     _ => {
                         return Err(
-                            echo.error(KittyErrorCode::Einval, "invalid transmission medium")
+                            echo.error(KittyErrorCode::Einval, "无效的传输介质")
                         );
                     },
                 };
@@ -389,7 +389,7 @@ pub fn parse_control_data(control: &[u8]) -> Result<KittyCommand, KittyError> {
                     Some(0) => false,
                     Some(1) => true,
                     _ => {
-                        return Err(echo.error(KittyErrorCode::Einval, "invalid value for key 'm'"));
+                        return Err(echo.error(KittyErrorCode::Einval, "键 'm' 的值无效"));
                     },
                 };
             },
@@ -467,7 +467,7 @@ pub fn parse_control_data(control: &[u8]) -> Result<KittyCommand, KittyError> {
                 command.quiet = match parse_u32(value) {
                     Some(q @ 0..=2) => q as u8,
                     _ => {
-                        return Err(echo.error(KittyErrorCode::Einval, "invalid value for key 'q'"));
+                        return Err(echo.error(KittyErrorCode::Einval, "键 'q' 的值无效"));
                     },
                 };
             },
@@ -476,13 +476,13 @@ pub fn parse_control_data(control: &[u8]) -> Result<KittyCommand, KittyError> {
                     Some(0) => false,
                     Some(1) => true,
                     _ => {
-                        return Err(echo.error(KittyErrorCode::Einval, "invalid value for key 'C'"));
+                        return Err(echo.error(KittyErrorCode::Einval, "键 'C' 的值无效"));
                     },
                 };
             },
             b"d" => {
                 if value.len() != 1 || !b"aAiInNcCpPqQxXyYzZrR".contains(&value[0]) {
-                    return Err(echo.error(KittyErrorCode::Einval, "invalid delete specifier"));
+                    return Err(echo.error(KittyErrorCode::Einval, "无效的删除说明符"));
                 }
                 command.delete_specifier = Some(value[0] as char);
             },
@@ -495,7 +495,7 @@ pub fn parse_control_data(control: &[u8]) -> Result<KittyCommand, KittyError> {
                     ));
                 },
                 None => {
-                    return Err(echo.error(KittyErrorCode::Einval, "invalid value for key 'U'"));
+                    return Err(echo.error(KittyErrorCode::Einval, "键 'U' 的值无效"));
                 },
             },
             b"N" | b"P" | b"Q" | b"H" | b"V" => {},
@@ -526,7 +526,7 @@ fn read_file_range(
 ) -> Result<Vec<u8>, KittyError> {
     let start = command.data_offset.unwrap_or(0) as u64;
     if start > file_len {
-        return Err(echo.error(KittyErrorCode::Ebadf, "could not read file"));
+        return Err(echo.error(KittyErrorCode::Ebadf, "无法读取文件"));
     }
     let available = file_len - start;
     let length = match command.data_size {
@@ -545,7 +545,7 @@ fn read_file_range(
         file.take(length).read_to_end(&mut bytes)?;
         Ok(bytes)
     };
-    read(path).map_err(|_| echo.error(KittyErrorCode::Ebadf, "could not read file"))
+    read(path).map_err(|_| echo.error(KittyErrorCode::Ebadf, "无法读取文件"))
 }
 
 fn run_payload_pipeline(
@@ -568,9 +568,9 @@ fn run_payload_pipeline(
                 .map_err(|_| echo.error(KittyErrorCode::Ebadf, "invalid file path"))?;
             let path = std::path::PathBuf::from(path_string);
             let metadata = std::fs::metadata(&path)
-                .map_err(|_| echo.error(KittyErrorCode::Ebadf, "could not read file"))?;
+                .map_err(|_| echo.error(KittyErrorCode::Ebadf, "无法读取文件"))?;
             if !metadata.is_file() {
-                return Err(echo.error(KittyErrorCode::Ebadf, "could not read file"));
+                return Err(echo.error(KittyErrorCode::Ebadf, "无法读取文件"));
             }
             let read_result = read_file_range(&path, metadata.len(), &command, &echo);
             if command.medium == KittyMedium::TempFile && should_delete_temp_file(&path) {
