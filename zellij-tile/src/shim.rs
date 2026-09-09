@@ -151,16 +151,16 @@ pub fn dump_layout(layout_name: &str) -> Result<String, String> {
 
     // 读取并解码响应
     let response_bytes =
-        bytes_from_stdin().map_err(|e| format!("Failed to read response from stdin: {:?}", e))?;
+        bytes_from_stdin().map_err(|e| format!("从标准输入读取响应失败：{:?}", e))?;
 
     let protobuf_response = ProtobufDumpLayoutResponse::decode(response_bytes.as_slice())
-        .map_err(|e| format!("Failed to decode protobuf response: {}", e))?;
+        .map_err(|e| format!("解码 protobuf 响应失败：{}", e))?;
 
     // 从 oneof 字段中提取结果
     match protobuf_response.result {
         Some(dump_layout_response::Result::LayoutContent(content)) => Ok(content),
         Some(dump_layout_response::Result::Error(error)) => Err(error),
-        None => Err("Server returned empty response".to_string()),
+        None => Err("服务器返回了空响应".to_string()),
     }
 }
 
@@ -220,13 +220,13 @@ pub fn get_focused_pane_info() -> Result<(usize, PaneId), String> {
             match info.focused_pane_id {
                 Some(pb_pane_id) => match pb_pane_id.try_into() {
                     Ok(pane_id) => Ok((tab_index, pane_id)),
-                    Err(_) => Err("Invalid pane_id in response".to_string()),
+                    Err(_) => Err("响应中的 pane_id 无效".to_string()),
                 },
-                None => Err("Missing pane_id in response".to_string()),
+                None => Err("响应中缺少 pane_id".to_string()),
             }
         },
         Some(get_focused_pane_info_response::Result::Error(err)) => Err(err),
-        None => Err("Empty response from host".to_string()),
+        None => Err("主机返回了空响应".to_string()),
     }
 }
 
@@ -348,14 +348,14 @@ pub fn save_session() -> Result<(), String> {
     unsafe { host_run_plugin_command() };
 
     let response_bytes =
-        bytes_from_stdin().map_err(|e| format!("Failed to read response: {:?}", e))?;
+        bytes_from_stdin().map_err(|e| format!("读取响应失败：{:?}", e))?;
     let protobuf_response = ProtobufSaveSessionResponse::decode(response_bytes.as_slice())
-        .map_err(|e| format!("Failed to decode response: {}", e))?;
+        .map_err(|e| format!("解码响应失败：{}", e))?;
 
     match protobuf_response.result {
         Some(save_session_response::Result::Success(_)) => Ok(()),
         Some(save_session_response::Result::Error(error)) => Err(error),
-        None => Err("Server returned empty response".to_string()),
+        None => Err("服务器返回了空响应".to_string()),
     }
 }
 
@@ -1595,9 +1595,9 @@ pub fn delete_dead_session(name: &str) -> Result<(), String> {
     unsafe { host_run_plugin_command() };
 
     let response_bytes = bytes_from_stdin()
-        .map_err(|e| format!("Failed to read DeleteDeadSession response: {}", e))?;
+        .map_err(|e| format!("读取 DeleteDeadSession 响应失败：{}", e))?;
     let protobuf_response = ProtobufDeleteDeadSessionResponse::decode(response_bytes.as_slice())
-        .map_err(|e| format!("Malformed DeleteDeadSession response: {}", e))?;
+        .map_err(|e| format!("格式错误的 DeleteDeadSession 响应：{}", e))?;
     match protobuf_response.error {
         Some(err) => Err(err),
         None => Ok(()),
@@ -1615,10 +1615,10 @@ pub fn delete_all_dead_sessions() -> Result<(), String> {
     unsafe { host_run_plugin_command() };
 
     let response_bytes = bytes_from_stdin()
-        .map_err(|e| format!("Failed to read DeleteAllDeadSessions response: {}", e))?;
+        .map_err(|e| format!("读取 DeleteAllDeadSessions 响应失败：{}", e))?;
     let protobuf_response =
         ProtobufDeleteAllDeadSessionsResponse::decode(response_bytes.as_slice())
-            .map_err(|e| format!("Malformed DeleteAllDeadSessions response: {}", e))?;
+            .map_err(|e| format!("格式错误的 DeleteAllDeadSessions 响应：{}", e))?;
     match protobuf_response.error {
         Some(err) => Err(err),
         None => Ok(()),
@@ -1692,9 +1692,9 @@ where
     unsafe { host_run_plugin_command() };
 
     let response_bytes =
-        bytes_from_stdin().map_err(|e| format!("Failed to read KillSessions response: {}", e))?;
+        bytes_from_stdin().map_err(|e| format!("读取 KillSessions 响应失败：{}", e))?;
     let protobuf_response = ProtobufKillSessionsResponse::decode(response_bytes.as_slice())
-        .map_err(|e| format!("Malformed KillSessions response: {}", e))?;
+        .map_err(|e| format!("格式错误的 KillSessions 响应：{}", e))?;
     match protobuf_response.error {
         Some(err) => Err(err),
         None => Ok(()),
@@ -1760,9 +1760,9 @@ fn dump_session_layout_impl(
     unsafe { host_run_plugin_command() };
 
     let response_bytes =
-        bytes_from_stdin().map_err(|e| format!("Failed to read response from stdin: {:?}", e))?;
+        bytes_from_stdin().map_err(|e| format!("从标准输入读取响应失败：{:?}", e))?;
     let protobuf_response = ProtobufDumpSessionLayoutResponse::decode(response_bytes.as_slice())
-        .map_err(|e| format!("Failed to decode protobuf response: {}", e))?;
+        .map_err(|e| format!("解码 protobuf 响应失败：{}", e))?;
 
     // 如果存在则提取元数据
     let metadata = protobuf_response
@@ -1774,7 +1774,7 @@ fn dump_session_layout_impl(
             Ok((content, metadata))
         },
         Some(dump_session_layout_response::Result::Error(error)) => Err(error),
-        None => Err("Server returned empty response".to_string()),
+        None => Err("服务器返回了空响应".to_string()),
     }
 }
 
@@ -1901,15 +1901,15 @@ pub fn get_pane_scrollback(
 
     // 从 stdin 读取响应
     let response_bytes =
-        bytes_from_stdin().map_err(|e| format!("Failed to read response from stdin: {:?}", e))?;
+        bytes_from_stdin().map_err(|e| format!("从标准输入读取响应失败：{:?}", e))?;
 
     // 解码 protobuf 响应
     let protobuf_response = ProtobufPaneScrollbackResponse::decode(response_bytes.as_slice())
-        .map_err(|e| format!("Failed to decode protobuf response: {}", e))?;
+        .map_err(|e| format!("解码 protobuf 响应失败：{}", e))?;
 
     // 转换为 Rust 类型
     let response = PaneScrollbackResponse::try_from(protobuf_response)
-        .map_err(|e| format!("Failed to convert protobuf response: {}", e))?;
+        .map_err(|e| format!("转换 protobuf 响应失败：{}", e))?;
 
     // 将 Result 枚举转换为实际的 Result 类型
     match response {
@@ -1959,15 +1959,15 @@ pub fn get_pane_pid(pane_id: PaneId) -> Result<i32, String> {
 
     // Read response from stdin
     let response_bytes =
-        bytes_from_stdin().map_err(|e| format!("Failed to read response from stdin: {:?}", e))?;
+        bytes_from_stdin().map_err(|e| format!("从标准输入读取响应失败：{:?}", e))?;
 
     // Decode protobuf response
     let protobuf_response = ProtobufGetPanePidResponse::decode(response_bytes.as_slice())
-        .map_err(|e| format!("Failed to decode protobuf response: {}", e))?;
+        .map_err(|e| format!("解码 protobuf 响应失败：{}", e))?;
 
     // Convert to Rust type
     let response = GetPanePidResponse::try_from(protobuf_response)
-        .map_err(|e| format!("Failed to convert protobuf response: {}", e))?;
+        .map_err(|e| format!("转换 protobuf 响应失败：{}", e))?;
 
     // Convert Result enum to actual Result type
     match response {
@@ -2019,7 +2019,7 @@ pub fn get_pane_running_command(pane_id: PaneId) -> Result<Vec<String>, String> 
     match protobuf_response.result {
         Some(get_pane_running_command_response::Result::Command(cmd)) => Ok(cmd.args),
         Some(get_pane_running_command_response::Result::Error(err)) => Err(err),
-        None => Err("Empty response from server".to_string()),
+        None => Err("服务器返回了空响应".to_string()),
     }
 }
 
@@ -2042,7 +2042,7 @@ pub fn get_session_list() -> Result<SessionListSnapshot, String> {
             for manifest in snapshot.live_sessions {
                 match SessionInfo::try_from(manifest) {
                     Ok(si) => live_sessions.push(si),
-                    Err(e) => return Err(format!("Malformed session manifest: {}", e)),
+                    Err(e) => return Err(format!("格式错误的会话清单：{}", e)),
                 }
             }
             let resurrectable_sessions = snapshot
@@ -2056,7 +2056,7 @@ pub fn get_session_list() -> Result<SessionListSnapshot, String> {
             })
         },
         Some(get_session_list_response::Result::Error(err)) => Err(err),
-        None => Err("Empty response from server".to_string()),
+        None => Err("服务器返回了空响应".to_string()),
     }
 }
 
@@ -2102,7 +2102,7 @@ pub fn get_pane_cwd(pane_id: PaneId) -> Result<PathBuf, String> {
     match protobuf_response.result {
         Some(get_pane_cwd_response::Result::Cwd(cwd_str)) => Ok(PathBuf::from(cwd_str)),
         Some(get_pane_cwd_response::Result::Error(err)) => Err(err),
-        None => Err("Empty response from server".to_string()),
+        None => Err("服务器返回了空响应".to_string()),
     }
 }
 
@@ -2132,15 +2132,15 @@ pub fn save_layout<S: AsRef<str>>(
 
     // Read response from stdin
     let response_bytes =
-        bytes_from_stdin().map_err(|e| format!("Failed to read response from stdin: {:?}", e))?;
+        bytes_from_stdin().map_err(|e| format!("从标准输入读取响应失败：{:?}", e))?;
 
     // Decode protobuf response
     let protobuf_response = ProtobufSaveLayoutResponse::decode(response_bytes.as_slice())
-        .map_err(|e| format!("Failed to decode protobuf response: {}", e))?;
+        .map_err(|e| format!("解码 protobuf 响应失败：{}", e))?;
 
     // Convert to Rust type
     let response = SaveLayoutResponse::try_from(protobuf_response)
-        .map_err(|e| format!("Failed to convert protobuf response: {}", e))?;
+        .map_err(|e| format!("转换 protobuf 响应失败：{}", e))?;
 
     // Convert Result enum to actual Result type
     match response {
@@ -2186,15 +2186,15 @@ pub fn delete_layout<S: AsRef<str>>(layout_name: S) -> Result<(), String> {
 
     // Read response from stdin
     let response_bytes =
-        bytes_from_stdin().map_err(|e| format!("Failed to read response from stdin: {:?}", e))?;
+        bytes_from_stdin().map_err(|e| format!("从标准输入读取响应失败：{:?}", e))?;
 
     // Decode protobuf response
     let protobuf_response = ProtobufDeleteLayoutResponse::decode(response_bytes.as_slice())
-        .map_err(|e| format!("Failed to decode protobuf response: {}", e))?;
+        .map_err(|e| format!("解码 protobuf 响应失败：{}", e))?;
 
     // Convert to Rust type
     let response = DeleteLayoutResponse::try_from(protobuf_response)
-        .map_err(|e| format!("Failed to convert protobuf response: {}", e))?;
+        .map_err(|e| format!("转换 protobuf 响应失败：{}", e))?;
 
     // Convert Result enum to actual Result type
     match response {
@@ -2250,16 +2250,16 @@ pub fn rename_layout(
 
     // Read response from stdin
     let response_bytes =
-        bytes_from_stdin().map_err(|e| format!("Failed to read response from stdin: {:?}", e))?;
+        bytes_from_stdin().map_err(|e| format!("从标准输入读取响应失败：{:?}", e))?;
 
     // Decode protobuf response
     let protobuf_response = ProtobufRenameLayoutResponse::decode(response_bytes.as_slice())
-        .map_err(|e| format!("Failed to decode protobuf response: {}", e))?;
+        .map_err(|e| format!("解码 protobuf 响应失败：{}", e))?;
 
     // 转换为原生响应类型
     let response: RenameLayoutResponse = protobuf_response
         .try_into()
-        .map_err(|e| format!("Failed to convert protobuf response: {}", e))?;
+        .map_err(|e| format!("转换 protobuf 响应失败：{}", e))?;
 
     match response {
         RenameLayoutResponse::Ok(_) => Ok(()),
@@ -2283,15 +2283,15 @@ pub fn edit_layout<S: AsRef<str>>(
 
     // Read response from stdin
     let response_bytes =
-        bytes_from_stdin().map_err(|e| format!("Failed to read response from stdin: {:?}", e))?;
+        bytes_from_stdin().map_err(|e| format!("从标准输入读取响应失败：{:?}", e))?;
 
     // Decode protobuf response
     let protobuf_response = ProtobufEditLayoutResponse::decode(response_bytes.as_slice())
-        .map_err(|e| format!("Failed to decode protobuf response: {}", e))?;
+        .map_err(|e| format!("解码 protobuf 响应失败：{}", e))?;
 
     // Convert to Rust type
     let response = EditLayoutResponse::try_from(protobuf_response)
-        .map_err(|e| format!("Failed to convert protobuf response: {}", e))?;
+        .map_err(|e| format!("转换 protobuf 响应失败：{}", e))?;
 
     // Convert Result enum to actual Result type
     match response {
@@ -2702,7 +2702,7 @@ pub fn generate_web_login_token(
     } else if let Some(token) = create_token_response.token {
         Ok(token)
     } else {
-        Err("Received empty response".to_owned())
+        Err("收到空响应".to_owned())
     }
 }
 
@@ -2909,9 +2909,9 @@ pub fn show_floating_panes(tab_id: Option<usize>) -> Result<bool, String> {
     object_to_stdout(&protobuf_plugin_command.encode_to_vec());
     unsafe { host_run_plugin_command() };
     let response_bytes =
-        bytes_from_stdin().map_err(|e| format!("Failed to read response: {:?}", e))?;
+        bytes_from_stdin().map_err(|e| format!("读取响应失败：{:?}", e))?;
     let response = ProtobufShowFloatingPanesResponse::decode(response_bytes.as_slice())
-        .map_err(|e| format!("Failed to decode response: {}", e))?;
+        .map_err(|e| format!("解码响应失败：{}", e))?;
     match response.result {
         Some(show_floating_panes_response::Result::Success(changed)) => Ok(changed),
         Some(show_floating_panes_response::Result::Error(e)) => Err(e),
@@ -2932,9 +2932,9 @@ pub fn hide_floating_panes(tab_id: Option<usize>) -> Result<bool, String> {
     object_to_stdout(&protobuf_plugin_command.encode_to_vec());
     unsafe { host_run_plugin_command() };
     let response_bytes =
-        bytes_from_stdin().map_err(|e| format!("Failed to read response: {:?}", e))?;
+        bytes_from_stdin().map_err(|e| format!("读取响应失败：{:?}", e))?;
     let response = ProtobufHideFloatingPanesResponse::decode(response_bytes.as_slice())
-        .map_err(|e| format!("Failed to decode response: {}", e))?;
+        .map_err(|e| format!("解码响应失败：{}", e))?;
     match response.result {
         Some(hide_floating_panes_response::Result::Success(changed)) => Ok(changed),
         Some(hide_floating_panes_response::Result::Error(e)) => Err(e),

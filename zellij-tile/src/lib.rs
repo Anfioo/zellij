@@ -69,14 +69,14 @@ pub trait ZellijWorker<'de>: Default + Serialize + Deserialize<'de> {
 }
 
 pub const PLUGIN_MISMATCH: &str =
-    "An error occurred in a plugin while receiving an Event from zellij. This means
-that the plugins aren't compatible with the current zellij version.
+    "插件在从 zellij 接收事件时发生错误。这意味着
+插件与当前 zellij 版本不兼容。
 
-The most likely explanation for this is that you're running either a
-self-compiled zellij or plugin version. Please make sure that, while developing,
-you also rebuild the plugins in order to pick up changes to the plugin code.
+最可能的原因是您在运行
+自行编译的 zellij 或插件版本。请确保在开发时
+同时重新构建插件，以便拾取插件代码的更改。
 
-Please refer to the documentation for further information:
+更多信息请参阅文档：
     https://github.com/zellij-org/zellij/blob/main/CONTRIBUTING.md#building
 ";
 
@@ -128,7 +128,7 @@ macro_rules! register_plugin {
 
         #[no_mangle]
         pub fn update() -> bool {
-            let err_context = "Failed to deserialize event";
+            let err_context = "反序列化事件失败";
             use std::convert::TryInto;
             use zellij_tile::shim::plugin_api::event::ProtobufEvent;
             use zellij_tile::shim::prost::Message;
@@ -143,7 +143,7 @@ macro_rules! register_plugin {
 
         #[no_mangle]
         pub fn pipe() -> bool {
-            let err_context = "Failed to deserialize pipe message";
+            let err_context = "反序列化管道消息失败";
             use std::convert::TryInto;
             use zellij_tile::shim::plugin_api::pipe_message::ProtobufPipeMessage;
             use zellij_tile::shim::prost::Message;
