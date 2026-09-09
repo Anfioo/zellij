@@ -104,7 +104,7 @@ fn try_to_connect_with_saved_session_token(
             Err(RemoteClientError::SessionTokenExpired) => {
                 // 会话已过期 — 删除并返回以重试
                 let _ = remote_session_tokens::delete_session_token(server_url);
-                eprintln!("Session expired, please re-authenticate");
+                eprintln!("会话已过期，请重新认证");
                 return Ok(None);
             },
             Err(e) => {
@@ -165,11 +165,11 @@ fn authenticate_with_retry(
                 return Ok(connections);
             },
             Err(RemoteClientError::InvalidAuthToken) => {
-                eprintln!("Invalid authentication token");
+                eprintln!("无效的身份验证令牌");
 
                 if attempt >= MAX_AUTH_ATTEMPTS {
                     eprintln!(
-                        "Maximum authentication attempts ({}) exceeded.",
+                        "超过最大认证尝试次数（{}）。",
                         MAX_AUTH_ATTEMPTS
                     );
                     return Err(RemoteClientError::InvalidAuthToken);

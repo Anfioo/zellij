@@ -139,8 +139,8 @@ pub fn create_first_message(
 
 pub fn create_ipc_pipe(session_name: &str) -> PathBuf {
     if let Err(e) = zellij_utils::sessions::validate_session_name(session_name) {
-        log::error!("Invalid session name: {}", e);
-        panic!("Invalid session name: {}", e);
+        log::error!("无效的会话名称：{}", e);
+        panic!("无效的会话名称：{}", e);
     }
     let zellij_ipc_pipe: PathBuf = {
         let mut sock_dir = zellij_utils::consts::ZELLIJ_SOCK_DIR.clone();

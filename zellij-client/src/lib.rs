@@ -99,7 +99,7 @@ pub(crate) fn async_runtime(maybe_number_of_workers: Option<usize>) -> tokio::ru
                     .thread_name("zellij client async-runtime")
                     .enable_all()
                     .build()
-                    .expect("Failed to create tokio runtime")
+                    .expect("创建 tokio 运行时失败")
             });
             runtime.handle().clone()
         },
@@ -120,8 +120,8 @@ pub enum RemoteClientError {
 impl std::fmt::Display for RemoteClientError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            RemoteClientError::InvalidAuthToken => write!(f, "Invalid authentication token"),
-            RemoteClientError::SessionTokenExpired => write!(f, "Session token expired"),
+            RemoteClientError::InvalidAuthToken => write!(f, "无效的身份验证令牌"),
+            RemoteClientError::SessionTokenExpired => write!(f, "会话令牌已过期"),
             RemoteClientError::Unauthorized => write!(f, "Unauthorized"),
             RemoteClientError::ConnectionFailed(msg) => write!(f, "Connection failed: {}", msg),
             RemoteClientError::UrlParseError(e) => write!(f, "Invalid URL: {}", e),
@@ -277,7 +277,7 @@ fn spawn_web_server(cli_args: &CliArgs) -> Result<String, String> {
         let config_file_path_exists = Path::new(&config_file_path).exists();
         if !config_file_path_exists {
             return Err(format!(
-                "Config file: {} does not exist",
+                "配置文件 {} 不存在",
                 config_file_path.display()
             ));
         }
@@ -318,7 +318,7 @@ fn spawn_web_server(cli_args: &CliArgs) -> Result<String, String> {
         let config_file_path_exists = Path::new(&config_file_path).exists();
         if !config_file_path_exists {
             return Err(format!(
-                "Config file: {} does not exist",
+                "配置文件 {} 不存在",
                 config_file_path.display()
             ));
         }
@@ -333,7 +333,7 @@ fn spawn_web_server(cli_args: &CliArgs) -> Result<String, String> {
                 Ok(String::new())
             } else {
                 Err(format!(
-                    "Web server process exited with code: {}",
+                    "Web 服务器进程以代码 {} 退出",
                     status.code().unwrap_or(-1)
                 ))
             }
@@ -345,7 +345,7 @@ fn spawn_web_server(cli_args: &CliArgs) -> Result<String, String> {
 #[cfg(not(feature = "web_server_capability"))]
 fn spawn_web_server(_cli_args: &CliArgs) -> Result<String, String> {
     log::error!(
-        "This version of Zellij was compiled without web server support, cannot run web server!"
+        "此版本的 Zellij 编译时未包含 Web 服务器支持，无法运行 Web 服务器！"
     );
     Ok("".to_owned())
 }
@@ -596,7 +596,7 @@ pub async fn run_remote_client_terminal_loop(
         .send(create_resize_message(new_size))
         .await
     {
-        log::error!("Failed to send resize message: {}", e);
+        log::error!("发送调整大小消息失败：{}", e);
     }
 
     let mut nested_frame_extractor = nested_session::NestedFrameExtractor::new();
@@ -637,7 +637,7 @@ pub async fn run_remote_client_terminal_loop(
                                         .into(),
                                     );
                                     if let Err(e) = connections.control_ws.send(control_msg).await {
-                                        log::error!("Failed to forward nested session frame over control WebSocket: {}", e);
+                                        log::error!("通过控制 WebSocket 转发嵌套会话帧失败：{}", e);
                                     }
                                 },
                                 None => {},
@@ -645,7 +645,7 @@ pub async fn run_remote_client_terminal_loop(
                         }
                         if !cleaned.is_empty() {
                             if let Err(e) = connections.terminal_ws.send(Message::Binary(cleaned.into())).await {
-                                log::error!("Failed to send stdin to terminal WebSocket: {}", e);
+                                log::error!("向终端 WebSocket 发送标准输入失败：{}", e);
                                 break;
                             }
                         }
@@ -655,7 +655,7 @@ pub async fn run_remote_client_terminal_loop(
                         break;
                     }
                     Err(e) => {
-                        log::error!("Error reading from stdin: {}", e);
+                        log::error!("从标准输入读取出错：{}", e);
                         break;
                     }
                 }
@@ -685,7 +685,7 @@ pub async fn run_remote_client_terminal_loop(
                     crate::os_input_output::SignalEvent::Resize => {
                         let new_size = os_input.get_terminal_size();
                         if let Err(e) = connections.control_ws.send(create_resize_message(new_size)).await {
-                            log::error!("Failed to send resize message: {}", e);
+                            log::error!("发送调整大小消息失败：{}", e);
                             break;
                         }
                     }
@@ -703,34 +703,34 @@ pub async fn run_remote_client_terminal_loop(
                         if let Some(sync) = synchronised_output {
                             stdout
                                 .write_all(sync.start_seq())
-                                .expect("cannot write to stdout");
+                                .expect("无法写入标准输出");
                         }
                         stdout
                             .write_all(text.as_bytes())
-                            .expect("cannot write to stdout");
+                            .expect("无法写入标准输出");
                         if let Some(sync) = synchronised_output {
                             stdout
                                 .write_all(sync.end_seq())
-                                .expect("cannot write to stdout");
+                                .expect("无法写入标准输出");
                         }
-                        stdout.flush().expect("could not flush");
+                        stdout.flush().expect("无法刷新");
                     }
                     Some(Ok(Message::Binary(data))) => {
                         let mut stdout = os_input.get_stdout_writer();
                         if let Some(sync) = synchronised_output {
                             stdout
                                 .write_all(sync.start_seq())
-                                .expect("cannot write to stdout");
+                                .expect("无法写入标准输出");
                         }
                         stdout
                             .write_all(&data)
-                            .expect("cannot write to stdout");
+                            .expect("无法写入标准输出");
                         if let Some(sync) = synchronised_output {
                             stdout
                                 .write_all(sync.end_seq())
-                                .expect("cannot write to stdout");
+                                .expect("无法写入标准输出");
                         }
-                        stdout.flush().expect("could not flush");
+                        stdout.flush().expect("无法刷新");
                     }
                     Some(Ok(Message::Close(_))) => {
                         break;
@@ -759,7 +759,7 @@ pub async fn run_remote_client_terminal_loop(
                             Ok(WebServerToWebClientControlMessage::QueryTerminalSize) => {
                                 let new_size = os_input.get_terminal_size();
                                 if let Err(e) = connections.control_ws.send(create_resize_message(new_size)).await {
-                                    log::error!("Failed to send resize message: {}", e);
+                                    log::error!("发送调整大小消息失败：{}", e);
                                 }
                             }
                             Ok(WebServerToWebClientControlMessage::Log { lines }) => {
@@ -1407,17 +1407,17 @@ pub fn start_client(
                 if let Some(sync) = synchronised_output {
                     stdout
                         .write_all(sync.start_seq())
-                        .expect("cannot write to stdout");
+                        .expect("无法写入标准输出");
                 }
                 stdout
                     .write_all(output.as_bytes())
-                    .expect("cannot write to stdout");
+                    .expect("无法写入标准输出");
                 if let Some(sync) = synchronised_output {
                     stdout
                         .write_all(sync.end_seq())
-                        .expect("cannot write to stdout");
+                        .expect("无法写入标准输出");
                 }
-                stdout.flush().expect("could not flush");
+                stdout.flush().expect("无法刷新");
             },
             ClientInstruction::UnblockInputThread => {
                 command_is_executing.unblock_input_thread();

@@ -854,7 +854,7 @@ pub fn forward_timeout_runtime() -> &'static Arc<tokio::runtime::Runtime> {
         let rt = tokio::runtime::Builder::new_current_thread()
             .enable_time()
             .build()
-            .expect("failed to build forward-timeout runtime");
+            .expect("创建前向超时运行时失败");
         let rt = Arc::new(rt);
         let rt_for_driver = rt.clone();
         // `block_on(pending())` 在此线程上永远保持执行器循环存活；
@@ -864,7 +864,7 @@ pub fn forward_timeout_runtime() -> &'static Arc<tokio::runtime::Runtime> {
             .spawn(move || {
                 rt_for_driver.block_on(std::future::pending::<()>());
             })
-            .expect("failed to spawn forward-timeout driver thread");
+            .expect("启动前向超时驱动线程失败");
         rt
     })
 }

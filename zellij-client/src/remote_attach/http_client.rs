@@ -15,7 +15,7 @@ pub fn create_http_client(
 
     if insecure {
         eprintln!(
-            "WARNING: TLS certificate validation is disabled. This connection is NOT secure."
+            "警告：TLS 证书验证已禁用。此连接不安全。"
         );
         builder = builder.ssl_options(
             isahc::config::SslOption::DANGER_ACCEPT_INVALID_CERTS

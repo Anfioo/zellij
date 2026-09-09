@@ -176,7 +176,7 @@ impl ClientOsApi for ClientOsInputOutput {
         get_terminal_size()
     }
     fn set_raw_mode(&mut self) {
-        crossterm::terminal::enable_raw_mode().expect("could not enable raw mode");
+        crossterm::terminal::enable_raw_mode().expect("无法启用原始模式");
     }
     fn unset_raw_mode(&self) -> Result<(), std::io::Error> {
         crossterm::terminal::disable_raw_mode()
@@ -249,7 +249,7 @@ impl ClientOsApi for ClientOsInputOutput {
                 let _ = sender.send_client_msg(msg);
             },
             None => {
-                log::warn!("Server not ready, dropping message.");
+                log::warn!("服务器未就绪，正在丢弃消息。");
             },
         }
     }
@@ -396,7 +396,7 @@ mod tests {
 
     #[test]
     fn client_os_input_output_can_be_constructed() {
-        let os_input = get_client_os_input().expect("should construct ClientOsInputOutput");
+        let os_input = get_client_os_input().expect("应当构造 ClientOsInputOutput");
         let size = os_input.get_terminal_size();
         assert!(size.rows > 0, "rows should be positive");
         assert!(size.cols > 0, "cols should be positive");
@@ -404,7 +404,7 @@ mod tests {
 
     #[test]
     fn cli_client_os_input_can_be_constructed() {
-        let os_input = get_cli_client_os_input().expect("should construct CLI ClientOsInputOutput");
+        let os_input = get_cli_client_os_input().expect("应当构造 CLI ClientOsInputOutput");
         let size = os_input.get_terminal_size();
         assert!(size.rows > 0, "rows should be positive");
         assert!(size.cols > 0, "cols should be positive");

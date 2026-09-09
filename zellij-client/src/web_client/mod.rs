@@ -81,7 +81,7 @@ pub fn start_web_client(
             }
             .unwrap_or("An unexpected error occurred!");
             log::error!(
-                "Thread {} panicked: {}, location {:?}",
+                "线程 {} 发生恐慌：{}，位置 {:?}",
                 thread,
                 msg,
                 info.location()
@@ -143,7 +143,7 @@ pub fn start_web_client(
             },
             (None, None) => None,
             _ => {
-                eprintln!("Must specify both web_server_cert and web_server_key");
+                eprintln!("必须同时指定 web_server_cert 和 web_server_key");
                 std::process::exit(2);
             },
         };
@@ -151,7 +151,7 @@ pub fn start_web_client(
         match listener {
             Ok(listener) => {
                 println!(
-                    "Web Server started on {} port {}",
+                    "Web 服务器已在 {} 端口 {} 上启动",
                     web_server_ip, web_server_port
                 );
                 (runtime, listener, tls_config)
@@ -189,7 +189,7 @@ pub async fn serve_web_client(
 ) {
     let Some(config_file_path) = config_file_path.or_else(|| Config::default_config_file_path())
     else {
-        log::error!("Failed to find default config file path");
+        log::error!("找不到默认配置文件路径");
         return;
     };
     let connection_table = Arc::new(Mutex::new(ConnectionTable::default()));
@@ -269,7 +269,7 @@ pub async fn serve_web_client(
         }));
 
     if let Err(e) = listener.set_nonblocking(true) {
-        log::error!("Failed to set web server listener to non-blocking: {}", e);
+        log::error!("将 Web 服务器监听器设置为非阻塞失败：{}", e);
         return;
     }
 
@@ -278,7 +278,7 @@ pub async fn serve_web_client(
             let server = match axum_server::from_tcp_rustls(listener, rustls_config) {
                 Ok(server) => server,
                 Err(e) => {
-                    log::error!("Failed to create TLS web server from listener: {}", e);
+                    log::error!("从监听器创建 TLS Web 服务器失败：{}", e);
                     return;
                 },
             };
@@ -291,7 +291,7 @@ pub async fn serve_web_client(
             let server = match axum_server::from_tcp(listener) {
                 Ok(server) => server,
                 Err(e) => {
-                    log::error!("Failed to create web server from listener: {}", e);
+                    log::error!("从监听器创建 Web 服务器失败：{}", e);
                     return;
                 },
             };
@@ -344,7 +344,7 @@ fn daemonize_web_server(
                     (None, None) => None,
                     _ => {
                         return Err(
-                            "Must specify both web_server_cert and web_server_key".to_owned()
+                            "必须同时指定 web_server_cert 和 web_server_key".to_owned()
                         )
                     },
                 };
@@ -388,7 +388,7 @@ fn daemonize_web_server(
             Ok(listener_and_runtime) => {
                 let _ = writeln!(
                     exit_message_tx,
-                    "Web Server started on {} port {}",
+                    "Web 服务器已在 {} 端口 {} 上启动",
                     web_server_ip, web_server_port
                 );
                 let _ = exit_status_tx.write_all(&[0]);
@@ -401,7 +401,7 @@ fn daemonize_web_server(
             },
         },
         _ => {
-            eprintln!("Failed to start server");
+            eprintln!("启动服务器失败");
             std::process::exit(2);
         },
     }
@@ -422,7 +422,7 @@ fn daemonize_web_server(
     use std::time::{Duration, Instant};
 
     let exe = current_exe().unwrap_or_else(|e| {
-        eprintln!("Failed to determine executable path: {}", e);
+        eprintln!("确定可执行文件路径失败：{}", e);
         exit(2);
     });
 
@@ -458,20 +458,20 @@ fn daemonize_web_server(
                     .is_ok()
                 {
                     println!(
-                        "Web Server started on {} port {}",
+                        "Web 服务器已在 {} 端口 {} 上启动",
                         web_server_ip, web_server_port
                     );
                     exit(0);
                 }
                 if Instant::now() > deadline {
-                    eprintln!("Timed out waiting for web server to start on {}", addr);
+                    eprintln!("等待 Web 服务器在 {} 上启动超时", addr);
                     exit(2);
                 }
                 std::thread::sleep(Duration::from_millis(100));
             }
         },
         Err(e) => {
-            eprintln!("Failed to spawn web server: {}", e);
+            eprintln!("启动 Web 服务器失败：{}", e);
             exit(2);
         },
     }

@@ -132,7 +132,7 @@ fn build_tls_config(
     } else {
         let native_certs = rustls_native_certs::load_native_certs();
         for err in &native_certs.errors {
-            log::warn!("Error loading native certificate: {}", err);
+            log::warn!("加载本机证书出错：{}", err);
         }
         let mut root_store = rustls::RootCertStore::empty();
         root_store.add_parsable_certificates(native_certs.certs);

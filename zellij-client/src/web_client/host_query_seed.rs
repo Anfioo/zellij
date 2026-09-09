@@ -422,7 +422,7 @@ mod tests {
                 ClientToServerMsg::ColorRegisters { color_registers } => Some(color_registers),
                 _ => None,
             })
-            .expect("ColorRegisters message missing");
+            .expect("缺少 ColorRegisters 消息");
         for reg in registers {
             assert!(
                 reg.color.starts_with("rgb:") && reg.color.len() == 4 + 4 + 1 + 4 + 1 + 4,

@@ -133,7 +133,7 @@ pub(crate) fn native_console_stdin_loop(
             },
             Ok(_) => {},
             Err(e) => {
-                log::error!("Failed to read crossterm event: {}", e);
+                log::error!("读取 crossterm 事件失败：{}", e);
                 let _ = send_input_instructions.send(InputInstruction::Exit);
                 break;
             },

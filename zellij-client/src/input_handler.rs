@@ -287,7 +287,7 @@ impl InputHandler {
                 Ok((InputInstruction::Exit, _error_context)) => {
                     self.should_exit = true;
                 },
-                Err(err) => panic!("Encountered read error: {:?}", err),
+                Err(err) => panic!("遇到读取错误：{:?}", err),
             }
         }
     }

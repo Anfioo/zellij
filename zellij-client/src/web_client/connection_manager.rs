@@ -114,7 +114,7 @@ impl ClientConnectionBus {
                 if let Some(stdout_channel_tx) = self.stdout_channel_tx.as_ref() {
                     let _ = stdout_channel_tx.send(stdout);
                 } else {
-                    log::error!("Failed to send STDOUT message to client");
+                    log::error!("向客户端发送 STDOUT 消息失败");
                 }
             },
         }
@@ -166,7 +166,7 @@ impl ClientConnectionBus {
                 if let Some(control_channel_tx) = self.control_channel_tx.as_ref() {
                     let _ = control_channel_tx.send(close_message);
                 } else {
-                    log::error!("Failed to send close message to client");
+                    log::error!("向客户端发送关闭消息失败");
                 }
             },
         }

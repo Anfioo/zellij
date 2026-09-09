@@ -85,11 +85,11 @@ pub async fn listen_to_web_server_instructions(
                     },
                 },
                 Err(e) => {
-                    log::error!("Failed to process web server instruction: {}", e);
+                    log::error!("处理 Web 服务器指令失败：{}", e);
                 },
             },
             Err(e) => {
-                log::error!("Failed to listen to ipc channel: {}", e);
+                log::error!("监听 IPC 通道失败：{}", e);
                 break;
             },
         }

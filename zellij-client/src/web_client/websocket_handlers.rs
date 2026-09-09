@@ -42,7 +42,7 @@ pub async fn ws_handler_control(
         .verify_client_ownership(&params.web_client_id, &session_token_hash.0)
     {
         log::error!(
-            "Control WebSocket: client does not own web_client_id {}",
+            "控制 WebSocket：客户端不拥有 web_client_id {}",
             params.web_client_id
         );
         return StatusCode::FORBIDDEN.into_response();
@@ -84,7 +84,7 @@ async fn handle_ws_control(socket: WebSocket, params: ControlParams, state: AppS
             .get_client_os_api(&deserialized_msg.web_client_id)
             .cloned()
         else {
-            log::error!("Unknown web_client_id: {}", deserialized_msg.web_client_id);
+            log::error!("未知的 web_client_id：{}", deserialized_msg.web_client_id);
             return;
         };
         let Some(client_msg) = control_payload_to_server_msg(deserialized_msg.payload) else {
@@ -103,7 +103,7 @@ async fn handle_ws_control(socket: WebSocket, params: ControlParams, state: AppS
                     Ok(deserialized_msg) => {
                         if deserialized_msg.web_client_id != web_client_id {
                             log::error!(
-                                "Client attempted to use web_client_id {} that does not belong to their connection",
+                                "客户端试图使用不属于其连接的 web_client_id {}",
                                 deserialized_msg.web_client_id
                             );
                             return;
@@ -111,7 +111,7 @@ async fn handle_ws_control(socket: WebSocket, params: ControlParams, state: AppS
                         send_message_to_server(deserialized_msg);
                     },
                     Err(e) => {
-                        log::error!("Failed to deserialize client msg: {:?}", e);
+                        log::error!("反序列化客户端消息失败：{:?}", e);
                     },
                 }
             },
@@ -156,7 +156,7 @@ async fn handle_ws_terminal(
         .verify_client_ownership(&web_client_id, &session_token_hash.0)
     {
         log::error!(
-            "Terminal WebSocket: client does not own web_client_id {}",
+            "终端 WebSocket：客户端不拥有 web_client_id {}",
             web_client_id
         );
         return;
@@ -169,7 +169,7 @@ async fn handle_ws_terminal(
         .get_client_os_api(&web_client_id)
         .cloned()
     else {
-        log::error!("Unknown web_client_id: {}", web_client_id);
+        log::error!("未知的 web_client_id：{}", web_client_id);
         return;
     };
 
@@ -278,7 +278,7 @@ async fn handle_ws_terminal(
                     .get_client_os_api(&web_client_id)
                     .cloned()
                 else {
-                    log::error!("Unknown web_client_id: {}", web_client_id);
+                    log::error!("未知的 web_client_id：{}", web_client_id);
                     continue;
                 };
                 parse_stdin(
@@ -296,7 +296,7 @@ async fn handle_ws_terminal(
                     .get_client_os_api(&web_client_id)
                     .cloned()
                 else {
-                    log::error!("Unknown web_client_id: {}", web_client_id);
+                    log::error!("未知的 web_client_id：{}", web_client_id);
                     continue;
                 };
                 parse_stdin(
@@ -316,7 +316,7 @@ async fn handle_ws_terminal(
             },
             // TODO: 支持 Message::Binary
             _ => {
-                log::error!("Unsupported websocket msg type");
+                log::error!("不支持的 WebSocket 消息类型");
             },
         }
     }
@@ -392,7 +392,7 @@ fn control_payload_to_server_msg(
             fit,
         } => ClientToServerMsg::SetMobileRenderPreferences { single_pane, fit },
         WebClientToWebServerControlMessagePayload::Unknown => {
-            log::warn!("Ignoring unknown control message type from web client");
+            log::warn!("忽略来自 Web 客户端的未知控制消息类型");
             return None;
         },
     };
@@ -431,10 +431,10 @@ mod tests {
             ClientToServerMsg::TerminalPixelDimensions { pixel_dimensions } => {
                 let cell = pixel_dimensions
                     .character_cell_size
-                    .expect("cell size missing");
+                    .expect("缺少单元格尺寸");
                 let area = pixel_dimensions
                     .text_area_size
-                    .expect("text area size missing");
+                    .expect("缺少文本区域尺寸");
                 assert_eq!(cell.width, 9);
                 assert_eq!(cell.height, 18);
                 assert_eq!(area.width, 720);

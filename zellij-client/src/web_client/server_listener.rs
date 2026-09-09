@@ -68,13 +68,13 @@ pub fn zellij_server_listener(
                             .and_then(|r| r.name.clone())
                             .or_else(generate_unique_session_name)
                         else {
-                            log::error!("Failed to generate unique session name, bailing.");
+                            log::error!("无法生成唯一的会话名称，正在放弃。");
                             client_connection_bus.close_connection();
                             return;
                         };
                         let mut sock_dir = zellij_utils::consts::ZELLIJ_SOCK_DIR.clone();
                         if let Err(e) = zellij_utils::sessions::validate_session_name(&session_name) {
-                            log::error!("Invalid session name: {}", e);
+                            log::error!("无效的会话名称：{}", e);
                             client_connection_bus.close_connection();
                             return;
                         }
@@ -117,7 +117,7 @@ pub fn zellij_server_listener(
                     let session_exists = session_manager.session_exists(&session_name).unwrap_or(false);
 
                     if is_read_only && !session_exists {
-                        log::error!("Read only tokens cannot create new sessions.");
+                        log::error!("只读令牌无法创建新会话。");
                         client_connection_bus.close_connection();
                         return;
                     }
@@ -268,7 +268,7 @@ pub fn zellij_server_listener(
                             },
                             None => {
                                 if unknown_message_count >= 1000 {
-                                    log::error!("Error: Received more than 1000 consecutive unknown server messages, disconnecting.");
+                                    log::error!("错误：连续收到超过 1000 条未知的服务器消息，正在断开连接。");
                                     // 这可能意味着我们处于无限循环中，让我们断开连接
                                     // 以免导致 100% CPU
                                     break;
@@ -326,7 +326,7 @@ fn reload_config_from_disk(
             *config_options_without_layout = reloaded_config_options_without_layout;
         },
         Err(e) => {
-            log::error!("Failed to reload config: {}", e);
+            log::error!("重新加载配置失败：{}", e);
         },
     };
 }

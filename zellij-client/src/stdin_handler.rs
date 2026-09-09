@@ -243,7 +243,7 @@ pub(crate) fn stdin_loop(
                         if e == "Session ended" {
                             log::debug!("Switched sessions, signing this thread off...");
                         } else {
-                            log::error!("Failed to read from STDIN: {}", e);
+                            log::error!("从 STDIN 读取失败：{}", e);
                         }
                         let _ = send_input_instructions.send(InputInstruction::Exit);
                         break;
