@@ -171,7 +171,7 @@ fn host_run_plugin_command(mut caller: Caller<'_, PluginEnv>) {
             let command: ProtobufPluginCommand = ProtobufPluginCommand::decode(bytes.as_slice())?;
             let command: PluginCommand = command
                 .try_into()
-                .map_err(|e| anyhow!("failed to convert serialized command: {}", e))?;
+                .map_err(|e| anyhow!("转换序列化命令失败：{}", e))?;
             match check_command_permission(&env, &command) {
                 (PermissionStatus::Granted, _) => match command {
                     PluginCommand::Subscribe(event_list) => subscribe(env, event_list)?,
@@ -791,7 +791,7 @@ fn host_run_plugin_command(mut caller: Caller<'_, PluginEnv>) {
                 },
                 (PermissionStatus::Denied, permission) => {
                     log::error!(
-                        "Plugin '{}' permission '{}' denied - Command '{:?}' denied",
+                        "插件 '{}' 的权限 '{}' 被拒绝——命令 '{:?}' 被拒绝",
                         env.name(),
                         permission
                             .map(|p| p.to_string())
@@ -938,7 +938,7 @@ fn get_plugin_ids(env: &PluginEnv) {
         client_id: env.client_id,
     };
     ProtobufPluginIds::try_from(ids)
-        .map_err(|e| anyhow!("Failed to serialized plugin ids: {}", e))
+        .map_err(|e| anyhow!("序列化插件 ID 失败：{}", e))
         .and_then(|serialized| {
             wasi_write_object(env, &serialized.encode_to_vec())?;
             Ok(())
@@ -1108,7 +1108,7 @@ fn open_plugin_pane_in_new_tab(
     let run_plugin_or_alias = match run_plugin_or_alias {
         Ok(r) => r,
         Err(e) => {
-            log::error!("Failed to parse plugin url '{}': {}", plugin_url, e);
+            log::error!("解析插件 URL '{}' 失败：{}", plugin_url, e);
             let response =
                 ProtobufOpenPaneInNewTabResponse::from(OpenPaneInNewTabResponse::default());
             wasi_write_object(env, &response.encode_to_vec())
@@ -1163,7 +1163,7 @@ fn open_plugin_pane_floating(
     let run_plugin_or_alias = match run_plugin_or_alias {
         Ok(r) => r,
         Err(e) => {
-            log::error!("Failed to parse plugin url '{}': {}", plugin_url, e);
+            log::error!("解析插件 URL '{}' 失败：{}", plugin_url, e);
             let response = ProtobufOpenPluginPaneFloatingResponse::from(
                 OpenPluginPaneFloatingResponse::default(),
             );
@@ -1268,7 +1268,7 @@ fn get_focused_pane_info(env: &PluginEnv) {
         Ok(response) => response,
         Err(RecvTimeoutError::Timeout) => {
             log::error!(
-                "GetFocusedPaneInfo timed out for plugin {} for client {:?}",
+                "GetFocusedPaneInfo 等待插件 {} 对客户端 {:?} 的响应超时",
                 env.plugin_id,
                 env.client_id
             );
@@ -1276,7 +1276,7 @@ fn get_focused_pane_info(env: &PluginEnv) {
         },
         Err(RecvTimeoutError::Disconnected) => {
             log::error!(
-                "GetFocusedPaneInfo channel disconnected for plugin {}",
+                "GetFocusedPaneInfo 通道已为插件 {} 断开",
                 env.plugin_id
             );
             GetFocusedPaneInfoResponse::Err(
@@ -1343,7 +1343,7 @@ fn parse_layout(env: &PluginEnv, layout_string: String) {
                     result: Some(parse_layout_response::Result::Metadata(protobuf_metadata)),
                 },
                 Err(e) => {
-                    log::error!("Failed to convert metadata to protobuf: {}", e);
+                    log::error!("将元数据转换为 protobuf 失败：{}", e);
                     // 回退 to SyntaxError if conversion fails
                     let error = LayoutParsingError::SyntaxError;
                     let protobuf_error =
@@ -1378,7 +1378,7 @@ fn parse_layout(env: &PluginEnv, layout_string: String) {
             // 转换 LayoutParsingError to protobuf
             // TryFrom is implemented in zellij-utils/src/plugin_api/事件.rs:1293-1314
             let protobuf_error = error.try_into().unwrap_or_else(|e| {
-                log::error!("Failed to convert error to protobuf: {}", e);
+                log::error!("将错误转换为 protobuf 失败：{}", e);
                 ProtobufLayoutParsingError {
                     error_type: Some(ProtobufLayoutParsingErrorType::SyntaxError(
                         ProtobufSyntaxError {},
@@ -1472,7 +1472,7 @@ fn run_action(env: &PluginEnv, mut action: Action, context: BTreeMap<String, Str
                 result.and_then(|r| r.affected_pane_id)
             },
             Err(e) => {
-                log::error!("failed to run action in plugin {}: {:?}", plugin_name, e);
+                log::error!("在插件 {} 中运行操作失败：{:?}", plugin_name, e);
                 None
             },
         };
@@ -1488,7 +1488,7 @@ fn run_action(env: &PluginEnv, mut action: Action, context: BTreeMap<String, Str
 
         // Send the ActionComplete 事件 back to the 插件
         if let Err(e) = senders.send_to_plugin(PluginInstruction::Update(updates)) {
-            log::error!("Failed to send ActionComplete event: {:?}", e);
+            log::error!("发送 ActionComplete 事件失败：{:?}", e);
         }
     });
 }
@@ -2492,7 +2492,7 @@ fn set_timeout(env: &PluginEnv, secs: f64) {
         let elapsed_time = Instant::now().duration_since(start_time).as_secs_f64();
 
         send_plugin_instructions
-            .ok_or(anyhow!("found no sender to send plugin instruction to"))
+            .ok_or(anyhow!("找不到可发送插件指令的发送者"))
             .and_then(|sender| {
                 sender
                     .send(PluginInstruction::Update(vec![(
@@ -2513,7 +2513,7 @@ fn set_timeout(env: &PluginEnv, secs: f64) {
 }
 
 fn exec_cmd(env: &PluginEnv, mut command_line: Vec<String>) {
-    log::warn!("The ExecCmd plugin command is deprecated and will be removed in a future version. Please use RunCmd instead (it has all the things and can even show you STDOUT/STDERR and an exit code!)");
+    log::warn!("ExecCmd 插件命令已弃用，将在未来版本中移除。请改用 RunCmd (it has all the things and can even show you STDOUT/STDERR and an exit code!)");
     let err_context = || {
         format!(
             "failed to execute command on host for plugin '{}'",
@@ -2524,7 +2524,7 @@ fn exec_cmd(env: &PluginEnv, mut command_line: Vec<String>) {
 
     // Bail out if we're forbidden to run 命令
     if !env.plugin._allow_exec_host_cmd {
-        warn!("This plugin isn't allow to run command in host side, skip running this command: '{cmd} {args}'.",
+        warn!("此插件不允许在主机侧运行命令，跳过运行该命令：'{cmd} {args}'。",
         	cmd = command, args = command_line.join(" "));
         return;
     }
@@ -2545,7 +2545,7 @@ fn run_command(
     context: BTreeMap<String, String>,
 ) {
     if command_line.is_empty() {
-        log::error!("Command cannot be empty");
+        log::error!("命令不能为空");
     } else {
         let command = command_line.remove(0);
         let cwd = translate_plugin_path(env, cwd);
@@ -2587,7 +2587,7 @@ fn web_request(
 fn post_message_to(env: &PluginEnv, plugin_message: PluginMessage) -> Result<()> {
     let worker_name = plugin_message
         .worker_name
-        .ok_or(anyhow!("Worker name not specified in message to worker"))?;
+        .ok_or(anyhow!("发给工作线程的消息中未指定工作线程名称"))?;
     env.senders
         .send_to_plugin(PluginInstruction::PostMessagesToPluginWorker(
             env.plugin_id,
@@ -2600,7 +2600,7 @@ fn post_message_to(env: &PluginEnv, plugin_message: PluginMessage) -> Result<()>
 fn post_message_to_plugin(env: &PluginEnv, plugin_message: PluginMessage) -> Result<()> {
     if let Some(worker_name) = plugin_message.worker_name {
         return Err(anyhow!(
-            "Worker name (\"{}\") should not be specified in message to plugin",
+            "发给插件的消息中不应指定工作线程名称（\"{}\"）",
             worker_name
         ));
     }
@@ -2726,7 +2726,7 @@ fn new_tabs_with_layout(env: &PluginEnv, raw_layout: &str) -> Result<()> {
         None,
         None,
     )
-    .map_err(|e| anyhow!("Failed to parse layout: {:?}", e))?;
+    .map_err(|e| anyhow!("解析布局失败：{:?}", e))?;
     apply_layout(env, layout);
     Ok(())
 }
@@ -2734,7 +2734,7 @@ fn new_tabs_with_layout(env: &PluginEnv, raw_layout: &str) -> Result<()> {
 fn new_tabs_with_layout_info(env: &PluginEnv, layout_info: LayoutInfo) -> Result<()> {
     // TODO: cwd
     let layout = Layout::from_layout_info(&env.layout_dir, layout_info)
-        .map_err(|e| anyhow!("Failed to parse layout: {:?}", e))?;
+        .map_err(|e| anyhow!("解析布局失败：{:?}", e))?;
     apply_layout(env, layout);
     Ok(())
 }
@@ -2962,7 +2962,7 @@ fn switch_session(
         // we 验证 the stringified 布局 here to fail early rather than when 解析 it at the
         // 会话-switching phase
         if let Err(e) = Layout::from_kdl(&stringified_layout, None, None, None) {
-            return Err(anyhow!("Failed to deserialize layout: {}", e));
+            return Err(anyhow!("反序列化布局失败：{}", e));
         }
     }
 
@@ -2973,7 +2973,7 @@ fn switch_session(
         .map(|s| s.contains('/'))
         .unwrap_or(false)
     {
-        log::error!("Session names cannot contain \'/\'");
+        log::error!("会话名称不能包含 \'/\'");
     } else {
         let client_id = env.client_id;
         let tab_position = tab_position.map(|p| p + 1); // ¯\_()_/¯
@@ -3036,7 +3036,7 @@ fn delete_all_dead_sessions() -> Result<()> {
                 .collect()
         },
         Err(e) => {
-            log::error!("Failed to read session info cache dir: {:?}", e);
+            log::error!("读取会话信息缓存目录失败：{:?}", e);
             vec![]
         },
     };
@@ -3289,7 +3289,7 @@ fn start_or_reload_plugin(env: &PluginEnv, url: &str) -> Result<()> {
     let error_msg = || format!("failed to start or reload plugin in plugin {}", env.name());
     let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
     let run_plugin_or_alias = RunPluginOrAlias::from_url(url, &None, None, Some(cwd))
-        .map_err(|e| anyhow!("Failed to parse plugin location: {}", e))?;
+        .map_err(|e| anyhow!("解析插件位置失败：{}", e))?;
     let action = Action::StartOrReloadPlugin {
         plugin: run_plugin_or_alias,
     };
@@ -3382,7 +3382,7 @@ fn rename_tab(env: &PluginEnv, tab_index: u32, new_name: &str) {
 fn rename_session(env: &PluginEnv, new_session_name: String) {
     let error_msg = || format!("failed to rename session in plugin {}", env.name());
     if new_session_name.contains('/') {
-        log::error!("Session names cannot contain \'/\'");
+        log::error!("会话名称不能包含 \'/\'");
     } else {
         let action = Action::RenameSession {
             name: new_session_name,
@@ -3423,7 +3423,7 @@ fn kill_sessions(session_names: Vec<String>) {
                 }
             },
             Err(e) => {
-                log::error!("Failed to kill session {}: {:?}", session_name, e);
+                log::error!("终止会话 {} 失败：{:?}", session_name, e);
             },
         };
     }
@@ -3585,7 +3585,7 @@ fn dump_session_layout(env: &PluginEnv, tab_index: Option<usize>) {
         .and_then(|metadata| match metadata.try_into() {
             Ok(pb) => Some(pb),
             Err(e) => {
-                log::error!("Failed to convert LayoutMetadata to protobuf: {}", e);
+                log::error!("将 LayoutMetadata 转换为 protobuf 失败：{}", e);
                 None
             },
         });
@@ -3793,7 +3793,7 @@ fn get_pane_info(env: &PluginEnv, pane_id: zellij_utils::data::PaneId) {
                 Ok(protobuf_pane_info) => Some(protobuf_pane_info),
                 Err(e) => {
                     log::error!(
-                        "Failed to convert PaneInfo to protobuf for pane {:?}: {}",
+                        "将窗格 {:?} 的 PaneInfo 转换为 protobuf 失败：{}",
                         pane_id,
                         e
                     );
@@ -3804,7 +3804,7 @@ fn get_pane_info(env: &PluginEnv, pane_id: zellij_utils::data::PaneId) {
         Ok(None) => None, // 窗格 not 找到的
         Err(RecvTimeoutError::Timeout) => {
             log::error!(
-                "GetPaneInfo timed out for pane {:?} from plugin {}",
+                "GetPaneInfo 等待来自插件 {} 的窗格 {:?} 响应超时",
                 pane_id,
                 env.plugin_id
             );
@@ -3812,7 +3812,7 @@ fn get_pane_info(env: &PluginEnv, pane_id: zellij_utils::data::PaneId) {
         },
         Err(RecvTimeoutError::Disconnected) => {
             log::error!(
-                "GetPaneInfo channel disconnected for plugin {}",
+                "GetPaneInfo 通道已为插件 {} 断开",
                 env.plugin_id
             );
             None
@@ -3855,7 +3855,7 @@ fn get_tab_info(env: &PluginEnv, tab_id: usize) {
                 Ok(protobuf_tab_info) => Some(protobuf_tab_info),
                 Err(e) => {
                     log::error!(
-                        "Failed to convert TabInfo to protobuf for tab {}: {}",
+                        "将标签页 {} 的 TabInfo 转换为 protobuf 失败：{}",
                         tab_id,
                         e
                     );
@@ -3866,7 +3866,7 @@ fn get_tab_info(env: &PluginEnv, tab_id: usize) {
         Ok(None) => None, // 标签页 not 找到的
         Err(RecvTimeoutError::Timeout) => {
             log::error!(
-                "GetTabInfo timed out for tab {} from plugin {}",
+                "GetTabInfo 等待来自插件 {} 的标签页 {} 响应超时",
                 tab_id,
                 env.plugin_id
             );
@@ -3874,7 +3874,7 @@ fn get_tab_info(env: &PluginEnv, tab_id: usize) {
         },
         Err(RecvTimeoutError::Disconnected) => {
             log::error!(
-                "GetTabInfo channel disconnected for plugin {}",
+                "GetTabInfo 通道已为插件 {} 断开",
                 env.plugin_id
             );
             None
@@ -3954,7 +3954,7 @@ fn set_pane_color(env: &PluginEnv, pane_id: PaneId, fg: Option<String>, bg: Opti
 fn scan_host_folder(env: &PluginEnv, folder_to_scan: PathBuf) {
     if !folder_to_scan.starts_with("/host") {
         log::error!(
-            "Can only scan files in the /host filesystem, found: {}",
+            "只能扫描 /host 文件系统中的文件，实际为：{}",
             folder_to_scan.display()
         );
         return;
@@ -3968,7 +3968,7 @@ fn scan_host_folder(env: &PluginEnv, folder_to_scan: PathBuf) {
         Ok(folder_to_scan) => {
             if !folder_to_scan.starts_with(&plugin_host_folder) {
                 log::error!(
-                    "Can only scan files in the plugin filesystem: {}, found: {}",
+                    "只能扫描插件文件系统中的文件：{}，实际为：{}",
                     plugin_host_folder.display(),
                     folder_to_scan.display()
                 );
@@ -3995,7 +3995,7 @@ fn scan_host_folder(env: &PluginEnv, folder_to_scan: PathBuf) {
                                 }
                             }
                             let _ = send_plugin_instructions
-                                .ok_or(anyhow!("found no sender to send plugin instruction to"))
+                                .ok_or(anyhow!("找不到可发送插件指令的发送者"))
                                 .map(|sender| {
                                     let _ = sender.send(PluginInstruction::Update(vec![(
                                         update_target,
@@ -4008,13 +4008,13 @@ fn scan_host_folder(env: &PluginEnv, folder_to_scan: PathBuf) {
                     });
                 },
                 Err(e) => {
-                    log::error!("Failed to read folder {}: {e}", folder_to_scan.display());
+                    log::error!("读取文件夹 {} 失败：{e}", folder_to_scan.display());
                 },
             }
         },
         Err(e) => {
             log::error!(
-                "Failed to canonicalize path {folder_to_scan:?} when scanning folder: {:?}",
+                "扫描文件夹时将路径 {folder_to_scan:?} 规范化失败：{:?}",
                 e
             );
         },
@@ -4023,7 +4023,7 @@ fn scan_host_folder(env: &PluginEnv, folder_to_scan: PathBuf) {
 
 #[cfg(not(windows))]
 fn list_windows_volumes(_env: &PluginEnv) {
-    log::error!("ListWindowsVolumes is only supported on Windows");
+    log::error!("ListWindowsVolumes 仅支持在 Windows 上使用");
 }
 
 fn set_soft_keyboard(env: &PluginEnv, on: bool) {
@@ -4050,7 +4050,7 @@ fn list_windows_volumes(env: &PluginEnv) {
         let mut entries = enumerate_drives();
         entries.extend(enumerate_wsl_distributions());
         let _ = send_plugin_instructions
-            .ok_or(anyhow!("found no sender to send plugin instruction to"))
+            .ok_or(anyhow!("找不到可发送插件指令的发送者"))
             .map(|sender| {
                 let _ = sender.send(PluginInstruction::Update(vec![(
                     update_target,
@@ -4163,7 +4163,7 @@ fn get_pane_scrollback(env: &PluginEnv, pane_id: PaneId, get_full_scrollback: bo
         Ok(response) => response,
         Err(RecvTimeoutError::Timeout) => {
             log::error!(
-                "GetPaneScrollback timed out after 5s for plugin {} requesting pane {:?}",
+                "GetPaneScrollback 等待插件 {} 请求的窗格 {:?} 超时（5 秒）",
                 env.plugin_id,
                 pane_id
             );
@@ -4174,7 +4174,7 @@ fn get_pane_scrollback(env: &PluginEnv, pane_id: PaneId, get_full_scrollback: bo
         },
         Err(RecvTimeoutError::Disconnected) => {
             log::error!(
-                "GetPaneScrollback channel disconnected for plugin {} requesting pane {:?}",
+                "GetPaneScrollback 通道已为请求窗格 {:?} 的插件 {} 断开",
                 env.plugin_id,
                 pane_id
             );
@@ -4187,7 +4187,7 @@ fn get_pane_scrollback(env: &PluginEnv, pane_id: PaneId, get_full_scrollback: bo
 
     // 转换 to protobuf and 写入 back to 插件
     ProtobufPaneScrollbackResponse::try_from(response)
-        .map_err(|e| anyhow!("Failed to serialize pane scrollback response: {}", e))
+        .map_err(|e| anyhow!("序列化窗格回滚缓冲区响应失败：{}", e))
         .and_then(|serialized| {
             wasi_write_object(env, &serialized.encode_to_vec())?;
             Ok(())
@@ -4282,7 +4282,7 @@ fn get_pane_pid(env: &PluginEnv, pane_id: PaneId) {
         Ok(response) => response,
         Err(RecvTimeoutError::Timeout) => {
             log::error!(
-                "GetPanePid timed out after 5s for plugin {} requesting pane {:?}",
+                "GetPanePid 等待插件 {} 请求的窗格 {:?} 超时（5 秒）",
                 env.plugin_id,
                 pane_id
             );
@@ -4290,7 +4290,7 @@ fn get_pane_pid(env: &PluginEnv, pane_id: PaneId) {
         },
         Err(RecvTimeoutError::Disconnected) => {
             log::error!(
-                "GetPanePid channel disconnected for plugin {} requesting pane {:?}",
+                "GetPanePid 通道已为请求窗格 {:?} 的插件 {} 断开",
                 env.plugin_id,
                 pane_id
             );
@@ -4381,7 +4381,7 @@ fn await_pane_running_command_response(
         Ok(response) => response,
         Err(RecvTimeoutError::Timeout) => {
             log::error!(
-                "GetPaneRunningCommand timed out for plugin {} requesting pane {:?}",
+                "GetPaneRunningCommand 等待插件 {} 请求的窗格 {:?} 响应超时",
                 env.plugin_id,
                 pane_id
             );
@@ -4392,7 +4392,7 @@ fn await_pane_running_command_response(
         },
         Err(RecvTimeoutError::Disconnected) => {
             log::error!(
-                "GetPaneRunningCommand channel disconnected for plugin {} requesting pane {:?}",
+                "GetPaneRunningCommand 通道已为请求窗格 {:?} 的插件 {} 断开",
                 env.plugin_id,
                 pane_id
             );
@@ -4449,7 +4449,7 @@ fn await_pane_cwd_response(
         Ok(response) => response,
         Err(RecvTimeoutError::Timeout) => {
             log::error!(
-                "GetPaneCwd timed out for plugin {} requesting pane {:?}",
+                "GetPaneCwd 等待插件 {} 请求的窗格 {:?} 响应超时",
                 env.plugin_id,
                 pane_id
             );
@@ -4457,7 +4457,7 @@ fn await_pane_cwd_response(
         },
         Err(RecvTimeoutError::Disconnected) => {
             log::error!(
-                "GetPaneCwd channel disconnected for plugin {} requesting pane {:?}",
+                "GetPaneCwd 通道已为请求窗格 {:?} 的插件 {} 断开",
                 env.plugin_id,
                 pane_id
             );
@@ -5017,7 +5017,7 @@ fn load_new_plugin(
                     ));
             },
             Err(e) => {
-                log::error!("Failed to load new plugin: {:?}", e);
+                log::error!("加载新插件失败：{:?}", e);
             },
         }
     } else {
@@ -5051,7 +5051,7 @@ fn load_new_plugin(
                 ));
             },
             Err(e) => {
-                log::error!("Failed to load new plugin: {:?}", e);
+                log::error!("加载新插件失败：{:?}", e);
             },
         }
     }
@@ -5067,7 +5067,7 @@ fn stop_web_server(_env: &PluginEnv) {
     #[cfg(feature = "web_server_capability")]
     let _ = shutdown_all_webserver_instances();
     #[cfg(not(feature = "web_server_capability"))]
-    log::error!("This instance of Zellij was compiled without web server capabilities");
+    log::error!("此 Zellij 实例编译时未包含 Web 服务器能力");
 }
 
 fn query_web_server_status(env: &PluginEnv) {
@@ -5168,7 +5168,7 @@ fn generate_web_login_token(env: &PluginEnv, token_label: Option<String>, read_o
 
 #[cfg(not(feature = "web_server_capability"))]
 fn generate_web_login_token(env: &PluginEnv, _token_label: Option<String>, _read_only: bool) {
-    log::error!("This version of Zellij was compiled without the web server capabilities!");
+    log::error!("此版本的 Zellij 编译时未包含 Web 服务器能力！");
     let empty_vec: Vec<&str> = vec![];
     let _ = wasi_write_object(env, &empty_vec);
 }
@@ -5194,7 +5194,7 @@ fn revoke_web_login_token(env: &PluginEnv, token_label: String) {
 
 #[cfg(not(feature = "web_server_capability"))]
 fn revoke_web_login_token(env: &PluginEnv, _token_label: String) {
-    log::error!("This version of Zellij was compiled without the web server capabilities!");
+    log::error!("此版本的 Zellij 编译时未包含 Web 服务器能力！");
     let empty_vec: Vec<&str> = vec![];
     let _ = wasi_write_object(env, &empty_vec);
 }
@@ -5216,7 +5216,7 @@ fn revoke_all_web_login_tokens(env: &PluginEnv) {
 
 #[cfg(not(feature = "web_server_capability"))]
 fn revoke_all_web_login_tokens(env: &PluginEnv) {
-    log::error!("This version of Zellij was compiled without the web server capabilities!");
+    log::error!("此版本的 Zellij 编译时未包含 Web 服务器能力！");
     let empty_vec: Vec<&str> = vec![];
     let _ = wasi_write_object(env, &empty_vec);
 }
@@ -5238,7 +5238,7 @@ fn rename_web_login_token(env: &PluginEnv, old_name: String, new_name: String) {
 
 #[cfg(not(feature = "web_server_capability"))]
 fn rename_web_login_token(env: &PluginEnv, _old_name: String, _new_name: String) {
-    log::error!("This version of Zellij was compiled without the web server capabilities!");
+    log::error!("此版本的 Zellij 编译时未包含 Web 服务器能力！");
     let empty_vec: Vec<&str> = vec![];
     let _ = wasi_write_object(env, &empty_vec);
 }
@@ -5264,7 +5264,7 @@ fn list_web_login_tokens(env: &PluginEnv) {
 
 #[cfg(not(feature = "web_server_capability"))]
 fn list_web_login_tokens(env: &PluginEnv) {
-    log::error!("This version of Zellij was compiled without the web server capabilities!");
+    log::error!("此版本的 Zellij 编译时未包含 Web 服务器能力！");
     let empty_vec: Vec<&str> = vec![];
     let _ = wasi_write_object(env, &empty_vec);
 }
@@ -5329,7 +5329,7 @@ fn override_layout(
     context: BTreeMap<String, String>,
 ) -> Result<()> {
     let layout = Layout::from_layout_info(&env.layout_dir, layout_info)
-        .map_err(|e| anyhow!("Failed to parse layout: {:?}", e))?;
+        .map_err(|e| anyhow!("解析布局失败：{:?}", e))?;
 
     // 转换 all 标签页 to Vec<TabLayoutInfo>
     let tabs: Vec<TabLayoutInfo> = layout

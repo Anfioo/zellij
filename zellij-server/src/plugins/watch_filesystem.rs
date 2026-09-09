@@ -134,7 +134,7 @@ pub fn watch_filesystem(
             },
             Err(errors) => errors
                 .iter()
-                .for_each(|error| log::error!("watch error: {error:?}")),
+                .for_each(|error| log::error!("监视错误：{error:?}")),
         },
     )?;
 

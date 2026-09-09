@@ -194,7 +194,7 @@ fn apply_pipe_message_to_plugin_inner(
     let protobuf_pipe_message: ProtobufPipeMessage = pipe_message
         .clone()
         .try_into()
-        .map_err(|e| anyhow!("Failed to convert to protobuf: {:?}", e))?;
+        .map_err(|e| anyhow!("转换为 protobuf 失败：{:?}", e))?;
     match instance.get_typed_func::<(), i32>(&mut running_plugin.store, "pipe") {
         Ok(pipe) => {
             wasi_write_object(

@@ -49,13 +49,13 @@ fn create_plugin_fs_entries(plugin_own_data_dir: &PathBuf, plugin_own_cache_dir:
     // 创建 filesystem entries mounted into WASM.
     // We 创建 them here to get expressive 错误 消息 in case they fail.
     if let Err(e) = fs::create_dir_all(&plugin_own_data_dir) {
-        log::error!("Failed to create plugin data dir: {}", e);
+        log::error!("创建插件数据目录失败：{}", e);
     };
     if let Err(e) = fs::create_dir_all(&plugin_own_cache_dir) {
-        log::error!("Failed to create plugin cache dir: {}", e);
+        log::error!("创建插件缓存目录失败：{}", e);
     }
     if let Err(e) = fs::create_dir_all(ZELLIJ_TMP_DIR.as_path()) {
-        log::error!("Failed to create plugin tmp dir: {}", e);
+        log::error!("创建插件临时目录失败：{}", e);
     }
 }
 
@@ -162,7 +162,7 @@ impl<'a> PluginLoader<'a> {
             .unwrap()
             .remove(&self.plugin_config.path) // TODO: do we still bring it back later?
             // maybe we can forgo this dance?
-            .ok_or(anyhow!("Plugin is not stored in memory"))?;
+            .ok_or(anyhow!("插件未存储在内存中"))?;
         Ok(module)
     }
     fn load_plugin_instance(
@@ -223,7 +223,7 @@ impl<'a> PluginLoader<'a> {
             .initial_userspace_configuration
             .clone()
             .try_into()
-            .map_err(|e| anyhow!("Failed to serialize user configuration: {:?}", e))?;
+            .map_err(|e| anyhow!("序列化用户配置失败：{:?}", e))?;
         let protobuf_bytes = protobuf_plugin_configuration.encode_to_vec();
         wasi_write_object(plugin.lock().unwrap().store.data(), &protobuf_bytes)
             .with_context(err_context)?;
@@ -454,7 +454,7 @@ impl<'a> PluginLoader<'a> {
                     builder.preopened_dir(dir, guest_path)?;
                 },
                 Err(e) => {
-                    log::warn!("Failed to mount directory {:?}: {}", host_path, e);
+                    log::warn!("挂载目录 {:?} 失败：{}", host_path, e);
                 },
             }
         }

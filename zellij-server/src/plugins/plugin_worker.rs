@@ -57,14 +57,14 @@ pub fn plugin_worker(mut worker: RunningWorker) -> UnboundedSender<MessageToWork
                 match receiver.recv().await {
                     Some(MessageToWorker::Message(message, payload)) => {
                         if let Err(e) = worker.send_message(message, payload) {
-                            log::error!("Failed to send message to worker: {:?}", e);
+                            log::error!("向工作线程发送消息失败：{:?}", e);
                         }
                     },
                     Some(MessageToWorker::Exit) => {
                         break;
                     },
                     None => {
-                        log::error!("Failed to receive worker message on channel");
+                        log::error!("在通道上接收工作线程消息失败");
                         break;
                     },
                 }

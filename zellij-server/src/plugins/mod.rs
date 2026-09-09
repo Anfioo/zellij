@@ -345,7 +345,7 @@ pub(crate) fn plugin_thread_main(
     }
 
     loop {
-        let (event, mut err_ctx) = bus.recv().expect("failed to receive event on channel");
+        let (event, mut err_ctx) = bus.recv().expect("在通道上接收事件失败");
         err_ctx.add_call(ContextType::Plugin((&event).into()));
         match event {
             PluginInstruction::Load(
@@ -407,7 +407,7 @@ pub(crate) fn plugin_thread_main(
                         )));
                     },
                     Err(e) => {
-                        log::error!("Failed to load plugin: {e}");
+                        log::error!("加载插件失败：{e}");
                     },
                 }
             },
@@ -446,7 +446,7 @@ pub(crate) fn plugin_thread_main(
                             Err(err) => match err.downcast_ref::<ZellijError>() {
                                 Some(ZellijError::PluginDoesNotExist) => {
                                     log::warn!(
-                                        "Plugin {} not found, starting it instead",
+                                        "未找到插件 {}，改为启动它",
                                         run_plugin.location
                                     );
                                     // we intentionally do not provide the client_id here because it belongs to
@@ -483,7 +483,7 @@ pub(crate) fn plugin_thread_main(
                                             ));
                                         },
                                         Err(e) => {
-                                            log::error!("Failed to load plugin: {e}");
+                                            log::error!("加载插件失败：{e}");
                                         },
                                     };
                                 },
@@ -494,7 +494,7 @@ pub(crate) fn plugin_thread_main(
                         }
                     },
                     None => {
-                        log::error!("Failed to find plugin info for: {:?}", run_plugin_or_alias);
+                        log::error!("找不到 {:?} 的插件信息", run_plugin_or_alias);
                     },
                 }
             },
@@ -544,7 +544,7 @@ pub(crate) fn plugin_thread_main(
                                     run_plugin_or_alias.clone(),
                                 )) {
                                     log::warn!(
-                                        "More initial_panes provided than empty slots available"
+                                        "提供的初始窗格数超过可用空位"
                                     );
                                     break;
                                 }
@@ -606,7 +606,7 @@ pub(crate) fn plugin_thread_main(
                                     .push(plugin_id);
                             },
                             Err(e) => {
-                                log::error!("Failed to load plugin: {}", e);
+                                log::error!("加载插件失败：{}", e);
                             },
                         }
                     }
@@ -698,7 +698,7 @@ pub(crate) fn plugin_thread_main(
                                         .push(plugin_id);
                                 },
                                 Err(e) => {
-                                    log::error!("Failed to load plugin: {}", e);
+                                    log::error!("加载插件失败：{}", e);
                                 },
                             }
                         }
@@ -1118,7 +1118,7 @@ pub(crate) fn plugin_thread_main(
                         ));
                     },
                     (Some(plugin_url), Some(destination_plugin_id)) => {
-                        log::warn!("Message contains both a destination plugin url: {plugin_url} and a destination plugin id: {destination_plugin_id}, ignoring the url and prioritizing the id");
+                        log::warn!("消息同时包含目标插件 URL：{plugin_url} 和目标插件 ID：{destination_plugin_id}, ignoring the url and prioritizing the id");
                         let is_private = true;
                         pipe_messages.push((
                             Some(destination_plugin_id),
@@ -1287,7 +1287,7 @@ pub(crate) fn plugin_thread_main(
     runtime.block_on(async {
         let result = tokio::time::timeout(EXIT_TIMEOUT, shutdown_receive.recv()).await;
         if let Err(err) = result {
-            log::error!("timeout waiting for plugin tasks to finish: {}", err);
+            log::error!("等待插件任务完成超时：{}", err);
         }
     });
 
@@ -1324,7 +1324,7 @@ fn populate_session_layout_metadata(
             Some(plugin_cmd) => {
                 plugin_ids_to_cmds.insert(plugin_id, plugin_cmd.clone());
             },
-            None => log::error!("Plugin with id: {plugin_id} not found"),
+            None => log::error!("未找到 ID 为 {plugin_id} 的插件"),
         }
     }
     session_layout_metadata.update_plugin_cmds(plugin_ids_to_cmds);
@@ -1404,13 +1404,13 @@ fn pipe_to_specific_plugins(
         Err(e) => match cli_client_id {
             Some(cli_client_id) => {
                 let _ = bus.senders.send_to_server(ServerInstruction::LogError(
-                    vec![format!("Failed to parse plugin url: {}", e)],
+                    vec![format!("解析插件 URL 失败：{}", e)],
                     cli_client_id,
                     None,
                 ));
             },
             None => {
-                log::error!("Failed to parse plugin url: {}", e);
+                log::error!("解析插件 URL 失败：{}", e);
             },
         },
     }
@@ -1460,7 +1460,7 @@ fn load_background_plugin(
             )));
         },
         Err(e) => {
-            log::error!("Failed to load plugin: {e}");
+            log::error!("加载插件失败：{e}");
         },
     }
 }

@@ -265,7 +265,7 @@ impl PluginMap {
                 Some(plugin_cmd) => {
                     plugin_ids_to_cmds.insert(plugin_id, plugin_cmd.clone());
                 },
-                None => log::error!("Plugin with id: {plugin_id} not found"),
+                None => log::error!("未找到 ID 为 {plugin_id} 的插件"),
             }
         }
         plugin_ids_to_cmds

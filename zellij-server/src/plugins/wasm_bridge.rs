@@ -546,7 +546,7 @@ impl WasmBridge {
                         let cache_dir = rp.store.data().plugin_own_data_dir.clone();
                         drop(rp); // 释放 锁 before filesystem operation
                         if let Err(e) = std::fs::remove_dir_all(&cache_dir) {
-                            log::error!("Failed to remove cache dir for plugin: {:?}", e);
+                            log::error!("删除插件 {:?} 的缓存目录失败", e);
                         }
                     } else {
                         let cache_dir = running_plugin
@@ -557,7 +557,7 @@ impl WasmBridge {
                             .plugin_own_data_dir
                             .clone();
                         if let Err(e) = std::fs::remove_dir_all(&cache_dir) {
-                            log::error!("Failed to remove cache dir for plugin: {:?}", e);
+                            log::error!("删除插件 {:?} 的缓存目录失败", e);
                         }
                     }
 
@@ -585,7 +585,7 @@ impl WasmBridge {
     }
     pub fn reload_plugin_with_id(&mut self, plugin_id: u32) -> Result<()> {
         let Some(run_plugin) = self.run_plugin_of_plugin_id(plugin_id).map(|r| r.clone()) else {
-            log::error!("Failed to find plugin with id: {}", plugin_id);
+            log::error!("找不到 ID 为 {} 的插件", plugin_id);
             return Ok(());
         };
 
@@ -602,17 +602,17 @@ impl WasmBridge {
         let plugin_executor = self.plugin_executor.clone();
 
         let Some(first_client_id) = self.get_first_client_id() else {
-            log::error!("No connected clients, cannot reload plugin.");
+            log::error!("没有已连接的客户端，无法重新加载插件。");
             return Ok(());
         };
         let Some(plugin_config) = self.plugin_config_of_plugin_id(plugin_id) else {
-            log::error!("Could not find running plugin with id: {}", plugin_id);
+            log::error!("找不到运行中、ID 为 {} 的插件", plugin_id);
             return Ok(());
         };
         let tab_index = self.tab_index_of_plugin_id(plugin_id);
         let Some(size) = self.size_of_plugin_id(plugin_id) else {
             log::error!(
-                "Could not find size of running plugin with id: {}",
+                "找不到运行中、ID 为 {} 的插件的大小",
                 plugin_id
             );
             return Ok(());
@@ -703,7 +703,7 @@ impl WasmBridge {
             }
             let Some(run_plugin) = self.run_plugin_of_plugin_id(plugin_id).map(|r| r.clone())
             else {
-                log::error!("Failed to find plugin with id: {}", plugin_id);
+                log::error!("找不到 ID 为 {} 的插件", plugin_id);
                 return Ok(());
             };
 
@@ -720,13 +720,13 @@ impl WasmBridge {
             let plugin_executor = self.plugin_executor.clone();
 
             let Some(plugin_config) = self.plugin_config_of_plugin_id(plugin_id) else {
-                log::error!("Could not find running plugin with id: {}", plugin_id);
+                log::error!("找不到运行中、ID 为 {} 的插件", plugin_id);
                 return Ok(());
             };
             let tab_index = self.tab_index_of_plugin_id(plugin_id);
             let Some(size) = self.size_of_plugin_id(plugin_id) else {
                 log::error!(
-                    "Could not find size of running plugin with id: {}",
+                    "找不到运行中、ID 为 {} 的插件的大小",
                     plugin_id
                 );
                 return Ok(());
@@ -777,7 +777,7 @@ impl WasmBridge {
                             });
                         },
                         Err(e) => {
-                            log::error!("Failed to load plugin for new client: {}", e);
+                            log::error!("为新客户端加载插件失败：{}", e);
                         },
                     }
                 },
@@ -1032,7 +1032,7 @@ impl WasmBridge {
                     match new_host_dir.try_exists() {
                         Ok(false) => {
                             log::error!(
-                                "Failed to change folder to {},: folder does not exist",
+                                "切换到文件夹 {} 失败：文件夹不存在",
                                 new_host_dir.display()
                             );
                             let _ = senders.send_to_plugin(PluginInstruction::Update(vec![(
@@ -1047,7 +1047,7 @@ impl WasmBridge {
                         },
                         Err(e) => {
                             log::error!(
-                                "Failed to change folder to {},: {}",
+                                "切换到文件夹 {} 失败：{}",
                                 new_host_dir.display(),
                                 e
                             );
@@ -1096,7 +1096,7 @@ impl WasmBridge {
                                             Some(*client_id),
                                             Event::FailedToChangeHostFolder(Some(e.to_string())),
                                         )]));
-                                    log::error!("Failed to create wasi ctx: {}", e);
+                                    log::error!("创建 WASI 上下文失败：{}", e);
                                 },
                             }
                         }
@@ -1561,7 +1561,7 @@ impl WasmBridge {
                                                 }
                                             },
                                             Err(e) => {
-                                                log::error!("Failed to apply event: {:?}", e);
+                                                log::error!("应用事件失败：{:?}", e);
                                             },
                                         }
                                     },
@@ -1758,12 +1758,12 @@ impl WasmBridge {
             Some(worker) => {
                 for (message, payload) in messages.drain(..) {
                     if let Err(e) = worker.send(MessageToWorker::Message(message, payload)) {
-                        log::error!("Failed to send message to worker: {:?}", e);
+                        log::error!("向工作线程发送消息失败：{:?}", e);
                     }
                 }
             },
             None => {
-                log::warn!("Worker {worker_name} not found, caching messages");
+                log::warn!("未找到工作线程 {worker_name}，正在缓存消息");
                 for (message, payload) in messages.drain(..) {
                     self.cached_worker_messages
                         .entry(plugin_id)
@@ -1779,7 +1779,7 @@ impl WasmBridge {
             self.watcher = match watch_filesystem(self.senders.clone(), &self.zellij_cwd) {
                 Ok(watcher) => Some(watcher),
                 Err(e) => {
-                    log::error!("Failed to watch filesystem: {:?}", e);
+                    log::error!("监视文件系统失败：{:?}", e);
                     None
                 },
             };
@@ -1800,7 +1800,7 @@ impl WasmBridge {
             .lock()
             .unwrap()
             .get_running_plugin(plugin_id, client_id)
-            .ok_or_else(|| anyhow!("Failed to get running plugin"))?;
+            .ok_or_else(|| anyhow!("获取运行中的插件失败"))?;
 
         let mut running_plugin = running_plugin.lock().unwrap();
 
@@ -1890,7 +1890,7 @@ impl WasmBridge {
                             vec![(plugin_id, Some(client_id))]
                         },
                         Err(e) => {
-                            log::error!("Failed to load plugin: {e}");
+                            log::error!("加载插件失败：{e}");
                             if let Some(cli_client_id) = cli_client_id {
                                 let _ = self.senders.send_to_server(ServerInstruction::LogError(
                                     vec![format!("Failed to log plugin: {e}")],
@@ -1906,7 +1906,7 @@ impl WasmBridge {
                 }
             },
             None => {
-                log::error!("Plugin not found for alias");
+                log::error!("未找到该别名的插件");
                 vec![]
             },
         }
@@ -2199,13 +2199,13 @@ pub fn apply_event_to_plugin(
                     }
                 },
                 Err(e) => {
-                    log::error!("Failed to convert to protobuf: {:?}", e);
+                    log::error!("转换为 protobuf 失败：{:?}", e);
                 },
             }
         },
         (PermissionStatus::Denied, permission) => {
             log::error!(
-                "PluginId '{}' permission '{}' is not allowed - Event '{:?}' denied",
+                "PluginId '{}' 的权限 '{}' 不允许——事件 '{:?}' 被拒绝",
                 plugin_id,
                 permission
                     .map(|p| p.to_string())
@@ -2239,7 +2239,7 @@ pub fn apply_before_close_event_to_plugin(
     let protobuf_event: ProtobufEvent = event
         .clone()
         .try_into()
-        .map_err(|e| anyhow!("Failed to convert to protobuf: {:?}", e))?;
+        .map_err(|e| anyhow!("转换为 protobuf 失败：{:?}", e))?;
     let update = instance
         .get_typed_func::<(), i32>(&mut running_plugin.store, "update")
         .with_context(err_context)?;

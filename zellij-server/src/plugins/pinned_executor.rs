@@ -131,7 +131,7 @@ impl PinnedExecutor {
                 }
             });
         if let Err(e) = thread_handle {
-            log::error!("Failed to spawn plugin execution thread: {}", e);
+            log::error!("启动插件执行线程失败：{}", e);
         }
 
         ExecutionThread {
@@ -187,7 +187,7 @@ impl PinnedExecutor {
                     .filter_map(|(idx, t)| t.as_ref().map(|_| idx))
                     .min_by_key(|&idx| thread_plugins.get(&idx).map(|s| s.len()).unwrap_or(0))
                     .unwrap_or_else(|| {
-                        log::error!("Failed to find free thread to run the plugin!");
+                        log::error!("找不到可运行插件的空闲线程！");
                         0 // this is a misconfiguration, but we don't want to crash the app
                           // if it happens
                     })
@@ -240,7 +240,7 @@ impl PinnedExecutor {
             assignments.get(&plugin_id).copied()
         };
         let Some(thread_idx) = thread_idx else {
-            log::error!("Failed to find thread for plugin with id: {}", plugin_id);
+            log::error!("找不到 ID 为 {} 的插件所对应的线程", plugin_id);
             return;
         };
 
@@ -248,7 +248,7 @@ impl PinnedExecutor {
         let threads = self.execution_threads.lock().unwrap();
         let thread = threads[thread_idx].as_ref();
         let Some(thread) = thread else {
-            log::error!("Failed to find thread for plugin with id: {}", plugin_id);
+            log::error!("找不到 ID 为 {} 的插件所对应的线程", plugin_id);
             return;
         };
 
@@ -260,7 +260,7 @@ impl PinnedExecutor {
         if let Err(_) = thread.sender.send(job) {
             // 线程 died unexpectedly - this is a critical 错误
             thread.jobs_in_flight.fetch_sub(1, Ordering::SeqCst);
-            log::error!("Plugin executor thread {} has died", thread_idx);
+            log::error!("插件执行线程 {} 已终止", thread_idx);
         }
     }
 
@@ -482,7 +482,7 @@ mod tests {
             tx.send(name).unwrap();
         });
         rx.recv_timeout(Duration::from_secs(5))
-            .expect("Thread name should be received")
+            .expect("应收到线程名称")
     }
 
     #[test]
@@ -703,7 +703,7 @@ mod tests {
         // Wait for all 3 任务 to complete
         for _ in 0..3 {
             rx.recv_timeout(Duration::from_secs(5))
-                .expect("Job should complete");
+                .expect("任务应完成");
         }
 
         assert_eq!(
@@ -722,7 +722,7 @@ mod tests {
         executor.execute_for_plugin(1, make_signaling_job(tx));
 
         let result = rx.recv_timeout(Duration::from_secs(5));
-        assert!(result.is_ok(), "Job should complete successfully");
+        assert!(result.is_ok(), "任务应完成 successfully");
     }
 
     #[test]
@@ -781,7 +781,7 @@ mod tests {
 
         // Wait for 加载 to complete
         rx.recv_timeout(Duration::from_secs(5))
-            .expect("Load should complete");
+            .expect("加载应完成");
 
         // 验证 插件 is registered
         let thread_idx = executor.register_plugin(1);
@@ -797,7 +797,7 @@ mod tests {
         executor.execute_plugin_load(1, make_signaling_job(tx_load));
         rx_load
             .recv_timeout(Duration::from_secs(5))
-            .expect("Load should complete");
+            .expect("加载应完成");
 
         // 卸载 插件 with 清理
         let counter = Arc::new(AtomicUsize::new(0));
@@ -812,7 +812,7 @@ mod tests {
         // Wait for 卸载 to complete
         rx_unload
             .recv_timeout(Duration::from_secs(5))
-            .expect("Unload should complete");
+            .expect("卸载应完成");
 
         // 验证 清理 ran
         assert_eq!(counter.load(Ordering::SeqCst), 1, "Cleanup should have run");
@@ -834,7 +834,7 @@ mod tests {
         executor.execute_plugin_load(1, make_signaling_job(tx_load));
         rx_load
             .recv_timeout(Duration::from_secs(5))
-            .expect("Load should complete");
+            .expect("加载应完成");
 
         // 卸载 with sequence 跟踪
         let sequence = Arc::new(Mutex::new(Vec::new()));
@@ -849,7 +849,7 @@ mod tests {
         // Wait for 卸载 to complete
         rx_unload
             .recv_timeout(Duration::from_secs(5))
-            .expect("Unload should complete");
+            .expect("卸载应完成");
         sequence.lock().unwrap().push("after");
 
         assert_eq!(*sequence.lock().unwrap(), vec!["cleanup", "after"]);
@@ -863,7 +863,7 @@ mod tests {
         let (tx1, rx1) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx1));
         rx1.recv_timeout(Duration::from_secs(5))
-            .expect("Load should complete");
+            .expect("加载应完成");
 
         // Make 线程 0 busy to force 插件 2 to 线程 1
         let barrier = Arc::new(Barrier::new(2));
@@ -877,7 +877,7 @@ mod tests {
         let (tx2, rx2) = channel();
         executor.execute_plugin_load(2, make_signaling_job(tx2));
         rx2.recv_timeout(Duration::from_secs(5))
-            .expect("Load should complete");
+            .expect("加载应完成");
 
         // 释放 barrier
         barrier.wait();
@@ -891,7 +891,7 @@ mod tests {
         executor.execute_plugin_unload(2, make_signaling_job(tx_unload2));
         rx_unload2
             .recv_timeout(Duration::from_secs(5))
-            .expect("Unload should complete");
+            .expect("卸载应完成");
 
         // Give shrinking a moment to complete
         thread::sleep(Duration::from_millis(100));
@@ -914,13 +914,13 @@ mod tests {
         executor.execute_plugin_load(1, make_signaling_job(tx_load));
         rx_load
             .recv_timeout(Duration::from_secs(5))
-            .expect("Load should complete");
+            .expect("加载应完成");
 
         let (tx_unload, rx_unload) = channel();
         executor.execute_plugin_unload(1, make_signaling_job(tx_unload));
         rx_unload
             .recv_timeout(Duration::from_secs(5))
-            .expect("Unload should complete");
+            .expect("卸载应完成");
 
         // Give shrinking a moment
         thread::sleep(Duration::from_millis(100));
@@ -940,7 +940,7 @@ mod tests {
         let (tx1, rx1) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx1));
         rx1.recv_timeout(Duration::from_secs(5))
-            .expect("Load should complete");
+            .expect("加载应完成");
 
         // Force 插件 2 to 线程 1 by making 线程 0 busy
         let barrier = Arc::new(Barrier::new(2));
@@ -953,7 +953,7 @@ mod tests {
         let (tx2, rx2) = channel();
         executor.execute_plugin_load(2, make_signaling_job(tx2));
         rx2.recv_timeout(Duration::from_secs(5))
-            .expect("Load should complete");
+            .expect("加载应完成");
 
         barrier.wait();
         thread::sleep(Duration::from_millis(100));
@@ -969,7 +969,7 @@ mod tests {
         executor.execute_plugin_unload(2, make_signaling_job(tx_unload));
         rx_unload
             .recv_timeout(Duration::from_secs(5))
-            .expect("Unload should complete");
+            .expect("卸载应完成");
 
         thread::sleep(Duration::from_millis(100));
 
@@ -998,7 +998,7 @@ mod tests {
         let (tx1, rx1) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx1));
         rx1.recv_timeout(Duration::from_secs(5))
-            .expect("Load should complete");
+            .expect("加载应完成");
 
         // Force 插件 2 to 线程 1
         let barrier = Arc::new(Barrier::new(2));
@@ -1011,7 +1011,7 @@ mod tests {
         let (tx2, rx2) = channel();
         executor.execute_plugin_load(2, make_signaling_job(tx2));
         rx2.recv_timeout(Duration::from_secs(5))
-            .expect("Load should complete");
+            .expect("加载应完成");
 
         barrier.wait();
         thread::sleep(Duration::from_millis(50));
@@ -1021,7 +1021,7 @@ mod tests {
         executor.execute_plugin_unload(2, make_signaling_job(tx_unload));
         rx_unload
             .recv_timeout(Duration::from_secs(5))
-            .expect("Unload should complete");
+            .expect("卸载应完成");
 
         thread::sleep(Duration::from_millis(100));
 
@@ -1043,7 +1043,7 @@ mod tests {
         let (tx1, rx1) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx1));
         rx1.recv_timeout(Duration::from_secs(5))
-            .expect("Load should complete");
+            .expect("加载应完成");
 
         let barrier = Arc::new(Barrier::new(2));
         let barrier_clone = barrier.clone();
@@ -1055,7 +1055,7 @@ mod tests {
         let (tx2, rx2) = channel();
         executor.execute_plugin_load(2, make_signaling_job(tx2));
         rx2.recv_timeout(Duration::from_secs(5))
-            .expect("Load should complete");
+            .expect("加载应完成");
 
         barrier.wait();
 
@@ -1097,8 +1097,8 @@ mod tests {
             .collect();
 
         for handle in handles {
-            let thread_idx = handle.join().expect("Thread should not panic");
-            assert!(thread_idx < 4, "Thread index should be valid");
+            let thread_idx = handle.join().expect("线程不应发生恐慌");
+            assert!(thread_idx < 4, "线程索引应有效");
         }
     }
 
@@ -1138,13 +1138,13 @@ mod tests {
         let (tx1, rx1) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx1));
         rx1.recv_timeout(Duration::from_secs(5))
-            .expect("Load should complete");
+            .expect("加载应完成");
 
         // 卸载 插件 1
         let (tx2, rx2) = channel();
         executor.execute_plugin_unload(1, make_signaling_job(tx2));
         rx2.recv_timeout(Duration::from_secs(5))
-            .expect("Unload should complete");
+            .expect("卸载应完成");
 
         thread::sleep(Duration::from_millis(100));
 
@@ -1152,7 +1152,7 @@ mod tests {
         let (tx3, rx3) = channel();
         executor.execute_plugin_load(1, make_signaling_job(tx3));
         rx3.recv_timeout(Duration::from_secs(5))
-            .expect("Second load should complete");
+            .expect("第二次加载应完成");
 
         // Execute 任务 for 插件 1
         let (tx4, rx4) = channel();
@@ -1177,7 +1177,7 @@ mod tests {
         // 收集 20 completion signals
         for _ in 1..=20 {
             rx.recv_timeout(Duration::from_secs(5))
-                .expect("Load should complete");
+                .expect("加载应完成");
         }
 
         assert!(
@@ -1200,7 +1200,7 @@ mod tests {
         // Wait for all 加载
         for _ in 0..5 {
             rx.recv_timeout(Duration::from_secs(5))
-                .expect("Load should complete");
+                .expect("加载应完成");
         }
 
         // Execute 2 任务 per 插件 (10 total)
@@ -1214,7 +1214,7 @@ mod tests {
         // Wait for all 任务
         for _ in 0..10 {
             rx.recv_timeout(Duration::from_secs(5))
-                .expect("Job should complete");
+                .expect("任务应完成");
         }
 
         let thread_count_before = executor.thread_count();
@@ -1228,7 +1228,7 @@ mod tests {
         // Wait for unloads
         for _ in 0..3 {
             rx.recv_timeout(Duration::from_secs(5))
-                .expect("Unload should complete");
+                .expect("卸载应完成");
         }
 
         thread::sleep(Duration::from_millis(100));
@@ -1248,7 +1248,7 @@ mod tests {
 
         for _ in 0..2 {
             rx.recv_timeout(Duration::from_secs(5))
-                .expect("Job should complete");
+                .expect("任务应完成");
         }
 
         // 丢弃 executor
@@ -1267,7 +1267,7 @@ mod tests {
         }
         for _ in 0..3 {
             rx.recv_timeout(Duration::from_secs(5))
-                .expect("Load should complete");
+                .expect("加载应完成");
         }
 
         // Execute 任务 for each
@@ -1277,14 +1277,14 @@ mod tests {
         }
         for _ in 0..3 {
             rx.recv_timeout(Duration::from_secs(5))
-                .expect("Job should complete");
+                .expect("任务应完成");
         }
 
         // 卸载 插件 2
         let tx_clone = tx.clone();
         executor.execute_plugin_unload(2, make_signaling_job(tx_clone));
         rx.recv_timeout(Duration::from_secs(5))
-            .expect("Unload should complete");
+            .expect("卸载应完成");
 
         thread::sleep(Duration::from_millis(100));
 
@@ -1295,7 +1295,7 @@ mod tests {
         }
         for _ in 0..2 {
             rx.recv_timeout(Duration::from_secs(5))
-                .expect("Load should complete");
+                .expect("加载应完成");
         }
 
         // Execute 任务 for 插件 1, 3, 4, 5
@@ -1305,7 +1305,7 @@ mod tests {
         }
         for _ in 0..4 {
             rx.recv_timeout(Duration::from_secs(5))
-                .expect("Job should complete");
+                .expect("任务应完成");
         }
 
         // 卸载 插件 1, 3
@@ -1315,7 +1315,7 @@ mod tests {
         }
         for _ in 0..2 {
             rx.recv_timeout(Duration::from_secs(5))
-                .expect("Unload should complete");
+                .expect("卸载应完成");
         }
 
         thread::sleep(Duration::from_millis(100));
