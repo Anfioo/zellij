@@ -85,7 +85,7 @@ impl KdlError {
 
 impl std::fmt::Display for KdlError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        write!(f, "Failed to parse Zellij configuration")
+        write!(f, "解析 Zellij 配置失败")
     }
 }
 use std::fmt::Display;
@@ -229,8 +229,8 @@ impl Config {
                     Err(ConfigError::KdlDeserializationError(kdl_error)) => {
                         let error_message = match kdl_error.kind {
                             kdl::KdlErrorKind::Context("valid node terminator") => {
-                                format!("Failed to deserialize KDL node. \nPossible reasons:\n{}\n{}\n{}\n{}",
-                                "- Missing `;` after a node name, eg. { node; another_node; }",
+                                format!("无法反序列化 KDL 节点。\n可能的原因：\n{}\n{}\n{}\n{}",
+                                "- 节点名称后缺少 `;`，例如 { node; another_node; }",
                                 "- Missing quotations (\") around an argument node eg. { first_node \"argument_node\"; }",
                                 "- Missing an equal sign (=) between node arguments on a title line. eg. argument=\"value\"",
                                 "- Found an extraneous equal sign (=) between node child arguments and their values. eg. { argument=\"value\" }")
@@ -294,7 +294,7 @@ impl Config {
         let config_file_path = config_file_path.clone();
         Config::from_kdl(&config, None)
             .map_err(|e| {
-                log::error!("Failed to parse config: {}", e);
+                log::error!("解析配置失败：{}", e);
                 None
             })
             .and_then(|parsed_config| {
@@ -310,22 +310,22 @@ impl Config {
                     None => config,
                 };
                 std::fs::write(&config_file_path, config.as_bytes()).map_err(|e| {
-                    log::error!("Failed to write config: {}", e);
+                    log::error!("写入配置失败：{}", e);
                     Some(config_file_path.clone())
                 })?;
                 let written_config = std::fs::read_to_string(&config_file_path).map_err(|e| {
-                    log::error!("Failed to read written config: {}", e);
+                    log::error!("读取已写入的配置失败：{}", e);
                     Some(config_file_path.clone())
                 })?;
                 let parsed_written_config =
                     Config::from_kdl(&written_config, None).map_err(|e| {
-                        log::error!("Failed to parse written config: {}", e);
+                        log::error!("解析已写入的配置失败：{}", e);
                         None
                     })?;
                 if parsed_written_config == parsed_config {
                     Ok(parsed_config)
                 } else {
-                    log::error!("Configuration corrupted when writing to disk");
+                    log::error!("写入磁盘时配置已损坏");
                     Err(Some(config_file_path))
                 }
             })
@@ -349,7 +349,7 @@ impl Config {
             match std::fs::read_to_string(&config_file_path) {
                 Ok(written_config) => written_config == config,
                 Err(e) => {
-                    log::error!("Failed to read written config: {}", e);
+                    log::error!("读取已写入的配置失败：{}", e);
                     false
                 },
             }

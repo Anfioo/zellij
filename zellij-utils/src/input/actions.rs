@@ -90,7 +90,7 @@ impl FromStr for ResizeDirection {
             "Increase" | "increase" | "+" => Ok(ResizeDirection::Increase),
             "Decrease" | "decrease" | "-" => Ok(ResizeDirection::Decrease),
             _ => Err(format!(
-                "Failed to parse ResizeDirection. Unknown ResizeDirection: {}",
+                "解析调整方向失败。未知的调整方向：{}",
                 s
             )),
         }
@@ -110,7 +110,7 @@ impl FromStr for SearchDirection {
             "Down" | "down" => Ok(SearchDirection::Down),
             "Up" | "up" => Ok(SearchDirection::Up),
             _ => Err(format!(
-                "Failed to parse SearchDirection. Unknown SearchDirection: {}",
+                "解析搜索方向失败。未知的搜索方向：{}",
                 s
             )),
         }
@@ -134,7 +134,7 @@ impl FromStr for SearchOption {
             "WholeWord" | "wholeword" | "Wholeword" => Ok(SearchOption::WholeWord),
             "Wrap" | "wrap" => Ok(SearchOption::Wrap),
             _ => Err(format!(
-                "Failed to parse SearchOption. Unknown SearchOption: {}",
+                "解析搜索选项失败。未知的搜索选项：{}",
                 s
             )),
         }
@@ -766,7 +766,7 @@ impl Action {
                             },
                             Err(_e) => {
                                 Err(format!(
-                                    "Malformed pane id: {}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)",
+                                    "格式错误的窗格 ID：{}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）",
                                     pane_id_str
                                 ))
                             }
@@ -790,7 +790,7 @@ impl Action {
                             },
                             Err(_e) => {
                                 Err(format!(
-                                    "Malformed pane id: {}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)",
+                                    "格式错误的窗格 ID：{}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）",
                                     pane_id_str
                                 ))
                             }
@@ -810,7 +810,7 @@ impl Action {
                         },
                         Err(_e) => {
                             Err(format!(
-                                "Malformed pane id: {}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)",
+                                "格式错误的窗格 ID：{}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）",
                                 pane_id_str
                             ))
                         }
@@ -828,7 +828,7 @@ impl Action {
                     let key = KeyWithModifier::from_str(key_str).map_err(|e| {
                         let suggestion = suggest_key_fix(key_str);
                         format!(
-                            "Invalid key at position {}: \"{}\"\n  Error: {}\n{}",
+                            "位置 {} 处的键无效：\"{}\"\n  错误：{}\n{}",
                             index + 1,
                             key_str,
                             e,
@@ -849,7 +849,7 @@ impl Action {
                         Some(pane_id_str) => {
                             let parsed_pane_id = PaneId::from_str(pane_id_str)
                                 .map_err(|_| format!(
-                                    "Malformed pane id: {}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)",
+                                    "格式错误的窗格 ID：{}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）",
                                     pane_id_str
                                 ))?;
                             actions.push(Action::WriteToPaneId {
@@ -877,7 +877,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::ResizeByPaneId {
                         pane_id,
@@ -892,7 +892,7 @@ impl Action {
             CliAction::FocusPaneId { pane_id } => {
                 let pane_id = PaneId::from_str(&pane_id)
                     .map_err(|_| format!(
-                        "Malformed pane id: {pane_id}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                        "格式错误的窗格 ID：{pane_id}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                     ))?;
                 Ok(vec![Action::FocusPaneByPaneId { pane_id }])
             },
@@ -905,7 +905,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::MovePaneByPaneId { pane_id, direction }])
                 },
@@ -915,7 +915,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::MovePaneBackwardsByPaneId { pane_id }])
                 },
@@ -932,7 +932,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::ClearScreenByPaneId { pane_id }])
                 },
@@ -957,7 +957,7 @@ impl Action {
                         },
                         Err(_e) => {
                             Err(format!(
-                                "Malformed pane id: {}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)",
+                                "格式错误的窗格 ID：{}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）",
                                 pane_id_str
                             ))
                         }
@@ -976,7 +976,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::EditScrollbackByPaneId { pane_id, ansi }])
                 },
@@ -986,7 +986,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::ScrollUpByPaneId { pane_id }])
                 },
@@ -996,7 +996,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::ScrollDownByPaneId { pane_id }])
                 },
@@ -1006,7 +1006,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::ScrollToBottomByPaneId { pane_id }])
                 },
@@ -1016,7 +1016,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::ScrollToTopByPaneId { pane_id }])
                 },
@@ -1026,7 +1026,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::PageScrollUpByPaneId { pane_id }])
                 },
@@ -1036,7 +1036,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::PageScrollDownByPaneId { pane_id }])
                 },
@@ -1046,7 +1046,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::HalfPageScrollUpByPaneId { pane_id }])
                 },
@@ -1056,7 +1056,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::HalfPageScrollDownByPaneId { pane_id }])
                 },
@@ -1066,7 +1066,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::ToggleFocusFullscreenByPaneId { pane_id }])
                 },
@@ -1076,7 +1076,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::ToggleFocusNoUiFullscreenByPaneId { pane_id }])
                 },
@@ -1123,7 +1123,7 @@ impl Action {
                         Ok(parsed_pane_id) => Some(parsed_pane_id),
                         Err(_e) => {
                             return Err(format!(
-                                "Malformed pane id: {}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)",
+                                "格式错误的窗格 ID：{}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）",
                                 pane_id_str
                             ))
                         },
@@ -1409,7 +1409,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::TogglePaneEmbedOrFloatingByPaneId { pane_id }])
                 },
@@ -1432,7 +1432,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::CloseFocusByPaneId { pane_id }])
                 },
@@ -1442,7 +1442,7 @@ impl Action {
                 let pane_id = match pane_id {
                     Some(pane_id_str) => Some(
                         PaneId::from_str(&pane_id_str).map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?,
                     ),
                     None => None,
@@ -1456,7 +1456,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::UndoRenamePaneByPaneId { pane_id }])
                 },
@@ -1546,8 +1546,8 @@ impl Action {
                             ConfigError::KdlDeserializationError(kdl_error) => {
                                 let error_message = match kdl_error.kind {
                                     kdl::KdlErrorKind::Context("valid node terminator") => {
-                                        format!("Failed to deserialize KDL node. \nPossible reasons:\n{}\n{}\n{}\n{}",
-                                        "- Missing `;` after a node name, eg. { node; another_node; }",
+                                        format!("无法反序列化 KDL 节点。\n可能的原因：\n{}\n{}\n{}\n{}",
+                                        "- 节点名称后缺少 `;`，例如 { node; another_node; }",
                                         "- Missing quotations (\") around an argument node eg. { first_node \"argument_node\"; }",
                                         "- Missing an equal sign (=) between node arguments on a title line. eg. argument=\"value\"",
                                         "- Found an extraneous equal sign (=) between node child arguments and their values. eg. { argument=\"value\" }")
@@ -1640,7 +1640,7 @@ impl Action {
                         (
                             layout_url.to_owned(),
                             Layout::stringified_from_url(layout_url)
-                                .map_err(|e| format!("Failed to load layout: {}", e))?,
+                                .map_err(|e| format!("加载布局失败：{}", e))?,
                             None,
                         )
                     } else {
@@ -1650,7 +1650,7 @@ impl Action {
                             .to_string_lossy()
                             .to_string();
                         Layout::stringified_from_path_or_default(Some(&layout_path), layout_dir)
-                            .map_err(|e| format!("Failed to load layout: {}", e))?
+                            .map_err(|e| format!("加载布局失败：{}", e))?
                     };
                     let mut layout = Layout::from_str(&raw_layout, path_to_raw_layout, swap_layouts.as_ref().map(|(f, p)| (f.as_str(), p.as_str())), cwd).map_err(|e| {
                         let stringified_error = match e {
@@ -1662,8 +1662,8 @@ impl Action {
                             ConfigError::KdlDeserializationError(kdl_error) => {
                                 let error_message = match kdl_error.kind {
                                     kdl::KdlErrorKind::Context("valid node terminator") => {
-                                        format!("Failed to deserialize KDL node. \nPossible reasons:\n{}\n{}\n{}\n{}",
-                                        "- Missing `;` after a node name, eg. { node; another_node; }",
+                                        format!("无法反序列化 KDL 节点。\n可能的原因：\n{}\n{}\n{}\n{}",
+                                        "- 节点名称后缺少 `;`，例如 { node; another_node; }",
                                         "- Missing quotations (\") around an argument node eg. { first_node \"argument_node\"; }",
                                         "- Missing an equal sign (=) between node arguments on a title line. eg. argument=\"value\"",
                                         "- Found an extraneous equal sign (=) between node child arguments and their values. eg. { argument=\"value\" }")
@@ -1791,7 +1791,7 @@ impl Action {
                         (
                             layout_url.to_owned(),
                             Layout::stringified_from_url(layout_url)
-                                .map_err(|e| format!("Failed to load layout from URL: {}", e))?,
+                                .map_err(|e| format!("从 URL 加载布局失败：{}", e))?,
                             None,
                         )
                     } else {
@@ -1801,7 +1801,7 @@ impl Action {
                             .to_string_lossy()
                             .to_string();
                         Layout::stringified_from_path_or_default(Some(layout_path), layout_dir)
-                            .map_err(|e| format!("Failed to load layout: {}", e))?
+                            .map_err(|e| format!("加载布局失败：{}", e))?
                     }
                 } else {
                     return Err("Either layout or layout-string must be provided".to_string());
@@ -1824,7 +1824,7 @@ impl Action {
                         },
                         ConfigError::KdlDeserializationError(kdl_error) => {
                             let error_message = kdl_error.to_string();
-                            format!("Failed to deserialize KDL layout: {}", error_message)
+                            format!("反序列化 KDL 布局失败：{}", error_message)
                         },
                         e => format!("{}", e),
                     };
@@ -2010,7 +2010,7 @@ impl Action {
                 Some(pane_id_str) => {
                     let pane_id = PaneId::from_str(&pane_id_str)
                         .map_err(|_| format!(
-                            "Malformed pane id: {pane_id_str}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)"
+                            "格式错误的窗格 ID：{pane_id_str}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）"
                         ))?;
                     Ok(vec![Action::TogglePanePinnedByPaneId { pane_id }])
                 },
@@ -2033,7 +2033,7 @@ impl Action {
                 if !malformed_ids.is_empty() {
                     Err(
                         format!(
-                            "Malformed pane ids: {}, expecting a space separated list of either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)",
+                            "格式错误的窗格 ID 列表：{}，期望以空格分隔的列表，元素可为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）",
                             malformed_ids.join(", ")
                         )
                     )
@@ -2053,7 +2053,7 @@ impl Action {
                 let Some(coordinates) =
                     FloatingPaneCoordinates::new(x, y, width, height, pinned, borderless)
                 else {
-                    return Err(format!("Failed to parse floating pane coordinates"));
+                    return Err(format!("解析浮动窗格坐标失败"));
                 };
                 let parsed_pane_id = PaneId::from_str(&pane_id);
                 match parsed_pane_id {
@@ -2081,7 +2081,7 @@ impl Action {
                     },
                     Err(_e) => {
                         Err(format!(
-                            "Malformed pane id: {}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)",
+                            "格式错误的窗格 ID：{}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）",
                             pane_id
                         ))
                     }
@@ -2101,7 +2101,7 @@ impl Action {
                     },
                     Err(_e) => {
                         Err(format!(
-                            "Malformed pane id: {}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)",
+                            "格式错误的窗格 ID：{}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）",
                             pane_id
                         ))
                     }
@@ -2134,7 +2134,7 @@ impl Action {
                         }])
                     },
                     Err(_e) => Err(format!(
-                        "Malformed pane id: {}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)",
+                        "格式错误的窗格 ID：{}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）",
                         pane_id_str
                     )),
                 }
@@ -2158,7 +2158,7 @@ impl Action {
                         Ok(PaneId::Plugin(id)) => Some((id, true)),
                         Err(_e) => {
                             return Err(format!(
-                                "Malformed pane id: {}, expecting either a bare integer (eg. 1), a terminal pane id (eg. terminal_1) or a plugin pane id (eg. plugin_1)",
+                                "格式错误的窗格 ID：{}，期望为裸整数（如 1）、终端窗格 ID（如 terminal_1）或插件窗格 ID（如 plugin_1）",
                                 stringified_pane_id
                             ));
                         },
@@ -2191,8 +2191,8 @@ impl Action {
                                 ConfigError::KdlDeserializationError(kdl_error) => {
                                     let error_message = match kdl_error.kind {
                                         kdl::KdlErrorKind::Context("valid node terminator") => {
-                                            format!("Failed to deserialize KDL node. \nPossible reasons:\n{}\n{}\n{}\n{}",
-                                            "- Missing `;` after a node name, eg. {{ node; another_node; }}",
+                                            format!("无法反序列化 KDL 节点。\n可能的原因：\n{}\n{}\n{}\n{}",
+                                            "- 节点名称后缺少 `;`，例如 {{ node; another_node; }}",
                                             "- Missing quotations (\") around an argument node eg. {{ first_node \"argument_node\"; }}",
                                             "- Missing an equal sign (=) between node arguments on a title line. eg. argument=\"value\"",
                                             "- Found an extraneous equal sign (=) between node child arguments and their values. eg. {{ argument=\"value\" }}")
@@ -2232,8 +2232,8 @@ impl Action {
                             ConfigError::KdlDeserializationError(kdl_error) => {
                                 let error_message = match kdl_error.kind {
                                     kdl::KdlErrorKind::Context("valid node terminator") => {
-                                        format!("Failed to deserialize KDL node. \nPossible reasons:\n{}\n{}\n{}\n{}",
-                                        "- Missing `;` after a node name, eg. {{ node; another_node; }}",
+                                        format!("无法反序列化 KDL 节点。\n可能的原因：\n{}\n{}\n{}\n{}",
+                                        "- 节点名称后缺少 `;`，例如 {{ node; another_node; }}",
                                         "- Missing quotations (\") around an argument node eg. {{ first_node \"argument_node\"; }}",
                                         "- Missing an equal sign (=) between node arguments on a title line. eg. argument=\"value\"",
                                         "- Found an extraneous equal sign (=) between node child arguments and their values. eg. {{ argument=\"value\" }}")
@@ -2330,7 +2330,7 @@ fn suggest_key_fix(key_str: &str) -> String {
         for part in &parts[..parts.len() - 1] {
             let lower = part.to_ascii_lowercase();
             if lower.starts_with("ctr") && lower != "ctrl" {
-                return format!("  Hint: Did you mean \"Ctrl\" instead of \"{}\"?", part);
+                return format!("  提示：您是不是想用 \"Ctrl\" 而不是 \"{}\"？", part);
             }
             if !matches!(lower.as_str(), "ctrl" | "alt" | "shift" | "super") {
                 return "  Hint: Valid modifiers are: Ctrl, Alt, Shift, Super".to_string();

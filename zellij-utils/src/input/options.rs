@@ -109,7 +109,7 @@ impl FromStr for PaneFrameStyle {
             "titles" => Ok(PaneFrameStyle::Titles),
             "none" => Ok(PaneFrameStyle::None),
             e => Err(format!(
-                "Unknown pane frame style: '{}' (expected 'full', 'titles' or 'none')",
+                "未知的窗格边框样式：'{}'（期望 'full'、'titles' 或 'none'）",
                 e
             )
             .into()),

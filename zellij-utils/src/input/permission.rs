@@ -48,7 +48,7 @@ impl PermissionCache {
         let granted = match fs::read_to_string(cache_path.clone()) {
             Ok(raw_string) => PermissionCache::from_string(raw_string).unwrap_or_default(),
             Err(e) => {
-                log::error!("Failed to read permission cache file: {}", e);
+                log::error!("读取权限缓存文件失败：{}", e);
                 GrantedPermission::default()
             },
         };

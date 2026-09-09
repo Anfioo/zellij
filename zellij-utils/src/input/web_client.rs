@@ -154,7 +154,7 @@ impl CursorInactiveStyle {
             Some("outline") => Ok(CursorInactiveStyle::Outline),
             Some("no_style") => Ok(CursorInactiveStyle::NoStyle),
             _ => Err(ConfigError::new_kdl_error(
-                format!("Must be 'block', 'bar', 'underline', 'outline' or 'no_style'"),
+                format!("必须是 'block'、'bar'、'underline'、'outline' 或 'no_style'"),
                 kdl.span().offset(),
                 kdl.span().len(),
             )),
@@ -207,7 +207,7 @@ impl CursorStyle {
             Some("bar") => Ok(CursorStyle::Bar),
             Some("underline") => Ok(CursorStyle::Underline),
             _ => Err(ConfigError::new_kdl_error(
-                format!("Must be 'block', 'bar' or 'underline'"),
+                format!("必须是 'block'、'bar' 或 'underline'"),
                 kdl.span().offset(),
                 kdl.span().len(),
             )),
@@ -301,7 +301,7 @@ impl WebClientConfig {
                     web_client_config.font_size = Some(value as u16);
                 } else {
                     return Err(ConfigError::new_kdl_error(
-                        format!("font_size must be between 1 and {}", u16::MAX),
+                        format!("字体大小必须在 1 到 {} 之间", u16::MAX),
                         font_size_node.span().offset(),
                         font_size_node.span().len(),
                     ));

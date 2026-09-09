@@ -95,7 +95,7 @@ impl<'de> Visitor<'de> for HexColorVisitor {
     type Value = HexColor;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "a hex color in the format #RGB or #RRGGBB")
+        write!(formatter, "格式为 #RGB 或 #RRGGBB 的十六进制颜色")
     }
 
     fn visit_str<E>(self, s: &str) -> Result<Self::Value, E>

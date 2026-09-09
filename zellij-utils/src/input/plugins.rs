@@ -126,7 +126,7 @@ impl PluginConfig {
         // 错误并可以全部报告回来。我们必须用某些东西初始化 `last_err`，
         // 而且由于用户只有在加载插件失败时才会看到它，我们不妨
         // spell it out right here.
-        let mut last_err: Result<Vec<u8>> = Err(anyhow!("failed to load plugin from disk"));
+        let mut last_err: Result<Vec<u8>> = Err(anyhow!("从磁盘加载插件失败"));
         for path in paths {
             // 检查插件路径是否与资源映射表中的条目匹配。如果是，直接从内存加载，
             // 从内存，不用麻烦磁盘。
@@ -134,11 +134,11 @@ impl PluginConfig {
             if !cfg!(feature = "disable_automatic_asset_installation") && self.is_builtin() {
                 let asset_path = PathBuf::from("plugins").join(&path);
                 if let Some(bytes) = ASSET_MAP.get(&asset_path) {
-                    log::debug!("Loaded plugin '{}' from internal assets", path.display());
+                    log::debug!("已从内部资源加载插件 '{}'", path.display());
 
                     if plugin_dir.join(&path).with_extension("wasm").exists() {
                         log::info!(
-                            "Plugin '{}' exists in the 'PLUGIN DIR' at '{}' but is being ignored",
+                            "插件 '{}' 存在于 'PLUGIN DIR' 的 '{}' 中，但被忽略",
                             path.display(),
                             plugin_dir.display()
                         );
@@ -151,7 +151,7 @@ impl PluginConfig {
             // 尝试从磁盘读取
             match fs::read(&path) {
                 Ok(val) => {
-                    log::debug!("Loaded plugin '{}' from disk", path.display());
+                    log::debug!("已从磁盘加载插件 '{}'", path.display());
                     return Ok(val);
                 },
                 Err(err) => {

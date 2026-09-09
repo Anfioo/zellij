@@ -122,7 +122,7 @@ impl RunPluginOrAlias {
     pub fn populate_run_plugin_if_needed(&mut self, plugin_aliases: &PluginAliases) {
         if let RunPluginOrAlias::Alias(run_plugin_alias) = self {
             if run_plugin_alias.run_plugin.is_some() {
-                log::warn!("Overriding plugin alias");
+                log::warn!("正在覆盖插件别名");
             }
             let merged_run_plugin = plugin_aliases
                 .aliases
@@ -184,7 +184,7 @@ impl RunPluginOrAlias {
                 Ok(RunPluginOrAlias::Alias(plugin_alias))
             },
             Err(e) => {
-                return Err(format!("Failed to parse plugin location {url}: {}", e));
+                return Err(format!("解析插件位置 {url} 失败：{}", e));
             },
         }
     }
@@ -620,7 +620,7 @@ impl RunPluginLocation {
                 let path = match shellexpand::full(&path.to_string_lossy().to_string()) {
                     Ok(s) => PathBuf::from(s.as_ref()),
                     Err(e) => {
-                        log::error!("Failed to shell expand plugin path: {}", e);
+                        log::error!("shell 展开插件路径失败：{}", e);
                         path
                     },
                 };
@@ -1495,7 +1495,7 @@ impl Layout {
     #[cfg(target_family = "wasm")]
     pub fn from_url(_url: &str, _config: Config) -> Result<(Layout, Config), ConfigError> {
         Err(ConfigError::DownloadError(format!(
-            "Unsupported platform, cannot download layout from the web"
+            "不支持的平台，无法从网络下载布局"
         )))
     }
     pub fn from_path_or_default_without_config(
@@ -1921,7 +1921,7 @@ fn split_space(
                         })
                         .sum::<f64>()
                 } else {
-                    panic!("Implicit sizing within fixed-size panes is not supported");
+                    panic!("不支持在固定大小窗格内进行隐式尺寸调整");
                 };
                 Dimension::percent(free_percent / flex_parts as f64)
             },
