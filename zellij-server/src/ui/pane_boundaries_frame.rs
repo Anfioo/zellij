@@ -1502,7 +1502,7 @@ mod tests {
         let (chars, _) = frame.help_text_version_full(80).unwrap();
         let text = characters_to_string(&chars);
         assert!(text.contains("Ctrl <MouseScroll>"));
-        assert!(text.contains("<drag borders>"));
+        assert!(text.contains("<拖动边框>"));
     }
 
     #[test]
@@ -1547,6 +1547,6 @@ mod tests {
         let (chars, _) = frame.help_text_version_short(20).unwrap();
         let text = characters_to_string(&chars);
         assert!(!text.contains("MouseScroll"));
-        assert!(text.contains("<drag borders>"));
+        assert!(text.contains("<拖动边框>"));
     }
 }

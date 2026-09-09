@@ -103,7 +103,7 @@ pub fn rerun_segments(is_first_run: bool, tier: HintTier) -> Vec<HintSegment> {
             HintSegment::plain("<"),
             HintSegment::emphasis("ESC"),
             HintSegment::plain(">"),
-            HintSegment::plain(" drop to shell, "),
+            HintSegment::plain(" 返回到 shell， "),
             HintSegment::plain("<"),
             HintSegment::emphasis("Ctrl-c"),
             HintSegment::plain(">"),
@@ -143,7 +143,7 @@ pub fn exit_code_segments(exit_status: HintExitStatus) -> Vec<HintSegment> {
             };
             vec![
                 HintSegment::plain(" [ "),
-                HintSegment::plain("EXIT CODE: "),
+                HintSegment::plain("退出代码："),
                 exit_code_segment,
                 HintSegment::plain(" ] "),
             ]
@@ -168,9 +168,9 @@ pub fn hover_segments(tier: HintTier) -> Vec<HintSegment> {
             HintSegment::plain(" "),
             HintSegment::emphasis("Alt"),
             HintSegment::plain(" <"),
-            HintSegment::emphasis("Right-Click"),
+            HintSegment::emphasis("右键单击"),
             HintSegment::plain(">"),
-            HintSegment::plain(" - ungroup all "),
+            HintSegment::plain(" - 取消全部分组 "),
         ],
         HintTier::Medium => vec![
             HintSegment::emphasis("Alt"),
@@ -179,7 +179,7 @@ pub fn hover_segments(tier: HintTier) -> Vec<HintSegment> {
             HintSegment::plain("> group, "),
             HintSegment::emphasis("Alt"),
             HintSegment::plain(" <"),
-            HintSegment::emphasis("Right-Click"),
+            HintSegment::emphasis("右键单击"),
             HintSegment::plain("> ungroup"),
         ],
         HintTier::Minimal => vec![
@@ -211,36 +211,36 @@ pub fn resize_segments(
                 HintSegment::plain(" "),
                 HintSegment::emphasis_2("Ctrl"),
                 HintSegment::plain(" <"),
-                HintSegment::emphasis_2("drag borders"),
-                HintSegment::plain("> to resize "),
+                HintSegment::emphasis_2("拖动边框"),
+                HintSegment::plain("> 以调整大小 "),
             ],
             (false, HintTier::Full) => vec![
                 HintSegment::plain(" <"),
-                HintSegment::emphasis_2("drag borders"),
-                HintSegment::plain("> to resize "),
+                HintSegment::emphasis_2("拖动边框"),
+                HintSegment::plain("> 以调整大小 "),
             ],
             (true, HintTier::Medium) => vec![
                 HintSegment::plain(" <"),
                 HintSegment::emphasis_2("Ctrl"),
                 HintSegment::plain(" "),
-                HintSegment::emphasis_2("drag borders"),
-                HintSegment::plain("> resize "),
+                HintSegment::emphasis_2("拖动边框"),
+                HintSegment::plain("> 调整大小 "),
             ],
             (false, HintTier::Medium) => vec![
                 HintSegment::plain(" <"),
-                HintSegment::emphasis_2("drag borders"),
-                HintSegment::plain("> resize "),
+                HintSegment::emphasis_2("拖动边框"),
+                HintSegment::plain("> 调整大小 "),
             ],
             (true, HintTier::Minimal) => vec![
                 HintSegment::plain(" <"),
                 HintSegment::emphasis_2("Ctrl"),
                 HintSegment::plain(" "),
-                HintSegment::emphasis_2("drag borders"),
+                HintSegment::emphasis_2("拖动边框"),
                 HintSegment::plain("> "),
             ],
             (false, HintTier::Minimal) => vec![
                 HintSegment::plain(" <"),
-                HintSegment::emphasis_2("drag borders"),
+                HintSegment::emphasis_2("拖动边框"),
                 HintSegment::plain("> "),
             ],
         };
@@ -254,11 +254,11 @@ pub fn resize_segments(
                     HintSegment::emphasis_2("Ctrl"),
                     HintSegment::plain(" <"),
                     HintSegment::emphasis_2("MouseScroll"),
-                    HintSegment::plain("> or "),
+                    HintSegment::plain("> 或 "),
                     HintSegment::emphasis_2("Ctrl"),
                     HintSegment::plain(" <"),
-                    HintSegment::emphasis_2("drag borders"),
-                    HintSegment::plain("> to resize "),
+                    HintSegment::emphasis_2("拖动边框"),
+                    HintSegment::plain("> 以调整大小 "),
                 ]
             } else {
                 vec![
@@ -267,8 +267,8 @@ pub fn resize_segments(
                     HintSegment::plain(" <"),
                     HintSegment::emphasis_2("MouseScroll"),
                     HintSegment::plain("> or <"),
-                    HintSegment::emphasis_2("drag borders"),
-                    HintSegment::plain("> to resize "),
+                    HintSegment::emphasis_2("拖动边框"),
+                    HintSegment::plain("> 以调整大小 "),
                 ]
             }
         },
@@ -280,8 +280,8 @@ pub fn resize_segments(
                     HintSegment::plain(" "),
                     HintSegment::emphasis_2("MouseScroll"),
                     HintSegment::plain("/"),
-                    HintSegment::emphasis_2("drag borders"),
-                    HintSegment::plain("> resize "),
+                    HintSegment::emphasis_2("拖动边框"),
+                    HintSegment::plain("> 调整大小 "),
                 ]
             } else {
                 vec![
@@ -290,8 +290,8 @@ pub fn resize_segments(
                     HintSegment::plain(" "),
                     HintSegment::emphasis_2("MouseScroll"),
                     HintSegment::plain(">/<"),
-                    HintSegment::emphasis_2("drag borders"),
-                    HintSegment::plain("> resize "),
+                    HintSegment::emphasis_2("拖动边框"),
+                    HintSegment::plain("> 调整大小 "),
                 ]
             }
         },
@@ -303,7 +303,7 @@ pub fn resize_segments(
                     HintSegment::plain(" "),
                     HintSegment::emphasis_2("MouseScroll"),
                     HintSegment::plain("/"),
-                    HintSegment::emphasis_2("drag borders"),
+                    HintSegment::emphasis_2("拖动边框"),
                     HintSegment::plain("> "),
                 ]
             } else {
@@ -313,7 +313,7 @@ pub fn resize_segments(
                     HintSegment::plain(" "),
                     HintSegment::emphasis_2("MouseScroll"),
                     HintSegment::plain(">/<"),
-                    HintSegment::emphasis_2("drag borders"),
+                    HintSegment::emphasis_2("拖动边框"),
                     HintSegment::plain("> "),
                 ]
             }
@@ -360,7 +360,7 @@ mod tests {
         for is_floating in [false, true] {
             for hint in resize_hint_variants(is_floating, false).into_values() {
                 assert!(!hint.text.contains("MouseScroll"));
-                assert!(hint.text.contains("drag borders"));
+                assert!(hint.text.contains("拖动边框"));
             }
         }
     }
@@ -370,7 +370,7 @@ mod tests {
         for is_floating in [false, true] {
             for hint in resize_hint_variants(is_floating, true).into_values() {
                 assert!(hint.text.contains("MouseScroll"));
-                assert!(hint.text.contains("drag borders"));
+                assert!(hint.text.contains("拖动边框"));
             }
         }
     }

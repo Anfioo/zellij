@@ -2174,7 +2174,7 @@ impl Tab {
         };
         if pane.is_held() && pane.exited() {
             match pane.exit_status() {
-                Some(exit_code) => base.push_str(&format!(" [ EXIT CODE: {} ] ", exit_code)),
+                Some(exit_code) => base.push_str(&format!(" [ 退出代码：{} ] ", exit_code)),
                 None => base.push_str(" [ EXITED ] "),
             }
         }

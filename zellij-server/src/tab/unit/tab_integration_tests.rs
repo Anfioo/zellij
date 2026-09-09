@@ -13653,7 +13653,7 @@ fn hint_text_suppressed_when_mouse_hover_tips_disabled() {
     assert!(!enabled_resize_hints.is_empty());
     assert!(enabled_resize_hints
         .values()
-        .all(|hint| hint.text.contains("drag borders")));
+        .all(|hint| hint.text.contains("拖动边框")));
 
     tab.update_mouse_hover_tips(false);
     assert!(tab.resolve_hint_text(client_id).is_empty());

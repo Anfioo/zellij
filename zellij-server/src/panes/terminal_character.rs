@@ -1002,11 +1002,11 @@ pub fn render_first_run_banner(
 
             let controls_bare_text_first_part = "<";
             let enter_bare_text = "ENTER";
-            let controls_bare_text_second_part = "> run, <";
+            let controls_bare_text_second_part = "> 运行，<";
             let esc_bare_text = "ESC";
-            let controls_bare_text_third_part = "> drop to shell, <";
+            let controls_bare_text_third_part = "> 返回到 shell，<";
             let ctrl_c_bare_text = "Ctrl-c";
-            let controls_bare_text_fourth_part = "> exit";
+            let controls_bare_text_fourth_part = "> 退出";
             let controls_color = RESET_STYLES
                 .foreground(Some(AnsiCode::from(
                     style.colors.text_unselected.emphasis_0,
@@ -1022,7 +1022,7 @@ pub fn render_first_run_banner(
             let controls_column_start_position =
                 middle_column.saturating_sub(controls_line_length / 2);
             let controls_line = format!(
-                "\u{1b}[{};{}H{}<{}{}{}{}> run, <{}{}{}{}> drop to shell, <{}{}{}{}> exit",
+                "\u{1b}[{};{}H{}<{}{}{}{}> 运行，<{}{}{}{}> 返回到 shell，<{}{}{}{}> 退出",
                 middle_row + 2,
                 controls_column_start_position,
                 bold_text,
@@ -1045,7 +1045,7 @@ pub fn render_first_run_banner(
             )
         },
         None => {
-            let bare_text = format!("Waiting to start...");
+            let bare_text = format!("正在等待启动……");
             let bare_text_width = bare_text.width();
             let column_start_postion = middle_column.saturating_sub(bare_text_width / 2);
             let bold_text = RESET_STYLES.bold(Some(AnsiCode::On));
@@ -1056,11 +1056,11 @@ pub fn render_first_run_banner(
 
             let controls_bare_text_first_part = "<";
             let enter_bare_text = "ENTER";
-            let controls_bare_text_second_part = "> run, <";
+            let controls_bare_text_second_part = "> 运行，<";
             let esc_bare_text = "ESC";
-            let controls_bare_text_third_part = "> drop to shell, <";
+            let controls_bare_text_third_part = "> 返回到 shell，<";
             let ctrl_c_bare_text = "Ctrl-c";
-            let controls_bare_text_fourth_part = "> exit";
+            let controls_bare_text_fourth_part = "> 退出";
             let controls_color = RESET_STYLES
                 .foreground(Some(AnsiCode::from(
                     style.colors.text_unselected.emphasis_0,
@@ -1076,7 +1076,7 @@ pub fn render_first_run_banner(
             let controls_column_start_position =
                 middle_column.saturating_sub(controls_line_length / 2);
             let controls_line = format!(
-                "\u{1b}[{};{}H{}<{}{}{}{}> run, <{}{}{}{}> drop to shell, <{}{}{}{}> exit",
+                "\u{1b}[{};{}H{}<{}{}{}{}> 运行，<{}{}{}{}> 返回到 shell，<{}{}{}{}> 退出",
                 middle_row + 2,
                 controls_column_start_position,
                 bold_text,
