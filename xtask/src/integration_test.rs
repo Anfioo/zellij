@@ -36,7 +36,7 @@ pub fn integration_test(sh: &Shell, flags: flags::IntegrationTest) -> anyhow::Re
         .run()
         .context(err_context)?;
     } else {
-        println!(">> cargo-nextest not found, falling back to `cargo test -- --test-threads=1`");
+        println!(">> 未找到 cargo-nextest，回退到 `cargo test -- --test-threads=1`");
         cmd!(
             sh,
             "{cargo} test --profile {profile} -p zellij-integration-tests -- --test-threads=1"

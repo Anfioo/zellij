@@ -106,7 +106,7 @@ pub fn run(sh: &Shell, mut flags: flags::Run) -> anyhow::Result<()> {
 
     if flags.quick_run {
         if flags.data_dir.is_some() {
-            eprintln!("cannot use '--data-dir' and '--quick-run' at the same time!");
+            eprintln!("不能同时使用 '--data-dir' 和 '--quick-run'！");
             std::process::exit(1);
         }
         flags.data_dir.replace(crate::asset_dir());
@@ -220,7 +220,7 @@ pub fn publish(sh: &Shell, flags: flags::Publish) -> anyhow::Result<()> {
                 .clone()
                 .into_string()
                 .map_err(|registry| anyhow::Error::msg(format!(
-                    "failed to convert '{:?}' to valid registry name",
+                    "将 '{:?}' 转换为有效的注册表名称失败",
                     registry
                 )))
                 .context(err_context)?
@@ -230,7 +230,7 @@ pub fn publish(sh: &Shell, flags: flags::Publish) -> anyhow::Result<()> {
     };
     let registry = registry.as_ref();
     if flags.no_push && flags.cargo_registry.is_none() {
-        anyhow::bail!("flag '--no-push' can only be used with '--cargo-registry'");
+        anyhow::bail!("标志 '--no-push' 只能与 '--cargo-registry' 一起使用");
     }
 
     sh.change_dir(crate::project_root());
@@ -256,9 +256,9 @@ pub fn publish(sh: &Shell, flags: flags::Publish) -> anyhow::Result<()> {
         .contains(version)
     {
         println!();
-        println!("Git tag 'v{version}' is already present.");
-        println!("If this is a mistake, delete it with: git tag -d 'v{version}'");
-        println!("Skip build phase and continue to publish? [y/n]");
+        println!("Git 标签 'v{version}' 已存在。");
+        println!("如果这是误操作，请用以下命令删除：git tag -d 'v{version}'");
+        println!("跳过构建阶段并继续发布？[y/n]");
 
         let stdin = std::io::stdin();
         loop {
@@ -274,9 +274,9 @@ pub fn publish(sh: &Shell, flags: flags::Publish) -> anyhow::Result<()> {
                     break;
                 },
                 _ => {
-                    println!(" --> Unknown input '{buffer}', ignoring...");
+                    println!(" --> 未知输入 '{buffer}'，正在忽略……");
                     println!();
-                    println!("Skip build phase and continue to publish? [y/n]");
+                    println!("跳过构建阶段并继续发布？[y/n]");
                 },
             }
         }
@@ -327,9 +327,9 @@ pub fn publish(sh: &Shell, flags: flags::Publish) -> anyhow::Result<()> {
     let closure = || -> anyhow::Result<()> {
         // Push commit and tag
         if flags.dry_run {
-            println!("Skipping push due to dry-run");
+            println!("由于试运行（dry-run）而跳过推送");
         } else if flags.no_push {
-            println!("Skipping push due to no-push");
+            println!("由于 no-push 而跳过推送");
         } else {
             let branch = cmd!(sh, "git rev-parse --abbrev-ref HEAD")
                 .read()
@@ -366,10 +366,10 @@ pub fn publish(sh: &Shell, flags: flags::Publish) -> anyhow::Result<()> {
                 .context(err_context)
                 {
                     println!();
-                    println!("Publishing crate '{crate_name}' failed with error:");
+                    println!("发布 crate '{crate_name}' 失败，错误：");
                     println!("{:?}", err);
                     println!();
-                    println!("Please choose what to do: [r]etry/[a]bort/[i]gnore");
+                    println!("请选择要执行的操作：[r]重试/[a]中止/[i]忽略");
 
                     let stdin = std::io::stdin();
                     let action;
@@ -391,9 +391,9 @@ pub fn publish(sh: &Shell, flags: flags::Publish) -> anyhow::Result<()> {
                                 break;
                             },
                             _ => {
-                                println!(" --> Unknown input '{buffer}', ignoring...");
+                                println!(" --> 未知输入 '{buffer}'，正在忽略……");
                                 println!();
-                                println!("Please choose what to do: [r]etry/[a]bort/[i]gnore");
+                                println!("请选择要执行的操作：[r]重试/[a]中止/[i]忽略");
                             },
                         }
                     }
@@ -402,7 +402,7 @@ pub fn publish(sh: &Shell, flags: flags::Publish) -> anyhow::Result<()> {
                         UserAction::Retry => continue,
                         UserAction::Ignore => break,
                         UserAction::Abort => {
-                            eprintln!("Aborting publish for crate '{crate_name}'");
+                            eprintln!("正在中止发布 crate '{crate_name}'");
                             return Err::<(), _>(err);
                         },
                     }
@@ -415,7 +415,7 @@ pub fn publish(sh: &Shell, flags: flags::Publish) -> anyhow::Result<()> {
 
         println!();
         println!(" +-----------------------------------------------+");
-        println!(" | PRAISE THE DEVS, WE HAVE A NEW ZELLIJ RELEASE |");
+        println!(" | 赞美开发者们，我们发布了新的 ZELLIJ |");
         println!(" +-----------------------------------------------+");
         Ok(())
     };

@@ -110,7 +110,7 @@ pub fn host_target_triple(sh: &Shell) -> anyhow::Result<String> {
         0 => Err(anyhow!("rustc didn't output the 'host' triple")),
         1 => Ok(maybe_triple.into_iter().next().unwrap()),
         _ => Err(anyhow!(
-            "rustc provided multiple host triples: {:?}",
+            "rustc 提供了多个主机三元组：{:?}",
             maybe_triple
         )),
     }

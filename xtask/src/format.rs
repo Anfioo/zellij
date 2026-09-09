@@ -15,7 +15,7 @@ pub fn format(sh: &Shell, flags: flags::Format) -> anyhow::Result<()> {
         let _pd = sh.push_dir(Path::new(crate_name));
         // Tell the user where we are now
         println!();
-        let msg = format!(">> Formatting '{crate_name}'");
+        let msg = format!(">> 正在格式化 '{crate_name}'");
         crate::status(&msg);
         println!("{}", msg);
 

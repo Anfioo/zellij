@@ -17,7 +17,7 @@ pub fn build(sh: &Shell, flags: flags::Build) -> anyhow::Result<()> {
 
     let cargo = crate::cargo()?;
     if flags.no_plugins && flags.plugins_only {
-        eprintln!("Cannot use both '--no-plugins' and '--plugins-only'");
+        eprintln!("不能同时使用 '--no-plugins' 和 '--plugins-only'");
         std::process::exit(1);
     }
 
@@ -71,7 +71,7 @@ pub fn build(sh: &Shell, flags: flags::Build) -> anyhow::Result<()> {
 
             let _pd = sh.push_dir(Path::new(crate_name));
             println!();
-            let msg = format!(">> Building '{crate_name}'");
+            let msg = format!(">> 正在构建 '{crate_name}'");
             crate::status(&msg);
             println!("{}", msg);
 

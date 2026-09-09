@@ -20,14 +20,14 @@ pub fn main(sh: &Shell, flags: flags::Ci) -> anyhow::Result<()> {
             test: false,
             ..
         }) => Err(anyhow::anyhow!(
-            "either '--build' or '--test' must be provided!"
+            "必须提供 '--build' 或 '--test'！"
         )),
         CiCmd::E2e(E2e {
             build: true,
             test: true,
             ..
         }) => Err(anyhow::anyhow!(
-            "flags '--build' and '--test' are mutually exclusive!"
+            "标志 '--build' 与 '--test' 互斥！"
         )),
         CiCmd::E2e(E2e {
             build: true,
@@ -113,11 +113,11 @@ fn e2e_build(sh: &Shell) -> anyhow::Result<()> {
         crate::cargo()
             .and_then(|cargo| {
                 if which::which("cargo-zigbuild").is_err() {
-                    eprintln!("!! 'cargo-zigbuild' wasn't found but is needed on macOS.");
-                    eprintln!("!! Please install it with:");
-                    eprintln!("!!   cargo install cargo-zigbuild");
-                    eprintln!("!!   brew install zig");
-                    return Err(anyhow::anyhow!("couldn't find 'cargo-zigbuild'"));
+                    eprintln!("！！未找到 'cargo-zigbuild'，但 macOS 上需要它。");
+                    eprintln!("！！请通过以下方式安装：");
+                    eprintln!("！！   cargo install cargo-zigbuild");
+                    eprintln!("！！   brew install zig");
+                    return Err(anyhow::anyhow!("找不到 'cargo-zigbuild'"));
                 }
                 cmd!(sh, "rustup target add {target}")
                     .run()
@@ -214,7 +214,7 @@ fn e2e_test(sh: &Shell, args: Vec<OsString>) -> anyhow::Result<()> {
             // plugin system tests are run here because they're medium-slow
             let _pd = sh.push_dir(Path::new("zellij-server"));
             println!();
-            let msg = ">> Testing Plugin System".to_string();
+            let msg = ">> 正在测试插件系统".to_string();
             crate::status(&msg);
             println!("{}", msg);
 
@@ -283,9 +283,9 @@ fn cross() -> anyhow::Result<PathBuf> {
     match which::which("cross") {
         Ok(path) => Ok(path),
         Err(e) => {
-            eprintln!("!! 'cross' wasn't found but is needed for this build step.");
-            eprintln!("!! Please install it with: `cargo install cross`");
-            Err(e).context("couldn't find 'cross' executable")
+            eprintln!("！！未找到 'cross'，但此构建步骤需要它。");
+            eprintln!("！！请通过以下方式安装： `cargo install cross`");
+            Err(e).context("找不到 'cross' 可执行文件")
         },
     }
 }

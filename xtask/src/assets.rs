@@ -70,7 +70,7 @@ pub fn assets(_sh: &Shell, flags: flags::Assets) -> anyhow::Result<()> {
                 .with_context(|| format!("failed to read '{}'", path.display()))?;
             if &on_disk != contents {
                 return Err(anyhow!(
-                    "'{}' is out of date, run `cargo xtask assets`",
+                    "'{}' 已过期，请运行 `cargo xtask assets`",
                     path.display()
                 ));
             }
@@ -130,7 +130,7 @@ fn build_bundle(assets_dir: &Path) -> anyhow::Result<String> {
         for name in top_level_declarations(&chunk) {
             if let Some(previous) = declarations.insert(name.clone(), (*module).to_string()) {
                 return Err(anyhow!(
-                    "duplicate top-level identifier '{}' declared in both '{}.js' and '{}.js'",
+                    "顶层标识符 '{}' 在 '{}.js' 和 '{}.js' 中重复声明",
                     name,
                     previous,
                     module
@@ -154,7 +154,7 @@ fn flatten_module(module: &str, source: &str) -> anyhow::Result<String> {
         let location = || format!("{}.js:{}", module, index + 1);
 
         if line.contains("import(") {
-            return Err(anyhow!("dynamic import is not supported at {}", location()));
+            return Err(anyhow!("在 {} 处不支持动态导入", location()));
         }
 
         if let Some(rest) = line.strip_prefix("import ") {
@@ -171,11 +171,11 @@ fn flatten_module(module: &str, source: &str) -> anyhow::Result<String> {
                     break;
                 }
                 if !is_import_binding_line(trimmed) {
-                    return Err(anyhow!("unrecognised import syntax at {}", location()));
+                    return Err(anyhow!("在 {} 处无法识别的导入语法", location()));
                 }
             }
             if !terminated {
-                return Err(anyhow!("unterminated import statement at {}", location()));
+                return Err(anyhow!("在 {} 处未终止的导入语句", location()));
             }
             continue;
         }
@@ -186,17 +186,17 @@ fn flatten_module(module: &str, source: &str) -> anyhow::Result<String> {
                     validate_module_specifier(line, &location())?;
                     continue;
                 }
-                return Err(anyhow!("unrecognised export syntax at {}", location()));
+                return Err(anyhow!("在 {} 处无法识别的导出语法", location()));
             }
             if line.starts_with("export default") || line.starts_with("export *") {
-                return Err(anyhow!("unsupported export form at {}", location()));
+                return Err(anyhow!("在 {} 处不支持的导出形式", location()));
             }
             let stripped = &line["export ".len()..];
             if !DECLARATION_PREFIXES
                 .iter()
                 .any(|prefix| stripped.starts_with(prefix))
             {
-                return Err(anyhow!("unrecognised export syntax at {}", location()));
+                return Err(anyhow!("在 {} 处无法识别的导出语法", location()));
             }
             out.push_str(stripped);
             out.push('\n');
@@ -228,7 +228,7 @@ fn validate_module_specifier(line: &str, location: &str) -> anyhow::Result<()> {
     let specifier = line
         .rsplit_once(" from ")
         .map(|(_, specifier)| specifier)
-        .ok_or_else(|| anyhow!("missing module specifier at {}", location))?
+        .ok_or_else(|| anyhow!("在 {} 处缺少模块说明符", location))?
         .trim()
         .trim_end_matches(';')
         .trim_matches(|c| c == '"' || c == '\'');
@@ -238,7 +238,7 @@ fn validate_module_specifier(line: &str, location: &str) -> anyhow::Result<()> {
         .and_then(|name| name.strip_suffix(".js"))
         .ok_or_else(|| {
             anyhow!(
-                "only relative sibling module specifiers are supported, found '{}' at {}",
+                "仅支持相对的同级模块说明符，在 {} 处找到 '{}'",
                 specifier,
                 location
             )
@@ -246,7 +246,7 @@ fn validate_module_specifier(line: &str, location: &str) -> anyhow::Result<()> {
 
     if !MODULE_ORDER.contains(&name) {
         return Err(anyhow!(
-            "module '{}' referenced at {} is not part of the bundle",
+            "在 {} 处引用的模块 '{}' 不属于该打包产物",
             name,
             location
         ));
@@ -320,7 +320,7 @@ fn rewrite_integrity_attributes(
             let digest = &digests[&asset];
             rewritten = replace_integrity_value(&rewritten, digest).ok_or_else(|| {
                 anyhow!(
-                    "tag referencing '{}' is missing an integrity attribute",
+                    "引用 '{}' 的标签缺少完整性属性",
                     asset
                 )
             })?;
@@ -404,7 +404,7 @@ mod tests {
     fn duplicate_top_level_identifiers_are_detected() {
         let dir = std::env::temp_dir().join("zellij-xtask-assets-duplicate-test");
         let _ = std::fs::remove_dir_all(&dir);
-        std::fs::create_dir_all(&dir).expect("create temp dir");
+        std::fs::create_dir_all(&dir).expect("创建临时目录");
         for module in MODULE_ORDER {
             let contents = if *module == "utils" || *module == "connection" {
                 "function collide() {}\n"
@@ -414,7 +414,7 @@ mod tests {
             std::fs::write(dir.join(format!("{}.js", module)), contents).expect("write module");
         }
 
-        let error = build_bundle(&dir).expect_err("expected duplicate detection to fail");
+        let error = build_bundle(&dir).expect_err("期望重复检测失败");
         assert!(
             error.to_string().contains("duplicate top-level identifier"),
             "unexpected error: {}",
