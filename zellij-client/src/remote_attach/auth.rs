@@ -67,7 +67,7 @@ pub async fn authenticate(
         401 => return Err(RemoteClientError::InvalidAuthToken),
         status if !response.status().is_success() => {
             return Err(RemoteClientError::ConnectionFailed(format!(
-                "Server returned status {}",
+                "服务器返回状态 {}",
                 status
             )));
         },
@@ -94,7 +94,7 @@ pub async fn authenticate(
         401 => return Err(RemoteClientError::Unauthorized),
         status if !session_response.status().is_success() => {
             return Err(RemoteClientError::ConnectionFailed(format!(
-                "Server returned status {}",
+                "服务器返回状态 {}",
                 status
             )));
         },
@@ -149,7 +149,7 @@ pub async fn validate_session_token(
     match session_response.status().as_u16() {
         401 => Err(RemoteClientError::SessionTokenExpired),
         status if !session_response.status().is_success() => Err(
-            RemoteClientError::ConnectionFailed(format!("Server returned status {}", status)),
+            RemoteClientError::ConnectionFailed(format!("服务器返回状态 {}", status)),
         ),
         _ => {
             let response_body = session_response

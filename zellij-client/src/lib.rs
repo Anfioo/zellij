@@ -740,7 +740,7 @@ pub async fn run_remote_client_terminal_loop(
                         break;
                     }
                     None => {
-                        log::error!("Received empty message from web server");
+                        log::error!("收到来自 Web 服务器的空消息");
                         break;
                     }
                     _ => {}
@@ -782,7 +782,7 @@ pub async fn run_remote_client_terminal_loop(
                                 // 空操作
                             }
                             Err(e) => {
-                                log::debug!("Ignoring unrecognized control message: {}", e);
+                                log::debug!("正在忽略无法识别的控制消息：{}", e);
                             }
                         }
 
@@ -1094,7 +1094,7 @@ pub fn start_client(
             }
             if should_start_web_server {
                 if let Err(e) = spawn_web_server(&cli_args) {
-                    log::error!("Failed to start web server: {}", e);
+                    log::error!("启动 Web 服务器失败：{}", e);
                 }
             }
 
@@ -1152,7 +1152,7 @@ pub fn start_client(
             }
             if should_start_web_server {
                 if let Err(e) = spawn_web_server(&cli_args) {
-                    log::error!("Failed to start web server: {}", e);
+                    log::error!("启动 Web 服务器失败：{}", e);
                 }
             }
 
@@ -1328,13 +1328,13 @@ pub fn start_client(
                         }
                     },
                     Err(IpcReceiveError::Disconnected) => {
-                        log::error!("Lost connection to the Zellij server");
+                        log::error!("与 Zellij 服务器的连接已丢失");
                         send_client_instructions
                             .send(ClientInstruction::UnblockInputThread)
                             .unwrap();
                         send_client_instructions
                             .send(ClientInstruction::Error(
-                                "Lost connection to the Zellij server".to_string(),
+                                "与 Zellij 服务器的连接已丢失".to_string(),
                             ))
                             .unwrap();
                         break;
@@ -1345,7 +1345,7 @@ pub fn start_client(
                             .send(ClientInstruction::UnblockInputThread)
                             .unwrap();
                         if consecutive_unknown_messages_received == 1 {
-                            log::error!("Received unknown message from server");
+                            log::error!("收到来自服务器的未知消息");
                         }
                         if consecutive_unknown_messages_received >= 1000 {
                             send_client_instructions
@@ -1385,7 +1385,7 @@ pub fn start_client(
     loop {
         let (client_instruction, mut err_ctx) = receive_client_instructions
             .recv()
-            .expect("failed to receive app instruction on channel");
+            .expect("在通道上接收应用指令失败");
 
         err_ctx.add_call(ContextType::Client((&client_instruction).into()));
 
@@ -1459,7 +1459,7 @@ pub fn start_client(
                         });
                     },
                     Err(e) => {
-                        log::error!("Failed to start web_server: {}", e);
+                        log::error!("启动 web_server 失败：{}", e);
                         let _ = os_input
                             .send_to_server(ClientToServerMsg::FailedToStartWebServer { error: e });
                     },
@@ -1660,7 +1660,7 @@ pub fn start_server_detached(
             }
             if should_start_web_server {
                 if let Err(e) = spawn_web_server(&cli_args) {
-                    log::error!("Failed to start web server: {}", e);
+                    log::error!("启动 Web 服务器失败：{}", e);
                 }
             }
 
@@ -1719,7 +1719,7 @@ pub fn start_server_detached(
             }
             if should_start_web_server {
                 if let Err(e) = spawn_web_server(&cli_args) {
-                    log::error!("Failed to start web server: {}", e);
+                    log::error!("启动 Web 服务器失败：{}", e);
                 }
             }
             let is_web_client = false;
@@ -1733,7 +1733,7 @@ pub fn start_server_detached(
             )
         },
         _ => {
-            eprintln!("Session already exists");
+            eprintln!("会话已存在");
             std::process::exit(1);
         },
     };
